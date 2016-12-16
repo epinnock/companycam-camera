@@ -14,6 +14,7 @@ import com.facebook.react.uimanager.events.RCTEventEmitter;
 
 public class CCCameraView extends ViewGroup {
 
+    protected String propStoragePath;
     protected String propProjectName;
     protected String propProjectAddress;
 
@@ -30,6 +31,13 @@ public class CCCameraView extends ViewGroup {
         ReactContext reactContext = (ReactContext)getContext();
         RCTEventEmitter rctEventEmitter = reactContext.getJSModule(RCTEventEmitter.class);
         rctEventEmitter.receiveEvent(getId(), "onClose", event);
+    }
+
+    public void setStoragePath(String str){
+        this.propStoragePath = str;
+
+        //TODO: just testing, please delete me later!
+        System.err.println("[CCC] Set storage path: " + str);
     }
 
     public void setProjectName(String str){

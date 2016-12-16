@@ -27,6 +27,7 @@ class CCCamera extends React.Component {
 }
 
 CCCamera.propTypes = {
+  storagePath: PropTypes.string,
   projectName: PropTypes.string,
   projectAddress: PropTypes.string,
   onClose: PropTypes.func,

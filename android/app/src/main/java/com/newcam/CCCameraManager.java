@@ -27,12 +27,9 @@ public class CCCameraManager extends SimpleViewManager<CCCameraView> {
         return new CCCameraView(context);
     }
 
-    @Override
-    @Nullable
-    public Map getExportedCustomDirectEventTypeConstants() {
-        return MapBuilder.of(
-            "onClose", MapBuilder.of("registrationName", "onClose")
-        );
+    @ReactProp(name = "storagePath")
+    public void setStoragePath(CCCameraView view, String str){
+        view.setStoragePath(str);
     }
 
     @ReactProp(name = "projectName")
@@ -43,5 +40,13 @@ public class CCCameraManager extends SimpleViewManager<CCCameraView> {
     @ReactProp(name = "projectAddress")
     public void setProjectAddress(CCCameraView view, String str){
         view.setProjectAddress(str);
+    }
+
+    @Override
+    @Nullable
+    public Map getExportedCustomDirectEventTypeConstants() {
+        return MapBuilder.of(
+            "onClose", MapBuilder.of("registrationName", "onClose")
+        );
     }
 }

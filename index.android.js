@@ -14,6 +14,7 @@ export default class newcam extends Component {
     return (
       <View style={styles.container}>
         <CCCamera
+          storagePath={"some path"}
           projectName={"Project name test"}
           projectAddress={"Project address test"}
           onClose={(error,button) => {
