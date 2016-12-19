@@ -1,0 +1,32 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="com.agilx.companycam.activities.PhotoDetailActivity">
+
+    <item
+        android:id="@+id/menu_photo_view_place"
+        android:orderInCategory="100"
+        android:title="@string/view_place"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/menu_photo_share"
+        android:orderInCategory="101"
+        android:title="@string/menu_share"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/menu_photo_edit"
+        android:orderInCategory="102"
+        android:title="@string/menu_edit"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/menu_photo_set_place"
+        android:orderInCategory="103"
+        android:title="@string/menu_set_place"
+        app:showAsAction="never"/>
+    <item
+        android:id="@+id/menu_photo_delete"
+        android:orderInCategory="104"
+        android:title="@string/menu_delete"
+        app:showAsAction="never"/>
+
+</menu>

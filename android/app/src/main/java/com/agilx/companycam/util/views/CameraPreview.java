@@ -11,9 +11,9 @@ import android.graphics.Typeface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import com.agilx.companycam.activities.CameraActivity;
 import com.agilx.companycam.core.web.model.Place;
 import com.agilx.companycam.util.DeviceUtil;
+import com.newcam.views.NewCameraView;
 
 public class CameraPreview extends SurfaceView {
 
@@ -96,7 +96,7 @@ public class CameraPreview extends SurfaceView {
 
     public void drawTextCentred(Canvas canvas, Paint paint, String text){
 
-        if (phonePosition != CameraActivity.PORTRAIT_TOP_UP) {
+        if (phonePosition != NewCameraView.PORTRAIT_TOP_UP) {
             paint.getTextBounds(text, 0, text.length(), textBounds);
 
             background.set(textBounds);
