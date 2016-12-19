@@ -1,0 +1,225 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.agilx.companycam.activities.CreatePlaceActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/button_bar">
+
+        <RelativeLayout
+            android:id="@+id/place_form"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="invisible">
+
+            <com.rengwuxian.materialedittext.MaterialEditText
+                style="@style/CompanyCamTheme.MaterialEditText.HighlightFloatingLabel"
+                android:id="@+id/place_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:inputType="textCapSentences"
+                android:hint="@string/hint_place_name"
+                android:background="#ffffff" />
+
+            <com.rengwuxian.materialedittext.MaterialEditText
+                style="@style/CompanyCamTheme.MaterialEditText.HighlightFloatingLabel"
+                android:id="@+id/place_address1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/place_name"
+                android:layout_marginTop="10dp"
+                android:layout_alignLeft="@id/place_name"
+                android:layout_alignRight="@id/place_name"
+                android:layout_alignStart="@id/place_name"
+                android:layout_alignEnd="@id/place_name"
+                android:inputType="text"
+                android:hint="@string/hint_address1"
+                app:met_floatingLabelText="@string/hint_address1"
+                android:background="#ffffff"/>
+
+            <com.rengwuxian.materialedittext.MaterialEditText
+                style="@style/CompanyCamTheme.MaterialEditText.HighlightFloatingLabel"
+                android:id="@+id/place_address2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/place_address1"
+                android:layout_marginTop="10dp"
+                android:layout_alignLeft="@id/place_address1"
+                android:layout_alignRight="@id/place_address1"
+                android:layout_alignStart="@id/place_address1"
+                android:layout_alignEnd="@id/place_address1"
+                android:inputType="textPostalAddress"
+                android:hint="@string/hint_address2"
+                app:met_floatingLabelText="@string/hint_address2"
+                android:background="#ffffff" />
+
+            <com.rengwuxian.materialedittext.MaterialEditText
+                style="@style/CompanyCamTheme.MaterialEditText.HighlightFloatingLabel"
+                android:id="@+id/place_city"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/place_address2"
+                android:layout_marginTop="10dp"
+                android:layout_alignLeft="@id/place_address2"
+                android:layout_alignRight="@id/place_address2"
+                android:layout_alignStart="@id/place_address2"
+                android:layout_alignEnd="@id/place_address2"
+                android:inputType="textPostalAddress"
+                android:hint="@string/city"
+                app:met_floatingLabelText="@string/city"
+                android:background="#ffffff"/>
+
+            <LinearLayout
+                android:id="@+id/layout_state_zip"
+                android:layout_below="@id/place_city"
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@id/place_city"
+                android:layout_alignRight="@id/place_city"
+                android:layout_alignStart="@id/place_city"
+                android:layout_alignEnd="@id/place_city"
+                android:orientation="horizontal">
+
+                <com.rengwuxian.materialedittext.MaterialEditText
+                    style="@style/CompanyCamTheme.MaterialEditText.HighlightFloatingLabel"
+                    android:id="@+id/place_state"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:layout_marginRight="5dp"
+                    android:inputType="textNoSuggestions"
+                    android:hint="@string/hint_state"
+                    app:met_floatingLabelText="@string/hint_state"
+                    android:background="#ffffff"/>
+
+                <com.rengwuxian.materialedittext.MaterialEditText
+                    style="@style/CompanyCamTheme.MaterialEditText.HighlightFloatingLabel"
+                    android:id="@+id/place_zip"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginLeft="5dp"
+                    android:inputType="number"
+                    android:hint="@string/hint_zip"
+                    app:met_floatingLabelText="@string/hint_zip"
+                    android:background="#ffffff"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_below="@id/layout_state_zip"
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignLeft="@id/place_city"
+                android:layout_alignRight="@id/place_city"
+                android:layout_alignStart="@id/place_city"
+                android:layout_alignEnd="@id/place_city"
+                android:orientation="horizontal">
+
+                <com.rengwuxian.materialedittext.MaterialEditText
+                    style="@style/CompanyCamTheme.MaterialEditText.HighlightFloatingLabel"
+                    android:id="@+id/place_latitude"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="5dp"
+                    android:layout_marginRight="5dp"
+                    android:inputType="numberDecimal"
+                    android:hint="@string/latitude"
+                    app:met_floatingLabelText="@string/latitude"
+                    android:background="#ffffff"/>
+
+                <com.rengwuxian.materialedittext.MaterialEditText
+                    style="@style/CompanyCamTheme.MaterialEditText.HighlightFloatingLabel"
+                    android:id="@+id/place_longitude"
+                    android:layout_weight="1"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginLeft="5dp"
+                    android:inputType="numberDecimal"
+                    android:hint="@string/longitude"
+                    app:met_floatingLabelText="@string/longitude"
+                    android:background="#ffffff"/>
+
+            </LinearLayout>
+
+        </RelativeLayout>
+
+     </ScrollView>
+
+    <com.rengwuxian.materialedittext.MaterialEditText
+        style="@style/CompanyCamTheme.MaterialEditText"
+        android:id="@+id/places_search"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/places_search_hint"
+        android:inputType="textPostalAddress"/>
+
+    <ListView
+        android:id="@+id/places_search_results"
+        android:layout_below="@id/places_search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:layout_centerInParent="true"
+        android:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/no_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="@string/could_not_get_location"
+        android:gravity="center"
+        android:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:gravity="center"
+        android:visibility="invisible" />
+
+    <LinearLayout
+        android:id="@+id/button_bar"
+        style="?android:attr/buttonBarStyle"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/places_search_results">
+        <Button
+            android:id="@+id/create_place_manual"
+            android:background="@null"
+            android:text="@string/create_place_manually"
+            android:textColor="@color/cc_dark_blue"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
+</RelativeLayout>

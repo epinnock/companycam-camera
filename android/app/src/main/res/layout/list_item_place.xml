@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:id="@+id/list_item_place"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="100dp">
+
+    <ImageView
+        android:id="@+id/image_place"
+        android:padding="6dp"
+        android:layout_width="100dp"
+        android:layout_height="100dp"/>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:layout_alignBottom="@id/image_place"
+        android:layout_alignEnd="@id/image_place"
+        android:layout_alignLeft="@id/image_place"
+        android:layout_alignRight="@id/image_place"
+        android:layout_alignStart="@id/image_place"
+        android:layout_alignTop="@id/image_place"
+        android:visibility="invisible"/>
+
+    <LinearLayout
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_toRightOf="@id/image_place"
+        android:layout_toEndOf="@id/image_place"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerVertical="true">
+
+    <TextView
+        android:id="@+id/place_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="3dp"
+        android:layout_toEndOf="@+id/image_place"
+        android:layout_toRightOf="@+id/image_place"
+        android:text="Really really really long place name no like so long its crazy man"
+        android:textSize="18sp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:textColor="@color/black"
+        tools:ignore="HardcodedText"/>
+
+    <TextView
+        android:id="@+id/address1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/place_name"
+        android:layout_alignLeft="@+id/place_name"
+        android:layout_alignStart="@+id/place_name"
+        android:layout_marginBottom="0dp"
+        android:text="Address 1"
+        android:textSize="14sp"
+        tools:ignore="HardcodedText"/>
+
+
+    <TextView
+        android:id="@+id/city_state_zip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/place_name"
+        android:layout_alignStart="@+id/place_name"
+        android:layout_below="@+id/address1"
+        android:layout_marginBottom="3dp"
+        android:text="City, State, ZipCode"
+        android:textSize="14sp"
+        tools:ignore="HardcodedText"/>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true">
+
+            <TextView
+                android:id="@+id/place_distance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1.23 mi"
+                tools:ignore="HardcodedText"
+                android:layout_alignTop="@+id/place_type"
+                android:layout_alignParentLeft="true"
+                android:layout_marginRight="5dp"
+                android:layout_marginEnd="5dp" />
+
+            <TextView
+                android:id="@+id/place_type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Geofence"
+                android:textSize="14sp"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="5dp"
+                android:layout_marginEnd="5dp"
+                tools:ignore="HardcodedText"/>
+
+
+
+
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <!--<TextView-->
+        <!--android:id="@+id/place_distance"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginRight="5dp"-->
+        <!--android:layout_marginEnd="5dp"-->
+        <!--android:layout_alignLeft="@+id/place_name"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:layout_below="@+id/city_state_zip"-->
+        <!--android:text="1.23 mi"-->
+        <!--tools:ignore="HardcodedText" />-->
+
+    <!--<TextView-->
+        <!--android:id="@+id/place_type"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_marginRight="5dp"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:layout_alignParentEnd="true"-->
+        <!--android:layout_alignParentBottom="true"-->
+        <!--android:text="Geofence"-->
+        <!--android:textSize="14sp"-->
+        <!--tools:ignore="HardcodedText"/>-->
+
+</RelativeLayout>

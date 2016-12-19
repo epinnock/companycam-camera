@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/black"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:id="@+id/camera_preview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <ImageButton
+        android:id="@+id/capture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/place_info"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="65dp"
+        android:background="@null"
+        android:src="@drawable/camera_button" />
+
+    <RelativeLayout
+        android:id="@+id/place_info"
+        android:layout_width="86dp"
+        android:layout_height="376dp"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/place_name"
+            android:background="@color/cc_dark_blue"
+            android:layout_width="376dp"
+            android:layout_height="86dp"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:rotation="270"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            tools:ignore="HardcodedText"/>
+
+        <TextView
+            android:id="@+id/place_address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:layout_gravity="center_horizontal"
+            android:singleLine="true"
+            android:textSize="16sp"
+            android:text="1"
+            android:textColor="@color/white"
+            android:visibility="gone"
+            tools:ignore="HardcodedText"/>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="40dp">
+
+        <ImageButton
+            android:id="@+id/close_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:padding="20dp"
+            android:src="@drawable/cancel"
+            android:background="@null"/>
+
+        <ImageButton
+            android:id="@+id/toggle_resolution"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/close_button"
+            android:layout_alignParentLeft="true"
+            android:layout_gravity="bottom"
+            android:paddingTop="15dp"
+            android:paddingBottom="15dp"
+            android:background="@null"
+            tools:ignore="RtlHardcoded"/>
+
+        <ImageButton
+            android:id="@+id/toggle_flash"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="15dp"
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:background="@null"
+            tools:ignore="RtlHardcoded"/>
+
+    </RelativeLayout>
+
+
+
+</RelativeLayout>

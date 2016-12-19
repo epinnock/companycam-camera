@@ -1,0 +1,23 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                tools:context="com.agilx.companycam.activities.PlaceSearchActivity">
+
+    <EditText
+        android:id="@+id/places_search"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="@dimen/activity_horizontal_margin"
+        android:layout_marginRight="@dimen/activity_horizontal_margin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/places_search_hint"
+        android:inputType="textPostalAddress"
+        android:visibility="visible"/>
+
+    <ListView
+        android:id="@+id/places_list"
+        android:layout_below="@id/places_search"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</RelativeLayout>

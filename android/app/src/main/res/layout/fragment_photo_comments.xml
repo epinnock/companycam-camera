@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/light_gray"
+                android:clickable="true">
+
+    <RelativeLayout
+        android:id="@+id/comments_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp">
+
+        <ImageButton
+            android:id="@+id/close_comments"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:background="@null"
+            android:contentDescription="@string/close_comments"
+            android:src="@drawable/cancel"
+            tools:ignore="RtlHardcoded"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/comments"
+            android:textSize="24sp"/>
+
+
+    </RelativeLayout>
+
+    <ListView
+        android:id="@+id/photo_comments"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/add_comment_form"
+        android:layout_below="@+id/comments_header"/>
+
+    <RelativeLayout
+        android:id="@+id/add_comment_form"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+
+        <View
+            android:id="@+id/separator"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_alignTop="@+id/comment_text"
+            android:background="@color/gray"/>
+
+        <com.rengwuxian.materialedittext.MaterialEditText
+            android:id="@+id/comment_text"
+            style="@style/CompanyCamTheme.MaterialEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginTop="2dp"
+            android:layout_toLeftOf="@+id/save_comment"
+            android:layout_toStartOf="@+id/save_comment"
+            android:hint="@string/add_comment_placeholder"
+            android:inputType="textCapSentences|textMultiLine"
+            android:maxLines="4"/>
+
+        <Button
+            android:id="@+id/save_comment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/comment_text"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentRight="true"
+            android:text="@string/comment_post"/>
+
+    </RelativeLayout>
+
+</RelativeLayout>
