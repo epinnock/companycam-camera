@@ -71,7 +71,8 @@ public class LogUtil {
         if (sLogToCrashlytics) {
             //Crashlytics.log(priority, tag, message); //TODO
         } else {
-            Log.println(priority, tag, message);
+            //Log.println(priority, tag, message);
+            System.err.println("LOGUTIL [" + priority + "][" + tag + "] " + message);
         }
     }
 

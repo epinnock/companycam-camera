@@ -1,14 +1,11 @@
 package com.newcam.views;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -20,7 +17,6 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
@@ -31,7 +27,6 @@ import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -39,10 +34,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.agilx.companycam.core.constants.RealmDbColumns;
 import com.agilx.companycam.core.events.OutOfMemoryEvent;
 import com.agilx.companycam.core.web.model.Place;
-import com.agilx.companycam.core.web.model.User;
 import com.agilx.companycam.react_bridges.PhotoActions;
 import com.agilx.companycam.util.ImageEditorUtility;
 import com.agilx.companycam.util.LogUtil;
@@ -50,35 +43,21 @@ import com.agilx.companycam.util.SingleClickListener;
 import com.agilx.companycam.util.StorageUtility;
 import com.agilx.companycam.util.views.CameraOverlay;
 import com.agilx.companycam.util.views.CameraPreview;
+import com.newcam.CCCameraView;
+import com.newcam.R;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import butterknife.ButterKnife;
-import butterknife.InjectView;
 import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
-import io.realm.Realm;
-
-import android.support.v4.content.LocalBroadcastManager;
-import com.facebook.react.bridge.Arguments;
-import com.facebook.react.bridge.WritableArray;
-import com.facebook.react.bridge.WritableMap;
-import com.newcam.CCCameraView;
-import com.newcam.R;
-
-import java.util.Date;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
 
 public class NewCameraView extends CCCameraView implements SurfaceHolder.Callback {
 
@@ -138,19 +117,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
     private boolean mMeteringAreaSupported;
 
-    @InjectView(R.id.toggle_resolution)
-    protected ImageButton mToggleResolution;
-    @InjectView(R.id.toggle_flash)
-    protected ImageButton mToggleFlash;
-    //@InjectView(R.id.place_info)
-    //protected RelativeLayout mPlaceInfo;
-    @InjectView(R.id.close_button)
-    protected ImageButton mCloseButton;
-
-    // The mToggleCamera button allows the user to switch between rear- and forward-facing cameras
-    @InjectView(R.id.toggle_camera)
-    protected ImageButton mToggleCamera;
-
     // width and height are the width and height of the screen measured in pixels
     int width;
     int height;
@@ -175,6 +141,13 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
     };
+
+    protected LinearLayout mLabelTouchTarget;
+    protected ImageButton mToggleResolution;
+    protected ImageButton mToggleFlash;
+    protected ImageButton mCloseButton;
+    // The mToggleCamera button allows the user to switch between rear- and forward-facing cameras
+    protected ImageButton mToggleCamera;
 
     // The mTopLayout contains the place label, close button, and resolution button
     private LinearLayout mTopLayout;
@@ -289,23 +262,26 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         mTopLayout.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.transparent_gray_gradient));
         mBottomLayout.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.transparent_gray_gradient_reverse));
 
+        mLabelTouchTarget = (LinearLayout) findViewById(R.id.label_touch_target);
+        mToggleResolution = (ImageButton) findViewById(R.id.toggle_resolution);
+        mToggleFlash = (ImageButton) findViewById(R.id.toggle_flash);
+        mCloseButton = (ImageButton) findViewById(R.id.close_button);
+        mToggleCamera = (ImageButton) findViewById(R.id.toggle_camera);
+
+        // Set the place name label
+        mPlaceName.setText("This will be set later!!"); //TODO should be updated as below when props received
+        /*if (placeName != null && !placeName.equals("")) {
+            mPlaceName.setText(placeName);
+        }
+        else if (placeAddress != null && !placeAddress.equals("")) {
+            mPlaceName.setText(placeAddress);
+        }
+        else {
+            mPlaceName.setText("");
+        }*/
+
         // Set the button orientations for the resolution layout
         setupResolutionLayout();
-
-        init2();
-    }
-
-    //TODO
-    /*@Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-    }*/
-
-    //@Override
-    //protected void onResume() {
-
-    public void init2(){
-        System.err.println("INITIALIZE");
 
         // Verify that the permissions exist in case user turned them off while on the camera preview
         // Close the activity if the permissions aren't available
@@ -328,12 +304,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         // Set the default button orientations
         int rotationValue = -90;
 
-        //TODO
-        mToggleResolution = (ImageButton) findViewById(R.id.toggle_resolution);
-        mToggleFlash = (ImageButton) findViewById(R.id.toggle_flash);
-        mCloseButton = (ImageButton) findViewById(R.id.close_button);
-        mToggleCamera = (ImageButton) findViewById(R.id.toggle_camera);
-
         mCloseButton.setRotation(rotationValue);
         mToggleResolution.setRotation(rotationValue);
         mToggleFlash.setRotation(rotationValue);
@@ -350,36 +320,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         setCameraButtonVisibility();
     }
 
-    //TODO
-    /*
-    @Override
-    protected void onPause() {
-        super.onPause();
-        mEventBus.unregister(this);
-        if (mCamera != null) {
-            mCamera.stopPreview();
-            mCamera.setPreviewCallback(null);
-            mCamera.release();
-            mCamera = null;
-
-            LogUtil.e(TAG, "The camera was released");
-        }
-
-        if (mPreview != null && mPreviewLayout != null) {
-            mPreviewLayout.removeView(mPreview);
-            mPreviewLayout = null;
-        }
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if (mOrientationListener != null) {
-            mOrientationListener.disable();
-        }
-    }*/
-
-    @OnClick(R.id.label_touch_target)
     public void labelTouch() {
 
         // If the resolution layout is displayed, this button click shouldn't have any action, so simply return
@@ -391,8 +331,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         finishWithResult("label");
     }
 
-
-    @OnClick(R.id.toggle_resolution)
     protected void toggleResolution() {
 
         // If the resolution layout is displayed, this button click shouldn't have any action, so simply return
@@ -415,7 +353,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         }
     }
 
-    @OnClick(R.id.toggle_flash)
     protected void toggleFlashTapped() {
 
         // Uncomment this section to allow the user to toggle between all four different available flash modes
@@ -441,10 +378,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
     }
 
-    @OnClick(R.id.close_button)
     protected void closeButtonClick() {
-        //getSupportFragmentManager().popBackStack(); //TODO
-
         // If the resolution layout is displayed, this button click shouldn't have any action, so simply return
         if (mResolutionLayoutVisible) {
             return;
@@ -920,55 +854,10 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         logIntercomEvent("took_photo", attributes);
 
         File file = new File(photoPath);
-        //Uri photoCaptureFileUri = Uri.fromFile(file);
 
-        //Intent intent = new Intent(this, EditPhotoCaptureActivity.class);
-        //intent.putExtra(EditPhotoCaptureActivity.BUNDLE_KEY_PHOTO_CAPTURE_PLACE, mPhotoCapturePlaceId);
-        //intent.putExtra(EditPhotoCaptureActivity.BUNDLE_KEY_PHOTO_CAPTURE_FILE_URI, photoCaptureFileUri);
-        //startActivity(intent);
-
-        //sendPhotoTakenBroadcast(photoCaptureFileUri);
         doPhotoTaken(file);
         finishWithResult("capture");
     }
-
-    //========================================================
-    // This method sends a broadcast to let other objects know that an image has been taken
-    //TODO
-    /*public void sendPhotoTakenBroadcast(Uri photoCaptureFileUri) {
-
-        // Gather some info
-        Location lastLocation = getLastLocation();
-
-        DateFormat apiDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZZZ", Locale.US);
-        String createdDate = apiDateFormat.format(new Date());
-
-        // Create a WritableMap for the userInfo (model: see Photo.java)
-        WritableMap userInfo = Arguments.createMap();
-
-        userInfo.putString("path", photoCaptureFileUri.getPath());
-        userInfo.putDouble("lat", lastLocation.getLatitude());
-        userInfo.putDouble("lon", lastLocation.getLongitude());
-        userInfo.putString("createdDate", createdDate);
-        userInfo.putInt("imageId", 0);
-        userInfo.putInt("locationId", 0);
-        userInfo.putInt("companyId", (int)ccApp.getCurrentCompany().getCompanyId());
-        userInfo.putInt("userId", (int)ccApp.getCurrentUser().getUserId());
-        userInfo.putString("projectId", "");
-        userInfo.putString("projectName", placeName);
-        userInfo.putString("projectAddress", placeAddress);
-
-        //NOTE: passing a WritableArray inside a Bundle object isn't supported yet, so we must do this later in EventListener
-        //userInfo.putArray("comments", Arguments.createArray());
-        //userInfo.putArray("tags", Arguments.createArray());
-
-        // Create an intent for the broadcast
-        Intent intent = new Intent(EventListener.PHOTO_TAKEN_NOTIFICATION);
-        Bundle extras = Arguments.toBundle(userInfo);
-        intent.putExtras(extras);
-        LocalBroadcastManager.getInstance(ccApp).sendBroadcast(intent);
-    }*/
-    //========================================================
 
     public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
         // Raw height and width of image
@@ -1131,7 +1020,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     }
 
     // This method switches between rear- and front-facing cameras
-    @OnClick(R.id.toggle_camera)
     protected void toggleCameraTapped() {
 
         if (mCameraType == Camera.CameraInfo.CAMERA_FACING_BACK) {
@@ -1163,7 +1051,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         }
 
         if (resolutionMode.equals("super")) {
-
             // Set the button images
             resolutionButton.setImageResource(R.drawable.superfine_size_icon);
             mNormalButton.setImageResource(R.drawable.normal_icon);
@@ -1186,7 +1073,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             mResolutionMode = "super";
         }
         else if (resolutionMode.equals("high")) {
-
             // Set the button images
             resolutionButton.setImageResource(R.drawable.high_size_icon);
             mNormalButton.setImageResource(R.drawable.normal_icon);
@@ -1209,7 +1095,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             mResolutionMode = "high";
         }
         else {
-
             // Set the button images
             resolutionButton.setImageResource(R.drawable.normal_size_icon);
             mNormalButton.setImageResource(R.drawable.normal_on_icon);
@@ -1613,6 +1498,41 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
                 hideResolutionLayout();
             }
         });
+
+        mToggleResolution.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleResolution();
+            }
+        });
+
+        mToggleFlash.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleFlashTapped();
+            }
+        });
+
+        mCloseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                closeButtonClick();
+            }
+        });
+
+        mLabelTouchTarget.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                labelTouch();
+            }
+        });
+
+        mToggleCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleCameraTapped();
+            }
+        });
     }
 
     private boolean checkCameraPermissions() {
@@ -1659,131 +1579,8 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             super.onPostExecute(editedPhoto);
 
             doPhotoAccepted(mFile);
-
-            //TODO
-            /*// Get the path to this file
-            String filePath = mFile.toURI().toString();
-
-            User currentUser = CompanyCamApplication.getInstance().getCurrentUser();
-            long currentCompanyId = currentUser.getCompany().getCompanyId();
-            String apiKey = currentUser.getApiKey();
-
-            // Create a new Image object and set its parameters
-            long uploadedById = currentUser.getUserId();
-            Date dateUploaded = new Date();
-            com.agilx.companycam.core.web.model.Image localImage = new com.agilx.companycam.core.web.model.Image();
-            localImage.setImageId(0);
-            localImage.setDateUploaded(dateUploaded);
-            localImage.setUploadedById(uploadedById);
-            localImage.setFilename(Uri.fromFile(mFile).getPath());
-            localImage.setUrlLarge(filePath);
-            localImage.setUrlMedium(filePath);
-            localImage.setUrlSmall(filePath);
-            localImage.setLocationId(mPhotoCapturePlaceId);
-            localImage.setCompanyId(currentCompanyId);
-            localImage.setLat((float)getLastLocation().getLatitude());
-            localImage.setLon((float)getLastLocation().getLongitude());
-            //localImage.setPlaceLocalId(mPlaceLocalId);
-
-            RealmList<PhotoComment> comments = new RealmList<>();
-            if (mPhotoComments != null) {
-                for (PhotoComment c : mPhotoComments) {
-                    comments.add(c);
-                }
-            }
-            localImage.setImageCommentsAttributes(comments);
-
-            RealmList<PhotoTags> tags = new RealmList<>();
-            ArrayList tagArray = new ArrayList();
-//                ArrayList tagObject = new ArrayList();
-            if(mPhotoTags != null) {
-                for (PhotoTags foundTag : mPhotoTags) {
-//                        tags.add(tag.getPhotoTagId());
-                    tags.add(foundTag);
-                    tagArray.add(foundTag.getPhotoTagId());
-                }
-            }
-
-            Gson gson = new GsonBuilder()
-                    .setExclusionStrategies(new ExclusionStrategy() {
-                        @Override
-                        public boolean shouldSkipField(FieldAttributes f) {
-                            return f.getDeclaringClass().equals(RealmObject.class);
-                        }
-
-                        @Override
-                        public boolean shouldSkipClass(Class<?> clazz) {
-                            return false;
-                        }
-                    })
-                    .create();
-
-            localImage.setImageTagsAttributes(tagArray.toString());
-            //}
-
-            // Send a broadcast to let any interested objects know that an image upload is about to be attempted
-            sendPhotoAcceptedBroadcast(localImage);*/
         }
     }
-
-    // This method sends a broadcast to let other objects know that an image upload has been submitted
-    //TODO
-    /*public void sendPhotoAcceptedBroadcast(com.agilx.companycam.core.web.model.Image localImage) {
-
-        // Send a broadcast to let any interested objects know that the UploadPhotoJob has been submitted for an image
-
-        // Create an intent for the broadcast
-        Intent intent = new Intent(EventListener.PHOTO_ACCEPTED_NOTIFICATION);
-
-        // Create a date format
-        DateFormat apiDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZZZ", Locale.US);
-
-        // Create a WritableArray for the comments.
-        // There won't actually be any comments here since the photos can only be sent using FastCam mode.
-        WritableArray comments = Arguments.createArray();
-        ArrayList<Integer> commentArray = new ArrayList<>();
-
-        // Save the comments array in the application object because passing a WritableArray inside a Bundle object isn't supported yet.
-        CompanyCamApplication.getInstance().setTempComments(comments);
-
-        // Create a WritableArray for the tags.
-        // There won't actually be any tags here since the photos can only be sent using FastCam mode.
-        WritableArray tags = Arguments.createArray();
-        ArrayList<Integer> tagArray = new ArrayList<>();
-
-        // Save the tags array in the application object because passing a WritableArray inside a Bundle object isn't supported yet.
-        CompanyCamApplication.getInstance().setTempTags(tags);
-
-        // Create a WritableMap for the userInfo
-        WritableMap userInfo = Arguments.createMap();
-
-        userInfo.putString("path", localImage.getFilename());
-        userInfo.putInt("imageId", (int)localImage.getImageId());
-        userInfo.putDouble("lat", localImage.getLat());
-        userInfo.putDouble("lon", localImage.getLon());
-        userInfo.putInt("locationId", 0);
-        userInfo.putString("projectId", "");
-        userInfo.putInt("userId", (int)localImage.getUploadedById());
-        userInfo.putString("createdDate", apiDateFormat.format(localImage.getDateUploaded()));
-        userInfo.putInt("companyId", (int)CompanyCamApplication.getInstance().getCurrentCompany().getCompanyId());
-
-        // Convert the userInfo WritableMap to a Bundle for the intent
-        Bundle extras = Arguments.toBundle(userInfo);
-
-        // Add the comments and tags to the bundle
-        if (commentArray.size() > 0) {
-            extras.putSerializable("comments", commentArray);
-        }
-        if (tagArray.size() > 0) {
-            extras.putSerializable("tags", tagArray);
-        }
-
-        // Add the bundle to the intent
-        intent.putExtras(extras);
-
-        // Send the broadcast locally
-        LocalBroadcastManager.getInstance(CompanyCamApplication.getInstance()).sendBroadcast(intent);
-    }*/
 
     // —————————————————————————————————————————————————————————————————————————————————————————————
     // Surface Holder methods
@@ -1845,5 +1642,4 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             Log.d(TAG, "Error starting camera preview: " + e.getMessage());
         }
     }
-
 }
