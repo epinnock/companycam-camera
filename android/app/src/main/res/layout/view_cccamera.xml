@@ -289,7 +289,7 @@
                 android:src="@drawable/close_icon"/>
 
             <LinearLayout
-                android:onClick="labelTouch"
+                android:id="@+id/label_touch_target"
                 android:orientation="vertical"
                 android:layout_width="0dp"
                 android:textAlignment="center"
