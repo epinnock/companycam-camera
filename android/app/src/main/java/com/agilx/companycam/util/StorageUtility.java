@@ -4,8 +4,6 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Environment;
 
-import org.parceler.apache.commons.lang.RandomStringUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -74,7 +72,8 @@ public class StorageUtility {
     public static File getTempFile(Context context) {
         File outputDir = context.getCacheDir();
         try {
-            String name = String.format("draw-%s", RandomStringUtils.randomAlphabetic(8));
+            //String name = String.format("draw-%s", RandomStringUtils.randomAlphabetic(8));
+            String name = String.format("draw-%s", "JFDSJFLJFDS"); //TODO
             return File.createTempFile(name, "png", outputDir);
         } catch (IOException e) {
             return null;
@@ -83,7 +82,8 @@ public class StorageUtility {
 
     public static String getNewFileName() {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
-        return String.format("%s-%s.jpg", timeStamp, RandomStringUtils.randomAlphabetic(16));
+        //return String.format("%s-%s.jpg", timeStamp, RandomStringUtils.randomAlphabetic(16));
+        return String.format("%s-%s.jpg", timeStamp, "RUEIWORUERUOW"); //TODO
     }
 
 }

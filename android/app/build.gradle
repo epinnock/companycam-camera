@@ -110,6 +110,9 @@ android {
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+    }
     // applicationVariants are e.g. debug, release
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
@@ -132,7 +135,6 @@ dependencies {
     compile 'com.facebook.react:react-native:+'
     // From node_modules
     compile 'com.google.code.gson:gson:2.4'
-    compile 'org.parceler:parceler:1.1.2'
     compile 'com.jakewharton:butterknife:6.1.0'
     compile 'io.realm:realm-android:0.87.5'
     compile 'de.greenrobot:eventbus:2.4.0'

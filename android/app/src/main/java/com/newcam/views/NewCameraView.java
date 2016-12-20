@@ -70,6 +70,7 @@ import android.support.v4.content.LocalBroadcastManager;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
+import com.newcam.CCCameraView;
 import com.newcam.R;
 
 import java.util.Date;
@@ -77,7 +78,9 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-public class NewCameraView extends ViewGroup implements SurfaceHolder.Callback {
+public class NewCameraView extends CCCameraView implements SurfaceHolder.Callback {
+
+    private static final String OOME_STRING = "Out of memory!"; //TODO: getString(R.string.oome_camera);
 
     private static String TAG = NewCameraView.class.getSimpleName();
     private static final String PREFS_FLASH_MODE = "PREFS_FLASH_MODE";
@@ -222,19 +225,14 @@ public class NewCameraView extends ViewGroup implements SurfaceHolder.Callback {
     // This is used to reject multiple clicks in quick succession.
     private static int CLICK_REJECTION_INTERVAL = 1500;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public NewCameraView(Context context) {
+        super(context);
 
         // Verify that the permissions exist in case user turned them off while on the camera preview
         // Close the activity if the permissions aren't available
         if (!checkCameraPermissions()) {
             finishWithError("No camera permissions");
         }
-
-        setContentView(R.layout.activity_camera2);
-        ButterKnife.inject(this);
-        mActionBar.hide();
 
         int cameraId = -1;
         int numberOfCameras = Camera.getNumberOfCameras();
@@ -291,39 +289,14 @@ public class NewCameraView extends ViewGroup implements SurfaceHolder.Callback {
         // Set the button orientations for the resolution layout
         setupResolutionLayout();
 
-        Bundle bundle = getIntent().getExtras();
-        if (bundle != null) {
-            mPhotoCapturePlaceId = bundle.getLong(EXTRA_PLACE_ID);
-            LogUtil.e(TAG, "mPhotoCaptureId is " + mPhotoCapturePlaceId);
-            mPlace = Realm.getInstance(CompanyCamApplication.getInstance())
-                    .where(Place.class).equalTo(RealmDbColumns.LOCAL_ID, mPhotoCapturePlaceId).findFirst();
-
-            // Check if the placeName and placeAddress are included in the intent
-            placeName = bundle.getString("placeName");
-            placeAddress = bundle.getString("placeAddress");
-
-            // Set the place name label
-            if (placeName != null && !placeName.equals("")) {
-                mPlaceName.setText(placeName);
-            }
-            else if (placeAddress != null && !placeAddress.equals("")) {
-                mPlaceName.setText(placeAddress);
-            }
-            else {
-                mPlaceName.setText("");
-            }
-        }
-
-        if(bundle != null){
-            appPhotoDirectory = new File(bundle.getString("photoDirectory"));
-        }else{
-            appPhotoDirectory = StorageUtility.getPhotoDirectory();
-            System.err.println("[CameraActivity] Warning: Bundle was null!");
-        }
+        this.placeAddress = this.propProjectAddress;
+        this.placeName = this.propProjectName;
+        this.appPhotoDirectory = new File(this.propStoragePath);
         System.err.println("[CameraActivity] Received storage directory: " + appPhotoDirectory.getAbsolutePath());
     }
 
-    @Override
+    //TODO
+    /*@Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
     }
@@ -393,14 +366,7 @@ public class NewCameraView extends ViewGroup implements SurfaceHolder.Callback {
         if (mOrientationListener != null) {
             mOrientationListener.disable();
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-
-        // Finish the activity with a result
-        finishWithResult("close");
-    }
+    }*/
 
     public void labelTouch(View v) {
 
@@ -413,24 +379,6 @@ public class NewCameraView extends ViewGroup implements SurfaceHolder.Callback {
         finishWithResult("label");
     }
 
-    // This method creates an intent to present the MainActivity again
-    public void _finishWithResultOrError(String button, String errmsg){
-
-        // Create a new Intent
-        Intent intent = new Intent(NewCameraActivity.this, com.agilx.companycam.MainActivity.class);
-        intent.putExtra("Button", button);
-        if(button.equals("error")){
-            intent.putExtra("ErrorMessage", errmsg);
-        }
-        setResult(RESULT_OK, intent);
-        finish();
-    }
-    public void finishWithResult(String button) {
-        _finishWithResultOrError(button, "");
-    }
-    public void finishWithError(String errmsg) {
-        _finishWithResultOrError("error", errmsg);
-    }
 
     @OnClick(R.id.toggle_resolution)
     protected void toggleResolution() {
@@ -483,7 +431,7 @@ public class NewCameraView extends ViewGroup implements SurfaceHolder.Callback {
 
     @OnClick(R.id.close_button)
     protected void closeButtonClick() {
-        getSupportFragmentManager().popBackStack();
+        //getSupportFragmentManager().popBackStack(); //TODO
 
         // If the resolution layout is displayed, this button click shouldn't have any action, so simply return
         if (mResolutionLayoutVisible) {
@@ -573,6 +521,7 @@ public class NewCameraView extends ViewGroup implements SurfaceHolder.Callback {
         mResolutionLayoutVisible = false;
     }
 
+
     /** A safe way to get an instance of the Camera object. */
     public Camera getCameraInstance() {
         Camera c = null;
@@ -598,7 +547,7 @@ public class NewCameraView extends ViewGroup implements SurfaceHolder.Callback {
 
     private void initOrientationListener() {
         mOrientationListener =
-                new OrientationEventListener(NewCameraActivity.this) {
+                new OrientationEventListener(getContext()) {
 
                     public void onOrientationChanged(int orientation) {
                         // We keep the last known orientation. So if the user
@@ -710,13 +659,13 @@ public class NewCameraView extends ViewGroup implements SurfaceHolder.Callback {
         // initializes the CameraPreview with the placeName and placeAddress given directly from the Javascript app.
         // Create our Preview view and set it as the content of our activity.
         //mPreview = new CameraPreview(this, mCamera, mPlace);
-        mPreview = new CameraPreview(this, placeName, placeAddress);
+        mPreview = new CameraPreview(getContext(), placeName, placeAddress);
         mPreview.getHolder().addCallback(this);
         mPreviewLayout = (RelativeLayout) findViewById(R.id.camera_preview);
         mPreviewLayout.addView(mPreview);
 
         // a TextureView can't be used as a camera preview, and used for drawing on, so we use a separate CameraOverlay
-        cameraOverlay = new CameraOverlay(NewCameraActivity.this, mPreview);
+        cameraOverlay = new CameraOverlay(getContext(), mPreview);
         mPreviewLayout.addView(cameraOverlay);
 
         setCameraDisplayOrientation(this, 0, mCamera);
@@ -734,12 +683,12 @@ public class NewCameraView extends ViewGroup implements SurfaceHolder.Callback {
 
     private final Camera.ShutterCallback shutterCallback = new Camera.ShutterCallback() {
         public void onShutter() {
-            AudioManager mgr = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            AudioManager mgr = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
             mgr.playSoundEffect(AudioManager.FLAG_PLAY_SOUND);
 
             // Animate the screen flash when the image is captured if the camera is in FastCam mode.
             if (mCameraMode.equals("fastcam")) {
-                NewCameraActivity.this.runOnUiThread(new Runnable() {
+                post(new Runnable(){
                     @Override
                     public void run() {
                         animateScreenFlash();
@@ -793,7 +742,7 @@ public class NewCameraView extends ViewGroup implements SurfaceHolder.Callback {
                     // The attempt to decode the data can sometimes fail and return null.  If that happens, display a message to the user and restart the camera preview..
                     if (bPhoto == null) {
 
-                        new AlertDialog.Builder(NewCameraActivity.this)
+                        new AlertDialog.Builder(getContext())
                                 .setTitle("Error")
                                 .setMessage("Something went wrong while taking this photo. Try taking a picture with your camera app and uploading it.")
                                 .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
@@ -838,8 +787,8 @@ public class NewCameraView extends ViewGroup implements SurfaceHolder.Callback {
                         setupListeners();
                     }
 
-                    CompanyCamApplication.getInstance().requestSingleLocationUpdate();
-                    mLastLocation = CompanyCamApplication.getInstance().getLastLocation();
+                    requestSingleLocationUpdate();
+                    mLastLocation = getLastLocation();
 
                     if (mLastLocation != null) {
                         Log.e("TAG", "GPS is on");
@@ -847,8 +796,8 @@ public class NewCameraView extends ViewGroup implements SurfaceHolder.Callback {
                         double longitude = mLastLocation.getLongitude();
                     }
                     else{
-                        CompanyCamApplication.getInstance().requestLastLocation();
-                        mLastLocation = CompanyCamApplication.getInstance().getLastLocation();
+                        requestLastLocation();
+                        mLastLocation = getLastLocation();
                     }
 
                     try {
@@ -916,7 +865,7 @@ public class NewCameraView extends ViewGroup implements SurfaceHolder.Callback {
                     Log.d(TAG, "Error accessing file: " + e.getMessage());
                 } catch (OutOfMemoryError oome) {
                     Log.e(TAG, "OutOfMemoryError: " + oome.getMessage());
-                    EventBus.getDefault().post(new OutOfMemoryEvent(getString(R.string.oome_camera)));
+                    EventBus.getDefault().post(new OutOfMemoryEvent(OOME_STRING));
                     finishWithError("Out of memory: " + oome.getMessage());
                 } finally {
                     if (bPhoto != null) {
@@ -956,7 +905,7 @@ public class NewCameraView extends ViewGroup implements SurfaceHolder.Callback {
 
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("quality", mResolutionMode);
-        CompanyCamApplication.logIntercomEvent("took_photo", attributes);
+        logIntercomEvent("took_photo", attributes);
 
         File file = new File(photoPath);
         Uri photoCaptureFileUri = Uri.fromFile(file);
@@ -972,11 +921,11 @@ public class NewCameraView extends ViewGroup implements SurfaceHolder.Callback {
 
     //========================================================
     // This method sends a broadcast to let other objects know that an image has been taken
-    public void sendPhotoTakenBroadcast(Uri photoCaptureFileUri) {
+    //TODO
+    /*public void sendPhotoTakenBroadcast(Uri photoCaptureFileUri) {
 
         // Gather some info
-        CompanyCamApplication ccApp = CompanyCamApplication.getInstance();
-        Location lastLocation = ccApp.getLastLocation();
+        Location lastLocation = getLastLocation();
 
         DateFormat apiDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZZZ", Locale.US);
         String createdDate = apiDateFormat.format(new Date());
@@ -1005,7 +954,7 @@ public class NewCameraView extends ViewGroup implements SurfaceHolder.Callback {
         Bundle extras = Arguments.toBundle(userInfo);
         intent.putExtras(extras);
         LocalBroadcastManager.getInstance(ccApp).sendBroadcast(intent);
-    }
+    }*/
     //========================================================
 
     public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
@@ -1655,7 +1604,7 @@ public class NewCameraView extends ViewGroup implements SurfaceHolder.Callback {
 
     private boolean checkCameraPermissions() {
         for (String permission : CAMERA_PERMISSIONS) {
-            int result = ContextCompat.checkSelfPermission(getBaseContext(), permission);
+            int result = ContextCompat.checkSelfPermission(getContext(), permission);
             if (result != PackageManager.PERMISSION_GRANTED) {
                 return false;
             }
@@ -1881,5 +1830,3 @@ public class NewCameraView extends ViewGroup implements SurfaceHolder.Callback {
     }
 
 }
-
-

@@ -107,7 +107,8 @@ public class CameraPreview extends SurfaceView {
             canvas.drawRect(background, paint);
 
             paint.setColor(Color.WHITE);
-            paint.setTextSize(DeviceUtil.dpToPx(CompanyCamApplication.getInstance(), 15));
+            //paint.setTextSize(DeviceUtil.dpToPx(CompanyCamApplication.getInstance(), 15));
+            paint.setTextSize(DeviceUtil.dpToPx(mContext, 15)); //TODO
             canvas.drawText(text, // Text to display
                     (canvas.getWidth() / 2) - (paint.measureText(text) / 2),
                     canvas.getHeight() - padding / 2,
@@ -143,7 +144,8 @@ public class CameraPreview extends SurfaceView {
 
             paint.setColor(Color.WHITE);
             paint.setAlpha(255);
-            paint.setTextSize(DeviceUtil.dpToPx(CompanyCamApplication.getInstance(), 15));
+            //paint.setTextSize(DeviceUtil.dpToPx(CompanyCamApplication.getInstance(), 15));
+            paint.setTextSize(DeviceUtil.dpToPx(mContext, 15)); //TODO
 
             String[] lines = text.split("\n");
 

@@ -4,6 +4,7 @@ import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.annotations.ReactProp;
+import com.newcam.views.NewCameraView;
 
 import java.util.Map;
 
@@ -24,7 +25,8 @@ public class CCCameraManager extends SimpleViewManager<CCCameraView> {
 
     @Override
     protected CCCameraView createViewInstance(ThemedReactContext context) {
-        return new CCCameraView(context);
+        //TODO can conditionally return any of the views extending CCCameraView
+        return new NewCameraView(context);
     }
 
     @ReactProp(name = "storagePath")
