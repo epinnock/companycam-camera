@@ -296,8 +296,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         setCameraMode(mCameraMode);
 
         // Set the default button orientations
-        int rotationValue = -90;
-
+        int rotationValue = 0;
         mCloseButton.setRotation(rotationValue);
         mToggleResolution.setRotation(rotationValue);
         mToggleFlash.setRotation(rotationValue);
@@ -395,9 +394,9 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
     // This method sets the proper button orientation for the mResolutionLayout
     private void setupResolutionLayout() {
-        mNormalButton.setRotation(-90);
-        mHighButton.setRotation(-90);
-        mSuperButton.setRotation(-90);
+        mNormalButtonLand.setRotation(-90);
+        mHighButtonLand.setRotation(-90);
+        mSuperButtonLand.setRotation(-90);
     }
 
     // This method animates the presentation of the resolution layout when the resolution button is tapped
@@ -410,7 +409,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             mResolutionLayout.setAlpha(0.0f);
 
             // Animate the position and opacity of the resolution layout
-            mResolutionLayout.animate().x(0.0f).alpha(1.0f).setDuration(300).start();
+            mResolutionLayout.animate().y(0.0f).alpha(1.0f).setDuration(300).start();
 
             // Animate the opacity of the top layout
             mTopLayout.animate().alpha(0.0f).setDuration(300).start();
@@ -421,7 +420,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             mResolutionLayoutLand.setAlpha(0.0f);
 
             // Animate the position and opacity of the landscape resolution layout
-            mResolutionLayoutLand.animate().y(0.0f).alpha(1.0f).setDuration(300).start();
+            mResolutionLayoutLand.animate().x(0.0f).alpha(1.0f).setDuration(300).start();
 
             // Animate the opacity of the top and bottom layouts
             mTopLayout.animate().alpha(0.0f).setDuration(300).start();
@@ -498,7 +497,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
                             // Change the rotation of the interface elements if the device has crossed the threshold between portrait and landscape
                             int rotationValue = -1;
                             if ((orientation >= 315 || orientation < 45) && !(mLastOrientation >= 315 || mLastOrientation < 45)) {
-                                rotationValue = -90;
+                                rotationValue = 0;
 
                                 // Hide the resolution layout if it's showing
                                 if (mResolutionLayoutVisible) {
@@ -513,7 +512,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
                             }
                             else if ((orientation < 315 && orientation >= 225) && !(mLastOrientation < 315 && mLastOrientation >= 225)) {
-                                rotationValue = 0;
+                                rotationValue = -90;
 
                                 // Hide the resolution layout if it's showing
                                 if (mResolutionLayoutVisible) {
@@ -527,7 +526,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
                                 setResolutionImage(mResolutionMode);
                             }
                             else if (mLastOrientation == OrientationEventListener.ORIENTATION_UNKNOWN) {
-                                rotationValue = -90;
+                                rotationValue = 0;
 
                                 // Hide the resolution layout if it's showing
                                 if (mResolutionLayoutVisible) {
