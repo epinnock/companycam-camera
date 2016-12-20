@@ -33,7 +33,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import com.notagilx.companycam.core.events.OutOfMemoryEvent;
 import com.notagilx.companycam.core.web.model.Place;
 import com.notagilx.companycam.react_bridges.PhotoActions;
@@ -168,9 +167,8 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     private ImageButton mNormalButton;
     private ImageButton mHighButton;
     private ImageButton mSuperButton;
-    private LinearLayout mResolutionLabelLayoutNormal;
-    private LinearLayout mResolutionLabelLayoutHigh;
-    private LinearLayout mResolutionLabelLayoutSuper;
+    private TextView mResolutionLabel1;
+    private TextView mResolutionLabel2;
     private ImageButton mResolutionDismissButton;
 
     // These views and text labels are for the resolution selection layout in landscape
@@ -178,8 +176,9 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     private ImageButton mNormalButtonLand;
     private ImageButton mHighButtonLand;
     private ImageButton mSuperButtonLand;
-    private TextView mResolutionLabel1Land;
-    private TextView mResolutionLabel2Land;
+    private LinearLayout mResolutionLabelLayoutNormal;
+    private LinearLayout mResolutionLabelLayoutHigh;
+    private LinearLayout mResolutionLabelLayoutSuper;
     private ImageButton mResolutionDismissButtonLand;
 
     // This is the animation distance for the resolution layout in dp
@@ -247,8 +246,8 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         mNormalButtonLand = (ImageButton) findViewById(R.id.normal_button_land);
         mHighButtonLand = (ImageButton) findViewById(R.id.high_button_land);
         mSuperButtonLand = (ImageButton) findViewById(R.id.super_button_land);
-        mResolutionLabel1Land = (TextView) findViewById(R.id.resolution_text_1_land);
-        mResolutionLabel2Land = (TextView) findViewById(R.id.resolution_text_2_land);
+        mResolutionLabel1 = (TextView) findViewById(R.id.resolution_text_1);
+        mResolutionLabel2 = (TextView) findViewById(R.id.resolution_text_2);
         mResolutionDismissButtonLand = (ImageButton) findViewById(R.id.resolution_dismiss_button_land);
         mScreenFlashView = (FrameLayout) findViewById(R.id.screen_flash_view);
 
@@ -394,9 +393,11 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
     // This method sets the proper button orientation for the mResolutionLayout
     private void setupResolutionLayout() {
-        mNormalButtonLand.setRotation(-90);
-        mHighButtonLand.setRotation(-90);
-        mSuperButtonLand.setRotation(-90);
+        mNormalButtonLand.setRotation(90);
+        mHighButtonLand.setRotation(90);
+        mSuperButtonLand.setRotation(90);
+        mResolutionDismissButtonLand.setRotation(180);
+
     }
 
     // This method animates the presentation of the resolution layout when the resolution button is tapped
@@ -419,8 +420,12 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             // Set the opacity of the landscape resolution layout to 0 before starting the animation
             mResolutionLayoutLand.setAlpha(0.0f);
 
+            // Convert the RESOLUTION_ANIMATION_DIST_DP to pixels
+            float animationDistPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, RESOLUTION_ANIMATION_DIST_DP, getResources().getDisplayMetrics());
+            float screenWidthPx = this.getWidth();
+
             // Animate the position and opacity of the landscape resolution layout
-            mResolutionLayoutLand.animate().x(0.0f).alpha(1.0f).setDuration(300).start();
+            mResolutionLayoutLand.animate().x(screenWidthPx - animationDistPx).alpha(1.0f).setDuration(300).start();
 
             // Animate the opacity of the top and bottom layouts
             mTopLayout.animate().alpha(0.0f).setDuration(300).start();
@@ -441,7 +446,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         if (mPhonePosition == PORTRAIT_TOP_UP) {
 
             // Animate the position and opacity of the resolution layout
-            mResolutionLayout.animate().x(-animationDistPx).alpha(0.0f).setDuration(300).start();
+            mResolutionLayout.animate().y(-animationDistPx).alpha(0.0f).setDuration(300).start();
 
             // Animate the opacity of the top layout
             mTopLayout.animate().alpha(1.0f).setDuration(300).start();
@@ -449,7 +454,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         else {
 
             // Animate the position and opacity of the landscape resolution layout
-            mResolutionLayoutLand.animate().y(-animationDistPx).alpha(0.0f).setDuration(300).start();
+            mResolutionLayoutLand.animate().x(this.getWidth()).alpha(0.0f).setDuration(300).start();
 
             // Animate the opacity of the top and bottom layouts
             mTopLayout.animate().alpha(1.0f).setDuration(300).start();
@@ -512,7 +517,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
                             }
                             else if ((orientation < 315 && orientation >= 225) && !(mLastOrientation < 315 && mLastOrientation >= 225)) {
-                                rotationValue = -90;
+                                rotationValue = 90;
 
                                 // Hide the resolution layout if it's showing
                                 if (mResolutionLayoutVisible) {
@@ -1053,14 +1058,14 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             mHighButtonLand.setImageResource(R.drawable.high_icon);
             mSuperButtonLand.setImageResource(R.drawable.super_fine_on_icon);
 
-            // Show the appropriate label layout for portrait orientation
+            // Show the appropriate label layout for landscape orientation
             mResolutionLabelLayoutNormal.setVisibility(View.GONE);
             mResolutionLabelLayoutHigh.setVisibility(View.GONE);
             mResolutionLabelLayoutSuper.setVisibility(View.VISIBLE);
 
-            // Set the resolution text labels for landscape orientation
-            mResolutionLabel1Land.setText("Best for capturing great details.");
-            mResolutionLabel2Land.setText("Largest file size.  Uses the most data.");
+            // Set the resolution text labels for portrait orientation
+            mResolutionLabel1.setText("Best for capturing great details.");
+            mResolutionLabel2.setText("Largest file size.  Uses the most data.");
 
             mResolutionMode = "super";
         }
@@ -1074,14 +1079,14 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             mHighButtonLand.setImageResource(R.drawable.high_on_icon);
             mSuperButtonLand.setImageResource(R.drawable.super_fine_icon);
 
-            // Show the appropriate label layout for portrait orientation
+            // Show the appropriate label layout for landscape orientation
             mResolutionLabelLayoutNormal.setVisibility(View.GONE);
             mResolutionLabelLayoutHigh.setVisibility(View.VISIBLE);
             mResolutionLabelLayoutSuper.setVisibility(View.GONE);
 
-            // Set the resolution text labels for landscape orientation
-            mResolutionLabel1Land.setText("Best for balancing image quality and file size.");
-            mResolutionLabel2Land.setText("Uses more data.");
+            // Set the resolution text labels for portrait orientation
+            mResolutionLabel1.setText("Best for balancing image quality and file size.");
+            mResolutionLabel2.setText("Uses more data.");
 
             mResolutionMode = "high";
         }
@@ -1095,14 +1100,14 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             mHighButtonLand.setImageResource(R.drawable.high_icon);
             mSuperButtonLand.setImageResource(R.drawable.super_fine_icon);
 
-            // Show the appropriate label layout for portrait orientation
+            // Show the appropriate label layout for landscape orientation
             mResolutionLabelLayoutNormal.setVisibility(View.VISIBLE);
             mResolutionLabelLayoutHigh.setVisibility(View.GONE);
             mResolutionLabelLayoutSuper.setVisibility(View.GONE);
 
-            // Set the resolution text labels for landscape orientation
-            mResolutionLabel1Land.setText("Best for everyday use.");
-            mResolutionLabel2Land.setText("Smallest file size.  Uses the least data.");
+            // Set the resolution text labels for portrait orientation
+            mResolutionLabel1.setText("Best for everyday use.");
+            mResolutionLabel2.setText("Smallest file size.  Uses the least data.");
 
             mResolutionMode = "normal";
         }
