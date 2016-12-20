@@ -28,7 +28,7 @@ public abstract class CCCameraView extends RelativeLayout {
 
     public CCCameraView(Context context) {
         super(context);
-        inflate(context, R.layout.activity_camera2, this);
+        inflate(context, R.layout.view_cccamera, this);
         init();
     }
 

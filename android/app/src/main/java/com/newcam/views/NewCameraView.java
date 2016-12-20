@@ -56,7 +56,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 
 public class NewCameraView extends CCCameraView implements SurfaceHolder.Callback {
@@ -128,8 +127,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     private final int MEDIUM_QUALITY = 50;
     private final int HIGH_QUALITY = 80;
     private final int HIGHEST_QUALITY = 80;
-
-    private int mCameraQuality;
 
     private double zoomdistance;
     ExifInterface exif;
@@ -218,9 +215,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
                 break;
             }
         }
-
-        //Set initial quality
-        mCameraQuality = HIGH_QUALITY;
     }
 
     @Override
@@ -1069,7 +1063,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             mResolutionLabel1Land.setText("Best for capturing great details.");
             mResolutionLabel2Land.setText("Largest file size.  Uses the most data.");
 
-            mCameraQuality = HIGHEST_QUALITY;
             mResolutionMode = "super";
         }
         else if (resolutionMode.equals("high")) {
@@ -1091,7 +1084,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             mResolutionLabel1Land.setText("Best for balancing image quality and file size.");
             mResolutionLabel2Land.setText("Uses more data.");
 
-            mCameraQuality = HIGH_QUALITY;
             mResolutionMode = "high";
         }
         else {
@@ -1113,7 +1105,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             mResolutionLabel1Land.setText("Best for everyday use.");
             mResolutionLabel2Land.setText("Smallest file size.  Uses the least data.");
 
-            mCameraQuality = HIGH_QUALITY;
             mResolutionMode = "normal";
         }
 
