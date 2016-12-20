@@ -253,8 +253,8 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         mScreenFlashView = (FrameLayout) findViewById(R.id.screen_flash_view);
 
         // Set the gradient backgrounds for the layouts
-        mTopLayout.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.transparent_gray_gradient));
-        mBottomLayout.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.transparent_gray_gradient_reverse));
+        mTopLayout.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.transparent_gray_gradient_270));
+        mBottomLayout.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.transparent_gray_gradient_90));
 
         mLabelTouchTarget = (LinearLayout) findViewById(R.id.label_touch_target);
         mToggleResolution = (ImageButton) findViewById(R.id.toggle_resolution);
@@ -936,13 +936,13 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     private void setFlashModeImage(String flashMode) {
         int imageRes;
         if (flashMode.equals("auto")) {
-            imageRes = R.drawable.flash_auto;
+            imageRes = R.drawable.flashlight_off;
         } else if (flashMode.equals("on")) {
-            imageRes = R.drawable.flash_on;
+            imageRes = R.drawable.flashlight_on;
         } else if (flashMode.equals("torch")) {
-            imageRes = R.drawable.torch_on;
+            imageRes = R.drawable.flashlight_on;
         } else {
-            imageRes = R.drawable.flash_off;
+            imageRes = R.drawable.flashlight_off;
         }
 
         mToggleFlash.setImageResource(imageRes);
