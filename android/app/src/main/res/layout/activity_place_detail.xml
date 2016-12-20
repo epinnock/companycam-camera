@@ -2,7 +2,7 @@
                 xmlns:tools="http://schemas.android.com/tools"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                tools:context="com.agilx.companycam.activities.PlaceDetailActivity">
+                tools:context="com.notagilx.companycam.activities.PlaceDetailActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -11,7 +11,7 @@
         android:paddingRight="2dp"
         android:paddingTop="2dp">
 
-        <com.agilx.companycam.util.views.HeaderGridView
+        <com.notagilx.companycam.util.views.HeaderGridView
             android:id="@+id/photos_grid_view"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

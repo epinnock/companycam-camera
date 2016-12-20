@@ -1,4 +1,4 @@
-package com.agilx.companycam.react_bridges;
+package com.notagilx.companycam.react_bridges;
 
 import android.content.Context;
 import android.graphics.Bitmap;

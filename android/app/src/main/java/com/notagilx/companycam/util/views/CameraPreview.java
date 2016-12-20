@@ -1,4 +1,4 @@
-package com.agilx.companycam.util.views;
+package com.notagilx.companycam.util.views;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -11,8 +11,8 @@ import android.graphics.Typeface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import com.agilx.companycam.core.web.model.Place;
-import com.agilx.companycam.util.DeviceUtil;
+import com.notagilx.companycam.core.web.model.Place;
+import com.notagilx.companycam.util.DeviceUtil;
 import com.newcam.views.NewCameraView;
 
 public class CameraPreview extends SurfaceView {

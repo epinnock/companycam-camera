@@ -1,4 +1,4 @@
-package com.agilx.companycam.util;
+package com.notagilx.companycam.util;
 
 import android.content.Context;
 import android.net.Uri;

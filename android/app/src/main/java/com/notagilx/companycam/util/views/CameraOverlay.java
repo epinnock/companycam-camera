@@ -1,4 +1,4 @@
-package com.agilx.companycam.util.views;
+package com.notagilx.companycam.util.views;
 
 import android.content.Context;
 import android.graphics.Canvas;

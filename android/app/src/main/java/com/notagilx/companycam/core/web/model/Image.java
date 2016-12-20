@@ -1,4 +1,4 @@
-package com.agilx.companycam.core.web.model;
+package com.notagilx.companycam.core.web.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;

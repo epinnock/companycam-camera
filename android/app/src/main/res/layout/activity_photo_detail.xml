@@ -3,7 +3,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="@color/black"
-                tools:context="com.agilx.companycam.activities.PhotoDetailActivity">
+                tools:context="com.notagilx.companycam.activities.PhotoDetailActivity">
 
     <android.support.v4.view.ViewPager
         android:id="@+id/view_pager"

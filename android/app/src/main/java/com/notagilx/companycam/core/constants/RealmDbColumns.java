@@ -1,4 +1,4 @@
-package com.agilx.companycam.core.constants;
+package com.notagilx.companycam.core.constants;
 
 public class RealmDbColumns {
 

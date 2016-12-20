@@ -17,7 +17,7 @@
             android:adjustViewBounds="true"
             android:src="@drawable/default_photo_icon"/>
 
-        <com.agilx.companycam.util.views.InkView
+        <com.notagilx.companycam.util.views.InkView
             android:id="@+id/ink"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

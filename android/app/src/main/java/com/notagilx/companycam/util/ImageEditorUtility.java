@@ -1,4 +1,4 @@
-package com.agilx.companycam.util;
+package com.notagilx.companycam.util;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -8,7 +8,7 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.media.ExifInterface;
 
-import com.agilx.companycam.core.events.OutOfMemoryEvent;
+import com.notagilx.companycam.core.events.OutOfMemoryEvent;
 
 import java.io.File;
 import java.io.FileOutputStream;

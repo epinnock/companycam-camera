@@ -34,15 +34,15 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.agilx.companycam.core.events.OutOfMemoryEvent;
-import com.agilx.companycam.core.web.model.Place;
-import com.agilx.companycam.react_bridges.PhotoActions;
-import com.agilx.companycam.util.ImageEditorUtility;
-import com.agilx.companycam.util.LogUtil;
-import com.agilx.companycam.util.SingleClickListener;
-import com.agilx.companycam.util.StorageUtility;
-import com.agilx.companycam.util.views.CameraOverlay;
-import com.agilx.companycam.util.views.CameraPreview;
+import com.notagilx.companycam.core.events.OutOfMemoryEvent;
+import com.notagilx.companycam.core.web.model.Place;
+import com.notagilx.companycam.react_bridges.PhotoActions;
+import com.notagilx.companycam.util.ImageEditorUtility;
+import com.notagilx.companycam.util.LogUtil;
+import com.notagilx.companycam.util.SingleClickListener;
+import com.notagilx.companycam.util.StorageUtility;
+import com.notagilx.companycam.util.views.CameraOverlay;
+import com.notagilx.companycam.util.views.CameraPreview;
 import com.newcam.CCCameraView;
 import com.newcam.R;
 

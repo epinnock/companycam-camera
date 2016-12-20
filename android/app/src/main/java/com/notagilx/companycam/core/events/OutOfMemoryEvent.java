@@ -1,4 +1,4 @@
-package com.agilx.companycam.core.events;
+package com.notagilx.companycam.core.events;
 
 /**
  * Created by Landon on 12/17/15.

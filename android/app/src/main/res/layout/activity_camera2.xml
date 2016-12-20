@@ -19,14 +19,14 @@
         android:background="#ffffff"
         android:alpha="0"/>
 
-    <com.agilx.companycam.util.views.FocusIndicatorView
+    <com.notagilx.companycam.util.views.FocusIndicatorView
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:id="@+id/focus_indicator_view"
         android:layout_centerInParent="false"
         android:visibility="invisible">
 
-    </com.agilx.companycam.util.views.FocusIndicatorView>
+    </com.notagilx.companycam.util.views.FocusIndicatorView>
 
     <LinearLayout
         android:orientation="horizontal"
@@ -36,7 +36,7 @@
         android:layout_width="150dp"
         android:layout_marginLeft="-150dp">
 
-        <com.agilx.companycam.util.views.VerticalTextView
+        <com.notagilx.companycam.util.views.VerticalTextView
             android:id="@+id/resolution_title"
             android:layout_width="30dp"
             android:layout_height="match_parent"
@@ -90,7 +90,7 @@
             android:layout_marginRight="5dp"
             android:layout_marginLeft="-5dp">
 
-            <com.agilx.companycam.util.views.VerticalTextView
+            <com.notagilx.companycam.util.views.VerticalTextView
                 android:id="@+id/resolution_text_1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -98,7 +98,7 @@
                 android:textColor="@android:color/white"
                 android:textStyle="italic"/>
 
-            <com.agilx.companycam.util.views.VerticalTextView
+            <com.notagilx.companycam.util.views.VerticalTextView
                 android:id="@+id/resolution_text_2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -118,7 +118,7 @@
             android:layout_marginLeft="-5dp"
             android:visibility="gone">
 
-            <com.agilx.companycam.util.views.VerticalTextView
+            <com.notagilx.companycam.util.views.VerticalTextView
                 android:id="@+id/resolution_text_3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -126,7 +126,7 @@
                 android:textColor="@android:color/white"
                 android:textStyle="italic"/>
 
-            <com.agilx.companycam.util.views.VerticalTextView
+            <com.notagilx.companycam.util.views.VerticalTextView
                 android:id="@+id/resolution_text_4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -146,7 +146,7 @@
             android:layout_marginLeft="-5dp"
             android:visibility="gone">
 
-            <com.agilx.companycam.util.views.VerticalTextView
+            <com.notagilx.companycam.util.views.VerticalTextView
                 android:id="@+id/resolution_text_5"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -154,7 +154,7 @@
                 android:textColor="@android:color/white"
                 android:textStyle="italic"/>
 
-            <com.agilx.companycam.util.views.VerticalTextView
+            <com.notagilx.companycam.util.views.VerticalTextView
                 android:id="@+id/resolution_text_6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -296,7 +296,7 @@
                 android:layout_width="match_parent"
                 android:layout_weight="1">
 
-                <com.agilx.companycam.util.views.VerticalTextView
+                <com.notagilx.companycam.util.views.VerticalTextView
                     android:id="@+id/place_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -304,7 +304,7 @@
                     android:textColor="@android:color/white"
                     />
 
-                <com.agilx.companycam.util.views.VerticalTextView
+                <com.notagilx.companycam.util.views.VerticalTextView
                     android:id="@+id/place_address"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -395,7 +395,7 @@
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="5dp"/>
 
-                <com.agilx.companycam.util.views.VerticalTextView
+                <com.notagilx.companycam.util.views.VerticalTextView
                     android:id="@+id/scanner_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -420,7 +420,7 @@
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="5dp"/>
 
-                <com.agilx.companycam.util.views.VerticalTextView
+                <com.notagilx.companycam.util.views.VerticalTextView
                     android:id="@+id/camera_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -445,7 +445,7 @@
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="5dp"/>
 
-                <com.agilx.companycam.util.views.VerticalTextView
+                <com.notagilx.companycam.util.views.VerticalTextView
                     android:id="@+id/fastcam_label"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
