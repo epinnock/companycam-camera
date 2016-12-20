@@ -288,7 +288,7 @@
                 android:layout_marginLeft="5dp"/>
 
             <LinearLayout
-                android:onClick="labelTouch"
+                android:id="@+id/label_touch_target"
                 android:orientation="horizontal"
                 android:layout_height="0dp"
                 android:textAlignment="center"

@@ -1,6 +1,7 @@
 package com.newcam.views;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -42,6 +43,7 @@ import com.agilx.companycam.core.constants.RealmDbColumns;
 import com.agilx.companycam.core.events.OutOfMemoryEvent;
 import com.agilx.companycam.core.web.model.Place;
 import com.agilx.companycam.core.web.model.User;
+import com.agilx.companycam.react_bridges.PhotoActions;
 import com.agilx.companycam.util.ImageEditorUtility;
 import com.agilx.companycam.util.LogUtil;
 import com.agilx.companycam.util.SingleClickListener;
@@ -80,12 +82,15 @@ import java.util.Locale;
 
 public class NewCameraView extends CCCameraView implements SurfaceHolder.Callback {
 
+    private static String TAG = NewCameraView.class.getSimpleName();
+
+    private static final String APP_PACKAGE ="com.agilx.companycam";
     private static final String OOME_STRING = "Out of memory!"; //TODO: getString(R.string.oome_camera);
 
-    private static String TAG = NewCameraView.class.getSimpleName();
     private static final String PREFS_FLASH_MODE = "PREFS_FLASH_MODE";
     private static final String PREFS_RESOLUTION_MODE = "PREFS_RESOLUTION_MODE";
     private static final String PREFS_CAMERA_MODE = "PREFS_CAMERA_MODE";
+
     public static String EXTRA_PLACE_ID = "place_id";
     public static final int PORTRAIT_TOP_UP = 1;
     public static final int PORTRAIT_TOP_DOWN = 2;
@@ -149,11 +154,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     // width and height are the width and height of the screen measured in pixels
     int width;
     int height;
-
-    // The placeName and placeAddress are the parameters passed from the Javascript app
-    private String placeName;
-    private String placeAddress;
-    private File appPhotoDirectory;
 
     private CameraOverlay cameraOverlay = null;
     private int mPhonePosition;
@@ -248,7 +248,10 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
         //Set initial quality
         mCameraQuality = HIGH_QUALITY;
+    }
 
+    @Override
+    public void init(){
         // Get references to the subviews
         mPreviewLayout = (RelativeLayout) findViewById(R.id.camera_preview);
         mPlaceName = (TextView) findViewById(R.id.place_name);
@@ -289,21 +292,20 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         // Set the button orientations for the resolution layout
         setupResolutionLayout();
 
-        this.placeAddress = this.propProjectAddress;
-        this.placeName = this.propProjectName;
-        this.appPhotoDirectory = new File(this.propStoragePath);
-        System.err.println("[CameraActivity] Received storage directory: " + appPhotoDirectory.getAbsolutePath());
+        init2();
     }
 
     //TODO
     /*@Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-    }
+    }*/
 
-    @Override
-    protected void onResume() {
-        super.onResume();
+    //@Override
+    //protected void onResume() {
+
+    public void init2(){
+        System.err.println("INITIALIZE");
 
         // Verify that the permissions exist in case user turned them off while on the camera preview
         // Close the activity if the permissions aren't available
@@ -311,10 +313,10 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             finishWithError("No camera permissions");
         }
 
-        mEventBus.register(this);
+        //mEventBus.register(this); //TODO
 
         // Get the saved settings from the SharedPreferences.  Restrict the possible flash modes to "torch" and "off".
-        SharedPreferences preferences = getSharedPreferences(CompanyCamApplication.APP_PACKAGE, Context.MODE_PRIVATE);
+        SharedPreferences preferences = getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
         mFlashMode = preferences.getString(PREFS_FLASH_MODE, "off");
         if (!(mFlashMode.equals("torch") || mFlashMode.equals("off"))) {
             mFlashMode.equals("off");
@@ -325,6 +327,13 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
         // Set the default button orientations
         int rotationValue = -90;
+
+        //TODO
+        mToggleResolution = (ImageButton) findViewById(R.id.toggle_resolution);
+        mToggleFlash = (ImageButton) findViewById(R.id.toggle_flash);
+        mCloseButton = (ImageButton) findViewById(R.id.close_button);
+        mToggleCamera = (ImageButton) findViewById(R.id.toggle_camera);
+
         mCloseButton.setRotation(rotationValue);
         mToggleResolution.setRotation(rotationValue);
         mToggleFlash.setRotation(rotationValue);
@@ -341,6 +350,8 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         setCameraButtonVisibility();
     }
 
+    //TODO
+    /*
     @Override
     protected void onPause() {
         super.onPause();
@@ -368,7 +379,8 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         }
     }*/
 
-    public void labelTouch(View v) {
+    @OnClick(R.id.label_touch_target)
+    public void labelTouch() {
 
         // If the resolution layout is displayed, this button click shouldn't have any action, so simply return
         if (mResolutionLayoutVisible) {
@@ -668,7 +680,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         cameraOverlay = new CameraOverlay(getContext(), mPreview);
         mPreviewLayout.addView(cameraOverlay);
 
-        setCameraDisplayOrientation(this, 0, mCamera);
+        setCameraDisplayOrientation(0, mCamera);
 
         // Set the visibility of the flash button
         setFlashButtonVisibility();
@@ -821,7 +833,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
                         exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE, num1Lat+"/1,"+num2Lat+"/1,"+num3Lat+"/1000");
                         exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, num1Lon+"/1,"+num2Lon+"/1,"+num3Lon+"/1000");
 
-                        SharedPreferences preferences = getSharedPreferences(CompanyCamApplication.APP_PACKAGE, Context.MODE_PRIVATE);
+                        SharedPreferences preferences = getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
                         mFlashMode = preferences.getString(PREFS_FLASH_MODE, "auto");
 
 
@@ -887,7 +899,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     private void gotoEditPhotoCapture(String photoPath) {
 
         if (photoPath == null) {
-            new AlertDialog.Builder(this)
+            new AlertDialog.Builder(getContext())
                     .setTitle("Error")
                     .setMessage("Something went wrong while taking this photo. Try taking a picture with your camera app and uploading it.")
                     .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
@@ -908,14 +920,15 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         logIntercomEvent("took_photo", attributes);
 
         File file = new File(photoPath);
-        Uri photoCaptureFileUri = Uri.fromFile(file);
+        //Uri photoCaptureFileUri = Uri.fromFile(file);
 
         //Intent intent = new Intent(this, EditPhotoCaptureActivity.class);
         //intent.putExtra(EditPhotoCaptureActivity.BUNDLE_KEY_PHOTO_CAPTURE_PLACE, mPhotoCapturePlaceId);
         //intent.putExtra(EditPhotoCaptureActivity.BUNDLE_KEY_PHOTO_CAPTURE_FILE_URI, photoCaptureFileUri);
         //startActivity(intent);
 
-        sendPhotoTakenBroadcast(photoCaptureFileUri);
+        //sendPhotoTakenBroadcast(photoCaptureFileUri);
+        doPhotoTaken(file);
         finishWithResult("capture");
     }
 
@@ -1053,7 +1066,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         mToggleFlash.setImageResource(imageRes);
 
         // Persist flash mode
-        SharedPreferences preferences = getSharedPreferences(CompanyCamApplication.APP_PACKAGE, Context.MODE_PRIVATE);
+        SharedPreferences preferences = getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(PREFS_FLASH_MODE, flashMode);
         editor.apply();
@@ -1220,7 +1233,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         }
 
         // Persist resolution mode
-        SharedPreferences preferences = getSharedPreferences(CompanyCamApplication.APP_PACKAGE, Context.MODE_PRIVATE);
+        SharedPreferences preferences = getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(PREFS_RESOLUTION_MODE, mResolutionMode);
         editor.apply();
@@ -1252,12 +1265,12 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         }.start();
     }
 
-    public static void setCameraDisplayOrientation(NewCameraActivity activity, int cameraId, Camera camera) {
+    public void setCameraDisplayOrientation(int cameraId, Camera camera) {
         android.hardware.Camera.CameraInfo info =
                 new android.hardware.Camera.CameraInfo();
         android.hardware.Camera.getCameraInfo(cameraId, info);
-        int rotation = activity.getWindowManager().getDefaultDisplay()
-                .getRotation();
+
+        int rotation = getActivity().getWindowManager().getDefaultDisplay().getRotation();
         int degrees = 0;
         switch (rotation) {
             case Surface.ROTATION_0: degrees = 0; break;
@@ -1441,7 +1454,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
         // Save the camera mode
         mCameraMode = cameraMode;
-        SharedPreferences preferences = getSharedPreferences(CompanyCamApplication.APP_PACKAGE, Context.MODE_PRIVATE);
+        SharedPreferences preferences = getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(PREFS_CAMERA_MODE, cameraMode);
         editor.apply();
@@ -1616,12 +1629,12 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     private void uploadFastCamPhoto(File photo) {
 
         // If saveToPhone is set, then save the image to the device in addition to sending it to the server.
-        SharedPreferences preferences = this.getSharedPreferences(CompanyCamApplication.APP_PACKAGE, Context.MODE_PRIVATE);
+        SharedPreferences preferences = getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
         boolean saveToPhone = preferences.getBoolean(PhotoActions.PREF_KEY_SAVE_TO_PHONE, false);
         if (saveToPhone) {
 
             // Try writing the image to the device. This method will return null if the image can't be saved successfully.
-            String imageURL = PhotoActions.writeImageToDevice(Uri.fromFile(photo));
+            String imageURL = PhotoActions.writeImageToDevice(getContext(), Uri.fromFile(photo));
         }
 
         new ProcessPhotoAsyncTask(photo).execute();
@@ -1645,7 +1658,10 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         protected void onPostExecute(File editedPhoto) {
             super.onPostExecute(editedPhoto);
 
-            // Get the path to this file
+            doPhotoAccepted(mFile);
+
+            //TODO
+            /*// Get the path to this file
             String filePath = mFile.toURI().toString();
 
             User currentUser = CompanyCamApplication.getInstance().getCurrentUser();
@@ -1665,11 +1681,11 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             localImage.setUrlSmall(filePath);
             localImage.setLocationId(mPhotoCapturePlaceId);
             localImage.setCompanyId(currentCompanyId);
-            localImage.setLat((float)CompanyCamApplication.getInstance().getLastLocation().getLatitude());
-            localImage.setLon((float)CompanyCamApplication.getInstance().getLastLocation().getLongitude());
+            localImage.setLat((float)getLastLocation().getLatitude());
+            localImage.setLon((float)getLastLocation().getLongitude());
             //localImage.setPlaceLocalId(mPlaceLocalId);
 
-            /*RealmList<PhotoComment> comments = new RealmList<>();
+            RealmList<PhotoComment> comments = new RealmList<>();
             if (mPhotoComments != null) {
                 for (PhotoComment c : mPhotoComments) {
                     comments.add(c);
@@ -1703,15 +1719,16 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
                     .create();
 
             localImage.setImageTagsAttributes(tagArray.toString());
-            //}*/
+            //}
 
             // Send a broadcast to let any interested objects know that an image upload is about to be attempted
-            sendPhotoAcceptedBroadcast(localImage);
+            sendPhotoAcceptedBroadcast(localImage);*/
         }
     }
 
     // This method sends a broadcast to let other objects know that an image upload has been submitted
-    public void sendPhotoAcceptedBroadcast(com.agilx.companycam.core.web.model.Image localImage) {
+    //TODO
+    /*public void sendPhotoAcceptedBroadcast(com.agilx.companycam.core.web.model.Image localImage) {
 
         // Send a broadcast to let any interested objects know that the UploadPhotoJob has been submitted for an image
 
@@ -1766,7 +1783,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
         // Send the broadcast locally
         LocalBroadcastManager.getInstance(CompanyCamApplication.getInstance()).sendBroadcast(intent);
-    }
+    }*/
 
     // —————————————————————————————————————————————————————————————————————————————————————————————
     // Surface Holder methods
