@@ -5,14 +5,8 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
 
-import io.realm.RealmList;
-import io.realm.RealmObject;
-import io.realm.annotations.Ignore;
-import io.realm.annotations.PrimaryKey;
+public class Image {
 
-public class Image extends RealmObject {
-
-    @PrimaryKey
     private long localId;
 
     @SerializedName("id")
@@ -75,16 +69,11 @@ public class Image extends RealmObject {
     @Expose
     private String urlLarge;
 
-    @SerializedName("image_comments")
-    @Expose
-    private RealmList<PhotoComment> imageCommentsAttributes;
-
     @SerializedName("tag_ids")
     @Expose
     private String imageTagsAttributes;
 
     @Expose(serialize = false, deserialize = false)
-    @Ignore
     public boolean isChecked;
 
     @SerializedName("placeLocalId")
@@ -219,14 +208,6 @@ public class Image extends RealmObject {
         this.urlLarge = urlLarge;
     }
 
-    public RealmList<PhotoComment> getImageCommentsAttributes() {
-        return imageCommentsAttributes;
-    }
-
-    public void setImageCommentsAttributes(RealmList<PhotoComment> imageCommentsAttributes) {
-        this.imageCommentsAttributes = imageCommentsAttributes;
-    }
-
     public String getImageTagsAttributes() { return imageTagsAttributes; }
 
     public void setImageTagsAttributes(String imageTagsAttributes) {
@@ -303,7 +284,6 @@ public class Image extends RealmObject {
         this.urlLarge = i.getUrlLarge();
         this.urlMedium = i.getUrlMedium();
         this.urlSmall = i.getUrlSmall();
-        this.imageCommentsAttributes = i.getImageCommentsAttributes();
         this.imageTagsAttributes = i.getImageTagsAttributes();
         this.placeLocalId = i.getPlaceLocalId();
     }

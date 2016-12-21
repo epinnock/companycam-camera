@@ -3,17 +3,11 @@ package com.notagilx.companycam.core.web.model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import io.realm.RealmList;
-import io.realm.RealmObject;
-import io.realm.annotations.Ignore;
-import io.realm.annotations.PrimaryKey;
-
 /**
  * Created by keaton on 3/28/15.
  */
-public class User extends RealmObject {
+public class User {
 
-    @PrimaryKey
     @SerializedName("id")
     @Expose
     private long userId;
@@ -63,10 +57,7 @@ public class User extends RealmObject {
 
     @SerializedName("Roles")
     @Expose
-    @Ignore
     private int[] roleValues;
-
-    private RealmList<UserPrivilege> roles;
 
     @SerializedName("user_type")
     @Expose
@@ -168,14 +159,6 @@ public class User extends RealmObject {
 
     public void setMobileSizeProfileUrl(String mobileSizeProfileUrl) {
         this.mobileSizeProfileUrl = mobileSizeProfileUrl;
-    }
-
-    public RealmList<UserPrivilege> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(RealmList<UserPrivilege> roles) {
-        this.roles = roles;
     }
 
     public UserType getUserType() {

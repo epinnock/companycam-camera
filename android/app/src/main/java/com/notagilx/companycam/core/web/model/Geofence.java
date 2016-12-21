@@ -3,12 +3,10 @@ package com.notagilx.companycam.core.web.model;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-import io.realm.RealmObject;
-
 /**
  * Created by dsveen on 3/28/16.
  */
-public class Geofence extends RealmObject {
+public class Geofence {
 
     @SerializedName("lat")
     @Expose

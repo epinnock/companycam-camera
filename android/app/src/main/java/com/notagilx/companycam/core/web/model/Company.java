@@ -5,12 +5,10 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 
-import io.realm.RealmObject;
-
 /**
  * Created by keaton on 3/28/15.
  */
-public class Company extends RealmObject implements Serializable {
+public class Company implements Serializable {
 
     @SerializedName("id")
     @Expose

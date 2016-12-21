@@ -5,16 +5,11 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
 
-import io.realm.RealmList;
-import io.realm.RealmObject;
-import io.realm.annotations.PrimaryKey;
-
 /**
  * Created by keaton on 3/30/15.
  */
-public class Place extends RealmObject {
+public class Place {
 
-    @PrimaryKey
     private long localId;
 
     @SerializedName("id")
@@ -108,11 +103,6 @@ public class Place extends RealmObject {
     @SerializedName("west")
     @Expose
     private double west;
-
-    @SerializedName("geofence")
-    @Expose
-    private RealmList<Geofence> geofence;
-
 
     public long getLocalId() {
         return localId;
@@ -285,12 +275,6 @@ public class Place extends RealmObject {
     public double getWest() { return west; }
 
     public void setWest(double west) { this.west = west; }
-
-    public RealmList<Geofence> getGeofence() { return geofence; }
-
-    public void setGeofence(RealmList<Geofence> geofence) { this.geofence = geofence; }
-
-
 
     public Place () {}
 

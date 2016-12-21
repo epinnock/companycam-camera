@@ -5,23 +5,17 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
 
-import io.realm.RealmObject;
-import io.realm.annotations.Ignore;
-import io.realm.annotations.PrimaryKey;
-
 /**
  * Created by keaton on 5/7/15.
  */
-public class PhotoComment extends RealmObject {
+public class PhotoComment {
 
-    @PrimaryKey
     @SerializedName("id")
     @Expose
     private long photoCommentId;
 
     @SerializedName("image_id")
     @Expose
-    @Ignore
     private long photoId;
 
     @SerializedName("comment")
@@ -30,7 +24,6 @@ public class PhotoComment extends RealmObject {
 
     @SerializedName("user")
     @Expose
-    @Ignore
     private User createdBy;
 
     @SerializedName("date_created")
@@ -43,7 +36,6 @@ public class PhotoComment extends RealmObject {
 
     @SerializedName("active")
     @Expose
-    @Ignore
     private boolean isActive;
 
     public long getPhotoCommentId() {

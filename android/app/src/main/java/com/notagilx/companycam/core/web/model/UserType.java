@@ -1,11 +1,9 @@
 package com.notagilx.companycam.core.web.model;
 
-import io.realm.RealmObject;
-
 /**
  * Created by keaton on 7/29/15.
  */
-public class UserType extends RealmObject {
+public class UserType {
 
     private int type;
 
