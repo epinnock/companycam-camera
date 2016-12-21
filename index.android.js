@@ -19,6 +19,12 @@ export default class newcam extends Component {
         onClose={(error,button) => {
           console.log(`[CCC JS] Invoked callback: [${error}] [${button}]`);
         }}
+        photoAccepted={(filename) => {
+          console.log(`[CCC JS] Photo accepted: ${filename}`);
+        }}
+        photoTaken={(filename) => {
+          console.log(`[CCC JS] Photo taken: ${filename}`);
+        }}
       />
     );
   }

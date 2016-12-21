@@ -48,7 +48,12 @@ public class CCCameraManager extends SimpleViewManager<CCCameraView> {
     @Nullable
     public Map getExportedCustomDirectEventTypeConstants() {
         return MapBuilder.of(
-            "onClose", MapBuilder.of("registrationName", "onClose")
+            "onClose",
+            MapBuilder.of("registrationName", "onClose"),
+            "photoAccepted",
+            MapBuilder.of("registrationName", "photoAccepted"),
+            "photoTaken",
+            MapBuilder.of("registrationName", "photoTaken")
         );
     }
 }

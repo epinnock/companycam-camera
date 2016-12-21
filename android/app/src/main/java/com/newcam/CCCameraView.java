@@ -39,54 +39,6 @@ public abstract class CCCameraView extends RelativeLayout {
         return context.getCurrentActivity();
     }
 
-    private void propOnClose(String errmsg, String button){
-        WritableMap event = Arguments.createMap();
-        event.putString("errmsg", errmsg);
-        event.putString("button", button);
-
-        ReactContext reactContext = (ReactContext)getContext();
-        RCTEventEmitter rctEventEmitter = reactContext.getJSModule(RCTEventEmitter.class);
-        rctEventEmitter.receiveEvent(getId(), "onClose", event);
-    }
-
-    protected void finishWithError(String errmsg){
-        propOnClose(errmsg, "error");
-    }
-
-    protected void finishWithResult(String button){
-        propOnClose("", button);
-    }
-
-    //TODO
-    //-------------------------------------
-    protected void requestSingleLocationUpdate(){
-
-    }
-
-    protected void requestLastLocation(){
-
-    }
-
-    protected Location getLastLocation(){
-        Location loc = new Location("Fake location");
-        loc.setLongitude(0.0d);
-        loc.setLatitude(0.0d);
-        return loc;
-    }
-
-    protected void logIntercomEvent(String tag, Map<String, Object> attrs){
-        System.err.println("LOGGING INTERCOM EVENT: [" + tag + "] " + attrs.toString());
-    }
-
-    protected void doPhotoTaken(File imgFile){
-        System.err.println("PHOTO TAKEN: " + imgFile.getAbsolutePath());
-    }
-
-    protected void doPhotoAccepted(File imgFile){
-        System.err.println("PHOTO ACCEPTED: " + imgFile.getAbsolutePath());
-    }
-    //-------------------------------------
-
     public void setStoragePath(String str){
         //this.propStoragePath = new File(str);
         appPhotoDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
@@ -109,4 +61,71 @@ public abstract class CCCameraView extends RelativeLayout {
         System.err.println("[CCC] Set project address: " + str);
         propOnClose("An error message!", "A button name");
     }
+
+    //callbacks
+    //-------------------------------------
+    private void doEvent(String eventName, WritableMap event){
+        ReactContext reactContext = (ReactContext)getContext();
+        RCTEventEmitter rctEventEmitter = reactContext.getJSModule(RCTEventEmitter.class);
+        rctEventEmitter.receiveEvent(getId(), eventName, event);
+    }
+
+    protected void doPhotoTaken(File imgFile){
+        //TODO: just testing, please delete me later!
+        System.err.println("PHOTO TAKEN: " + imgFile.getAbsolutePath());
+
+        WritableMap event = Arguments.createMap();
+        event.putString("filename", imgFile.getAbsolutePath());
+        doEvent("photoTaken", event);
+    }
+
+    protected void doPhotoAccepted(File imgFile){
+        //TODO: just testing, please delete me later!
+        System.err.println("PHOTO ACCEPTED: " + imgFile.getAbsolutePath());
+
+        WritableMap event = Arguments.createMap();
+        event.putString("filename", imgFile.getAbsolutePath());
+        doEvent("photoAccepted", event);
+    }
+
+    private void propOnClose(String errmsg, String button){
+        //TODO: just testing, please delete me later!
+        System.err.println("ON CLOSE: [" + errmsg + "] [" + button + "]");
+
+        WritableMap event = Arguments.createMap();
+        event.putString("errmsg", errmsg);
+        event.putString("button", button);
+        doEvent("onClose", event);
+    }
+
+    protected void finishWithError(String errmsg){
+        propOnClose(errmsg, "error");
+    }
+
+    protected void finishWithResult(String button){
+        propOnClose("", button);
+    }
+    //-------------------------------------
+
+    //TODO
+    //-------------------------------------
+    protected void requestSingleLocationUpdate(){
+
+    }
+
+    protected void requestLastLocation(){
+
+    }
+
+    protected Location getLastLocation(){
+        Location loc = new Location("Fake location");
+        loc.setLongitude(0.0d);
+        loc.setLatitude(0.0d);
+        return loc;
+    }
+
+    protected void logIntercomEvent(String tag, Map<String, Object> attrs) {
+        System.err.println("LOGGING INTERCOM EVENT: [" + tag + "] " + attrs.toString());
+    }
+    //-------------------------------------
 }
