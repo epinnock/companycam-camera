@@ -40,8 +40,10 @@ public abstract class CCCameraView extends RelativeLayout {
     }
 
     public void setStoragePath(String str){
-        //this.propStoragePath = new File(str);
-        appPhotoDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+        this.appPhotoDirectory = new File(str);
+        if(!appPhotoDirectory.exists()){
+            finishWithError("Photo directory does not exist");
+        }
 
         //TODO: just testing, please delete me later!
         System.err.println("[CCC] Set storage path: " + appPhotoDirectory.getAbsolutePath());
@@ -59,7 +61,6 @@ public abstract class CCCameraView extends RelativeLayout {
 
         //TODO: just testing, please delete me later!
         System.err.println("[CCC] Set project address: " + str);
-        propOnClose("An error message!", "A button name");
     }
 
     //callbacks
