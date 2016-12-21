@@ -8,12 +8,12 @@ import {
 import CCCamera from './cccamera';
 
 export default class newcam extends Component {
-  
+
   render() {
     return (
       <CCCamera
         style={styles.fullscreen}
-        storagePath={"some path"}
+        storagePath={"/"}
         projectName={"Project name test"}
         projectAddress={"Project address test"}
         onClose={(error,button) => {
@@ -32,7 +32,7 @@ export default class newcam extends Component {
 
 const styles = StyleSheet.create({
   fullscreen: {
-    width: Dimensions.get('window').width, 
+    width: Dimensions.get('window').width,
     height: Dimensions.get('window').height,
   },
 });

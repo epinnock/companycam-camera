@@ -134,7 +134,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     // Permissions required to take a picture
     private static final String[] CAMERA_PERMISSIONS = {
             Manifest.permission.CAMERA,
-            Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
     };
 
@@ -197,12 +196,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     public NewCameraView(Context context) {
         super(context);
 
-        // Verify that the permissions exist in case user turned them off while on the camera preview
-        // Close the activity if the permissions aren't available
-        if (!checkCameraPermissions()) {
-            finishWithError("No camera permissions");
-        }
-
         int cameraId = -1;
         int numberOfCameras = Camera.getNumberOfCameras();
         for (int i = 0; i < numberOfCameras; i++) {
@@ -218,6 +211,14 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
     @Override
     public void init(){
+
+        // Verify that the permissions exist in case user turned them off while on the camera preview
+        // Close the activity if the permissions aren't available
+        if (!checkCameraPermissions()) {
+            finishWithError("No camera permissions");
+            return;
+        }
+
         // Get references to the subviews
         mPreviewLayout = (RelativeLayout) findViewById(R.id.camera_preview);
         mPlaceName = (TextView) findViewById(R.id.place_name);
@@ -275,12 +276,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
         // Set the button orientations for the resolution layout
         setupResolutionLayout();
-
-        // Verify that the permissions exist in case user turned them off while on the camera preview
-        // Close the activity if the permissions aren't available
-        if (!checkCameraPermissions()) {
-            finishWithError("No camera permissions");
-        }
 
         //mEventBus.register(this); //TODO
 
@@ -489,6 +484,19 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         return c; // returns null if camera is unavailable
     }
 
+    // This method releases the camera reference
+    @Override
+    public void releaseCamera() {
+
+        if (mCamera != null) {
+
+            // Close the current camera
+            mCamera.setPreviewCallback(null);
+            mCamera.release();
+            mCamera = null;
+        }
+    }
+
     private void initOrientationListener() {
         mOrientationListener =
                 new OrientationEventListener(getContext()) {
@@ -567,7 +575,10 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         }
         else {
 
-            // Wait for one second to see if the camera has been released by another object.  If the camera is still null, then no preview
+            finishWithError("camera in use");
+
+            // TODO - Remove this section if the camera view should finish after an unsuccessful attempt to retrieve the camera
+            /*// Wait for one second to see if the camera has been released by another object.  If the camera is still null, then no preview
             // can be displayed.
             final Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
@@ -583,7 +594,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
                         initializeCameraForPreview();
                     }
                 }
-            }, 1000);
+            }, 1000);*/
         }
     }
 
@@ -608,6 +619,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         mPreviewLayout = (RelativeLayout) findViewById(R.id.camera_preview);
         mPreviewLayout.addView(mPreview);
 
+        // TODO - I think this TextureView can be deleted
         // a TextureView can't be used as a camera preview, and used for drawing on, so we use a separate CameraOverlay
         cameraOverlay = new CameraOverlay(getContext(), mPreview);
         mPreviewLayout.addView(cameraOverlay);
@@ -1031,8 +1043,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         //mCurrentZoomLevel = 1.0;
 
         // Close the current camera
-        mCamera.setPreviewCallback(null);
-        mCamera.release();
+        releaseCamera();
 
         // Initialize the camera again
         mPreviewLayout.removeView(mPreview);
@@ -1593,6 +1604,26 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
                 mCamera.setPreviewDisplay(holder);
                 mCamera.startPreview();
             }
+            else {
+
+                // Create an instance of Camera
+                mCamera = getCameraInstance();
+
+                if (mCamera != null) {
+
+                    setCameraDisplayOrientation(0, mCamera);
+
+                    // Set the visibility of the flash button
+                    setFlashButtonVisibility();
+
+                    setFlashModeImage(mFlashMode);
+                    updateFlashSetting(mFlashMode);
+                    setResolution(mResolutionMode);
+
+                    //Set up Listeners
+                    setupListeners();
+                }
+            }
         } catch (IOException e) {
             Log.d(TAG, "Error setting camera preview: " + e.getMessage());
         }
@@ -1604,6 +1635,9 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
         // Set the mSurfaceCreated flag
         mPreview.mSurfaceCreated = false;
+
+        // Release the camera
+        releaseCamera();
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {

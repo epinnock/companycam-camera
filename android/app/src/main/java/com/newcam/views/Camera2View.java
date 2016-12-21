@@ -19,4 +19,10 @@ public class Camera2View extends CCCameraView {
     public void init(){
 
     }
+
+    // This method releases the camera reference
+    @Override
+    public void releaseCamera() {
+
+    }
 }

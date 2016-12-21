@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
 import android.os.Environment;
+import android.support.v4.content.LocalBroadcastManager;
 import android.widget.RelativeLayout;
 
 import com.facebook.react.bridge.Arguments;
@@ -90,6 +91,10 @@ public abstract class CCCameraView extends RelativeLayout {
     }
 
     private void propOnClose(String errmsg, String button){
+
+        // Release the camera
+        releaseCamera();
+
         //TODO: just testing, please delete me later!
         System.err.println("ON CLOSE: [" + errmsg + "] [" + button + "]");
 
@@ -98,6 +103,8 @@ public abstract class CCCameraView extends RelativeLayout {
         event.putString("button", button);
         doEvent("onClose", event);
     }
+
+    public abstract void releaseCamera();
 
     protected void finishWithError(String errmsg){
         propOnClose(errmsg, "error");
@@ -129,4 +136,12 @@ public abstract class CCCameraView extends RelativeLayout {
         System.err.println("LOGGING INTERCOM EVENT: [" + tag + "] " + attrs.toString());
     }
     //-------------------------------------
+
+    @Override
+    public void finalize() throws Throwable {
+
+        System.out.println("finalize() called in CCCameraView");
+
+        super.finalize();
+    }
 }
