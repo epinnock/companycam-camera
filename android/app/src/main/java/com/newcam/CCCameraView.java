@@ -136,12 +136,4 @@ public abstract class CCCameraView extends RelativeLayout {
         System.err.println("LOGGING INTERCOM EVENT: [" + tag + "] " + attrs.toString());
     }
     //-------------------------------------
-
-    @Override
-    public void finalize() throws Throwable {
-
-        System.out.println("finalize() called in CCCameraView");
-
-        super.finalize();
-    }
 }
