@@ -90,8 +90,6 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import butterknife.InjectView;
-import butterknife.OnClick;
 import de.greenrobot.event.EventBus;
 
 import static android.content.Context.CAMERA_SERVICE;
@@ -219,35 +217,21 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     // "scanner" = this is a mode that tries to identify documents in the photo and transforms the image to show a flattened version of the document
     private String mCameraMode;
 
-    // The placeName and placeAddress are the parameters passed from the Javascript app
-    private String placeName;
-    private String placeAddress;
-    private File appPhotoDirectory;
-
     // The mTopLayout contains the place label, close button, and resolution button
     private LinearLayout mTopLayout;
 
     // The mBottomLayout contains the camera buttons and camera mode labels
     private LinearLayout mBottomLayout;
 
-    // The mCloseButton dismisses the Activity
-    @InjectView(R.id.close_button)
+    protected LinearLayout mLabelTouchTarget;
     protected ImageButton mCloseButton;
-
-    // The mToggleResolution button presents a subview to allow the user to select an image resolution
-    @InjectView(R.id.toggle_resolution)
     protected ImageButton mToggleResolution;
-
-    // The mToggleFlash button allows the user to toggle between the various flash options
-    @InjectView(R.id.toggle_flash)
     protected ImageButton mToggleFlash;
+    // The mToggleCamera button allows the user to switch between rear- and forward-facing cameras
+    protected ImageButton mToggleCamera;
 
     // The mCaptureButton allows the user to capture a photo
     private ImageButton mCaptureButton;
-
-    // The mToggleCamera button allows the user to switch between rear- and forward-facing cameras
-    @InjectView(R.id.toggle_camera)
-    protected ImageButton mToggleCamera;
 
     // The mPlaceName and mPlaceAddress text views hold the name and address of the project location
     protected TextView mPlaceName;
@@ -330,7 +314,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     // Permissions required to take a picture
     private static final String[] CAMERA_PERMISSIONS = {
             Manifest.permission.CAMERA,
-            Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
     };
 
@@ -348,7 +331,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
 
     @Override
     public void init() {
-        Log.d(TAG, "onCreate");
 
         // Verify that the permissions exist in case user turned them off while on the camera preview
         // Close the activity if the permissions aren't available
@@ -397,6 +379,12 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         // Set the gradient backgrounds for the layouts
         mTopLayout.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.transparent_gray_gradient_270));
         mBottomLayout.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.transparent_gray_gradient_90));
+
+        mLabelTouchTarget = (LinearLayout) findViewById(R.id.label_touch_target);
+        mToggleResolution = (ImageButton) findViewById(R.id.toggle_resolution);
+        mToggleFlash = (ImageButton) findViewById(R.id.toggle_flash);
+        mCloseButton = (ImageButton) findViewById(R.id.close_button);
+        mToggleCamera = (ImageButton) findViewById(R.id.toggle_camera);
 
         // Set the place name label
         mPlaceName.setText("This will be set later!!"); //TODO should be updated as below when props received
@@ -675,12 +663,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         //-------------------------------------
         startBackgroundThread();
 
-        // Verify that the permissions exist in case user turned them off while on the camera preview
-        // Close the activity if the permissions aren't available
-        if (!checkCameraPermissions()) {
-            finishWithError("No camera permissions");
-        }
-
         // Register the EventBus
         //mEventBus.register(this); //TODO
 
@@ -695,7 +677,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         setCameraMode(mCameraMode);
 
         // Set the default button orientations
-        int rotationValue = -90;
+        int rotationValue = 0;
         mCloseButton.setRotation(rotationValue);
         mToggleResolution.setRotation(rotationValue);
         mToggleFlash.setRotation(rotationValue);
@@ -757,7 +739,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     }
     */
 
-    public void labelTouch(View v) {
+    public void labelTouch() {
         // Finish the activity with a result
         finishWithResult("label");
     }
@@ -768,7 +750,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     }
 
     // This method either shows the resolution layout or dismisses the Activity depending on the current orientation of the device
-    @OnClick(R.id.toggle_resolution)
     protected void toggleResolution() {
 
         // If the resolution layout is displayed, this button click shouldn't have any action, so simply return
@@ -792,7 +773,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     }
 
     // This method either shows the resolution layout or dismisses the Activity depending on the current orientation of the device
-    @OnClick(R.id.close_button)
     protected void closeButtonClick() {
 
         // If the resolution layout is displayed, this button click shouldn't have any action, so simply return
@@ -829,7 +809,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
                             // Change the rotation of the interface elements if the device has crossed the threshold between portrait and landscape
                             int rotationValue = -1;
                             if ((orientation >= 315 || orientation < 45) && !(mLastOrientation >= 315 || mLastOrientation < 45)) {
-                                rotationValue = -90;
+                                rotationValue = 0;
 
                                 // Hide the resolution layout if it's showing
                                 if (mResolutionLayoutVisible) {
@@ -844,7 +824,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
 
                             }
                             else if ((orientation < 315 && orientation >= 225) && !(mLastOrientation < 315 && mLastOrientation >= 225)) {
-                                rotationValue = 0;
+                                rotationValue = 90;
 
                                 // Hide the resolution layout if it's showing
                                 if (mResolutionLayoutVisible) {
@@ -858,7 +838,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
                                 setResolutionImage(mResolutionMode);
                             }
                             else if (mLastOrientation == OrientationEventListener.ORIENTATION_UNKNOWN) {
-                                rotationValue = -90;
+                                rotationValue = 0;
 
                                 // Hide the resolution layout if it's showing
                                 if (mResolutionLayoutVisible) {
@@ -885,9 +865,10 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
 
     // This method sets the proper button orientation for the mResolutionLayout
     private void setupResolutionLayout() {
-        mNormalButton.setRotation(-90);
-        mHighButton.setRotation(-90);
-        mSuperButton.setRotation(-90);
+        mNormalButton.setRotation(90);
+        mHighButton.setRotation(90);
+        mSuperButton.setRotation(90);
+        mResolutionDismissButtonLand.setRotation(180);
     }
 
     // This method animates the presentation of the resolution layout when the resolution button is tapped
@@ -1322,7 +1303,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     }
 
     // This method updates the flash setting
-    @OnClick(R.id.toggle_flash)
     protected void toggleFlashTapped() {
 
         // Uncomment this section to allow the user to toggle between all four different available flash modes
@@ -1423,7 +1403,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     }
 
     // This method switches between rear- and front-facing cameras
-    @OnClick(R.id.toggle_camera)
     protected void toggleCameraTapped() {
 
         if (mCameraType == CameraCharacteristics.LENS_FACING_BACK) {
@@ -2291,6 +2270,40 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
             }
         });
 
+        mToggleResolution.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleResolution();
+            }
+        });
+
+        mToggleFlash.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleFlashTapped();
+            }
+        });
+
+        mCloseButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                closeButtonClick();
+            }
+        });
+
+        mLabelTouchTarget.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                labelTouch();
+            }
+        });
+
+        mToggleCamera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                toggleCameraTapped();
+            }
+        });
     }
 
     // This method returns a boolean that describes whether or not each of the necessary camera permissions has been granted.
