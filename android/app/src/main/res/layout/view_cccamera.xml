@@ -137,89 +137,103 @@
             android:background="#66000000"
             />
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_height="match_parent"
+        <RelativeLayout
             android:layout_width="wrap_content"
-            android:layout_weight="1"
-            android:id="@+id/resolution_text_layout_1"
-            android:gravity="center_vertical|center_horizontal"
-            >
-
-            <com.notagilx.companycam.util.views.VerticalTextView
-                android:id="@+id/resolution_text_1_land"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Best for everyday use."
-                android:textColor="@android:color/white"
-                android:textStyle="italic"
-                android:gravity="bottom"/>
-
-            <com.notagilx.companycam.util.views.VerticalTextView
-                android:id="@+id/resolution_text_2_land"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Smallest file size.  Uses least data."
-                android:textColor="@android:color/white"
-                android:textStyle="italic"
-                android:gravity="bottom"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:orientation="horizontal"
             android:layout_height="match_parent"
-            android:layout_width="wrap_content"
-            android:layout_weight="1"
-            android:id="@+id/resolution_text_layout_2"
-            android:gravity="center_vertical|center_horizontal"
-            >
+            android:layout_marginRight="-5dp"
+            android:layout_marginLeft="5dp">
 
-            <com.notagilx.companycam.util.views.VerticalTextView
-                android:id="@+id/resolution_text_3_land"
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_height="match_parent"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Best for balancing image quality and file size."
-                android:textColor="@android:color/white"
-                android:textStyle="italic"
-                android:gravity="bottom"/>
+                android:layout_weight="1"
+                android:id="@+id/resolution_text_layout_1"
+                android:gravity="center_vertical|center_horizontal"
+                android:visibility="visible">
 
-            <com.notagilx.companycam.util.views.VerticalTextView
-                android:id="@+id/resolution_text_4_land"
+                <com.notagilx.companycam.util.views.VerticalTextView
+                    android:id="@+id/resolution_text_1_land"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Best for everyday use."
+                    android:textColor="@android:color/white"
+                    android:textStyle="italic"
+                    android:gravity="bottom"
+                    android:visibility="visible"/>
+
+                <com.notagilx.companycam.util.views.VerticalTextView
+                    android:id="@+id/resolution_text_2_land"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Smallest file size.  Uses least data."
+                    android:textColor="@android:color/white"
+                    android:textStyle="italic"
+                    android:gravity="bottom"
+                    android:visibility="visible"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_height="match_parent"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Uses more data."
-                android:textColor="@android:color/white"
-                android:textStyle="italic"
-                android:gravity="bottom"/>
-        </LinearLayout>
+                android:layout_weight="1"
+                android:id="@+id/resolution_text_layout_2"
+                android:gravity="center_vertical|center_horizontal"
+                android:visibility="visible">
 
-        <LinearLayout
-            android:orientation="horizontal"
-            android:layout_height="match_parent"
-            android:layout_width="wrap_content"
-            android:layout_weight="1"
-            android:id="@+id/resolution_text_layout_3"
-            android:gravity="center_vertical|center_horizontal"
-            >
+                <com.notagilx.companycam.util.views.VerticalTextView
+                    android:id="@+id/resolution_text_3_land"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Best for balancing image quality and file size."
+                    android:textColor="@android:color/white"
+                    android:textStyle="italic"
+                    android:gravity="bottom"
+                    android:visibility="visible"/>
 
-            <com.notagilx.companycam.util.views.VerticalTextView
-                android:id="@+id/resolution_text_5_land"
+                <com.notagilx.companycam.util.views.VerticalTextView
+                    android:id="@+id/resolution_text_4_land"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Uses more data."
+                    android:textColor="@android:color/white"
+                    android:textStyle="italic"
+                    android:gravity="bottom"
+                    android:visibility="visible"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_height="match_parent"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Best for capturing great details."
-                android:textColor="@android:color/white"
-                android:textStyle="italic"
-                android:gravity="bottom"/>
+                android:layout_weight="1"
+                android:id="@+id/resolution_text_layout_3"
+                android:gravity="center_vertical|center_horizontal"
+                android:visibility="visible">
 
-            <com.notagilx.companycam.util.views.VerticalTextView
-                android:id="@+id/resolution_text_6_land"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Largest file size.  Uses the most data."
-                android:textColor="@android:color/white"
-                android:textStyle="italic"
-                android:gravity="bottom"/>
-        </LinearLayout>
+                <com.notagilx.companycam.util.views.VerticalTextView
+                    android:id="@+id/resolution_text_5_land"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Best for capturing great details."
+                    android:textColor="@android:color/white"
+                    android:textStyle="italic"
+                    android:gravity="bottom"
+                    android:visibility="visible"/>
+
+                <com.notagilx.companycam.util.views.VerticalTextView
+                    android:id="@+id/resolution_text_6_land"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Largest file size.  Uses the most data."
+                    android:textColor="@android:color/white"
+                    android:textStyle="italic"
+                    android:gravity="bottom"
+                    android:visibility="visible"/>
+            </LinearLayout>
+
+        </RelativeLayout>
 
         <LinearLayout
             android:orientation="vertical"
@@ -264,7 +278,8 @@
             android:textStyle="normal"
             android:textSize="18sp"
             android:layout_width="30dp"
-            android:layout_marginLeft="-10dp"/>
+            android:layout_marginLeft="-10dp"
+            android:layout_marginRight="-10dp"/>
 
     </LinearLayout>
 

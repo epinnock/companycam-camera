@@ -6,6 +6,7 @@ import android.location.Location;
 import android.os.Environment;
 import android.support.v4.content.LocalBroadcastManager;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
@@ -26,6 +27,9 @@ public abstract class CCCameraView extends RelativeLayout {
     protected String placeName;
     protected String placeAddress;
     protected File appPhotoDirectory;
+
+    protected TextView mPlaceName;
+    protected TextView mPlaceAddress;
 
     public CCCameraView(Context context) {
         super(context);
@@ -55,6 +59,11 @@ public abstract class CCCameraView extends RelativeLayout {
 
         //TODO: just testing, please delete me later!
         System.err.println("[CCC] Set project name: " + str);
+
+        // Set the mPlaceName label
+        if (mPlaceName != null) {
+            mPlaceName.setText(placeName);
+        }
     }
 
     public void setProjectAddress(String str){
@@ -62,6 +71,11 @@ public abstract class CCCameraView extends RelativeLayout {
 
         //TODO: just testing, please delete me later!
         System.err.println("[CCC] Set project address: " + str);
+
+        // Set the mPlaceAddress label
+        if (mPlaceAddress != null) {
+            mPlaceAddress.setText(placeAddress);
+        }
     }
 
     //callbacks

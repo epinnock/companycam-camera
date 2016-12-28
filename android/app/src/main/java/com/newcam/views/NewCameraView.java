@@ -26,6 +26,7 @@ import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -44,6 +45,9 @@ import com.notagilx.companycam.util.SingleClickListener;
 import com.notagilx.companycam.util.StorageUtility;
 import com.notagilx.companycam.util.views.CameraOverlay;
 import com.notagilx.companycam.util.views.CameraPreview;
+import com.newcam.CCCameraView;
+import com.newcam.R;
+import com.notagilx.companycam.util.views.VerticalTextView;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -60,6 +64,8 @@ import de.greenrobot.event.EventBus;
 public class NewCameraView extends CCCameraView implements SurfaceHolder.Callback {
 
     private static String TAG = NewCameraView.class.getSimpleName();
+
+    private Context mContext;
 
     private static final String APP_PACKAGE ="com.agilx.companycam";
     private static final String OOME_STRING = "Out of memory!"; //TODO: getString(R.string.oome_camera);
@@ -88,8 +94,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     private TextView mPictureSize;
     private TextView mPictureSizeList;
     private Place mPlace;
-    protected TextView mPlaceName;
-    protected TextView mPlaceAddress;
 
     // mCameraType is a reference to the camera type (rear- or forward-facing) currently being used
     private int mCameraType = Camera.CameraInfo.CAMERA_FACING_BACK;
@@ -195,6 +199,8 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
     public NewCameraView(Context context) {
         super(context);
+
+        mContext = context;
 
         int cameraId = -1;
         int numberOfCameras = Camera.getNumberOfCameras();
@@ -362,7 +368,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         setFlashModeImage(mFlashMode);
 
         updateFlashSetting(mFlashMode);
-
     }
 
     protected void closeButtonClick() {
@@ -491,6 +496,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         if (mCamera != null) {
 
             // Close the current camera
+            mCamera.stopPreview();
             mCamera.setPreviewCallback(null);
             mCamera.release();
             mCamera = null;
@@ -612,17 +618,28 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
         // The previous implementation initialized the CameraPreview with a Place object from Realm.  The new React Native implementation
         // initializes the CameraPreview with the placeName and placeAddress given directly from the Javascript app.
-        // Create our Preview view and set it as the content of our activity.
-        //mPreview = new CameraPreview(this, mCamera, mPlace);
-        mPreview = new CameraPreview(getContext());
-        mPreview.getHolder().addCallback(this);
-        mPreviewLayout = (RelativeLayout) findViewById(R.id.camera_preview);
-        mPreviewLayout.addView(mPreview);
+        // Create the preview if is hasn't been created before.  If it's already been created, then the camera preview can just be started again.
+        if (mPreview == null) {
+            mPreview = new CameraPreview(getContext());
+            mPreview.getHolder().addCallback(this);
+            mPreviewLayout = (RelativeLayout) findViewById(R.id.camera_preview);
+            mPreviewLayout.addView(mPreview);
+        }
+        else {
+            if (mCamera != null) {
+                try {
+                    mCamera.setPreviewDisplay(mPreview.getHolder());
+                    mCamera.startPreview();
+                }
+                catch (IOException ioe) {
+                }
+            }
+        }
 
         // TODO - I think this TextureView can be deleted
         // a TextureView can't be used as a camera preview, and used for drawing on, so we use a separate CameraOverlay
-        cameraOverlay = new CameraOverlay(getContext(), mPreview);
-        mPreviewLayout.addView(cameraOverlay);
+        //cameraOverlay = new CameraOverlay(getContext(), mPreview);
+        //mPreviewLayout.addView(cameraOverlay);
 
         setCameraDisplayOrientation(0, mCamera);
 
@@ -974,9 +991,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     // This method briefly flashes the screen as a visual indicator that a photo was captured
     private void animateScreenFlash() {
 
-        // Make sure the mFocusIndicatorView is hidden
-        //mFocusIndicatorView.setVisibility(View.INVISIBLE);
-
         // Set the mScreenFlashView's alpha to 1.0 and show it
         mScreenFlashView.setAlpha(1.0f);
         mScreenFlashView.setVisibility(View.VISIBLE);
@@ -1046,7 +1060,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         releaseCamera();
 
         // Initialize the camera again
-        mPreviewLayout.removeView(mPreview);
+        //mPreviewLayout.removeView(mPreview);
         startPreview();
     }
 
@@ -1070,8 +1084,8 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             mSuperButtonLand.setImageResource(R.drawable.super_fine_on_icon);
 
             // Show the appropriate label layout for landscape orientation
-            mResolutionLabelLayoutNormal.setVisibility(View.GONE);
-            mResolutionLabelLayoutHigh.setVisibility(View.GONE);
+            mResolutionLabelLayoutNormal.setVisibility(View.INVISIBLE);
+            mResolutionLabelLayoutHigh.setVisibility(View.INVISIBLE);
             mResolutionLabelLayoutSuper.setVisibility(View.VISIBLE);
 
             // Set the resolution text labels for portrait orientation
@@ -1091,9 +1105,9 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             mSuperButtonLand.setImageResource(R.drawable.super_fine_icon);
 
             // Show the appropriate label layout for landscape orientation
-            mResolutionLabelLayoutNormal.setVisibility(View.GONE);
+            mResolutionLabelLayoutNormal.setVisibility(View.INVISIBLE);
             mResolutionLabelLayoutHigh.setVisibility(View.VISIBLE);
-            mResolutionLabelLayoutSuper.setVisibility(View.GONE);
+            mResolutionLabelLayoutSuper.setVisibility(View.INVISIBLE);
 
             // Set the resolution text labels for portrait orientation
             mResolutionLabel1.setText("Best for balancing image quality and file size.");
@@ -1113,8 +1127,8 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
             // Show the appropriate label layout for landscape orientation
             mResolutionLabelLayoutNormal.setVisibility(View.VISIBLE);
-            mResolutionLabelLayoutHigh.setVisibility(View.GONE);
-            mResolutionLabelLayoutSuper.setVisibility(View.GONE);
+            mResolutionLabelLayoutHigh.setVisibility(View.INVISIBLE);
+            mResolutionLabelLayoutSuper.setVisibility(View.INVISIBLE);
 
             // Set the resolution text labels for portrait orientation
             mResolutionLabel1.setText("Best for everyday use.");
