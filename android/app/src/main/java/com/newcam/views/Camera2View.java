@@ -253,9 +253,8 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     private ImageButton mNormalButton;
     private ImageButton mHighButton;
     private ImageButton mSuperButton;
-    private LinearLayout mResolutionLabelLayoutNormal;
-    private LinearLayout mResolutionLabelLayoutHigh;
-    private LinearLayout mResolutionLabelLayoutSuper;
+    private TextView mResolutionLabel1;
+    private TextView mResolutionLabel2;
     private ImageButton mResolutionDismissButton;
 
     // These views and text labels are for the resolution selection layout in landscape
@@ -263,8 +262,9 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     private ImageButton mNormalButtonLand;
     private ImageButton mHighButtonLand;
     private ImageButton mSuperButtonLand;
-    private TextView mResolutionLabel1Land;
-    private TextView mResolutionLabel2Land;
+    private LinearLayout mResolutionLabelLayoutNormal;
+    private LinearLayout mResolutionLabelLayoutHigh;
+    private LinearLayout mResolutionLabelLayoutSuper;
     private ImageButton mResolutionDismissButtonLand;
 
     private CameraOverlay cameraOverlay = null;
@@ -370,8 +370,8 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         mNormalButtonLand = (ImageButton) findViewById(R.id.normal_button_land);
         mHighButtonLand = (ImageButton) findViewById(R.id.high_button_land);
         mSuperButtonLand = (ImageButton) findViewById(R.id.super_button_land);
-        mResolutionLabel1Land = (TextView) findViewById(R.id.resolution_text_1_land);
-        mResolutionLabel2Land = (TextView) findViewById(R.id.resolution_text_2_land);
+        mResolutionLabel1 = (TextView) findViewById(R.id.resolution_text_1_land);
+        mResolutionLabel2 = (TextView) findViewById(R.id.resolution_text_2_land);
         mResolutionDismissButtonLand = (ImageButton) findViewById(R.id.resolution_dismiss_button_land);
         mFocusIndicatorView = (FocusIndicatorView) findViewById(R.id.focus_indicator_view);
         mScreenFlashView = (FrameLayout) findViewById(R.id.screen_flash_view);
@@ -881,7 +881,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
             mResolutionLayout.setAlpha(0.0f);
 
             // Animate the position and opacity of the resolution layout
-            mResolutionLayout.animate().x(0.0f).alpha(1.0f).setDuration(300).start();
+            mResolutionLayout.animate().y(0.0f).alpha(1.0f).setDuration(300).start();
 
             // Animate the opacity of the top layout
             mTopLayout.animate().alpha(0.0f).setDuration(300).start();
@@ -891,8 +891,12 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
             // Set the opacity of the landscape resolution layout to 0 before starting the animation
             mResolutionLayoutLand.setAlpha(0.0f);
 
+            // Convert the RESOLUTION_ANIMATION_DIST_DP to pixels
+            float animationDistPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, RESOLUTION_ANIMATION_DIST_DP, getResources().getDisplayMetrics());
+            float screenWidthPx = this.getWidth();
+
             // Animate the position and opacity of the landscape resolution layout
-            mResolutionLayoutLand.animate().y(0.0f).alpha(1.0f).setDuration(300).start();
+            mResolutionLayoutLand.animate().x(screenWidthPx - animationDistPx).alpha(1.0f).setDuration(300).start();
 
             // Animate the opacity of the top and bottom layouts
             mTopLayout.animate().alpha(0.0f).setDuration(300).start();
@@ -913,7 +917,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         if (mPhonePosition == PORTRAIT_TOP_UP) {
 
             // Animate the position and opacity of the resolution layout
-            mResolutionLayout.animate().x(-animationDistPx).alpha(0.0f).setDuration(300).start();
+            mResolutionLayout.animate().y(-animationDistPx).alpha(0.0f).setDuration(300).start();
 
             // Animate the opacity of the top layout
             mTopLayout.animate().alpha(1.0f).setDuration(300).start();
@@ -921,7 +925,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         else {
 
             // Animate the position and opacity of the landscape resolution layout
-            mResolutionLayoutLand.animate().y(-animationDistPx).alpha(0.0f).setDuration(300).start();
+            mResolutionLayoutLand.animate().x(this.getWidth()).alpha(0.0f).setDuration(300).start();
 
             // Animate the opacity of the top and bottom layouts
             mTopLayout.animate().alpha(1.0f).setDuration(300).start();
@@ -948,7 +952,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         }
 
         // Create the preview view and set it as the content of the activity.  Set the size of the SurfaceHolder to the chosen preview size
-        mPreview = new CameraPreview(getContext(), placeName, placeAddress);
+        mPreview = new CameraPreview(getContext());
         mPreview.getHolder().setFixedSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
         mPreview.getHolder().addCallback(this);
         if (mPreviewLayout == null) {
@@ -1116,20 +1120,24 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
             newWidth = (int) (newHeight / previewAspectRatio);
         }
 
-        // Set the layout parameters for the mPreview.  Since the Activity is fixed in landscape orientation, the width and height values
-        // need to be reversed.
-        RelativeLayout.LayoutParams mPreviewParams = new RelativeLayout.LayoutParams(newHeight, newWidth);
+        // Set the layout parameters for the mPreview.
+        RelativeLayout.LayoutParams mPreviewParams = new RelativeLayout.LayoutParams(newWidth, newHeight);
 
-        System.out.println("left margin = " + -((newHeight - (int)screenHeight)/2));
-        System.out.println("top margin = " + -((newWidth - (int)screenWidth)/2));
-        System.out.println("right margin = " + -((newHeight - (int)screenHeight)/2));
-        System.out.println("bottom margin = " + -((newWidth - (int)screenWidth)/2));
-        mPreviewParams.setMargins(-((newHeight - (int)screenHeight)/2), -((newWidth - (int)screenWidth)/2), -((newHeight - (int)screenHeight)/2), -((newWidth - (int)screenWidth)/2));
+        int marginX = -(newWidth - (int)screenWidth)/2;
+        int marginY = -(newHeight - (int)screenHeight)/2;
+
+        System.out.println("left margin = " + marginX);
+        System.out.println("top margin = " + marginY);
+        System.out.println("right margin = " + marginX);
+        System.out.println("bottom margin = " + marginY);
+
+        mPreviewParams.setMargins(marginX, marginY, marginX, marginY);
         mPreview.setLayoutParams(mPreviewParams);
-        mPreview.mWidth = newHeight;
-        mPreview.mHeight = newWidth;
-        mPreview.mLeft = -((newHeight - (int)screenHeight)/2);
-        mPreview.mTop = -((newWidth - (int)screenWidth)/2);
+        mPreview.mWidth = newWidth;
+        mPreview.mHeight = newHeight;
+        mPreview.mLeft = marginX;
+        mPreview.mTop = marginY;
+
         mPreview.requestLayout();
     }
 
@@ -1199,9 +1207,9 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         // Go through each of the camera's supported preview sizes and compare them to the reference size to find the optimal preview size to use.
         for (Size option : choices) {
 
-            // Check if this preview size is no bigger than the max allowed width and height and that it's aspect ratio matches the aspect ratio
+            // Check if this preview size is no bigger than the max allowed width and height and that its aspect ratio matches the aspect ratio
             // of the reference size.
-            if (option.getWidth() <= maxWidth && option.getHeight() <= maxHeight && option.getHeight() == option.getWidth() * h / w) {
+            if ((option.getWidth() <= maxWidth) && (option.getHeight() <= maxHeight) && (option.getHeight()*w == option.getWidth()*h)) {
 
                 // Check if the largest dimension of this preview size is at least as large as the minimum requirement for the current
                 // resolution selection
@@ -1476,8 +1484,8 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
             mResolutionLabelLayoutSuper.setVisibility(View.VISIBLE);
 
             // Set the resolution text labels for landscape orientation
-            mResolutionLabel1Land.setText("Best for capturing great details.");
-            mResolutionLabel2Land.setText("Largest file size.  Uses the most data.");
+            mResolutionLabel1.setText("Best for capturing great details.");
+            mResolutionLabel2.setText("Largest file size.  Uses the most data.");
 
             mCameraQuality = HIGHEST_QUALITY;
             mResolutionMode = "super";
@@ -1499,8 +1507,8 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
             mResolutionLabelLayoutSuper.setVisibility(View.GONE);
 
             // Set the resolution text labels for landscape orientation
-            mResolutionLabel1Land.setText("Best for balancing image quality and file size.");
-            mResolutionLabel2Land.setText("Uses more data.");
+            mResolutionLabel1.setText("Best for balancing image quality and file size.");
+            mResolutionLabel2.setText("Uses more data.");
 
             mCameraQuality = HIGH_QUALITY;
             mResolutionMode = "high";
@@ -1522,8 +1530,8 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
             mResolutionLabelLayoutSuper.setVisibility(View.GONE);
 
             // Set the resolution text labels for landscape orientation
-            mResolutionLabel1Land.setText("Best for everyday use.");
-            mResolutionLabel2Land.setText("Smallest file size.  Uses the least data.");
+            mResolutionLabel1.setText("Best for everyday use.");
+            mResolutionLabel2.setText("Smallest file size.  Uses the least data.");
 
             mCameraQuality = HIGH_QUALITY;
             mResolutionMode = "normal";
@@ -2737,6 +2745,8 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
 
                 Log.d(TAG, "bPhoto saved to mFile");
 
+                //TODO: better if gotoEdit/uploadFastCam are done *after* exif is set and bPhoto is recycled?
+
                 // Transition to the EditPhotoCaptureActivity as long as the current mode isn't FastCam
                 if (!mCameraMode.equals("fastcam")) {
                     gotoEditPhotoCapture(photo.getPath());
@@ -3001,7 +3011,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     }
 
     // This is a helper method for logging the auto focus state
-    private String getAFStateString(int afState) {
+    private static String getAFStateString(int afState) {
         switch (afState) {
             case 0:
                 return "CONTROL_AF_STATE_INACTIVE";
@@ -3023,7 +3033,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     }
 
     // This is a helper method for logging the auto exposure state
-    private String getAEStateString(int aeState) {
+    private static String getAEStateString(int aeState) {
         switch (aeState) {
             case 0:
                 return "CONTROL_AE_STATE_INACTIVE";

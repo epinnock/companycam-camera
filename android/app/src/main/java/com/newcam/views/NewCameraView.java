@@ -18,7 +18,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.CountDownTimer;
-import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.TypedValue;
@@ -33,6 +32,9 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.newcam.CCCameraView;
+import com.newcam.R;
 import com.notagilx.companycam.core.events.OutOfMemoryEvent;
 import com.notagilx.companycam.core.web.model.Place;
 import com.notagilx.companycam.react_bridges.PhotoActions;
@@ -42,8 +44,6 @@ import com.notagilx.companycam.util.SingleClickListener;
 import com.notagilx.companycam.util.StorageUtility;
 import com.notagilx.companycam.util.views.CameraOverlay;
 import com.notagilx.companycam.util.views.CameraPreview;
-import com.newcam.CCCameraView;
-import com.newcam.R;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -614,7 +614,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         // initializes the CameraPreview with the placeName and placeAddress given directly from the Javascript app.
         // Create our Preview view and set it as the content of our activity.
         //mPreview = new CameraPreview(this, mCamera, mPlace);
-        mPreview = new CameraPreview(getContext(), placeName, placeAddress);
+        mPreview = new CameraPreview(getContext());
         mPreview.getHolder().addCallback(this);
         mPreviewLayout = (RelativeLayout) findViewById(R.id.camera_preview);
         mPreviewLayout.addView(mPreview);

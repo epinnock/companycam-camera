@@ -47,7 +47,7 @@ public class CameraOverlay extends View {
     @Override
     public void onDraw(Canvas canvas) {
 
-        preview.drawOverlay(canvas, isError, errorMsg);
+        //preview.drawOverlay(canvas, isError, errorMsg);
     }
 
 }
