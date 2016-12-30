@@ -1,5 +1,12 @@
 package com.newcam;
 
+import android.annotation.TargetApi;
+import android.app.Activity;
+import android.content.Context;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
+
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -17,6 +24,7 @@ import javax.annotation.Nullable;
 
 public class CCCameraManager extends SimpleViewManager<CCCameraView> {
 
+    public ThemedReactContext mContext;
     public static final String REACT_CLASS = "CompanyCamCamera";
 
     @Override
@@ -26,9 +34,15 @@ public class CCCameraManager extends SimpleViewManager<CCCameraView> {
 
     @Override
     protected CCCameraView createViewInstance(ThemedReactContext context) {
-        //TODO can conditionally return any of the views extending CCCameraView
-        //return new NewCameraView(context);
-        return new Camera2View(context);
+        mContext = context;
+
+        // Return the appropriate view class according to the device's version and available cameras
+        if (android.os.Build.VERSION.SDK_INT >= 21 && hasNonLegacyCamera()) {
+            return new Camera2View(context);
+        }
+        else {
+            return new NewCameraView(context);
+        }
     }
 
     @ReactProp(name = "storagePath")
@@ -57,5 +71,33 @@ public class CCCameraManager extends SimpleViewManager<CCCameraView> {
             "photoTaken",
             MapBuilder.of("registrationName", "photoTaken")
         );
+    }
+
+    // This method checks if there's at least one non-LEGACY rear-facing camera available on this device
+    @TargetApi(21)
+    public boolean hasNonLegacyCamera() {
+
+        boolean foundNonLegacyCamera = false;
+
+        // At least SDK 21 is required to support the camera2 API
+        CameraManager manager = (CameraManager) mContext.getCurrentActivity().getSystemService(Context.CAMERA_SERVICE);
+        try {
+            for (String cameraId : manager.getCameraIdList()) {
+                CameraCharacteristics cc = manager.getCameraCharacteristics(cameraId);
+
+                // Check if this is a rear-facing camera and it's hardware support level is greater than LEGACY
+                if (cc.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_BACK) {
+                    int deviceLevel = cc.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
+                    if (deviceLevel != CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
+                        foundNonLegacyCamera = true;
+                    }
+                }
+            }
+        }
+        catch (CameraAccessException cae) {
+            System.out.println("caught a CameraAccessException");
+        }
+
+        return foundNonLegacyCamera;
     }
 }

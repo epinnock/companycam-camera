@@ -78,6 +78,25 @@ public abstract class CCCameraView extends RelativeLayout {
         }
     }
 
+    private final Runnable measureAndLayout = new Runnable() {
+        @Override
+        public void run() {
+            measure(
+                    MeasureSpec.makeMeasureSpec(getWidth(), MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(getHeight(), MeasureSpec.EXACTLY));
+            layout(getLeft(), getTop(), getRight(), getBottom());
+        }
+    };
+
+    @Override
+    public void requestLayout() {
+        super.requestLayout();
+
+        // Since React Native overrides onLayout in its ViewGroups, a layout pass never
+        // happens after a call to requestLayout, so we simulate one here.
+        post(measureAndLayout);
+    }
+
     //callbacks
     //-------------------------------------
     private void doEvent(String eventName, WritableMap event){

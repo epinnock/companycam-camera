@@ -121,7 +121,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         ORIENTATIONS.append(Surface.ROTATION_270, 180);
     }
 
-    public static String EXTRA_PLACE_ID = "place_id";
     public static final int PORTRAIT_TOP_UP = 1;
     public static final int PORTRAIT_TOP_DOWN = 2;
     public static final int LANDSCAPE_TOP_LEFT = 3;
@@ -178,25 +177,17 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     // mCameraType is a reference to the camera type (rear- or forward-facing) currently being used
     private int mCameraType = CameraCharacteristics.LENS_FACING_BACK;
 
-    private CameraCaptureSession mSession;
     private CameraPreview mPreview;
     private Surface mJpegCaptureSurface, mPreviewSurface;
-    private CaptureResult mPendingResult;
     private Size mPreviewSize;
     private CameraCharacteristics mCharacteristics;
-    private int mCaptureImageFormat;
-    private int mRotation;
 
     // The mOrientationListener is used to properly orient the buttons on the screen as the device orientation changes since the Activity
     // orientation is fixed in landscape.
     private OrientationEventListener mOrientationListener;
     private int mLastOrientation = OrientationEventListener.ORIENTATION_UNKNOWN;
 
-    private int photoOrientaton = Surface.ROTATION_0; //portrait for this activity
     private RelativeLayout mPreviewLayout;
-    private long mPhotoCapturePlaceId;
-    private TextView mPictureSize;
-    private TextView mPictureSizeList;
 
     // The mFlashMode string defines the flash mode to use
     // "auto" = auto flash
@@ -227,6 +218,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     protected ImageButton mCloseButton;
     protected ImageButton mToggleResolution;
     protected ImageButton mToggleFlash;
+
     // The mToggleCamera button allows the user to switch between rear- and forward-facing cameras
     protected ImageButton mToggleCamera;
 
@@ -267,13 +259,9 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     private LinearLayout mResolutionLabelLayoutSuper;
     private ImageButton mResolutionDismissButtonLand;
 
-    private CameraOverlay cameraOverlay = null;
     private int mPhonePosition;
 
-    private final int LOW_QUALITY = 25;
-    private final int MEDIUM_QUALITY = 50;
     private final int HIGH_QUALITY = 80;
-    private final int HIGHEST_QUALITY = 80;
 
     // This is the animation distance for the resolution layout in dp
     private final int RESOLUTION_ANIMATION_DIST_DP = 150;
@@ -281,9 +269,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     // The mResolutionLayoutVisible flag indicates whether or not the resolution layout is currently visible
     private boolean mResolutionLayoutVisible = false;
 
-    private int mCameraQuality;
-
-    private List<Size> mJPEGSizes;
     ImageReader mJPEGReader;
 
     // The mCurrentZoomLevel and mCurrentFingerSpacing are used to handle pinch/zoom gestures
@@ -326,7 +311,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
 
     public Camera2View(Context context) {
         super(context);
-
     }
 
     @Override
@@ -339,8 +323,8 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
             return;
         }
 
-        //Set initial quality
-        mCameraQuality = HIGH_QUALITY;
+        // Set the default camera type
+        mCameraType = CameraCharacteristics.LENS_FACING_BACK;
 
         // Get references to the subviews
         mPreviewLayout = (RelativeLayout) findViewById(R.id.camera_preview);
@@ -370,8 +354,8 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         mNormalButtonLand = (ImageButton) findViewById(R.id.normal_button_land);
         mHighButtonLand = (ImageButton) findViewById(R.id.high_button_land);
         mSuperButtonLand = (ImageButton) findViewById(R.id.super_button_land);
-        mResolutionLabel1 = (TextView) findViewById(R.id.resolution_text_1_land);
-        mResolutionLabel2 = (TextView) findViewById(R.id.resolution_text_2_land);
+        mResolutionLabel1 = (TextView) findViewById(R.id.resolution_text_1);
+        mResolutionLabel2 = (TextView) findViewById(R.id.resolution_text_2);
         mResolutionDismissButtonLand = (ImageButton) findViewById(R.id.resolution_dismiss_button_land);
         mFocusIndicatorView = (FocusIndicatorView) findViewById(R.id.focus_indicator_view);
         mScreenFlashView = (FrameLayout) findViewById(R.id.screen_flash_view);
@@ -387,16 +371,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         mToggleCamera = (ImageButton) findViewById(R.id.toggle_camera);
 
         // Set the place name label
-        mPlaceName.setText("This will be set later!!"); //TODO should be updated as below when props received
-        /*if (placeName != null && !placeName.equals("")) {
-            mPlaceName.setText(placeName);
-        }
-        else if (placeAddress != null && !placeAddress.equals("")) {
-            mPlaceName.setText(placeAddress);
-        }
-        else {
-            mPlaceName.setText("");
-        }*/
+        mPlaceName.setText("This will be set later!!"); //TODO this is a placeholder for testing and should be removed
 
         // Set the button orientations for the resolution layout
         setupResolutionLayout();
@@ -702,16 +677,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
 
     //TODO
     /*
-    @Override
-    public void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        Log.d("TAG", "New Window ATTACHED");
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-    }
 
     @Override
     protected void onPause() {
@@ -746,7 +711,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
 
     @Override
     public void releaseCamera() {
-
+        closeCamera();
     }
 
     // This method either shows the resolution layout or dismisses the Activity depending on the current orientation of the device
@@ -865,9 +830,9 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
 
     // This method sets the proper button orientation for the mResolutionLayout
     private void setupResolutionLayout() {
-        mNormalButton.setRotation(90);
-        mHighButton.setRotation(90);
-        mSuperButton.setRotation(90);
+        mNormalButtonLand.setRotation(90);
+        mHighButtonLand.setRotation(90);
+        mSuperButtonLand.setRotation(90);
         mResolutionDismissButtonLand.setRotation(180);
     }
 
@@ -959,14 +924,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
             mPreviewLayout = (RelativeLayout) findViewById(R.id.camera_preview);
         }
         mPreviewLayout.addView(mPreview);
-
-        // Set the mPreview property of the mPreviewLayout so that it's bounds will be set correctly in the overridden implementation
-        // of onLayout()
-        //mPreviewLayout.mPreview = mPreview;
-
-        // A TextureView can't be used as both a camera preview and for drawing, so we use a separate CameraOverlay
-        //cameraOverlay = new CameraOverlay(Camera2Activity.this, mPreview);
-        //mPreviewLayout.addView(cameraOverlay);
     }
 
     // This method sets up the camera outputs for the first camera of the chosen type; front- or rear-facing.
@@ -1002,14 +959,11 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
                 supportsJpeg = true;
             }
         }
-        if (supportsJpeg) {
-            mCaptureImageFormat = ImageFormat.JPEG;
-        } else {
+        if (!supportsJpeg) {
             throw new CameraAccessException(CameraAccessException.CAMERA_ERROR, "Could not find supported image format.");
         }
 
         // Find the largest preview size that will fit the aspect ratio of the preview layout.
-        mJPEGSizes = new ArrayList<Size>(Arrays.asList(streamConfigs.getOutputSizes(ImageFormat.JPEG)));
 
         // Get the height and width of the screen in portrait coordinates (where height > width)
         //TODO: I guess this should really be the view size and not the screen size?
@@ -1468,7 +1422,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         }
 
         if (resolutionMode.equals("super")) {
-
             // Set the button images
             resolutionButton.setImageResource(R.drawable.superfine_size_icon);
             mNormalButton.setImageResource(R.drawable.normal_icon);
@@ -1478,20 +1431,18 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
             mHighButtonLand.setImageResource(R.drawable.high_icon);
             mSuperButtonLand.setImageResource(R.drawable.super_fine_on_icon);
 
-            // Show the appropriate label layout for portrait orientation
-            mResolutionLabelLayoutNormal.setVisibility(View.GONE);
-            mResolutionLabelLayoutHigh.setVisibility(View.GONE);
+            // Show the appropriate label layout for landscape orientation
+            mResolutionLabelLayoutNormal.setVisibility(View.INVISIBLE);
+            mResolutionLabelLayoutHigh.setVisibility(View.INVISIBLE);
             mResolutionLabelLayoutSuper.setVisibility(View.VISIBLE);
 
-            // Set the resolution text labels for landscape orientation
+            // Set the resolution text labels for portrait orientation
             mResolutionLabel1.setText("Best for capturing great details.");
             mResolutionLabel2.setText("Largest file size.  Uses the most data.");
 
-            mCameraQuality = HIGHEST_QUALITY;
             mResolutionMode = "super";
         }
         else if (resolutionMode.equals("high")) {
-
             // Set the button images
             resolutionButton.setImageResource(R.drawable.high_size_icon);
             mNormalButton.setImageResource(R.drawable.normal_icon);
@@ -1501,20 +1452,18 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
             mHighButtonLand.setImageResource(R.drawable.high_on_icon);
             mSuperButtonLand.setImageResource(R.drawable.super_fine_icon);
 
-            // Show the appropriate label layout for portrait orientation
-            mResolutionLabelLayoutNormal.setVisibility(View.GONE);
+            // Show the appropriate label layout for landscape orientation
+            mResolutionLabelLayoutNormal.setVisibility(View.INVISIBLE);
             mResolutionLabelLayoutHigh.setVisibility(View.VISIBLE);
-            mResolutionLabelLayoutSuper.setVisibility(View.GONE);
+            mResolutionLabelLayoutSuper.setVisibility(View.INVISIBLE);
 
-            // Set the resolution text labels for landscape orientation
+            // Set the resolution text labels for portrait orientation
             mResolutionLabel1.setText("Best for balancing image quality and file size.");
             mResolutionLabel2.setText("Uses more data.");
 
-            mCameraQuality = HIGH_QUALITY;
             mResolutionMode = "high";
         }
         else {
-
             // Set the button images
             resolutionButton.setImageResource(R.drawable.normal_size_icon);
             mNormalButton.setImageResource(R.drawable.normal_on_icon);
@@ -1524,16 +1473,15 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
             mHighButtonLand.setImageResource(R.drawable.high_icon);
             mSuperButtonLand.setImageResource(R.drawable.super_fine_icon);
 
-            // Show the appropriate label layout for portrait orientation
+            // Show the appropriate label layout for landscape orientation
             mResolutionLabelLayoutNormal.setVisibility(View.VISIBLE);
-            mResolutionLabelLayoutHigh.setVisibility(View.GONE);
-            mResolutionLabelLayoutSuper.setVisibility(View.GONE);
+            mResolutionLabelLayoutHigh.setVisibility(View.INVISIBLE);
+            mResolutionLabelLayoutSuper.setVisibility(View.INVISIBLE);
 
-            // Set the resolution text labels for landscape orientation
+            // Set the resolution text labels for portrait orientation
             mResolutionLabel1.setText("Best for everyday use.");
             mResolutionLabel2.setText("Smallest file size.  Uses the least data.");
 
-            mCameraQuality = HIGH_QUALITY;
             mResolutionMode = "normal";
         }
 
@@ -1870,49 +1818,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
             // Set the resolution images
             setResolutionImage(resolutionMode);
 
-            /*List<Size> lsps = mJPEGSizes;
-
-            // Check to see if the old resolution is normal
-            Size sizeToSet = lsps.get(0);
-            if (resolutionMode.equals("super")) {
-                for (Size size : lsps) {
-                    if (size.getWidth() < 1920) {
-                        break;
-                    }
-                    sizeToSet = size;
-                }
-
-                //setJPEGImageReader(sizeToSet);
-
-                setResolutionImage("super");
-                LogUtil.e(TAG, "IN SUPER HIGH RES MODE");
-            }
-            else if (resolutionMode.equals("high")) {
-                for (Size size : lsps) {
-                    if (size.getWidth() < 1920) {
-                        break;
-                    }
-                    sizeToSet = size;
-                }
-
-                //setJPEGImageReader(sizeToSet);
-
-                setResolutionImage("high");
-                LogUtil.e(TAG, "IN HIGH RES MODE");
-            }
-            else {
-                for (Size size : lsps) {
-                    if (size.getWidth() == 1280 && size.getHeight()== 720) {
-                        sizeToSet = size;
-                    }
-                }
-
-                //setJPEGImageReader(sizeToSet);
-
-                setResolutionImage("normal");
-                LogUtil.e(TAG, "IN LOW RES MODE");
-            }*/
-
             // Initialize the camera again
             mPreviewLayout.removeView(mPreview);
             createPreview();
@@ -2028,8 +1933,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
 
                 @Override
                 public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
-                    // save this, as it's needed to create raw files
-                    mPendingResult = result;
 
                     // Play the shutter click sound effect as long as the device ringer is turned on
                     AudioManager mgr = (AudioManager) getContext().getSystemService(Context.AUDIO_SERVICE);
@@ -2054,45 +1957,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         } catch (CameraAccessException e) {
             Log.e(TAG, "Image capture failed.", e);
         }
-    }
-
-
-    public void onEvent(final OutOfMemoryEvent event) {
-        new CountDownTimer(5000, 1000) {
-
-            public void onTick(long millisUntilFinished) {
-                cameraOverlay.setError(event.getMessage());
-            }
-
-            public void onFinish() {
-                cameraOverlay.removeError();
-            }
-        }.start();
-    }
-
-    public void setCameraDisplayOrientation(CameraCharacteristics cc) {
-
-        int rotation = getActivity().getWindowManager().getDefaultDisplay()
-                .getRotation();
-        int degrees = 0;
-        switch (rotation) {
-            case Surface.ROTATION_0: degrees = 0; break;
-            case Surface.ROTATION_90: degrees = 90; break;
-            case Surface.ROTATION_180: degrees = 180; break;
-            case Surface.ROTATION_270: degrees = 270; break;
-        }
-
-        int result;
-        if (cc.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT) {
-            result = (cc.get(CameraCharacteristics.SENSOR_ORIENTATION) + degrees) % 360;
-            result = (360 - result) % 360; // compensate the mirror
-        }
-        else {
-            // back-facing
-            result = (cc.get(CameraCharacteristics.SENSOR_ORIENTATION) - degrees + 360) % 360;
-        }
-
-        mRotation = result;
     }
 
     // This method initializes all of the touch listeners and click listeners for the interface elements.
@@ -2883,11 +2747,8 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
 
         if (mCamera != null) {
             closeCamera();
-            //mCamera.close();
-            //mCamera = null;
             LogUtil.e(TAG, "The camera was released");
         }
-        mSession = null;
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
@@ -2903,9 +2764,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
             // preview surface does not exist
             return;
         }
-
-        // stop preview before making changes
-        // TODO: maybe stop mSession?
 
         // set preview size and make any resize, rotate or reformatting changes here
 

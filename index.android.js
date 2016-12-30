@@ -18,6 +18,7 @@ export default class newcam extends Component {
         projectAddress={"Project address test"}
         onClose={(error,button) => {
           console.log(`[CCC JS] Invoked callback: [${error}] [${button}]`);
+          console.log(`[CCC JS] Width = [${Dimensions.get('window').width}] Height = [${Dimensions.get('window').height}]`);
         }}
         photoAccepted={(filename) => {
           console.log(`[CCC JS] Photo accepted: ${filename}`);

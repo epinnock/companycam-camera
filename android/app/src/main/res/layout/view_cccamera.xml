@@ -8,8 +8,8 @@
 
     <RelativeLayout
         android:id="@+id/camera_preview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_width="1440dp"
+        android:layout_height="2560dp"/>
 
     <FrameLayout
         android:id="@+id/screen_flash_view"

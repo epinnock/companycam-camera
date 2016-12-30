@@ -17,7 +17,6 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.os.CountDownTimer;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.TypedValue;
@@ -26,7 +25,6 @@ import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -37,13 +35,11 @@ import android.widget.TextView;
 import com.newcam.CCCameraView;
 import com.newcam.R;
 import com.notagilx.companycam.core.events.OutOfMemoryEvent;
-import com.notagilx.companycam.core.web.model.Place;
 import com.notagilx.companycam.react_bridges.PhotoActions;
 import com.notagilx.companycam.util.ImageEditorUtility;
 import com.notagilx.companycam.util.LogUtil;
 import com.notagilx.companycam.util.SingleClickListener;
 import com.notagilx.companycam.util.StorageUtility;
-import com.notagilx.companycam.util.views.CameraOverlay;
 import com.notagilx.companycam.util.views.CameraPreview;
 import com.newcam.CCCameraView;
 import com.newcam.R;
@@ -65,8 +61,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
     private static String TAG = NewCameraView.class.getSimpleName();
 
-    private Context mContext;
-
     private static final String APP_PACKAGE ="com.agilx.companycam";
     private static final String OOME_STRING = "Out of memory!"; //TODO: getString(R.string.oome_camera);
 
@@ -74,26 +68,18 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     private static final String PREFS_RESOLUTION_MODE = "PREFS_RESOLUTION_MODE";
     private static final String PREFS_CAMERA_MODE = "PREFS_CAMERA_MODE";
 
-    public static String EXTRA_PLACE_ID = "place_id";
     public static final int PORTRAIT_TOP_UP = 1;
     public static final int PORTRAIT_TOP_DOWN = 2;
     public static final int LANDSCAPE_TOP_LEFT = 3;
     public static final int LANDSCAPE_TOP_RIGHT = 4;
-    int FRONT_CAMERA = 1;
-    int BACK_CAMERA = 0;
 
     private Camera mCamera;
     private int mCameraId;
     private CameraPreview mPreview;
     private OrientationEventListener mOrientationListener;
     private int mLastOrientation = OrientationEventListener.ORIENTATION_UNKNOWN;
-    private int photoOrientaton = Surface.ROTATION_0; //portrait for this activity
     private RelativeLayout mPreviewLayout;
     private ImageButton mCaptureButton;
-    private long mPhotoCapturePlaceId;
-    private TextView mPictureSize;
-    private TextView mPictureSizeList;
-    private Place mPlace;
 
     // mCameraType is a reference to the camera type (rear- or forward-facing) currently being used
     private int mCameraType = Camera.CameraInfo.CAMERA_FACING_BACK;
@@ -117,19 +103,11 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     // "scanner" = this is a mode that tries to identify documents in the photo and transforms the image to show a flattened version of the document
     private String mCameraMode;
 
-    private boolean mMeteringAreaSupported;
-
-    // width and height are the width and height of the screen measured in pixels
-    int width;
-    int height;
-
-    private CameraOverlay cameraOverlay = null;
+    // The mPhonePosition is used as a helper to track the orientation of the device.
     private int mPhonePosition;
 
-    private final int LOW_QUALITY = 25;
-    private final int MEDIUM_QUALITY = 50;
+    // The HIGH_QUALITY int is used to define the JPEG compression quality when processing a photo.
     private final int HIGH_QUALITY = 80;
-    private final int HIGHEST_QUALITY = 80;
 
     private double zoomdistance;
     ExifInterface exif;
@@ -145,6 +123,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     protected ImageButton mToggleResolution;
     protected ImageButton mToggleFlash;
     protected ImageButton mCloseButton;
+
     // The mToggleCamera button allows the user to switch between rear- and forward-facing cameras
     protected ImageButton mToggleCamera;
 
@@ -199,20 +178,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
     public NewCameraView(Context context) {
         super(context);
-
-        mContext = context;
-
-        int cameraId = -1;
-        int numberOfCameras = Camera.getNumberOfCameras();
-        for (int i = 0; i < numberOfCameras; i++) {
-            Camera.CameraInfo info = new Camera.CameraInfo();
-            Camera.getCameraInfo(i, info);
-            if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-                Log.d(TAG, "Camera found");
-                cameraId = i;
-                break;
-            }
-        }
     }
 
     @Override
@@ -269,16 +234,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         mToggleCamera = (ImageButton) findViewById(R.id.toggle_camera);
 
         // Set the place name label
-        mPlaceName.setText("This will be set later!!"); //TODO should be updated as below when props received
-        /*if (placeName != null && !placeName.equals("")) {
-            mPlaceName.setText(placeName);
-        }
-        else if (placeAddress != null && !placeAddress.equals("")) {
-            mPlaceName.setText(placeAddress);
-        }
-        else {
-            mPlaceName.setText("");
-        }*/
+        mPlaceName.setText("This will be set later!!"); //TODO this is a placeholder for testing and should be removed
 
         // Set the button orientations for the resolution layout
         setupResolutionLayout();
@@ -397,7 +353,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         mHighButtonLand.setRotation(90);
         mSuperButtonLand.setRotation(90);
         mResolutionDismissButtonLand.setRotation(180);
-
     }
 
     // This method animates the presentation of the resolution layout when the resolution button is tapped
@@ -476,7 +431,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             if (cameraInfo.facing == mCameraType) {
                 try {
                     c = Camera.open(camIdx); // attempt to get a Camera instance
-
+                    mCameraId = camIdx;
                     LogUtil.e(TAG, "The camera instance was retrieved.");
                     return c;
                 }
@@ -581,26 +536,8 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         }
         else {
 
+            // Finish with an error describing that the camera is already in use
             finishWithError("camera in use");
-
-            // TODO - Remove this section if the camera view should finish after an unsuccessful attempt to retrieve the camera
-            /*// Wait for one second to see if the camera has been released by another object.  If the camera is still null, then no preview
-            // can be displayed.
-            final Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-
-                    // Create an instance of Camera
-                    mCamera = getCameraInstance();
-
-                    if (mCamera != null) {
-
-                        // Initialize the camera for the preview
-                        initializeCameraForPreview();
-                    }
-                }
-            }, 1000);*/
         }
     }
 
@@ -635,11 +572,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
                 }
             }
         }
-
-        // TODO - I think this TextureView can be deleted
-        // a TextureView can't be used as a camera preview, and used for drawing on, so we use a separate CameraOverlay
-        //cameraOverlay = new CameraOverlay(getContext(), mPreview);
-        //mPreviewLayout.addView(cameraOverlay);
 
         setCameraDisplayOrientation(0, mCamera);
 
@@ -683,7 +615,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
                     int orientation = ((mLastOrientation + 45) / 90) * 90;
                     int rotation = 0;
                     Camera.CameraInfo info = new Camera.CameraInfo();
-                    Camera.getCameraInfo(BACK_CAMERA, info);
+                    Camera.getCameraInfo(mCameraId, info);
 
                     rotation = (info.orientation + orientation) % 360;
 
@@ -695,16 +627,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
                     BitmapFactory.decodeByteArray(data, 0, data.length, options);
 
                     System.out.println("The data length is " + data.length);
-
-                    // This section was used to downsample the raw image to fit on the screen.  However, this resulted in the downsampled
-                    // bitmap being sent to the server instead of the full size image.  In order to retain the full size image and send it
-                    // to the server, don't downsample the raw image.
-                    /*Display display = getWindowManager().getDefaultDisplay();
-                    Point size = new Point();
-                    display.getSize(size);
-                    final int width = size.x;
-                    final int height = size.y;
-                    options.inSampleSize = calculateInSampleSize(options, width, height);*/
 
                     // Decode bitmap
                     options.inJustDecodeBounds = false;
@@ -884,72 +806,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
         doPhotoTaken(file);
         finishWithResult("capture");
-    }
-
-    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        // Raw height and width of image
-        final int height = options.outHeight;
-        final int width = options.outWidth;
-        int inSampleSize = 1;
-
-
-        if (height > reqHeight || width > reqWidth) {
-            if (width > height) {
-                inSampleSize = Math.round((float)height / (float)reqHeight);
-            } else {
-                inSampleSize = Math.round((float)width / (float)reqWidth);
-            }
-        }
-
-        return inSampleSize;
-    }
-
-    private Camera.Size findCorrectAspectRatio(List<Camera.Size> sizes, boolean limitMegaPixels) {
-        Camera.Size returnSize = null;
-        int width, height;
-        float maxMegaPixelResolution = 7.0f;
-        float minMegaPixelResolution = 2.8f;
-
-        //loop through to find first size that equals 16:9 ratio
-        for (Camera.Size s : sizes) {
-
-            width = s.width;
-            height = s.height;
-            int megaPixel = width * height;
-            float resolution = megaPixel / 1000000f;
-            int factor = greatestCommonFactor(width, height);
-
-
-
-            int widthRatio = width / factor;
-            int heightRatio = height / factor;
-
-            if (limitMegaPixels) {
-                if ((widthRatio == 16 && heightRatio == 9) &&
-                        (resolution >= minMegaPixelResolution && resolution < maxMegaPixelResolution)) {
-                    returnSize = s;
-                    break;
-                }
-            } else {
-                if ((widthRatio == 16 && heightRatio == 9)) {
-                    returnSize = s;
-                    break;
-                }
-            }
-        }
-
-        //if we don't find one just set to largest size
-        if (returnSize == null && sizes.size() > 0 ) {
-            Camera.Size firstSize = sizes.get(0);
-            Camera.Size lastSize = sizes.get(sizes.size() -1);
-            if (firstSize.width > lastSize.width) {
-                returnSize = firstSize;
-            } else {
-                returnSize = lastSize;
-            }
-        }
-
-        return returnSize;
     }
 
     private int greatestCommonFactor(int width, int height) {
@@ -1155,19 +1011,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
                 mCamera.setParameters(p);
             }
         }
-    }
-
-    public void onEvent(final OutOfMemoryEvent event) {
-        new CountDownTimer(5000, 1000) {
-
-            public void onTick(long millisUntilFinished) {
-                cameraOverlay.setError(event.getMessage());
-            }
-
-            public void onFinish() {
-                cameraOverlay.removeError();
-            }
-        }.start();
     }
 
     public void setCameraDisplayOrientation(int cameraId, Camera camera) {

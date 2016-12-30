@@ -32,6 +32,13 @@ public class CameraPreview extends SurfaceView {
     final int ALPHA = 64;
     final int PADDING = 18;
 
+    /*@Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        System.out.println("onSizeChanged called with w = " + w + " and h = " + h);
+        super.onSizeChanged(w, h, oldw, oldh);
+        //super.onSizeChanged(1440, 2560, oldw, oldh);
+    }*/
+
     // This initializer accepts the name and address of the place instead of using a Place object
     public CameraPreview(Context context) {
         super(context);
@@ -48,11 +55,17 @@ public class CameraPreview extends SurfaceView {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        System.out.println("onMeasure called with mWidth = " + mWidth + " and mHeight = " + mHeight);
         if (mWidth != 0 && mHeight != 0) {
             setMeasuredDimension(mWidth, mHeight);
         }
         else {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         }
+    }
+
+    protected void setmWidth(int width) {
+        System.out.println("setmWidth called with width = " + width);
+        mWidth = width;
     }
 }
