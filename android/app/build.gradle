@@ -135,8 +135,6 @@ dependencies {
     compile 'com.facebook.react:react-native:+'
     // From node_modules
     compile 'com.google.code.gson:gson:2.4'
-    compile 'com.jakewharton:butterknife:6.1.0'
-    compile 'de.greenrobot:eventbus:2.4.0'
     
 }
 

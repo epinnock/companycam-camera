@@ -37,7 +37,6 @@
         android:layout_marginTop="-150dp">
 
         <TextView
-            android:id="@+id/resolution_title"
             android:layout_height="30dp"
             android:layout_width="match_parent"
             android:text="Choose photo resolution setting."
@@ -52,7 +51,6 @@
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:gravity="center_vertical|center_horizontal"
-            android:id="@+id/resolution_button_layout"
             android:layout_marginBottom="10dp"
             android:layout_marginTop="10dp">
 
@@ -86,7 +84,6 @@
             android:layout_height="0dp"
             android:layout_width="match_parent"
             android:layout_weight="1"
-            android:id="@+id/resolution_text_layout"
             android:gravity="center_vertical|center_horizontal"
             android:layout_marginBottom="5dp"
             android:layout_marginTop="-5dp">
@@ -153,7 +150,6 @@
                 android:visibility="visible">
 
                 <com.notagilx.companycam.util.views.VerticalTextView
-                    android:id="@+id/resolution_text_1_land"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Best for everyday use."
@@ -163,7 +159,6 @@
                     android:visibility="visible"/>
 
                 <com.notagilx.companycam.util.views.VerticalTextView
-                    android:id="@+id/resolution_text_2_land"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Smallest file size.  Uses least data."
@@ -183,7 +178,6 @@
                 android:visibility="visible">
 
                 <com.notagilx.companycam.util.views.VerticalTextView
-                    android:id="@+id/resolution_text_3_land"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Best for balancing image quality and file size."
@@ -193,7 +187,6 @@
                     android:visibility="visible"/>
 
                 <com.notagilx.companycam.util.views.VerticalTextView
-                    android:id="@+id/resolution_text_4_land"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Uses more data."
@@ -213,7 +206,6 @@
                 android:visibility="visible">
 
                 <com.notagilx.companycam.util.views.VerticalTextView
-                    android:id="@+id/resolution_text_5_land"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Best for capturing great details."
@@ -223,7 +215,6 @@
                     android:visibility="visible"/>
 
                 <com.notagilx.companycam.util.views.VerticalTextView
-                    android:id="@+id/resolution_text_6_land"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Largest file size.  Uses the most data."
@@ -240,7 +231,6 @@
             android:layout_height="match_parent"
             android:layout_width="wrap_content"
             android:gravity="center_vertical|center_horizontal"
-            android:id="@+id/resolution_button_layout_land"
             android:layout_marginLeft="-20dp"
             android:layout_marginRight="-20dp">
 
@@ -270,7 +260,6 @@
         </LinearLayout>
 
         <com.notagilx.companycam.util.views.VerticalTextView
-            android:id="@+id/resolution_title_land"
             android:layout_height="match_parent"
             android:text="Choose photo resolution setting."
             android:textColor="@android:color/white"
@@ -362,8 +351,7 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/bottom_button_layout">
+            android:layout_height="wrap_content">
 
             <ImageButton
                 android:layout_height="match_parent"
@@ -398,7 +386,6 @@
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/bottom_label_layout"
             android:gravity="center_horizontal">
 
             <LinearLayout

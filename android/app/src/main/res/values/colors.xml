@@ -1,48 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="black">#000000</color>
-    <color name="white">#ffffff</color>
-
-    <color name="cc_light_blue">#ff52abd3</color>
-    <color name="cc_dark_blue">@android:color/holo_blue_dark</color>
-    <color name="cc_blue">#28ADFD</color>
-    <color name="cc_red">#E53935</color>
-    <color name="cc_dark_red">#d32f2f</color>
 
     <color name="sun_yellow">#fdd835</color>
 
-    <color name="dark_gray">#333333</color>
-    <color name="dark_gray_pressed">#292929</color>
-    <color name="dark_gray_disabled">#99292929</color>
-    <color name="gray">#666666</color>
-    <color name="gray_pressed">#888888</color>
-    <color name="gray_disabled">#99888888</color>
-    <color name="light_gray">#cdcdcd</color>
-    <color name="light_gray_pressed">#aaaaaa</color>
-
-    <color name="button_light_gray_pressed">#949398</color>
-    <color name="button_light_gray">#ffd6d7d7</color>
-
     <!-- Colors made when R/G/B values are strictly FF or 00 -->
-    <color name="plain_red">#FF0000</color>
-    <color name="plain_blue">#0000FF</color>
-    <color name="plain_yellow">#FFFF00</color>
-    <color name="plain_green">#00FF00</color>
-    <color name="plain_purple">#7F007F</color>
-    <color name="plain_orange">#FF7F00</color>
 
     <!-- Chips Colors -->
-    <color name="colorPrimary">@color/blue</color>
-    <color name="colorPrimaryDark">@color/mediumBlue</color>
-
-    <color name="paper">#fafafa</color>
-
-    <color name="blue">#4a90e2</color>
-    <color name="mediumBlue">#3978c1</color>
-
-    <color name="color_error">#FFCB0017</color>
-
-    <color name="base10">#eaeaea</color>
-    <color name="base30">#c1c1c1</color>
 
 </resources>

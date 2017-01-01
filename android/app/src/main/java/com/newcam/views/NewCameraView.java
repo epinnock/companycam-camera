@@ -41,9 +41,6 @@ import com.notagilx.companycam.util.LogUtil;
 import com.notagilx.companycam.util.SingleClickListener;
 import com.notagilx.companycam.util.StorageUtility;
 import com.notagilx.companycam.util.views.CameraPreview;
-import com.newcam.CCCameraView;
-import com.newcam.R;
-import com.notagilx.companycam.util.views.VerticalTextView;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -55,7 +52,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.greenrobot.event.EventBus;
 
 public class NewCameraView extends CCCameraView implements SurfaceHolder.Callback {
 
@@ -760,7 +756,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
                     Log.d(TAG, "Error accessing file: " + e.getMessage());
                 } catch (OutOfMemoryError oome) {
                     Log.e(TAG, "OutOfMemoryError: " + oome.getMessage());
-                    EventBus.getDefault().post(new OutOfMemoryEvent(OOME_STRING));
+                    //EventBus.getDefault().post(new OutOfMemoryEvent(OOME_STRING));
                     finishWithError("Out of memory: " + oome.getMessage());
                 } finally {
                     if (bPhoto != null) {
