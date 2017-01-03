@@ -1401,6 +1401,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     // —————————————————————————————————————————————————————————————————————————————————————————————
     // Surface Holder methods
     // —————————————————————————————————————————————————————————————————————————————————————————————
+    @Override
     public void surfaceCreated(SurfaceHolder holder) {
 
         Log.d(TAG, "surfaceCreated");
@@ -1439,6 +1440,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         }
     }
 
+    @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
 
         Log.d(TAG, "surfaceDestroyed");
@@ -1450,6 +1452,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         releaseCamera();
     }
 
+    @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 
         Log.d(TAG, "surfaceChanged");

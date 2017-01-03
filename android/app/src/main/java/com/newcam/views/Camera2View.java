@@ -2693,6 +2693,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     // —————————————————————————————————————————————————————————————————————————————————————————————
     // Surface Holder methods
     // —————————————————————————————————————————————————————————————————————————————————————————————
+    @Override
     public void surfaceCreated(SurfaceHolder holder) {
 
         Log.d(TAG, "surfaceCreated");
@@ -2710,6 +2711,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         openCamera(holder);
     }
 
+    @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
 
         Log.d(TAG, "surfaceDestroyed");
@@ -2725,6 +2727,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         }
     }
 
+    @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 
         Log.d(TAG, "surfaceChanged width = " + w + " and height = " + h);
