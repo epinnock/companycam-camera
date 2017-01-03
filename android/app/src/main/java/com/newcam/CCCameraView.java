@@ -169,9 +169,5 @@ public abstract class CCCameraView extends RelativeLayout {
         loc.setLatitude(0.0d);
         return loc;
     }
-
-    protected void logIntercomEvent(String tag, Map<String, Object> attrs) {
-        System.err.println("LOGGING INTERCOM EVENT: [" + tag + "] " + attrs.toString());
-    }
     //-------------------------------------
 }

@@ -796,7 +796,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("quality", mResolutionMode);
-        logIntercomEvent("took_photo", attributes);
 
         File file = new File(photoPath);
 

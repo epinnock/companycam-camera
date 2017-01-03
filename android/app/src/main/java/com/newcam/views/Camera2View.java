@@ -1214,7 +1214,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
 
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("quality", mResolutionMode);
-        logIntercomEvent("took_photo", attributes);
 
         File file = new File(photoPath);
 
