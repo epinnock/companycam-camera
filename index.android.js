@@ -20,11 +20,11 @@ export default class newcam extends Component {
           console.log(`[CCC JS] Invoked callback: [${error}] [${button}]`);
           console.log(`[CCC JS] Width = [${Dimensions.get('window').width}] Height = [${Dimensions.get('window').height}]`);
         }}
-        photoAccepted={(filename) => {
-          console.log(`[CCC JS] Photo accepted: ${filename}`);
+        photoAccepted={(filename, imgDims) => {
+          console.log(`[CCC JS] Photo accepted: ${imgDims[0]}x${imgDims[1]} ${filename}`);
         }}
-        photoTaken={(filename) => {
-          console.log(`[CCC JS] Photo taken: ${filename}`);
+        photoTaken={(filename, imgDims) => {
+          console.log(`[CCC JS] Photo taken: ${imgDims[0]}x${imgDims[1]} ${filename}`);
         }}
       />
     );

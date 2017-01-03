@@ -3,8 +3,6 @@ package com.newcam;
 import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
-import android.os.Environment;
-import android.support.v4.content.LocalBroadcastManager;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -44,6 +42,82 @@ public abstract class CCCameraView extends RelativeLayout {
         return context.getCurrentActivity();
     }
 
+    public abstract void releaseCamera();
+
+    protected void finishWithError(String errmsg){
+        propOnClose(errmsg, "error");
+    }
+
+    protected void finishWithResult(String button){
+        propOnClose("", button);
+    }
+
+    private final Runnable measureAndLayout = new Runnable() {
+        @Override
+        public void run() {
+            measure(
+                    MeasureSpec.makeMeasureSpec(getWidth(), MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(getHeight(), MeasureSpec.EXACTLY));
+            layout(getLeft(), getTop(), getRight(), getBottom());
+        }
+    };
+
+    @Override
+    public void requestLayout() {
+        super.requestLayout();
+
+        // Since React Native overrides onLayout in its ViewGroups, a layout pass never
+        // happens after a call to requestLayout, so we simulate one here.
+        post(measureAndLayout);
+    }
+
+    //component props: functions
+    //-------------------------------------
+    private void _doEvent(String eventName, WritableMap event){
+        ReactContext reactContext = (ReactContext)getContext();
+        RCTEventEmitter rctEventEmitter = reactContext.getJSModule(RCTEventEmitter.class);
+        rctEventEmitter.receiveEvent(getId(), eventName, event);
+    }
+
+    protected void doPhotoTaken(File imgFile, int imgWidth, int imgHeight){
+        //TODO: just testing, please delete me later!
+        System.err.println("PHOTO TAKEN: " + imgFile.getAbsolutePath());
+
+        WritableMap event = Arguments.createMap();
+        event.putString("filename", imgFile.getAbsolutePath());
+        event.putInt("imgWidth", imgWidth);
+        event.putInt("imgHeight", imgHeight);
+        _doEvent("photoTaken", event);
+    }
+
+    protected void doPhotoAccepted(File imgFile, int imgWidth, int imgHeight){
+        //TODO: just testing, please delete me later!
+        System.err.println("PHOTO ACCEPTED: " + imgFile.getAbsolutePath());
+
+        WritableMap event = Arguments.createMap();
+        event.putString("filename", imgFile.getAbsolutePath());
+        event.putInt("imgWidth", imgWidth);
+        event.putInt("imgHeight", imgHeight);
+        _doEvent("photoAccepted", event);
+    }
+
+    private void propOnClose(String errmsg, String button) {
+
+        // Release the camera
+        releaseCamera();
+
+        //TODO: just testing, please delete me later!
+        System.err.println("ON CLOSE: [" + errmsg + "] [" + button + "]");
+
+        WritableMap event = Arguments.createMap();
+        event.putString("errmsg", errmsg);
+        event.putString("button", button);
+        _doEvent("onClose", event);
+    }
+    //-------------------------------------
+
+    //component props: values
+    //-------------------------------------
     public void setStoragePath(String str){
         this.appPhotoDirectory = new File(str);
         if(!appPhotoDirectory.exists()){
@@ -76,75 +150,6 @@ public abstract class CCCameraView extends RelativeLayout {
         if (mPlaceAddress != null) {
             mPlaceAddress.setText(placeAddress);
         }
-    }
-
-    private final Runnable measureAndLayout = new Runnable() {
-        @Override
-        public void run() {
-            measure(
-                    MeasureSpec.makeMeasureSpec(getWidth(), MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(getHeight(), MeasureSpec.EXACTLY));
-            layout(getLeft(), getTop(), getRight(), getBottom());
-        }
-    };
-
-    @Override
-    public void requestLayout() {
-        super.requestLayout();
-
-        // Since React Native overrides onLayout in its ViewGroups, a layout pass never
-        // happens after a call to requestLayout, so we simulate one here.
-        post(measureAndLayout);
-    }
-
-    //callbacks
-    //-------------------------------------
-    private void doEvent(String eventName, WritableMap event){
-        ReactContext reactContext = (ReactContext)getContext();
-        RCTEventEmitter rctEventEmitter = reactContext.getJSModule(RCTEventEmitter.class);
-        rctEventEmitter.receiveEvent(getId(), eventName, event);
-    }
-
-    protected void doPhotoTaken(File imgFile){
-        //TODO: just testing, please delete me later!
-        System.err.println("PHOTO TAKEN: " + imgFile.getAbsolutePath());
-
-        WritableMap event = Arguments.createMap();
-        event.putString("filename", imgFile.getAbsolutePath());
-        doEvent("photoTaken", event);
-    }
-
-    protected void doPhotoAccepted(File imgFile){
-        //TODO: just testing, please delete me later!
-        System.err.println("PHOTO ACCEPTED: " + imgFile.getAbsolutePath());
-
-        WritableMap event = Arguments.createMap();
-        event.putString("filename", imgFile.getAbsolutePath());
-        doEvent("photoAccepted", event);
-    }
-
-    private void propOnClose(String errmsg, String button){
-
-        // Release the camera
-        releaseCamera();
-
-        //TODO: just testing, please delete me later!
-        System.err.println("ON CLOSE: [" + errmsg + "] [" + button + "]");
-
-        WritableMap event = Arguments.createMap();
-        event.putString("errmsg", errmsg);
-        event.putString("button", button);
-        doEvent("onClose", event);
-    }
-
-    public abstract void releaseCamera();
-
-    protected void finishWithError(String errmsg){
-        propOnClose(errmsg, "error");
-    }
-
-    protected void finishWithResult(String button){
-        propOnClose("", button);
     }
     //-------------------------------------
 

@@ -15,7 +15,6 @@ import android.location.Location;
 import android.media.AudioManager;
 import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -34,9 +33,7 @@ import android.widget.TextView;
 
 import com.newcam.CCCameraView;
 import com.newcam.R;
-import com.notagilx.companycam.core.events.OutOfMemoryEvent;
 import com.notagilx.companycam.react_bridges.PhotoActions;
-import com.notagilx.companycam.util.ImageEditorUtility;
 import com.notagilx.companycam.util.LogUtil;
 import com.notagilx.companycam.util.SingleClickListener;
 import com.notagilx.companycam.util.StorageUtility;
@@ -660,18 +657,21 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
                     FileOutputStream out = new FileOutputStream(photo.getPath());
                     BufferedOutputStream bos = new BufferedOutputStream(out);
                     bPhoto.compress(Bitmap.CompressFormat.JPEG, HIGH_QUALITY, bos);
+                    int imgWidth = bPhoto.getWidth();
+                    int imgHeight = bPhoto.getHeight();
+
                     bos.flush();
                     bos.close();
                     out.close();
 
                     // Transition to the EditPhotoCaptureActivity as long as the current mode isn't FastCam
                     if (!mCameraMode.equals("fastcam")) {
-                        gotoEditPhotoCapture(photo.getPath());
+                        gotoEditPhotoCapture(photo.getPath(), imgWidth, imgHeight);
                     }
 
                     // If the current mode is FastCam, then upload the photo immediately
                     else {
-                        uploadFastCamPhoto(photo);
+                        uploadFastCamPhoto(photo, imgWidth, imgHeight);
 
                         // Start the camera preview again
                         mCamera.startPreview();
@@ -775,7 +775,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         return (new File(dir, StorageUtility.getNewFileName()));
     }
 
-    private void gotoEditPhotoCapture(String photoPath) {
+    private void gotoEditPhotoCapture(String photoPath, int imgWidth, int imgHeight) {
 
         if (photoPath == null) {
             new AlertDialog.Builder(getContext())
@@ -800,7 +800,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
         File file = new File(photoPath);
 
-        doPhotoTaken(file);
+        doPhotoTaken(file, imgWidth, imgHeight);
         finishWithResult("capture");
     }
 
@@ -1405,7 +1405,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     }
 
     // This method uploads photos taken while in FastCam mode
-    private void uploadFastCamPhoto(File photo) {
+    private void uploadFastCamPhoto(File photo, int imgWidth, int imgHeight) {
 
         // If saveToPhone is set, then save the image to the device in addition to sending it to the server.
         SharedPreferences preferences = getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
@@ -1416,29 +1416,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             String imageURL = PhotoActions.writeImageToDevice(getContext(), Uri.fromFile(photo));
         }
 
-        new ProcessPhotoAsyncTask(photo).execute();
-    }
-
-    // This class uploads photos on a background thread
-    class ProcessPhotoAsyncTask extends AsyncTask<Object, Void, File> {
-
-        private File mFile;
-
-        public ProcessPhotoAsyncTask(File file) {
-            mFile = file;
-        }
-
-        @Override
-        protected File doInBackground(Object... params) {
-            return ImageEditorUtility.processImageWithEdit(mFile, 0, null);
-        }
-
-        @Override
-        protected void onPostExecute(File editedPhoto) {
-            super.onPostExecute(editedPhoto);
-
-            doPhotoAccepted(mFile);
-        }
+        doPhotoAccepted(photo, imgWidth, imgHeight);
     }
 
     // —————————————————————————————————————————————————————————————————————————————————————————————
