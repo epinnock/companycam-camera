@@ -51,6 +51,10 @@ CCCamera.propTypes = {
   storagePath: PropTypes.string,
   projectName: PropTypes.string,
   projectAddress: PropTypes.string,
+  exifLat: PropTypes.number,
+  exifLon: PropTypes.number,
+  exifLocTimestamp: PropTypes.number,
+  
   onClose: PropTypes.func,
   photoAccepted: PropTypes.func,
   photoTaken: PropTypes.func,

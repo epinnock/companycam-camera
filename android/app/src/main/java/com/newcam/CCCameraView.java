@@ -13,7 +13,6 @@ import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 
 import java.io.File;
-import java.util.Map;
 
 /**
  * Created by dan on 12/16/16.
@@ -21,11 +20,15 @@ import java.util.Map;
 
 public abstract class CCCameraView extends RelativeLayout {
 
-    // The placeName and placeAddress are the parameters passed from the Javascript app
+    // Component props: values
     protected String placeName;
     protected String placeAddress;
     protected File appPhotoDirectory;
+    protected double propExifLocationLatitude;
+    protected double propExifLocationLongitude;
+    protected long propExifLocationTimestamp;
 
+    // Common layout features
     protected TextView mPlaceName;
     protected TextView mPlaceAddress;
 
@@ -50,6 +53,14 @@ public abstract class CCCameraView extends RelativeLayout {
 
     protected void finishWithResult(String button){
         propOnClose("", button);
+    }
+
+    protected Location getExifLocation(){
+        Location loc = new Location("Component props");
+        loc.setLongitude(this.propExifLocationLongitude);
+        loc.setLatitude(this.propExifLocationLatitude);
+        loc.setTime(this.propExifLocationTimestamp);
+        return loc;
     }
 
     private final Runnable measureAndLayout = new Runnable() {
@@ -151,23 +162,26 @@ public abstract class CCCameraView extends RelativeLayout {
             mPlaceAddress.setText(placeAddress);
         }
     }
-    //-------------------------------------
 
-    //TODO
-    //-------------------------------------
-    protected void requestSingleLocationUpdate(){
+    public void setExifLat(double val){
+        this.propExifLocationLatitude = val;
 
+        //TODO: just testing, please delete me later!
+        System.err.println("[CCC] Set EXIF latitude: " + val);
     }
 
-    protected void requestLastLocation(){
+    public void setExifLon(double val){
+        this.propExifLocationLongitude = val;
 
+        //TODO: just testing, please delete me later!
+        System.err.println("[CCC] Set EXIF longitude: " + val);
     }
 
-    protected Location getLastLocation(){
-        Location loc = new Location("Fake location");
-        loc.setLongitude(0.0d);
-        loc.setLatitude(0.0d);
-        return loc;
+    public void setExifLocTimestamp(long val){
+        this.propExifLocationTimestamp = val;
+
+        //TODO: just testing, please delete me later!
+        System.err.println("[CCC] Set EXIF location timestamp: " + val);
     }
     //-------------------------------------
 }

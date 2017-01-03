@@ -104,7 +104,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
     private double zoomdistance;
     ExifInterface exif;
-    private Location mLastLocation;
 
     // Permissions required to take a picture
     private static final String[] CAMERA_PERMISSIONS = {
@@ -678,28 +677,14 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
                         setupListeners();
                     }
 
-                    requestSingleLocationUpdate();
-                    mLastLocation = getLastLocation();
-
-                    if (mLastLocation != null) {
-                        Log.e("TAG", "GPS is on");
-                        double latitude = mLastLocation.getLatitude();
-                        double longitude = mLastLocation.getLongitude();
-                    }
-                    else{
-                        requestLastLocation();
-                        mLastLocation = getLastLocation();
-                    }
-
                     try {
                         exif = new ExifInterface(photo.getPath());
+                        Location exifLoc = getExifLocation();
 
-                        double latitude = 0;
-                        double longitude = 0;
-                        if (mLastLocation != null) {
-                            latitude = Math.abs(mLastLocation.getLatitude());
-                            longitude = Math.abs(mLastLocation.getLongitude());
-                        }
+                        //TODO: GPS location+timetamp: Move this to utils; maybe use Location.convert instead?
+                        //------------------------------------------------
+                        double latitude = Math.abs(exifLoc.getLatitude());
+                        double longitude = Math.abs(exifLoc.getLongitude());
 
                         int num1Lat = (int)Math.floor(latitude);
                         int num2Lat = (int)Math.floor((latitude - num1Lat) * 60);
@@ -711,39 +696,25 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
                         exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE, num1Lat+"/1,"+num2Lat+"/1,"+num3Lat+"/1000");
                         exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, num1Lon+"/1,"+num2Lon+"/1,"+num3Lon+"/1000");
-
-                        SharedPreferences preferences = getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
-                        mFlashMode = preferences.getString(PREFS_FLASH_MODE, "auto");
-
-
-                        exif.setAttribute(ExifInterface.TAG_FLASH, mFlashMode);
+                        exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, (exifLoc.getLatitude() > 0) ? "N" : "S");
+                        exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, (exifLoc.getLongitude() > 0) ? "E" : "W");
 
                         Calendar calendar = Calendar.getInstance();
-
-                        calendar.setTimeInMillis(mLastLocation.getTime());
+                        calendar.setTimeInMillis(exifLoc.getTime());
                         int hourOfDay = calendar.get(Calendar.HOUR_OF_DAY);
                         int minutes = calendar.get(Calendar.MINUTE);
                         int seconds = calendar.get(Calendar.SECOND);
 
                         String exifGPSTimestamp = hourOfDay + "/1," + minutes + "/1," + seconds + "/1";
-
                         exif.setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, exifGPSTimestamp);
+                        //------------------------------------------------
+
+                        SharedPreferences preferences = getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
+                        mFlashMode = preferences.getString(PREFS_FLASH_MODE, "auto");
+                        exif.setAttribute(ExifInterface.TAG_FLASH, mFlashMode);
+
                         exif.setAttribute(ExifInterface.TAG_MODEL, Build.MODEL);
                         exif.setAttribute(ExifInterface.TAG_MAKE, Build.MANUFACTURER);
-
-
-
-                        if (mLastLocation.getLatitude() > 0) {
-                            exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, "N");
-                        } else {
-                            exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, "S");
-                        }
-
-                        if (mLastLocation.getLongitude() > 0) {
-                            exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, "E");
-                        } else {
-                            exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, "W");
-                        }
 
                         exif.saveAttributes();
                     } catch (IOException e) {
