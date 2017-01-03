@@ -71,7 +71,7 @@ public class CCCameraManager extends SimpleViewManager<CCCameraView> {
     }
 
     @ReactProp(name = "exifLocTimestamp")
-    public void setExifLocTimestamp(CCCameraView view, long val){
+    public void setExifLocTimestamp(CCCameraView view, double val){
         view.setExifLocTimestamp(val);
     }
 

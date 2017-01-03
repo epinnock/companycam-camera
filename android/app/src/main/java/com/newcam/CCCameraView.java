@@ -177,8 +177,8 @@ public abstract class CCCameraView extends RelativeLayout {
         System.err.println("[CCC] Set EXIF longitude: " + val);
     }
 
-    public void setExifLocTimestamp(long val){
-        this.propExifLocationTimestamp = val;
+    public void setExifLocTimestamp(double val){
+        this.propExifLocationTimestamp = (long)val;
 
         //TODO: just testing, please delete me later!
         System.err.println("[CCC] Set EXIF location timestamp: " + val);

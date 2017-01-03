@@ -2625,16 +2625,23 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
 
                     int num1Lat = (int)Math.floor(latitude);
                     int num2Lat = (int)Math.floor((latitude - num1Lat) * 60);
-                    double num3Lat = (latitude - ((double)num1Lat+((double)num2Lat/60))) * 3600000;
+                    int num3Lat = (int)( (latitude - ((double)num1Lat+((double)num2Lat/60))) * 3600000 );
 
                     int num1Lon = (int)Math.floor(longitude);
                     int num2Lon = (int)Math.floor((longitude - num1Lon) * 60);
-                    double num3Lon = (longitude - ((double)num1Lon+((double)num2Lon/60))) * 3600000;
+                    int num3Lon = (int)( (longitude - ((double)num1Lon+((double)num2Lon/60))) * 3600000 );
 
-                    exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE, num1Lat+"/1,"+num2Lat+"/1,"+num3Lat+"/1000");
-                    exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, num1Lon+"/1,"+num2Lon+"/1,"+num3Lon+"/1000");
-                    exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, (exifLoc.getLatitude() > 0) ? "N" : "S");
-                    exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, (exifLoc.getLongitude() > 0) ? "E" : "W");
+                    String exifLatStr = num1Lat+"/1,"+num2Lat+"/1,"+num3Lat+"/1000";
+                    String exifLatRef = (exifLoc.getLatitude() > 0) ? "N" : "S";
+                    exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE, exifLatStr);
+                    exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, exifLatRef);
+
+                    String exifLonStr = num1Lon+"/1,"+num2Lon+"/1,"+num3Lon+"/1000";
+                    String exifLonRef = (exifLoc.getLongitude() > 0) ? "E" : "W";
+                    exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, exifLonStr);
+                    exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, exifLonRef);
+
+                    System.out.println("Set EXIF location coords: [" + exifLatStr + "][" + exifLatRef + "] [" + exifLonStr + "][" + exifLonRef + "]");
 
                     Calendar calendar = Calendar.getInstance();
                     calendar.setTimeInMillis(exifLoc.getTime());
@@ -2644,6 +2651,8 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
 
                     String exifGPSTimestamp = hourOfDay + "/1," + minutes + "/1," + seconds + "/1";
                     exif.setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, exifGPSTimestamp);
+
+                    System.out.println("Set EXIF location timestamp: [" + exifGPSTimestamp + "]");
                     //------------------------------------------------
 
                     SharedPreferences preferences = getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
