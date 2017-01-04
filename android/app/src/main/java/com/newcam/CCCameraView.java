@@ -3,9 +3,6 @@ package com.newcam;
 import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
-import android.os.Environment;
-import android.support.v4.content.LocalBroadcastManager;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -14,10 +11,8 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
-import com.newcam.views.TabletButtonView;
 
 import java.io.File;
-import java.util.Map;
 
 /**
  * Created by dan on 12/16/16.
@@ -27,11 +22,15 @@ public abstract class CCCameraView extends RelativeLayout {
 
     protected Context mContext;
 
-    // The placeName and placeAddress are the parameters passed from the Javascript app
+    // Component props: values
     protected String placeName;
     protected String placeAddress;
     protected File appPhotoDirectory;
+    protected double propExifLocationLatitude;
+    protected double propExifLocationLongitude;
+    protected long propExifLocationTimestamp;
 
+    // Common layout features
     protected TextView mPlaceName;
     protected TextView mPlaceAddress;
 
@@ -52,6 +51,90 @@ public abstract class CCCameraView extends RelativeLayout {
         return context.getCurrentActivity();
     }
 
+    public abstract void releaseCamera();
+
+    protected void finishWithError(String errmsg){
+        propOnClose(errmsg, "error");
+    }
+
+    protected void finishWithResult(String button){
+        propOnClose("", button);
+    }
+
+    protected Location getExifLocation(){
+        Location loc = new Location("Component props");
+        loc.setLongitude(this.propExifLocationLongitude);
+        loc.setLatitude(this.propExifLocationLatitude);
+        loc.setTime(this.propExifLocationTimestamp);
+        return loc;
+    }
+
+    private final Runnable measureAndLayout = new Runnable() {
+        @Override
+        public void run() {
+            measure(
+                    MeasureSpec.makeMeasureSpec(getWidth(), MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(getHeight(), MeasureSpec.EXACTLY));
+            layout(getLeft(), getTop(), getRight(), getBottom());
+        }
+    };
+
+    @Override
+    public void requestLayout() {
+        super.requestLayout();
+
+        // Since React Native overrides onLayout in its ViewGroups, a layout pass never
+        // happens after a call to requestLayout, so we simulate one here.
+        post(measureAndLayout);
+    }
+
+    //component props: functions
+    //-------------------------------------
+    private void _doEvent(String eventName, WritableMap event){
+        ReactContext reactContext = (ReactContext)getContext();
+        RCTEventEmitter rctEventEmitter = reactContext.getJSModule(RCTEventEmitter.class);
+        rctEventEmitter.receiveEvent(getId(), eventName, event);
+    }
+
+    protected void doPhotoTaken(File imgFile, int imgWidth, int imgHeight){
+        //TODO: just testing, please delete me later!
+        System.err.println("PHOTO TAKEN: " + imgFile.getAbsolutePath());
+
+        WritableMap event = Arguments.createMap();
+        event.putString("filename", imgFile.getAbsolutePath());
+        event.putInt("imgWidth", imgWidth);
+        event.putInt("imgHeight", imgHeight);
+        _doEvent("photoTaken", event);
+    }
+
+    protected void doPhotoAccepted(File imgFile, int imgWidth, int imgHeight){
+        //TODO: just testing, please delete me later!
+        System.err.println("PHOTO ACCEPTED: " + imgFile.getAbsolutePath());
+
+        WritableMap event = Arguments.createMap();
+        event.putString("filename", imgFile.getAbsolutePath());
+        event.putInt("imgWidth", imgWidth);
+        event.putInt("imgHeight", imgHeight);
+        _doEvent("photoAccepted", event);
+    }
+
+    private void propOnClose(String errmsg, String button) {
+
+        // Release the camera
+        releaseCamera();
+
+        //TODO: just testing, please delete me later!
+        System.err.println("ON CLOSE: [" + errmsg + "] [" + button + "]");
+
+        WritableMap event = Arguments.createMap();
+        event.putString("errmsg", errmsg);
+        event.putString("button", button);
+        _doEvent("onClose", event);
+    }
+    //-------------------------------------
+
+    //component props: values
+    //-------------------------------------
     public void setStoragePath(String str){
         this.appPhotoDirectory = new File(str);
         if(!appPhotoDirectory.exists()){
@@ -86,95 +169,25 @@ public abstract class CCCameraView extends RelativeLayout {
         }
     }
 
-    private final Runnable measureAndLayout = new Runnable() {
-        @Override
-        public void run() {
-            measure(
-                    MeasureSpec.makeMeasureSpec(getWidth(), MeasureSpec.EXACTLY),
-                    MeasureSpec.makeMeasureSpec(getHeight(), MeasureSpec.EXACTLY));
-            layout(getLeft(), getTop(), getRight(), getBottom());
-        }
-    };
-
-    @Override
-    public void requestLayout() {
-        super.requestLayout();
-
-        // Since React Native overrides onLayout in its ViewGroups, a layout pass never
-        // happens after a call to requestLayout, so we simulate one here.
-        post(measureAndLayout);
-    }
-
-    //callbacks
-    //-------------------------------------
-    private void doEvent(String eventName, WritableMap event){
-        ReactContext reactContext = (ReactContext)getContext();
-        RCTEventEmitter rctEventEmitter = reactContext.getJSModule(RCTEventEmitter.class);
-        rctEventEmitter.receiveEvent(getId(), eventName, event);
-    }
-
-    protected void doPhotoTaken(File imgFile){
-        //TODO: just testing, please delete me later!
-        System.err.println("PHOTO TAKEN: " + imgFile.getAbsolutePath());
-
-        WritableMap event = Arguments.createMap();
-        event.putString("filename", imgFile.getAbsolutePath());
-        doEvent("photoTaken", event);
-    }
-
-    protected void doPhotoAccepted(File imgFile){
-        //TODO: just testing, please delete me later!
-        System.err.println("PHOTO ACCEPTED: " + imgFile.getAbsolutePath());
-
-        WritableMap event = Arguments.createMap();
-        event.putString("filename", imgFile.getAbsolutePath());
-        doEvent("photoAccepted", event);
-    }
-
-    private void propOnClose(String errmsg, String button){
-
-        // Release the camera
-        releaseCamera();
+    public void setExifLat(double val){
+        this.propExifLocationLatitude = val;
 
         //TODO: just testing, please delete me later!
-        System.err.println("ON CLOSE: [" + errmsg + "] [" + button + "]");
-
-        WritableMap event = Arguments.createMap();
-        event.putString("errmsg", errmsg);
-        event.putString("button", button);
-        doEvent("onClose", event);
+        System.err.println("[CCC] Set EXIF latitude: " + val);
     }
 
-    public abstract void releaseCamera();
+    public void setExifLon(double val){
+        this.propExifLocationLongitude = val;
 
-    protected void finishWithError(String errmsg){
-        propOnClose(errmsg, "error");
+        //TODO: just testing, please delete me later!
+        System.err.println("[CCC] Set EXIF longitude: " + val);
     }
 
-    protected void finishWithResult(String button){
-        propOnClose("", button);
-    }
-    //-------------------------------------
+    public void setExifLocTimestamp(double val){
+        this.propExifLocationTimestamp = (long)val;
 
-    //TODO
-    //-------------------------------------
-    protected void requestSingleLocationUpdate(){
-
-    }
-
-    protected void requestLastLocation(){
-
-    }
-
-    protected Location getLastLocation(){
-        Location loc = new Location("Fake location");
-        loc.setLongitude(0.0d);
-        loc.setLatitude(0.0d);
-        return loc;
-    }
-
-    protected void logIntercomEvent(String tag, Map<String, Object> attrs) {
-        System.err.println("LOGGING INTERCOM EVENT: [" + tag + "] " + attrs.toString());
+        //TODO: just testing, please delete me later!
+        System.err.println("[CCC] Set EXIF location timestamp: " + val);
     }
     //-------------------------------------
 }

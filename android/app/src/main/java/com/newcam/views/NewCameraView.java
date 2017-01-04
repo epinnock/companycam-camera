@@ -15,7 +15,6 @@ import android.location.Location;
 import android.media.AudioManager;
 import android.media.ExifInterface;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -34,9 +33,7 @@ import android.widget.TextView;
 
 import com.newcam.CCCameraView;
 import com.newcam.R;
-import com.notagilx.companycam.core.events.OutOfMemoryEvent;
 import com.notagilx.companycam.react_bridges.PhotoActions;
-import com.notagilx.companycam.util.ImageEditorUtility;
 import com.notagilx.companycam.util.LogUtil;
 import com.notagilx.companycam.util.SingleClickListener;
 import com.notagilx.companycam.util.StorageUtility;
@@ -107,7 +104,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
     private double zoomdistance;
     ExifInterface exif;
-    private Location mLastLocation;
 
     // Permissions required to take a picture
     private static final String[] CAMERA_PERMISSIONS = {
@@ -884,90 +880,74 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
                     FileOutputStream out = new FileOutputStream(photo.getPath());
                     BufferedOutputStream bos = new BufferedOutputStream(out);
                     bPhoto.compress(Bitmap.CompressFormat.JPEG, HIGH_QUALITY, bos);
+                    int imgWidth = bPhoto.getWidth();
+                    int imgHeight = bPhoto.getHeight();
+
                     bos.flush();
                     bos.close();
                     out.close();
 
                     // Transition to the EditPhotoCaptureActivity as long as the current mode isn't FastCam
                     if (!mCameraMode.equals("fastcam")) {
-                        gotoEditPhotoCapture(photo.getPath());
+                        gotoEditPhotoCapture(photo.getPath(), imgWidth, imgHeight);
                     }
 
                     // If the current mode is FastCam, then upload the photo immediately
                     else {
-                        uploadFastCamPhoto(photo);
+                        uploadFastCamPhoto(photo, imgWidth, imgHeight);
 
                         // Start the camera preview again
                         mCamera.startPreview();
                         setupListeners();
                     }
 
-                    requestSingleLocationUpdate();
-                    mLastLocation = getLastLocation();
-
-                    if (mLastLocation != null) {
-                        Log.e("TAG", "GPS is on");
-                        double latitude = mLastLocation.getLatitude();
-                        double longitude = mLastLocation.getLongitude();
-                    }
-                    else{
-                        requestLastLocation();
-                        mLastLocation = getLastLocation();
-                    }
-
                     try {
                         exif = new ExifInterface(photo.getPath());
+                        Location exifLoc = getExifLocation();
 
-                        double latitude = 0;
-                        double longitude = 0;
-                        if (mLastLocation != null) {
-                            latitude = Math.abs(mLastLocation.getLatitude());
-                            longitude = Math.abs(mLastLocation.getLongitude());
-                        }
+                        //TODO: GPS location+timetamp: Move this to utils; maybe use Location.convert instead?
+                        //------------------------------------------------
+                        double latitude = Math.abs(exifLoc.getLatitude());
+                        double longitude = Math.abs(exifLoc.getLongitude());
 
                         int num1Lat = (int)Math.floor(latitude);
                         int num2Lat = (int)Math.floor((latitude - num1Lat) * 60);
-                        double num3Lat = (latitude - ((double)num1Lat+((double)num2Lat/60))) * 3600000;
+                        int num3Lat = (int)( (latitude - ((double)num1Lat+((double)num2Lat/60))) * 3600000 );
 
                         int num1Lon = (int)Math.floor(longitude);
                         int num2Lon = (int)Math.floor((longitude - num1Lon) * 60);
-                        double num3Lon = (longitude - ((double)num1Lon+((double)num2Lon/60))) * 3600000;
+                        int num3Lon = (int)( (longitude - ((double)num1Lon+((double)num2Lon/60))) * 3600000 );
 
-                        exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE, num1Lat+"/1,"+num2Lat+"/1,"+num3Lat+"/1000");
-                        exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, num1Lon+"/1,"+num2Lon+"/1,"+num3Lon+"/1000");
+                        String exifLatStr = num1Lat+"/1,"+num2Lat+"/1,"+num3Lat+"/1000";
+                        String exifLatRef = (exifLoc.getLatitude() > 0) ? "N" : "S";
+                        exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE, exifLatStr);
+                        exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, exifLatRef);
 
-                        SharedPreferences preferences = getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
-                        mFlashMode = preferences.getString(PREFS_FLASH_MODE, "auto");
+                        String exifLonStr = num1Lon+"/1,"+num2Lon+"/1,"+num3Lon+"/1000";
+                        String exifLonRef = (exifLoc.getLongitude() > 0) ? "E" : "W";
+                        exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, exifLonStr);
+                        exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, exifLonRef);
 
-
-                        exif.setAttribute(ExifInterface.TAG_FLASH, mFlashMode);
+                        System.out.println("Set EXIF location coords: [" + exifLatStr + "][" + exifLatRef + "] [" + exifLonStr + "][" + exifLonRef + "]");
 
                         Calendar calendar = Calendar.getInstance();
-
-                        calendar.setTimeInMillis(mLastLocation.getTime());
+                        calendar.setTimeInMillis(exifLoc.getTime());
                         int hourOfDay = calendar.get(Calendar.HOUR_OF_DAY);
                         int minutes = calendar.get(Calendar.MINUTE);
                         int seconds = calendar.get(Calendar.SECOND);
 
                         String exifGPSTimestamp = hourOfDay + "/1," + minutes + "/1," + seconds + "/1";
-
                         exif.setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, exifGPSTimestamp);
+
+                        System.out.println("Set EXIF location timestamp: [" + exifGPSTimestamp + "]");
+                        //------------------------------------------------
+
+                        SharedPreferences preferences = getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
+                        mFlashMode = preferences.getString(PREFS_FLASH_MODE, "auto");
+                        exif.setAttribute(ExifInterface.TAG_FLASH, mFlashMode);
+
                         exif.setAttribute(ExifInterface.TAG_MODEL, Build.MODEL);
                         exif.setAttribute(ExifInterface.TAG_MAKE, Build.MANUFACTURER);
-
-
-
-                        if (mLastLocation.getLatitude() > 0) {
-                            exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, "N");
-                        } else {
-                            exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, "S");
-                        }
-
-                        if (mLastLocation.getLongitude() > 0) {
-                            exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, "E");
-                        } else {
-                            exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, "W");
-                        }
 
                         exif.saveAttributes();
                     } catch (IOException e) {
@@ -999,7 +979,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         return (new File(dir, StorageUtility.getNewFileName()));
     }
 
-    private void gotoEditPhotoCapture(String photoPath) {
+    private void gotoEditPhotoCapture(String photoPath, int imgWidth, int imgHeight) {
 
         if (photoPath == null) {
             new AlertDialog.Builder(getContext())
@@ -1020,11 +1000,10 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("quality", mResolutionMode);
-        logIntercomEvent("took_photo", attributes);
 
         File file = new File(photoPath);
 
-        doPhotoTaken(file);
+        doPhotoTaken(file, imgWidth, imgHeight);
         finishWithResult("capture");
     }
 
@@ -1629,7 +1608,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     }
 
     // This method uploads photos taken while in FastCam mode
-    private void uploadFastCamPhoto(File photo) {
+    private void uploadFastCamPhoto(File photo, int imgWidth, int imgHeight) {
 
         // If saveToPhone is set, then save the image to the device in addition to sending it to the server.
         SharedPreferences preferences = getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
@@ -1640,34 +1619,13 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             String imageURL = PhotoActions.writeImageToDevice(getContext(), Uri.fromFile(photo));
         }
 
-        new ProcessPhotoAsyncTask(photo).execute();
-    }
-
-    // This class uploads photos on a background thread
-    class ProcessPhotoAsyncTask extends AsyncTask<Object, Void, File> {
-
-        private File mFile;
-
-        public ProcessPhotoAsyncTask(File file) {
-            mFile = file;
-        }
-
-        @Override
-        protected File doInBackground(Object... params) {
-            return ImageEditorUtility.processImageWithEdit(mFile, 0, null);
-        }
-
-        @Override
-        protected void onPostExecute(File editedPhoto) {
-            super.onPostExecute(editedPhoto);
-
-            doPhotoAccepted(mFile);
-        }
+        doPhotoAccepted(photo, imgWidth, imgHeight);
     }
 
     // —————————————————————————————————————————————————————————————————————————————————————————————
     // Surface Holder methods
     // —————————————————————————————————————————————————————————————————————————————————————————————
+    @Override
     public void surfaceCreated(SurfaceHolder holder) {
 
         Log.d(TAG, "surfaceCreated");
@@ -1706,6 +1664,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         }
     }
 
+    @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
 
         Log.d(TAG, "surfaceDestroyed");
@@ -1717,6 +1676,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         releaseCamera();
     }
 
+    @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 
         Log.d(TAG, "surfaceChanged");

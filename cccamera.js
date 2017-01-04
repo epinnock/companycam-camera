@@ -24,15 +24,15 @@ class CCCamera extends React.Component {
   _photoAccepted(event) {
     if(!this.props.photoAccepted){ return; }
     
-    const filename = event.nativeEvent.filename;
-    this.props.photoAccepted(filename);
+    const { filename, imgWidth, imgHeight } = event.nativeEvent;
+    this.props.photoAccepted(filename, [imgWidth, imgHeight]);
   }
   
   _photoTaken(event) {
     if(!this.props.photoTaken){ return; }
     
-    const filename = event.nativeEvent.filename;
-    this.props.photoTaken(filename);
+    const { filename, imgWidth, imgHeight } = event.nativeEvent;
+    this.props.photoTaken(filename, [imgWidth, imgHeight]);
   }
   
   render() {
@@ -51,6 +51,10 @@ CCCamera.propTypes = {
   storagePath: PropTypes.string,
   projectName: PropTypes.string,
   projectAddress: PropTypes.string,
+  exifLat: PropTypes.number,
+  exifLon: PropTypes.number,
+  exifLocTimestamp: PropTypes.number,
+  
   onClose: PropTypes.func,
   photoAccepted: PropTypes.func,
   photoTaken: PropTypes.func,

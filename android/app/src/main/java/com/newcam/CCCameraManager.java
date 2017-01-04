@@ -60,6 +60,21 @@ public class CCCameraManager extends SimpleViewManager<CCCameraView> {
         view.setProjectAddress(str);
     }
 
+    @ReactProp(name = "exifLat")
+    public void setExifLat(CCCameraView view, double val){
+        view.setExifLat(val);
+    }
+
+    @ReactProp(name = "exifLon")
+    public void setExifLon(CCCameraView view, double val){
+        view.setExifLon(val);
+    }
+
+    @ReactProp(name = "exifLocTimestamp")
+    public void setExifLocTimestamp(CCCameraView view, double val){
+        view.setExifLocTimestamp(val);
+    }
+
     @Override
     @Nullable
     public Map getExportedCustomDirectEventTypeConstants() {
