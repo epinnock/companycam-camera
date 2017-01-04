@@ -52,7 +52,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.greenrobot.event.EventBus;
 
 public class NewCameraView extends CCCameraView implements SurfaceHolder.Callback {
 
@@ -981,7 +980,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
                     Log.d(TAG, "Error accessing file: " + e.getMessage());
                 } catch (OutOfMemoryError oome) {
                     Log.e(TAG, "OutOfMemoryError: " + oome.getMessage());
-                    EventBus.getDefault().post(new OutOfMemoryEvent(OOME_STRING));
+                    //EventBus.getDefault().post(new OutOfMemoryEvent(OOME_STRING));
                     finishWithError("Out of memory: " + oome.getMessage());
                 } finally {
                     if (bPhoto != null) {

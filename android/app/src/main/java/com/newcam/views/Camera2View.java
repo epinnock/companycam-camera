@@ -90,8 +90,6 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import de.greenrobot.event.EventBus;
-
 import static android.content.Context.CAMERA_SERVICE;
 
 @TargetApi(21)
@@ -714,7 +712,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
 
     @Override
     protected void onPause() {
-        mEventBus.unregister(this);
+        //mEventBus.unregister(this);
 
         // Camera is released once preview is destroyed
         if (mPreview != null && mPreviewLayout != null) {
@@ -2901,7 +2899,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
                 Log.d(TAG, "Error accessing file: " + e.getMessage());
             } catch (OutOfMemoryError oome) {
                 Log.e(TAG, "OutOfMemoryError: " + oome.getMessage());
-                EventBus.getDefault().post(new OutOfMemoryEvent(OOME_STRING));
+                //EventBus.getDefault().post(new OutOfMemoryEvent(OOME_STRING));
                 finishWithError("Out of memory: " + oome.getMessage());
             } finally {
                 if (bPhoto != null) {
@@ -3059,6 +3057,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
 
         @Override
         protected File doInBackground(Object... params) {
+            //TODO: this doesn't actually do anything at all...but should it?
             return ImageEditorUtility.processImageWithEdit(mFile, 0, null);
         }
 
