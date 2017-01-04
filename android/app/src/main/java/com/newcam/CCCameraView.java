@@ -20,6 +20,8 @@ import java.io.File;
 
 public abstract class CCCameraView extends RelativeLayout {
 
+    protected Context mContext;
+
     // Component props: values
     protected String placeName;
     protected String placeAddress;
@@ -32,8 +34,12 @@ public abstract class CCCameraView extends RelativeLayout {
     protected TextView mPlaceName;
     protected TextView mPlaceAddress;
 
+    // The useTabletLayout flag describes whether the tablet layout is being used for this device
+    public boolean useTabletLayout = false;
+
     public CCCameraView(Context context) {
         super(context);
+        mContext = context;
         inflate(context, R.layout.view_cccamera, this);
         init();
     }
