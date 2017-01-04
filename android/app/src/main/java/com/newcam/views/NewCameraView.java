@@ -808,14 +808,14 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             mgr.playSoundEffect(AudioManager.FLAG_PLAY_SOUND);
 
             // Animate the screen flash when the image is captured if the camera is in FastCam mode.
-            if (mCameraMode.equals("fastcam")) {
+            //if (mCameraMode.equals("fastcam")) {
                 post(new Runnable(){
                     @Override
                     public void run() {
                         animateScreenFlash();
                     }
                 });
-            }
+            //}
         }
     };
 

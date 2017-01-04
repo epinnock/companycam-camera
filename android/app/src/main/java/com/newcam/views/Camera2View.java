@@ -2579,14 +2579,14 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
                     }
 
                     // Animate the screen flash when the image is captured if the camera is in FastCam mode.
-                    if (mCameraMode.equals("fastcam")) {
+                    //if (mCameraMode.equals("fastcam")) {
                         post(new Runnable() {
                             @Override
                             public void run() {
                                 animateScreenFlash();
                             }
                         });
-                    }
+                    //}
 
                     // Unlock the auto focus again after the photo is taken
                     unlockFocus();
