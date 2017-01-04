@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:id="@+id/bottom_layout"
+              android:gravity="center_vertical|center_horizontal"
+              android:paddingRight="5dp"
+              android:weightSum="3"
+              android:background="@drawable/transparent_gray_gradient_180">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_weight="1">
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+        </FrameLayout>
+
+        <ImageButton
+            android:layout_width="0dp"
+            android:src="@drawable/normal_size_icon"
+            android:id="@+id/toggle_resolution"
+            android:layout_weight="1"
+            android:layout_height="40dp"
+            android:background="#00000000"
+            android:layout_marginTop="10dp"/>
+
+        <ImageButton
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:src="@drawable/close_icon"
+            android:id="@+id/close_button"
+            android:layout_weight="1"
+            android:background="#00000000"
+            android:layout_marginTop="10dp"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_height="0dp"
+        android:layout_width="wrap_content"
+        android:id="@+id/bottom_button_layout"
+        android:layout_weight="1"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_gravity="center_horizontal"
+        android:gravity="center_vertical|center_horizontal">
+
+        <ImageButton
+            android:layout_height="wrap_content"
+            android:src="@drawable/flip_camera"
+            android:id="@+id/toggle_camera"
+            android:background="#00000000"
+            android:layout_width="50dp"
+            android:padding="10dp"
+            android:layout_marginBottom="15dp"/>
+
+        <ImageButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/snap_icon"
+            android:background="#00000000"
+            android:id="@+id/capture"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"/>
+
+        <ImageButton
+            android:layout_height="wrap_content"
+            android:src="@drawable/flashlight_on"
+            android:id="@+id/toggle_flash"
+            android:background="#00000000"
+            android:padding="10dp"
+            android:layout_width="50dp"
+            android:layout_marginTop="20dp"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_height="0dp"
+        android:layout_width="wrap_content"
+        android:id="@+id/bottom_label_layout"
+        android:gravity="right|center_vertical"
+        android:layout_weight="1"
+        android:layout_marginRight="15dp"
+        android:layout_marginLeft="15dp">
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/fastcam_layout"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:gravity="right|center_vertical">
+
+            <TextView
+                android:id="@+id/fastcam_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="FASTCAM"
+                android:textColor="@android:color/white"
+                android:fontFamily="sans-serif-light"/>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/mode_icon"
+                android:id="@+id/fastcam_selected_icon"
+                android:layout_margin="10dp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/camera_layout"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:gravity="right|center_vertical">
+
+            <TextView
+                android:id="@+id/camera_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CAMERA"
+                android:textColor="@android:color/white"
+                android:fontFamily="sans-serif-light"/>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/mode_icon"
+                android:id="@+id/camera_selected_icon"
+                android:layout_margin="10dp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/scanner_layout"
+            android:visibility="gone"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:gravity="right|center_vertical">
+
+            <TextView
+                android:id="@+id/scanner_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SCANNER"
+                android:textColor="@android:color/white"
+                android:fontFamily="sans-serif-light"/>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/mode_icon"
+                android:id="@+id/scanner_selected_icon"
+                android:layout_margin="10dp"/>
+
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>
