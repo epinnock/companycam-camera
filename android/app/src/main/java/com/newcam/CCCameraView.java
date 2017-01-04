@@ -5,6 +5,7 @@ import android.content.Context;
 import android.location.Location;
 import android.os.Environment;
 import android.support.v4.content.LocalBroadcastManager;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -13,6 +14,7 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
+import com.newcam.views.TabletButtonView;
 
 import java.io.File;
 import java.util.Map;
@@ -23,6 +25,8 @@ import java.util.Map;
 
 public abstract class CCCameraView extends RelativeLayout {
 
+    protected Context mContext;
+
     // The placeName and placeAddress are the parameters passed from the Javascript app
     protected String placeName;
     protected String placeAddress;
@@ -31,8 +35,12 @@ public abstract class CCCameraView extends RelativeLayout {
     protected TextView mPlaceName;
     protected TextView mPlaceAddress;
 
+    // The useTabletLayout flag describes whether the tablet layout is being used for this device
+    public boolean useTabletLayout = false;
+
     public CCCameraView(Context context) {
         super(context);
+        mContext = context;
         inflate(context, R.layout.view_cccamera, this);
         init();
     }

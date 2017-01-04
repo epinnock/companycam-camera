@@ -41,9 +41,6 @@ import com.notagilx.companycam.util.LogUtil;
 import com.notagilx.companycam.util.SingleClickListener;
 import com.notagilx.companycam.util.StorageUtility;
 import com.notagilx.companycam.util.views.CameraPreview;
-import com.newcam.CCCameraView;
-import com.newcam.R;
-import com.notagilx.companycam.util.views.VerticalTextView;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -120,6 +117,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     };
 
     protected LinearLayout mLabelTouchTarget;
+    protected LinearLayout mLabelTouchTargetLand;
     protected ImageButton mToggleResolution;
     protected ImageButton mToggleFlash;
     protected ImageButton mCloseButton;
@@ -163,6 +161,10 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     private LinearLayout mResolutionLabelLayoutSuper;
     private ImageButton mResolutionDismissButtonLand;
 
+    // The mTabletButtonView is the layout that holds all the buttons for tablets
+    private TabletButtonView mTabletButtonView;
+    private TabletButtonView mTabletButtonViewLand;
+
     // This is the animation distance for the resolution layout in dp
     private final int RESOLUTION_ANIMATION_DIST_DP = 150;
 
@@ -194,6 +196,12 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         mPreviewLayout = (RelativeLayout) findViewById(R.id.camera_preview);
         mPlaceName = (TextView) findViewById(R.id.place_name);
         mPlaceAddress = (TextView) findViewById(R.id.place_address);
+        mLabelTouchTarget = (LinearLayout) findViewById(R.id.label_touch_target);
+        mLabelTouchTargetLand = (LinearLayout) findViewById(R.id.label_touch_target_land);
+        mToggleResolution = (ImageButton) findViewById(R.id.toggle_resolution);
+        mToggleFlash = (ImageButton) findViewById(R.id.toggle_flash);
+        mCloseButton = (ImageButton) findViewById(R.id.close_button);
+        mToggleCamera = (ImageButton) findViewById(R.id.toggle_camera);
         mCaptureButton = (ImageButton) findViewById(R.id.capture);
         mTopLayout = (LinearLayout) findViewById(R.id.top_layout);
         mBottomLayout = (LinearLayout) findViewById(R.id.bottom_layout);
@@ -223,15 +231,38 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         mResolutionDismissButtonLand = (ImageButton) findViewById(R.id.resolution_dismiss_button_land);
         mScreenFlashView = (FrameLayout) findViewById(R.id.screen_flash_view);
 
-        // Set the gradient backgrounds for the layouts
-        mTopLayout.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.transparent_gray_gradient_270));
-        mBottomLayout.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.transparent_gray_gradient_90));
+        // Initialize the tablet button view if the device is using the tablet layout
+        LinearLayout tabletButtonLayout = (LinearLayout) findViewById(R.id.tablet_button_view);
+        LinearLayout tableButtonLayoutLand = (LinearLayout) findViewById(R.id.tablet_button_view_land);
+        if (tabletButtonLayout != null) {
 
-        mLabelTouchTarget = (LinearLayout) findViewById(R.id.label_touch_target);
-        mToggleResolution = (ImageButton) findViewById(R.id.toggle_resolution);
-        mToggleFlash = (ImageButton) findViewById(R.id.toggle_flash);
-        mCloseButton = (ImageButton) findViewById(R.id.close_button);
-        mToggleCamera = (ImageButton) findViewById(R.id.toggle_camera);
+            // Create two TabletButtonViews
+            LinearLayout.LayoutParams tabletParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+            mTabletButtonView = new TabletButtonView(mContext);
+            tabletButtonLayout.addView(mTabletButtonView, tabletParams);
+            mTabletButtonViewLand = new TabletButtonView(mContext);
+            tableButtonLayoutLand.addView(mTabletButtonViewLand, tabletParams);
+
+            // Set the layout resources for the two tablet button views
+            mTabletButtonView.layoutResourceID = R.layout.view_tablet_button;
+            mTabletButtonViewLand.layoutResourceID = R.layout.view_tablet_button_land;
+
+            // Initialize the tablet button views
+            mTabletButtonView.initView(mContext);
+            mTabletButtonViewLand.initView(mContext);
+
+            // Set the useTableLayout flag
+            useTabletLayout = true;
+
+            // Show the mTableButtonView by default
+            showTabletButtonView();
+        }
+        else {
+
+            // Set the gradient backgrounds for the layouts
+            mTopLayout.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.transparent_gray_gradient_270));
+            mBottomLayout.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.transparent_gray_gradient_90));
+        }
 
         // Set the place name label
         mPlaceName.setText("This will be set later!!"); //TODO this is a placeholder for testing and should be removed
@@ -240,6 +271,9 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         setupResolutionLayout();
 
         //mEventBus.register(this); //TODO
+
+        // Initialize the orientation listener
+        initOrientationListener();
 
         // Get the saved settings from the SharedPreferences.  Restrict the possible flash modes to "torch" and "off".
         SharedPreferences preferences = getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
@@ -260,13 +294,33 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
         startPreview();
 
-        initOrientationListener();
-
         // Set the visibility of the flash button
         setFlashButtonVisibility();
 
         // Set the visibility of the camera button
         setCameraButtonVisibility();
+    }
+
+    @Override
+    public void setProjectName(String str){
+        super.setProjectName(str);
+
+        // Set the place name label for landscape on tablets
+        TextView mPlaceNameLand = (TextView) findViewById(R.id.place_name_land);
+        if (mPlaceNameLand != null) {
+            mPlaceNameLand.setText(placeName);
+        }
+    }
+
+    @Override
+    public void setProjectAddress(String str){
+        super.setProjectAddress(str);
+
+        // Set the place address label for landscape on tablets
+        TextView mPlaceAddressLand = (TextView) findViewById(R.id.place_address_land);
+        if (mPlaceAddressLand != null) {
+            mPlaceAddressLand.setText(placeAddress);
+        }
     }
 
     public void labelTouch() {
@@ -367,8 +421,18 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             // Animate the position and opacity of the resolution layout
             mResolutionLayout.animate().y(0.0f).alpha(1.0f).setDuration(300).start();
 
-            // Animate the opacity of the top layout
-            mTopLayout.animate().alpha(0.0f).setDuration(300).start();
+            if (useTabletLayout) {
+
+                // Animate the opacity of the mLabelTouchTarget, mCloseButton, and mToggleResolution
+                mLabelTouchTarget.animate().alpha(0.0f).setDuration(300).start();
+                mCloseButton.animate().alpha(0.0f).setDuration(300).start();
+                mToggleResolution.animate().alpha(0.0f).setDuration(300).start();
+            }
+            else {
+
+                // Animate the opacity of the top layout
+                mTopLayout.animate().alpha(0.0f).setDuration(300).start();
+            }
         }
         else {
 
@@ -382,9 +446,27 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             // Animate the position and opacity of the landscape resolution layout
             mResolutionLayoutLand.animate().x(screenWidthPx - animationDistPx).alpha(1.0f).setDuration(300).start();
 
-            // Animate the opacity of the top and bottom layouts
-            mTopLayout.animate().alpha(0.0f).setDuration(300).start();
-            mBottomLayout.animate().alpha(0.0f).setDuration(300).start();
+            if (useTabletLayout) {
+
+                // Animate the opacity of the mLabelTouchTargetLand, mCloseButton, and mToggleResolution
+                mLabelTouchTargetLand.animate().alpha(0.0f).setDuration(300).start();
+                mCloseButton.animate().alpha(0.0f).setDuration(300).start();
+                mToggleResolution.animate().alpha(0.0f).setDuration(300).start();
+            }
+            else {
+
+                // Animate the opacity of the top and bottom layouts
+                mTopLayout.animate().alpha(0.0f).setDuration(300).start();
+                mBottomLayout.animate().alpha(0.0f).setDuration(300).start();
+            }
+        }
+
+        // Remove the click listener for the mLabelTouchTarget and mLabelTouchTargetLand layouts while the resolution layout is visible
+        mLabelTouchTarget.setOnClickListener(null);
+        mLabelTouchTarget.setClickable(false);
+        if (mLabelTouchTargetLand != null) {
+            mLabelTouchTargetLand.setOnClickListener(null);
+            mLabelTouchTargetLand.setClickable(false);
         }
 
         // Set the mResolutionLayoutVisible flag
@@ -403,23 +485,149 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             // Animate the position and opacity of the resolution layout
             mResolutionLayout.animate().y(-animationDistPx).alpha(0.0f).setDuration(300).start();
 
-            // Animate the opacity of the top layout
-            mTopLayout.animate().alpha(1.0f).setDuration(300).start();
+            if (useTabletLayout) {
+
+                // Animate the opacity of the mLabelTouchTarget, mCloseButton, and mToggleResolution
+                mLabelTouchTarget.animate().alpha(1.0f).setDuration(300).start();
+                mCloseButton.animate().alpha(1.0f).setDuration(300).start();
+                mToggleResolution.animate().alpha(1.0f).setDuration(300).start();
+            }
+            else {
+
+                // Animate the opacity of the top layout
+                mTopLayout.animate().alpha(1.0f).setDuration(300).start();
+            }
         }
         else {
 
             // Animate the position and opacity of the landscape resolution layout
             mResolutionLayoutLand.animate().x(this.getWidth()).alpha(0.0f).setDuration(300).start();
 
-            // Animate the opacity of the top and bottom layouts
-            mTopLayout.animate().alpha(1.0f).setDuration(300).start();
-            mBottomLayout.animate().alpha(1.0f).setDuration(300).start();
+            if (useTabletLayout) {
+
+                // Animate the opacity of the mLabelTouchTargetLand, mCloseButton, and mToggleResolution
+                mLabelTouchTargetLand.animate().alpha(1.0f).setDuration(300).start();
+                mCloseButton.animate().alpha(1.0f).setDuration(300).start();
+                mToggleResolution.animate().alpha(1.0f).setDuration(300).start();
+            }
+            else {
+
+                // Animate the opacity of the top and bottom layouts
+                mTopLayout.animate().alpha(1.0f).setDuration(300).start();
+                mBottomLayout.animate().alpha(1.0f).setDuration(300).start();
+            }
+        }
+
+        // Add the click listener back to the mLabelTouchTarget and mLabelTouchTargetLand layouts while the resolution layout is hidden
+        mLabelTouchTarget.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                labelTouch();
+            }
+        });
+        mLabelTouchTarget.setClickable(true);
+        if (mLabelTouchTargetLand != null) {
+            mLabelTouchTargetLand.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    labelTouch();
+                }
+            });
+            mLabelTouchTargetLand.setClickable(true);
         }
 
         // Set the mResolutionLayoutVisible flag
         mResolutionLayoutVisible = false;
     }
 
+    // This method shows the mTabletButtonView and hides the mTabletButtonViewLand
+    public void showTabletButtonView() {
+
+        // Set the view references
+        mCaptureButton = mTabletButtonView.mCaptureButton;
+        mToggleResolution = mTabletButtonView.mToggleResolution;
+        mToggleFlash = mTabletButtonView.mToggleFlash;
+        mCloseButton = mTabletButtonView.mCloseButton;
+        mToggleCamera = mTabletButtonView.mToggleCamera;
+        mFastCamLayout = mTabletButtonView.mFastCamLayout;
+        mFastCamLabel = mTabletButtonView.mFastCamLabel;
+        mFastCamIndicator = mTabletButtonView.mFastCamIndicator;
+        mCameraLayout = mTabletButtonView.mCameraLayout;
+        mCameraIndicator = mTabletButtonView.mCameraIndicator;
+        mCameraLabel = mTabletButtonView.mCameraLabel;
+        mScannerLayout = mTabletButtonView.mScannerLayout;
+        mScannerIndicator = mTabletButtonView.mScannerIndicator;
+        mScannerLabel = mTabletButtonView.mScannerLabel;
+
+        // Setup the listeners again
+        setupListeners();
+
+        // Set the button states
+        if (mCameraMode != null) {
+            setCameraMode(mCameraMode);
+        }
+        if (mResolutionMode != null) {
+            setResolution(mResolutionMode);
+        }
+        if (mFlashMode != null) {
+            setFlashModeImage(mFlashMode);
+        }
+        setCameraButtonVisibility();
+        setFlashButtonVisibility();
+
+
+        // Animate the opacity of the mTableButtonView and the mTableButtonViewLand
+        mTabletButtonView.animate().alpha(1.0f).setDuration(300).start();
+        mTabletButtonViewLand.animate().alpha(0.0f).setDuration(300).start();
+
+        // Animate the opacity of the mLabelTouchTarget and mLabelTouchTargetLand
+        mLabelTouchTarget.animate().alpha(1.0f).setDuration(300).start();
+        mLabelTouchTargetLand.animate().alpha(0.0f).setDuration(300).start();
+    }
+
+    // This method shows the mTabletButtonViewLand and hides the mTabletButtonView
+    public void showTabletButtonViewLand() {
+
+        // Set the view references
+        mCaptureButton = mTabletButtonViewLand.mCaptureButton;
+        mToggleResolution = mTabletButtonViewLand.mToggleResolution;
+        mToggleFlash = mTabletButtonViewLand.mToggleFlash;
+        mCloseButton = mTabletButtonViewLand.mCloseButton;
+        mToggleCamera = mTabletButtonViewLand.mToggleCamera;
+        mFastCamLayout = mTabletButtonViewLand.mFastCamLayout;
+        mFastCamLabel = mTabletButtonViewLand.mFastCamLabel;
+        mFastCamIndicator = mTabletButtonViewLand.mFastCamIndicator;
+        mCameraLayout = mTabletButtonViewLand.mCameraLayout;
+        mCameraIndicator = mTabletButtonViewLand.mCameraIndicator;
+        mCameraLabel = mTabletButtonViewLand.mCameraLabel;
+        mScannerLayout = mTabletButtonViewLand.mScannerLayout;
+        mScannerIndicator = mTabletButtonViewLand.mScannerIndicator;
+        mScannerLabel = mTabletButtonViewLand.mScannerLabel;
+
+        // Setup the listeners again
+        setupListeners();
+
+        // Set the button states
+        if (mCameraMode != null) {
+            setCameraMode(mCameraMode);
+        }
+        if (mResolutionMode != null) {
+            setResolution(mResolutionMode);
+        }
+        if (mFlashMode != null) {
+            setFlashModeImage(mFlashMode);
+        }
+        setCameraButtonVisibility();
+        setFlashButtonVisibility();
+
+        // Animate the opacity of the mTableButtonView and the mTableButtonViewLand
+        mTabletButtonView.animate().alpha(0.0f).setDuration(300).start();
+        mTabletButtonViewLand.animate().alpha(1.0f).setDuration(300).start();
+
+        // Animate the opacity of the mLabelTouchTarget and mLabelTouchTargetLand
+        mLabelTouchTarget.animate().alpha(0.0f).setDuration(300).start();
+        mLabelTouchTargetLand.animate().alpha(1.0f).setDuration(300).start();
+    }
 
     /** A safe way to get an instance of the Camera object. */
     public Camera getCameraInstance() {
@@ -480,10 +688,16 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
                                 mPhonePosition = PORTRAIT_TOP_UP;
 
-                                // Set the icons for the mToggleResolution and mCloseButton
-                                setResolutionImage(mResolutionMode);
-                                mCloseButton.setImageResource(R.drawable.close_icon);
+                                // Show the mTabletButtonView for tablets
+                                if (useTabletLayout) {
+                                    showTabletButtonView();
+                                }
+                                else {
 
+                                    // Set the icons for the mToggleResolution and mCloseButton
+                                    setResolutionImage(mResolutionMode);
+                                    mCloseButton.setImageResource(R.drawable.close_icon);
+                                }
                             }
                             else if ((orientation < 315 && orientation >= 225) && !(mLastOrientation < 315 && mLastOrientation >= 225)) {
                                 rotationValue = 90;
@@ -495,9 +709,16 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
                                 mPhonePosition = LANDSCAPE_TOP_LEFT;
 
-                                // Set the icons for the mToggleResolution and mCloseButton
-                                mToggleResolution.setImageResource(R.drawable.close_icon);
-                                setResolutionImage(mResolutionMode);
+                                // Show the mTabletButtonViewLand for tablets
+                                if (useTabletLayout) {
+                                    showTabletButtonViewLand();
+                                }
+                                else {
+
+                                    // Set the icons for the mToggleResolution and mCloseButton
+                                    mToggleResolution.setImageResource(R.drawable.close_icon);
+                                    setResolutionImage(mResolutionMode);
+                                }
                             }
                             else if (mLastOrientation == OrientationEventListener.ORIENTATION_UNKNOWN) {
                                 rotationValue = 0;
@@ -925,7 +1146,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         // Determine whether the mToggleResolution button or the mCloseButton is currently controlling the resolution selection based on the
         // device orientation
         ImageButton resolutionButton = mToggleResolution;
-        if (mPhonePosition == LANDSCAPE_TOP_LEFT) {
+        if (mPhonePosition == LANDSCAPE_TOP_LEFT && !useTabletLayout) {
             resolutionButton = mCloseButton;
         }
 

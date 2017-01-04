@@ -34,7 +34,8 @@
         android:id="@+id/resolution_layout"
         android:background="#aa000000"
         android:layout_height="150dp"
-        android:layout_marginTop="-150dp">
+        android:layout_marginTop="-150dp"
+        android:clickable="true">
 
         <TextView
             android:id="@+id/resolution_title"
@@ -45,7 +46,7 @@
             android:gravity="center_vertical|center_horizontal"
             android:textStyle="normal"
             android:textSize="18sp"
-            />
+            android:clickable="false"/>
 
         <LinearLayout
             android:orientation="horizontal"
@@ -54,7 +55,8 @@
             android:gravity="center_vertical|center_horizontal"
             android:id="@+id/resolution_button_layout"
             android:layout_marginBottom="10dp"
-            android:layout_marginTop="10dp">
+            android:layout_marginTop="10dp"
+            android:clickable="true">
 
             <ImageButton
                 android:layout_height="match_parent"
@@ -127,7 +129,8 @@
         android:layout_width="150dp"
         android:layout_alignParentRight="true"
         android:id="@+id/resolution_layout_land"
-        android:layout_marginRight="-150dp">
+        android:layout_marginRight="-150dp"
+        android:clickable="true">
 
         <ImageButton
             android:layout_height="match_parent"
