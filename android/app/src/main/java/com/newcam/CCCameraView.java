@@ -2,6 +2,7 @@ package com.newcam;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -20,6 +21,7 @@ import java.io.File;
 
 public abstract class CCCameraView extends RelativeLayout {
 
+    private static final String APP_PACKAGE ="com.agilx.companycam";
     protected Context mContext;
 
     // Component props: values
@@ -49,6 +51,10 @@ public abstract class CCCameraView extends RelativeLayout {
     protected Activity getActivity(){
         ThemedReactContext context = (ThemedReactContext)this.getContext();
         return context.getCurrentActivity();
+    }
+
+    protected SharedPreferences getSharedPreferences() {
+        return getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
     }
 
     public abstract void releaseCamera();

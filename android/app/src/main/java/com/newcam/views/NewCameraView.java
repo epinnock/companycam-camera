@@ -54,9 +54,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
     private static String TAG = NewCameraView.class.getSimpleName();
 
-    private static final String APP_PACKAGE ="com.agilx.companycam";
-    private static final String OOME_STRING = "Out of memory!"; //TODO: getString(R.string.oome_camera);
-
     private static final String PREFS_FLASH_MODE = "PREFS_FLASH_MODE";
     private static final String PREFS_RESOLUTION_MODE = "PREFS_RESOLUTION_MODE";
     private static final String PREFS_CAMERA_MODE = "PREFS_CAMERA_MODE";
@@ -284,8 +281,8 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             mLabelTouchTarget.setClickable(true);
         }
 
-        // Set the place name label
-        mPlaceName.setText("This will be set later!!"); //TODO this is a placeholder for testing and should be removed
+        // Set the place name label--will be updated when props are received
+        mPlaceName.setText("Location");
 
         // Set the button orientations for the resolution layout
         setupResolutionLayout();
@@ -296,7 +293,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         initOrientationListener();
 
         // Get the saved settings from the SharedPreferences.  Restrict the possible flash modes to "torch" and "off".
-        SharedPreferences preferences = getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
+        SharedPreferences preferences = getSharedPreferences();
         mFlashMode = preferences.getString(PREFS_FLASH_MODE, "off");
         if (!(mFlashMode.equals("torch") || mFlashMode.equals("off"))) {
             mFlashMode.equals("off");
@@ -967,7 +964,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
                         System.out.println("Set EXIF location timestamp: [" + exifGPSTimestamp + "]");
                         //------------------------------------------------
 
-                        SharedPreferences preferences = getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
+                        SharedPreferences preferences = getSharedPreferences();
                         mFlashMode = preferences.getString(PREFS_FLASH_MODE, "auto");
                         exif.setAttribute(ExifInterface.TAG_FLASH, mFlashMode);
 
@@ -1062,7 +1059,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         mToggleFlash.setImageResource(imageRes);
 
         // Persist flash mode
-        SharedPreferences preferences = getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
+        SharedPreferences preferences = getSharedPreferences();
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(PREFS_FLASH_MODE, flashMode);
         editor.apply();
@@ -1218,7 +1215,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         }
 
         // Persist resolution mode
-        SharedPreferences preferences = getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
+        SharedPreferences preferences = getSharedPreferences();
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(PREFS_RESOLUTION_MODE, mResolutionMode);
         editor.apply();
@@ -1426,7 +1423,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
         // Save the camera mode
         mCameraMode = cameraMode;
-        SharedPreferences preferences = getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
+        SharedPreferences preferences = getSharedPreferences();
         SharedPreferences.Editor editor = preferences.edit();
         editor.putString(PREFS_CAMERA_MODE, cameraMode);
         editor.apply();
@@ -1636,7 +1633,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     private void uploadFastCamPhoto(File photo, int imgWidth, int imgHeight) {
 
         // If saveToPhone is set, then save the image to the device in addition to sending it to the server.
-        SharedPreferences preferences = getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
+        SharedPreferences preferences = getSharedPreferences();
         boolean saveToPhone = preferences.getBoolean(PhotoActions.PREF_KEY_SAVE_TO_PHONE, false);
         if (saveToPhone) {
 
