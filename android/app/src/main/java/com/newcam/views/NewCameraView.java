@@ -357,8 +357,8 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         }
 
         // The action for the close button depends on the orientation of the device because the close button and resolution button are
-        // reversed in portrait and landscape
-        if (mPhonePosition == PORTRAIT_TOP_UP) {
+        // reversed in portrait and landscape in the phone layout
+        if (mPhonePosition == PORTRAIT_TOP_UP || useTabletLayout) {
 
             // This is the resolution button action
             showResolutionLayout();
@@ -402,8 +402,8 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         }
 
         // The action for the close button depends on the orientation of the device because the close button and resolution button are
-        // reversed in portrait and landscape
-        if (mPhonePosition == PORTRAIT_TOP_UP) {
+        // reversed in portrait and landscape in the phone layout
+        if (mPhonePosition == PORTRAIT_TOP_UP || useTabletLayout) {
 
             // This is the close button action
             // Finish the activity
