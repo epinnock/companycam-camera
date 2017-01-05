@@ -28,14 +28,11 @@ import android.hardware.camera2.CaptureResult;
 import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.MeteringRectangle;
 import android.hardware.camera2.params.StreamConfigurationMap;
-import android.location.Location;
 import android.media.AudioManager;
-import android.media.ExifInterface;
 import android.media.Image;
 import android.media.ImageReader;
 import android.media.MediaActionSound;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
@@ -60,6 +57,7 @@ import android.widget.TextView;
 
 import com.newcam.CCCameraView;
 import com.newcam.R;
+import com.newcam.utils.ExifUtils;
 import com.notagilx.companycam.react_bridges.PhotoActions;
 import com.notagilx.companycam.util.LogUtil;
 import com.notagilx.companycam.util.SingleClickListener;
@@ -76,7 +74,6 @@ import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -283,8 +280,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     // The CLICK_REJECTION_INTERVAL is an amount of time in milliseconds that must elapse before a button click will be processed.
     // This is used to reject multiple clicks in quick succession.
     private static int CLICK_REJECTION_INTERVAL = 1500;
-
-    ExifInterface exif;
 
     // Permissions required to take a picture
     private static final String[] CAMERA_PERMISSIONS = {
@@ -2835,54 +2830,9 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
                 }
 
                 try {
-                    exif = new ExifInterface(photo.getPath());
-                    Location exifLoc = getExifLocation();
-
-                    //TODO: GPS location+timetamp: Move this to utils; maybe use Location.convert instead?
-                    //------------------------------------------------
-                    double latitude = Math.abs(exifLoc.getLatitude());
-                    double longitude = Math.abs(exifLoc.getLongitude());
-
-                    int num1Lat = (int)Math.floor(latitude);
-                    int num2Lat = (int)Math.floor((latitude - num1Lat) * 60);
-                    int num3Lat = (int)( (latitude - ((double)num1Lat+((double)num2Lat/60))) * 3600000 );
-
-                    int num1Lon = (int)Math.floor(longitude);
-                    int num2Lon = (int)Math.floor((longitude - num1Lon) * 60);
-                    int num3Lon = (int)( (longitude - ((double)num1Lon+((double)num2Lon/60))) * 3600000 );
-
-                    String exifLatStr = num1Lat+"/1,"+num2Lat+"/1,"+num3Lat+"/1000";
-                    String exifLatRef = (exifLoc.getLatitude() > 0) ? "N" : "S";
-                    exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE, exifLatStr);
-                    exif.setAttribute(ExifInterface.TAG_GPS_LATITUDE_REF, exifLatRef);
-
-                    String exifLonStr = num1Lon+"/1,"+num2Lon+"/1,"+num3Lon+"/1000";
-                    String exifLonRef = (exifLoc.getLongitude() > 0) ? "E" : "W";
-                    exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE, exifLonStr);
-                    exif.setAttribute(ExifInterface.TAG_GPS_LONGITUDE_REF, exifLonRef);
-
-                    System.out.println("Set EXIF location coords: [" + exifLatStr + "][" + exifLatRef + "] [" + exifLonStr + "][" + exifLonRef + "]");
-
-                    Calendar calendar = Calendar.getInstance();
-                    calendar.setTimeInMillis(exifLoc.getTime());
-                    int hourOfDay = calendar.get(Calendar.HOUR_OF_DAY);
-                    int minutes = calendar.get(Calendar.MINUTE);
-                    int seconds = calendar.get(Calendar.SECOND);
-
-                    String exifGPSTimestamp = hourOfDay + "/1," + minutes + "/1," + seconds + "/1";
-                    exif.setAttribute(ExifInterface.TAG_GPS_TIMESTAMP, exifGPSTimestamp);
-
-                    System.out.println("Set EXIF location timestamp: [" + exifGPSTimestamp + "]");
-                    //------------------------------------------------
-
                     SharedPreferences preferences = getSharedPreferences();
                     String flashMode = preferences.getString(PREFS_FLASH_MODE, "auto");
-                    exif.setAttribute(ExifInterface.TAG_FLASH, flashMode);
-
-                    exif.setAttribute(ExifInterface.TAG_MODEL, Build.MODEL);
-                    exif.setAttribute(ExifInterface.TAG_MAKE, Build.MANUFACTURER);
-
-                    exif.saveAttributes();
+                    ExifUtils.setAttributes(photo, getExifLocation(), flashMode);
                 } catch (IOException e) {
                     LogUtil.e(TAG, e.getLocalizedMessage());
                 }
