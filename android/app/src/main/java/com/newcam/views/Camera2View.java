@@ -219,10 +219,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     // The mCaptureButton allows the user to capture a photo
     private ImageButton mCaptureButton;
 
-    // The mPlaceName and mPlaceAddress text views hold the name and address of the project location
-    protected TextView mPlaceName;
-    protected TextView mPlaceAddress;
-
     // These views and text labels are for the camera options labels
     private LinearLayout mFastCamLayout;
     private ImageView mFastCamIndicator;
@@ -386,6 +382,22 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
             // Set the useTableLayout flag
             useTabletLayout = true;
 
+            // Add the click listener to the mLabelTouchTarget and mLabelTouchTargetLand
+            mLabelTouchTarget.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    labelTouch();
+                }
+            });
+            mLabelTouchTarget.setClickable(true);
+            mLabelTouchTargetLand.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    labelTouch();
+                }
+            });
+            mLabelTouchTargetLand.setClickable(true);
+
             // Show the mTableButtonView by default
             showTabletButtonView();
         }
@@ -394,6 +406,15 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
             // Set the gradient backgrounds for the layouts
             mTopLayout.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.transparent_gray_gradient_270));
             mBottomLayout.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.transparent_gray_gradient_90));
+
+            // Add the click listener to the mLabelTouchTarget
+            mLabelTouchTarget.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    labelTouch();
+                }
+            });
+            mLabelTouchTarget.setClickable(true);
         }
 
         // Set the place name label

@@ -249,6 +249,22 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             // Set the useTableLayout flag
             useTabletLayout = true;
 
+            // Add the click listener to the mLabelTouchTarget and mLabelTouchTargetLand
+            mLabelTouchTarget.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    labelTouch();
+                }
+            });
+            mLabelTouchTarget.setClickable(true);
+            mLabelTouchTargetLand.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    labelTouch();
+                }
+            });
+            mLabelTouchTargetLand.setClickable(true);
+
             // Show the mTableButtonView by default
             showTabletButtonView();
         }
@@ -257,6 +273,15 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             // Set the gradient backgrounds for the layouts
             mTopLayout.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.transparent_gray_gradient_270));
             mBottomLayout.setBackgroundDrawable(this.getResources().getDrawable(R.drawable.transparent_gray_gradient_90));
+
+            // Add the click listener to the mLabelTouchTarget
+            mLabelTouchTarget.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    labelTouch();
+                }
+            });
+            mLabelTouchTarget.setClickable(true);
         }
 
         // Set the place name label
