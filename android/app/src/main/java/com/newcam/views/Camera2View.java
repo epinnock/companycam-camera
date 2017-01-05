@@ -770,8 +770,8 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         }
 
         // The action for the close button depends on the orientation of the device because the close button and resolution button are
-        // reversed in portrait and landscape
-        if (mPhonePosition == PORTRAIT_TOP_UP) {
+        // reversed in portrait and landscape in the phone layout
+        if (mPhonePosition == PORTRAIT_TOP_UP || useTabletLayout) {
 
             // This is the resolution button action
             showResolutionLayout();
@@ -793,8 +793,8 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         }
 
         // The action for the close button depends on the orientation of the device because the close button and resolution button are
-        // reversed in portrait and landscape
-        if (mPhonePosition == PORTRAIT_TOP_UP) {
+        // reversed in portrait and landscape in the phone layout
+        if (mPhonePosition == PORTRAIT_TOP_UP || useTabletLayout) {
 
             // This is the close button action
             // Finish the activity
@@ -1132,13 +1132,24 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         }
 
         // Create the preview view and set it as the content of the activity.  Set the size of the SurfaceHolder to the chosen preview size
-        mPreview = new CameraPreview(getContext());
-        mPreview.getHolder().setFixedSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
-        mPreview.getHolder().addCallback(this);
-        if (mPreviewLayout == null) {
-            mPreviewLayout = (RelativeLayout) findViewById(R.id.camera_preview);
+        if (mPreview == null) {
+            mPreview = new CameraPreview(getContext());
+            mPreview.getHolder().setFixedSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
+            mPreview.getHolder().addCallback(this);
+            if (mPreviewLayout == null) {
+                mPreviewLayout = (RelativeLayout) findViewById(R.id.camera_preview);
+            }
+            mPreviewLayout.addView(mPreview);
         }
-        mPreviewLayout.addView(mPreview);
+        else {
+
+            // Set the flash mode and resolution mode images
+            setFlashModeImage(mFlashMode);
+            setResolutionImage(mResolutionMode);
+
+            // Initialize the camera
+            openCamera(mPreview.getHolder());
+        }
     }
 
     // This method sets up the camera outputs for the first camera of the chosen type; front- or rear-facing.
@@ -1595,7 +1606,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         closeCamera();
 
         // Initialize the camera again
-        mPreviewLayout.removeView(mPreview);
+        //mPreviewLayout.removeView(mPreview);
         createPreview();
     }
 
@@ -2033,7 +2044,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
             setResolutionImage(resolutionMode);
 
             // Initialize the camera again
-            mPreviewLayout.removeView(mPreview);
+            //mPreviewLayout.removeView(mPreview);
             createPreview();
         }
     }
