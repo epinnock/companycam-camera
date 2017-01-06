@@ -303,6 +303,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
 
         // Verify that the permissions exist in case user turned them off while on the camera preview
         // Close the activity if the permissions aren't available
+        //TODO: onClose prop may not be set yet
         if (!checkCameraPermissions()) {
             finishWithError("No camera permissions");
             return;
@@ -1123,7 +1124,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         catch (CameraAccessException cae) {
         }
 
-        // Create the preview view and set it as the content of the activity.  Set the size of the SurfaceHolder to the chosen preview size
+        // If necessary, create the preview view and set it as the content of the activity.  Set the size of the SurfaceHolder to the chosen preview size
         if (mPreview == null) {
             mPreview = new CameraPreview(getContext());
             mPreview.getHolder().setFixedSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
@@ -1870,6 +1871,10 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         focusParams.bottomMargin = previewHeight - (int)(y + (mFocusIndicatorView.getHeight()/2));
         mFocusIndicatorView.setLayoutParams(focusParams);
 
+	//TODO: this doesn't seem to help with misplaced indicator
+        //mFocusIndicatorView.requestLayout();
+        mPreview.requestLayout();
+
         // Set the mManualAutoFocus flag and then lock the autofocus
         mManualAutoFocus = true;
         lockFocusToRegion(mMeteringRect);
@@ -2410,6 +2415,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     private void openCamera(SurfaceHolder holder) {
 
         if (!checkCameraPermissions()) {
+            System.err.println("checkCameraPermissions returned false");
             return;
         }
 
@@ -2878,6 +2884,10 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     public void surfaceCreated(SurfaceHolder holder) {
 
         Log.d(TAG, "surfaceCreated");
+
+        if(mCaptureSession != null) {
+            mCaptureSession.close();
+        }
 
         // Set the SurfaceCreated flag
         mPreview.mSurfaceCreated = true;

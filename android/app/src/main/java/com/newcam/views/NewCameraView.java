@@ -98,7 +98,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     private final int HIGH_QUALITY = 80;
 
     private double zoomdistance;
-    ExifInterface exif;
 
     // Permissions required to take a picture
     private static final String[] CAMERA_PERMISSIONS = {
@@ -177,6 +176,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
         // Verify that the permissions exist in case user turned them off while on the camera preview
         // Close the activity if the permissions aren't available
+        //TODO: onClose prop may not be set yet
         if (!checkCameraPermissions()) {
             finishWithError("No camera permissions");
             return;
