@@ -346,7 +346,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         }
 
         // Finish the activity with a result
-        finishWithResult("label");
+        //finishWithResult("label"); //TODO: temporarily disabled
     }
 
     protected void toggleResolution() {
