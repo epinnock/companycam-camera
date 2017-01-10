@@ -99,12 +99,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
     private double zoomdistance;
 
-    // Permissions required to take a picture
-    private static final String[] CAMERA_PERMISSIONS = {
-            Manifest.permission.CAMERA,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-    };
-
     protected LinearLayout mLabelTouchTarget;
     protected LinearLayout mLabelTouchTargetLand;
     protected ImageButton mToggleResolution;
@@ -172,16 +166,8 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     }
 
     @Override
-    public void init(){
-
-        // Verify that the permissions exist in case user turned them off while on the camera preview
-        // Close the activity if the permissions aren't available
-        //TODO: onClose prop may not be set yet
-        if (!checkCameraPermissions()) {
-            finishWithError("No camera permissions");
-            return;
-        }
-
+    public void init(Context context){
+        
         // Get references to the subviews
         mPreviewLayout = (RelativeLayout) findViewById(R.id.camera_preview);
         mPlaceName = (TextView) findViewById(R.id.place_name);
@@ -228,9 +214,9 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
             // Create two TabletButtonViews
             LinearLayout.LayoutParams tabletParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-            mTabletButtonView = new TabletButtonView(mContext);
+            mTabletButtonView = new TabletButtonView(context);
             tabletButtonLayout.addView(mTabletButtonView, tabletParams);
-            mTabletButtonViewLand = new TabletButtonView(mContext);
+            mTabletButtonViewLand = new TabletButtonView(context);
             tableButtonLayoutLand.addView(mTabletButtonViewLand, tabletParams);
 
             // Set the layout resources for the two tablet button views
@@ -238,8 +224,8 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             mTabletButtonViewLand.layoutResourceID = R.layout.view_tablet_button_land;
 
             // Initialize the tablet button views
-            mTabletButtonView.initView(mContext);
-            mTabletButtonViewLand.initView(mContext);
+            mTabletButtonView.initView(context);
+            mTabletButtonViewLand.initView(context);
 
             // Set the useTableLayout flag
             useTabletLayout = true;
@@ -284,8 +270,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
         // Set the button orientations for the resolution layout
         setupResolutionLayout();
-
-        //mEventBus.register(this); //TODO
 
         // Initialize the orientation listener
         initOrientationListener();
@@ -935,7 +919,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
                     Log.d(TAG, "Error accessing file: " + e.getMessage());
                 } catch (OutOfMemoryError oome) {
                     Log.e(TAG, "OutOfMemoryError: " + oome.getMessage());
-                    //EventBus.getDefault().post(new OutOfMemoryEvent(OOME_STRING));
                     finishWithError("Out of memory: " + oome.getMessage());
                 } finally {
                     if (bPhoto != null) {
@@ -1570,16 +1553,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
                 toggleCameraTapped();
             }
         });
-    }
-
-    private boolean checkCameraPermissions() {
-        for (String permission : CAMERA_PERMISSIONS) {
-            int result = ContextCompat.checkSelfPermission(getContext(), permission);
-            if (result != PackageManager.PERMISSION_GRANTED) {
-                return false;
-            }
-        }
-        return true;
     }
 
     // This method uploads photos taken while in FastCam mode

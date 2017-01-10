@@ -1,9 +1,14 @@
 package com.newcam;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.location.Location;
+import android.support.v4.content.ContextCompat;
+import android.view.View;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -22,7 +27,12 @@ import java.io.File;
 public abstract class CCCameraView extends RelativeLayout {
 
     private static final String APP_PACKAGE ="com.agilx.companycam";
-    protected Context mContext;
+
+    // Permissions required to take a picture
+    private static final String[] CAMERA_PERMISSIONS = {
+            Manifest.permission.CAMERA,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+    };
 
     // Component props: values
     protected String placeName;
@@ -41,12 +51,29 @@ public abstract class CCCameraView extends RelativeLayout {
 
     public CCCameraView(Context context) {
         super(context);
-        mContext = context;
-        inflate(context, R.layout.view_cccamera, this);
-        init();
+
+        // Request/verify permissions before initializing
+        if(checkCameraPermissions()){
+            inflate(context, R.layout.view_cccamera, this);
+            init(context);
+        }else{
+            System.err.println("No camera permissions");
+
+            // TODO: the props don't seem to be set at this point (no @ReactProp method for callbacks...)
+            // Inflate a little error message/close button layout in this case...
+            inflate(context, R.layout.view_nocamera, this);
+
+            Button exitButton = (Button) findViewById(R.id.exit_button);
+            exitButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    propOnClose("No camera permissions", "error");
+                }
+            });
+        }
     }
 
-    public abstract void init();
+    public abstract void init(Context context);
 
     protected Activity getActivity(){
         ThemedReactContext context = (ThemedReactContext)this.getContext();
@@ -57,13 +84,26 @@ public abstract class CCCameraView extends RelativeLayout {
         return getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
     }
 
+    // This method returns a boolean that describes whether or not each of the necessary camera permissions has been granted.
+    protected boolean checkCameraPermissions() {
+        for (String permission : CAMERA_PERMISSIONS) {
+            int result = ContextCompat.checkSelfPermission(getContext(), permission);
+            if (result != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public abstract void releaseCamera();
 
     protected void finishWithError(String errmsg){
+        releaseCamera();
         propOnClose(errmsg, "error");
     }
 
     protected void finishWithResult(String button){
+        releaseCamera();
         propOnClose("", button);
     }
 
@@ -103,9 +143,7 @@ public abstract class CCCameraView extends RelativeLayout {
     }
 
     protected void doPhotoTaken(File imgFile, int imgWidth, int imgHeight){
-        //TODO: just testing, please delete me later!
-        System.err.println("PHOTO TAKEN: " + imgFile.getAbsolutePath());
-
+        //invoke photoTaken prop
         WritableMap event = Arguments.createMap();
         event.putString("filename", imgFile.getAbsolutePath());
         event.putInt("imgWidth", imgWidth);
@@ -114,9 +152,7 @@ public abstract class CCCameraView extends RelativeLayout {
     }
 
     protected void doPhotoAccepted(File imgFile, int imgWidth, int imgHeight){
-        //TODO: just testing, please delete me later!
-        System.err.println("PHOTO ACCEPTED: " + imgFile.getAbsolutePath());
-
+        // Invoke photoAccepted prop
         WritableMap event = Arguments.createMap();
         event.putString("filename", imgFile.getAbsolutePath());
         event.putInt("imgWidth", imgWidth);
@@ -125,13 +161,7 @@ public abstract class CCCameraView extends RelativeLayout {
     }
 
     private void propOnClose(String errmsg, String button) {
-
-        // Release the camera
-        releaseCamera();
-
-        //TODO: just testing, please delete me later!
-        System.err.println("ON CLOSE: [" + errmsg + "] [" + button + "]");
-
+        // Invoke onClose prop
         WritableMap event = Arguments.createMap();
         event.putString("errmsg", errmsg);
         event.putString("button", button);
@@ -143,19 +173,15 @@ public abstract class CCCameraView extends RelativeLayout {
     //-------------------------------------
     public void setStoragePath(String str){
         this.appPhotoDirectory = new File(str);
+
+        // Quit with error if invalid path
         if(!appPhotoDirectory.exists()){
             finishWithError("Photo directory does not exist");
         }
-
-        //TODO: just testing, please delete me later!
-        System.err.println("[CCC] Set storage path: " + appPhotoDirectory.getAbsolutePath());
     }
 
     public void setProjectName(String str){
         placeName = str;
-
-        //TODO: just testing, please delete me later!
-        System.err.println("[CCC] Set project name: " + str);
 
         // Set the mPlaceName label
         if (mPlaceName != null) {
@@ -166,9 +192,6 @@ public abstract class CCCameraView extends RelativeLayout {
     public void setProjectAddress(String str){
         placeAddress = str;
 
-        //TODO: just testing, please delete me later!
-        System.err.println("[CCC] Set project address: " + str);
-
         // Set the mPlaceAddress label
         if (mPlaceAddress != null) {
             mPlaceAddress.setText(placeAddress);
@@ -177,23 +200,14 @@ public abstract class CCCameraView extends RelativeLayout {
 
     public void setExifLat(double val){
         this.propExifLocationLatitude = val;
-
-        //TODO: just testing, please delete me later!
-        System.err.println("[CCC] Set EXIF latitude: " + val);
     }
 
     public void setExifLon(double val){
         this.propExifLocationLongitude = val;
-
-        //TODO: just testing, please delete me later!
-        System.err.println("[CCC] Set EXIF longitude: " + val);
     }
 
     public void setExifLocTimestamp(double val){
         this.propExifLocationTimestamp = (long)val;
-
-        //TODO: just testing, please delete me later!
-        System.err.println("[CCC] Set EXIF location timestamp: " + val);
     }
     //-------------------------------------
 }

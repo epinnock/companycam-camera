@@ -24,7 +24,6 @@ import javax.annotation.Nullable;
 
 public class CCCameraManager extends SimpleViewManager<CCCameraView> {
 
-    public ThemedReactContext mContext;
     public static final String REACT_CLASS = "CompanyCamCamera";
 
     @Override
@@ -34,10 +33,9 @@ public class CCCameraManager extends SimpleViewManager<CCCameraView> {
 
     @Override
     protected CCCameraView createViewInstance(ThemedReactContext context) {
-        mContext = context;
 
         // Return the appropriate view class according to the device's version and available cameras
-        if (android.os.Build.VERSION.SDK_INT >= 21 && hasNonLegacyCamera()) {
+        if (android.os.Build.VERSION.SDK_INT >= 21 && hasNonLegacyCamera(context)) {
             return new Camera2View(context);
         }
         else {
@@ -90,12 +88,12 @@ public class CCCameraManager extends SimpleViewManager<CCCameraView> {
 
     // This method checks if there's at least one non-LEGACY rear-facing camera available on this device
     @TargetApi(21)
-    public boolean hasNonLegacyCamera() {
+    public static boolean hasNonLegacyCamera(ThemedReactContext context) {
 
         boolean foundNonLegacyCamera = false;
 
         // At least SDK 21 is required to support the camera2 API
-        CameraManager manager = (CameraManager) mContext.getCurrentActivity().getSystemService(Context.CAMERA_SERVICE);
+        CameraManager manager = (CameraManager) context.getCurrentActivity().getSystemService(Context.CAMERA_SERVICE);
         try {
             for (String cameraId : manager.getCameraIdList()) {
                 CameraCharacteristics cc = manager.getCameraCharacteristics(cameraId);
