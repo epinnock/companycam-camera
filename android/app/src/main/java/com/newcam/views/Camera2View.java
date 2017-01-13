@@ -288,7 +288,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     private Handler mBackgroundHandler;
 
     // The mCameraClosedCallback is a string that describes whether or not a specific callback should execute after the camera is successfully closed
-    private String mCameraClosedCallback;
+    private String mCameraClosedCallback = "none";
 
 
     public Camera2View(Context context) { super(context); }
@@ -437,9 +437,11 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
                 mCameraOpenCloseLock.release();
 
                 // If there's a callback to execute after the camera is closed, then execute it and reset the mCameraClosedCallback string
-                if (mCameraClosedCallback.equals("openCamera")) {
-                    mCameraClosedCallback = "";
-                    openCamera(mPreview.getHolder());
+                if(mCameraClosedCallback != null){ 
+                  if (mCameraClosedCallback.equals("openCamera")) {
+                      mCameraClosedCallback = "";
+                      openCamera(mPreview.getHolder());
+                  }
                 }
             }
 
