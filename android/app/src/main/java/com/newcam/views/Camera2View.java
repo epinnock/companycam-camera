@@ -287,6 +287,9 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     // The mBackgroundHandler handles tasks running in the background.
     private Handler mBackgroundHandler;
 
+    // The mCameraClosedCallback is a string that describes whether or not a specific callback should execute after the camera is successfully closed
+    private String mCameraClosedCallback;
+
 
     public Camera2View(Context context) { super(context); }
 
@@ -432,6 +435,12 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
                 System.out.println("mStateCallback onClosed called");
 
                 mCameraOpenCloseLock.release();
+
+                // If there's a callback to execute after the camera is closed, then execute it and reset the mCameraClosedCallback string
+                if (mCameraClosedCallback.equals("openCamera")) {
+                    mCameraClosedCallback = "";
+                    openCamera(mPreview.getHolder());
+                }
             }
 
             @Override
@@ -1141,8 +1150,9 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
             setFlashModeImage(mFlashMode);
             setResolutionImage(mResolutionMode);
 
-            // Initialize the camera
-            openCamera(mPreview.getHolder());
+            // Initialize the camera again by closing the current camera and opening the new one after the onClosed camera state callback has executed
+            mCameraClosedCallback = "openCamera";
+            closeCamera();
         }
     }
 
@@ -1595,9 +1605,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
 
         // Reset the current zoom level
         mCurrentZoomLevel = 1.0;
-
-        // Close the current camera
-        closeCamera();
 
         // Initialize the camera again
         //mPreviewLayout.removeView(mPreview);
