@@ -25,6 +25,7 @@ import javax.annotation.Nullable;
 public class CCCameraManager extends SimpleViewManager<CCCameraView> {
 
     public static final String REACT_CLASS = "CompanyCamCamera";
+    public CCCameraView currentView;
 
     @Override
     public String getName() {
@@ -34,13 +35,23 @@ public class CCCameraManager extends SimpleViewManager<CCCameraView> {
     @Override
     protected CCCameraView createViewInstance(ThemedReactContext context) {
 
+        // If there's a current CCCameraView already instantiated, remove its lifecycleListener from the context
+        if (currentView != null && currentView.lifecycleListener != null) {
+            context.removeLifecycleEventListener(currentView.lifecycleListener);
+        }
+
         // Return the appropriate view class according to the device's version and available cameras
         if (android.os.Build.VERSION.SDK_INT >= 21 && hasNonLegacyCamera(context)) {
-            return new Camera2View(context);
+            currentView = new Camera2View(context);
         }
         else {
-            return new NewCameraView(context);
+            currentView = new NewCameraView(context);
         }
+
+        // After instantiating a new view, add its liefcycleListener to the context
+        context.addLifecycleEventListener(currentView.lifecycleListener);
+
+        return currentView;
     }
 
     @ReactProp(name = "storagePath")

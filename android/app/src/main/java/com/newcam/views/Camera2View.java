@@ -55,6 +55,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.facebook.react.bridge.LifecycleEventListener;
 import com.newcam.CCCameraView;
 import com.newcam.R;
 import com.newcam.utils.ExifUtils;
@@ -725,6 +726,26 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         // Set the visibility of the camera button
         setCameraButtonVisibility();
         //-------------------------------------
+
+        lifecycleListener = new LifecycleEventListener() {
+            @Override
+            public void onHostResume() {
+                System.out.println("onHostResume called in Camera2View");
+                createPreview();
+            }
+
+            @Override
+            public void onHostPause() {
+                System.out.println("onHostPause called in Camera2View");
+                releaseCamera();
+            }
+
+            @Override
+            public void onHostDestroy() {
+                System.out.println("onHostDestroy called in Camera2View");
+                releaseCamera();
+            }
+        };
     }
 
     //TODO
@@ -763,6 +784,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
 
     @Override
     public void releaseCamera() {
+        mCameraClosedCallback = "";
         closeCamera();
     }
 
@@ -2911,6 +2933,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         LogUtil.e(TAG, "surfaceDestroyed was called");
 
         if (mCamera != null) {
+            mCameraClosedCallback = "";
             closeCamera();
             LogUtil.e(TAG, "The camera was released");
         }
