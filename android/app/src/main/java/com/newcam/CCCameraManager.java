@@ -49,7 +49,9 @@ public class CCCameraManager extends SimpleViewManager<CCCameraView> {
         }
 
         // After instantiating a new view, add its liefcycleListener to the context
-        context.addLifecycleEventListener(currentView.lifecycleListener);
+        if (currentView != null && currentView.lifecycleListener != null) {
+            context.addLifecycleEventListener(currentView.lifecycleListener);
+        }
 
         return currentView;
     }
