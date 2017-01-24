@@ -282,6 +282,9 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     // This is used to reject multiple clicks in quick succession.
     private static int CLICK_REJECTION_INTERVAL = 1500;
 
+    //TODO: only re-acquire the camera on onHostResume if onHostPause has occurred
+    private boolean hostHasPausedWithoutResume = false;
+
     // The mBackgroundThread is an additional thread for running tasks that shouldn't block the UI.
     private HandlerThread mBackgroundThread;
 
@@ -715,6 +718,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         mToggleCamera.setRotation(rotationValue);
 
         // Create the camera preview
+        System.err.println("[DEBUG] createPreview being called - Constructor"); //TODO
         createPreview();
 
         // Setup all the button listeners
@@ -731,13 +735,20 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
             @Override
             public void onHostResume() {
                 System.out.println("onHostResume called in Camera2View");
-                createPreview();
+                if(hostHasPausedWithoutResume){
+                    hostHasPausedWithoutResume = false;
+                    createPreview();
+                    System.err.println("[DEBUG] createPreview IS being called - onHostResume"); //TODO
+                }else{
+                    System.err.println("[DEBUG] createPreview NOT being called - onHostResume"); //TODO
+                }
             }
 
             @Override
             public void onHostPause() {
                 System.out.println("onHostPause called in Camera2View");
                 releaseCamera();
+                hostHasPausedWithoutResume = true;
             }
 
             @Override
