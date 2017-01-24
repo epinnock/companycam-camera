@@ -715,6 +715,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         mToggleCamera.setRotation(rotationValue);
 
         // Create the camera preview
+        System.err.println("[DEBUG] createPreview being called - Constructor"); //TODO
         createPreview();
 
         // Setup all the button listeners
@@ -731,6 +732,7 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
             @Override
             public void onHostResume() {
                 System.out.println("onHostResume called in Camera2View");
+                System.err.println("[DEBUG] createPreview being called - onHostResume"); //TODO
                 createPreview();
             }
 

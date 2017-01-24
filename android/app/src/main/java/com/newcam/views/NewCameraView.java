@@ -292,6 +292,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         mToggleFlash.setRotation(rotationValue);
         mToggleCamera.setRotation(rotationValue);
 
+        System.err.println("[DEBUG] startPreview being called - Constructor"); //TODO
         startPreview();
 
         // Set the visibility of the flash button
@@ -304,6 +305,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             @Override
             public void onHostResume() {
                 System.out.println("onHostResume called in NewCameraView");
+                System.err.println("[DEBUG] startPreview being called - onHostResume"); //TODO
                 startPreview();
             }
 
