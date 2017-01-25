@@ -1878,6 +1878,9 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
 
         LogUtil.e(TAG, "handleFocus was called");
 
+        // Define the size of the FocusIndicatorView as 80dp
+        float focusIndicatorSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 80, getResources().getDisplayMetrics());
+
         // Get the first pointer for this event
         int pointerId = event.getPointerId(0);
         int pointerIndex = event.findPointerIndex(pointerId);
@@ -1890,13 +1893,12 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         int previewWidth = mPreviewLayout.getWidth();
         int previewHeight = mPreviewLayout.getHeight();
 
-        // Since the Camera2Activity is defined in landscape, the x and y coordinates from the touch event need to be converted to
-        // normalized portrait coordinates for the regionsForNormalizedCoord() method.
-        float n_x = 1.0f - y/previewHeight;
+        // The x and y coordinates from the touch event need to be converted to normalized portrait coordinates for the regionsForNormalizedCoord() method.
+        float n_y = y/previewHeight;
+        float n_x = x/previewWidth;
         if (mCameraType == CameraMetadata.LENS_FACING_FRONT) {
-            n_x = y/previewHeight;
+            n_x = 1.0f - x/previewWidth;
         }
-        float n_y = x/previewWidth;
 
         System.out.println("handleFocus called and n_x = " + n_x + " n_y = " + n_y);
         System.out.println("handleFocus called and previewWidth = " + previewWidth + " previewHeight = " + previewHeight);
@@ -1907,15 +1909,12 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         mMeteringRect = regionsForNormalizedCoord(n_x, n_y, 0.1f, cropRegion, sensorOrientation);
 
         // Set the position of the mFocusIndicatorView based on the touch point
-        RelativeLayout.LayoutParams focusParams = (RelativeLayout.LayoutParams) mFocusIndicatorView.getLayoutParams();
-        focusParams.leftMargin = (int)(x - (mFocusIndicatorView.getWidth()/2));
-        focusParams.topMargin = (int)(y - (mFocusIndicatorView.getHeight()/2));
-        focusParams.rightMargin = previewWidth - (int)(x + (mFocusIndicatorView.getWidth()/2));
-        focusParams.bottomMargin = previewHeight - (int)(y + (mFocusIndicatorView.getHeight()/2));
-        mFocusIndicatorView.setLayoutParams(focusParams);
+        mFocusIndicatorView.left = (int)(x - (focusIndicatorSize/2));
+        mFocusIndicatorView.right = (int)(x + (focusIndicatorSize/2));
+        mFocusIndicatorView.top = (int)(y - (focusIndicatorSize/2));
+        mFocusIndicatorView.bottom = (int)(y + (focusIndicatorSize/2));
 
-	//TODO: this doesn't seem to help with misplaced indicator
-        //mFocusIndicatorView.requestLayout();
+        mFocusIndicatorView.requestLayout();
         mPreview.requestLayout();
 
         // Set the mManualAutoFocus flag and then lock the autofocus

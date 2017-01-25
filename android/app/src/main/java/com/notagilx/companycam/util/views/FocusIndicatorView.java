@@ -17,6 +17,10 @@ import android.view.View;
 public class FocusIndicatorView extends View {
 
     public float radius = 0.5f;
+    public int top;
+    public int bottom;
+    public int left;
+    public int right;
 
     public FocusIndicatorView(Context context) {
         super(context);
@@ -65,5 +69,24 @@ public class FocusIndicatorView extends View {
             p.setShader(new RadialGradient(width/2.0f, height/2.0f, width*(radius/2.0f), Color.TRANSPARENT, 0x88ffffff, Shader.TileMode.MIRROR));
             canvas.drawArc(interiorRect, 0, 360, true, p);
         }
+    }
+
+    private final Runnable measureAndLayout = new Runnable() {
+        @Override
+        public void run() {
+            measure(
+                    MeasureSpec.makeMeasureSpec(getWidth(), MeasureSpec.EXACTLY),
+                    MeasureSpec.makeMeasureSpec(getHeight(), MeasureSpec.EXACTLY));
+            layout(left, top, right, bottom);
+        }
+    };
+
+    @Override
+    public void requestLayout() {
+        super.requestLayout();
+
+        // Since React Native overrides onLayout in its ViewGroups, a layout pass never
+        // happens after a call to requestLayout, so we simulate one here.
+        post(measureAndLayout);
     }
 }
