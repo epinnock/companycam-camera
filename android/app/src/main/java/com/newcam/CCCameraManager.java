@@ -24,6 +24,8 @@ import javax.annotation.Nullable;
 
 public class CCCameraManager extends SimpleViewManager<CCCameraView> {
 
+    private static final boolean FORCE_CAMERA_1 = true;
+
     public static final String REACT_CLASS = "CompanyCamCamera";
     public CCCameraView currentView;
 
@@ -41,7 +43,7 @@ public class CCCameraManager extends SimpleViewManager<CCCameraView> {
         }
 
         // Return the appropriate view class according to the device's version and available cameras
-        if (android.os.Build.VERSION.SDK_INT >= 21 && hasNonLegacyCamera(context)) {
+        if (!FORCE_CAMERA_1 && android.os.Build.VERSION.SDK_INT >= 21 && hasNonLegacyCamera(context)) {
             currentView = new Camera2View(context);
         }
         else {

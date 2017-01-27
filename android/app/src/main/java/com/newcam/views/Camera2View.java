@@ -59,6 +59,7 @@ import com.facebook.react.bridge.LifecycleEventListener;
 import com.newcam.CCCameraView;
 import com.newcam.R;
 import com.newcam.utils.ExifUtils;
+import com.newcam.utils.PhotoUtils;
 import com.notagilx.companycam.react_bridges.PhotoActions;
 import com.notagilx.companycam.util.LogUtil;
 import com.notagilx.companycam.util.SingleClickListener;
@@ -2842,8 +2843,13 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
 
                 Log.d(TAG, "Before cropping the photo is " + bPhoto.getWidth() + " x " + bPhoto.getHeight());
 
+                // Get the height and width of the screen in portrait coordinates (where height > width)
+                //TODO: I guess this should really be the view size and not the screen size?
+                double screenWidth = (double) getWidth(); //CompanyCamApplication.getInstance().getScreenPortraitPixelWidth();
+                double screenHeight = (double) getHeight(); //CompanyCamApplication.getInstance().getScreenPortraitPixelHeight();
+
                 // Crop the image to the screen aspect ratio
-                bPhoto = cropBitmapToScreen(bPhoto);
+                bPhoto = PhotoUtils.cropBitmapToScreen(bPhoto, screenWidth, screenHeight);
 
                 Log.d(TAG, "After cropping the photo is " + bPhoto.getWidth() + " x " + bPhoto.getHeight());
 
@@ -2968,66 +2974,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
 
         // start preview with new settings
         //createPreview();
-    }
-
-    // This method crops the given photo to have the same aspect ratio as the device screen
-    private Bitmap cropBitmapToScreen(Bitmap bPhoto) {
-
-        // Get the height and width of the screen in portrait coordinates (where height > width)
-        //TODO: I guess this should really be the view size and not the screen size?
-        double screenWidth = (double) getWidth(); //CompanyCamApplication.getInstance().getScreenPortraitPixelWidth();
-        double screenHeight = (double) getHeight(); //CompanyCamApplication.getInstance().getScreenPortraitPixelHeight();
-
-        // Calculate the aspect ratio of the screen
-        double screenAspectRatio = screenHeight/screenWidth;
-
-        // Get the height and width of the bitmap in portrait coordinates (where height > width)
-        double bitmapWidth = Math.min(bPhoto.getWidth(), bPhoto.getHeight());
-        double bitmapHeight = Math.max(bPhoto.getWidth(), bPhoto.getHeight());
-
-        // Calculate the aspect ratio of the bitmap
-        double bitmapAspectRatio = bitmapHeight/bitmapWidth;
-
-        // Crop the bitmap evenly so that its aspect ratio matches the screen aspect ratio
-        int newWidth = (int) bitmapWidth;
-        int newHeight = (int) bitmapHeight;
-        if (bitmapAspectRatio > screenAspectRatio) {
-            newHeight = (int) (screenAspectRatio * newWidth);
-        }
-        else {
-            newWidth = (int) (newHeight / screenAspectRatio);
-        }
-
-        int offsetX = ((int)bitmapWidth - newWidth)/2;
-        int offsetY = ((int)bitmapHeight - newHeight)/2;
-
-        // Double check to make sure that the crop region is smaller than the original bitmap.  Some devices with an exact 16x9 screen
-        // may throw an exception when trying to crop 0 pixels off of the image.
-        if (screenAspectRatio != bitmapAspectRatio && offsetX + newWidth <= (int)bitmapWidth && offsetY + newHeight <= (int)bitmapHeight) {
-
-            // For some devices, the x,y coordinates of the bitmap change relative to the width and height that are returned by
-            // bitmap.getWidth() and getHeight() when the device is rotated.  If this happens, then trying to create the new bitmap
-            // will throw an IllegalArgumentException.  Catch that exception and try to reverse the coordinates if necessary
-            try {
-                return Bitmap.createBitmap(bPhoto, offsetX, offsetY, newWidth, newHeight);
-            }
-            catch (IllegalArgumentException iae) {
-
-                // Try reversing the x,y coordinates
-                try {
-                    return Bitmap.createBitmap(bPhoto, offsetY, offsetX, newHeight, newWidth);
-                }
-                catch (IllegalArgumentException iae2) {
-
-                    // If an IllegalArgumentException is still thrown, then simply return the original bitmap
-                    return bPhoto;
-                }
-            }
-
-        }
-        else {
-            return bPhoto;
-        }
     }
 
     // This method uploads photos taken while in FastCam mode

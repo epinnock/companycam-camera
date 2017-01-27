@@ -33,6 +33,7 @@ import com.facebook.react.bridge.LifecycleEventListener;
 import com.newcam.CCCameraView;
 import com.newcam.R;
 import com.newcam.utils.ExifUtils;
+import com.newcam.utils.PhotoUtils;
 import com.notagilx.companycam.react_bridges.PhotoActions;
 import com.notagilx.companycam.util.LogUtil;
 import com.notagilx.companycam.util.SingleClickListener;
@@ -907,7 +908,23 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
                     Matrix matrix = new Matrix();
                     matrix.postRotate(rotation);
+
+                    Log.d(TAG, "calculations done, ready to rotate");
                     bPhoto = Bitmap.createBitmap(bPhoto, 0, 0, bPhoto.getWidth(), bPhoto.getHeight(), matrix, true);
+
+                    Log.d(TAG, "Before cropping the photo is " + bPhoto.getWidth() + " x " + bPhoto.getHeight());
+
+                    // Get the height and width of the screen in portrait coordinates (where height > width)
+                    //TODO: I guess this should really be the view size and not the screen size?
+                    double screenWidth = (double) getWidth(); //CompanyCamApplication.getInstance().getScreenPortraitPixelWidth();
+                    double screenHeight = (double) getHeight(); //CompanyCamApplication.getInstance().getScreenPortraitPixelHeight();
+
+                    // Crop the image to the screen aspect ratio
+                    bPhoto = PhotoUtils.cropBitmapToScreen(bPhoto, screenWidth, screenHeight);
+
+                    Log.d(TAG, "After cropping the photo is " + bPhoto.getWidth() + " x " + bPhoto.getHeight());
+
+                    Log.d(TAG, "bPhoto rotated and ready for storage.");
 
                     File photo = getPhotoPath();
                     if (photo.exists()) {
