@@ -55,7 +55,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.facebook.react.bridge.LifecycleEventListener;
 import com.newcam.CCCameraView;
 import com.newcam.R;
 import com.newcam.utils.ExifUtils;
@@ -282,9 +281,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     // The CLICK_REJECTION_INTERVAL is an amount of time in milliseconds that must elapse before a button click will be processed.
     // This is used to reject multiple clicks in quick succession.
     private static int CLICK_REJECTION_INTERVAL = 1500;
-
-    //TODO: only re-acquire the camera on onHostResume if onHostPause has occurred
-    private boolean hostHasPausedWithoutResume = false;
 
     // The mBackgroundThread is an additional thread for running tasks that shouldn't block the UI.
     private HandlerThread mBackgroundThread;
@@ -731,33 +727,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         // Set the visibility of the camera button
         setCameraButtonVisibility();
         //-------------------------------------
-
-        lifecycleListener = new LifecycleEventListener() {
-            @Override
-            public void onHostResume() {
-                System.out.println("onHostResume called in Camera2View");
-                if(hostHasPausedWithoutResume){
-                    hostHasPausedWithoutResume = false;
-                    createPreview();
-                    System.err.println("[DEBUG] createPreview IS being called - onHostResume"); //TODO
-                }else{
-                    System.err.println("[DEBUG] createPreview NOT being called - onHostResume"); //TODO
-                }
-            }
-
-            @Override
-            public void onHostPause() {
-                System.out.println("onHostPause called in Camera2View");
-                releaseCamera();
-                hostHasPausedWithoutResume = true;
-            }
-
-            @Override
-            public void onHostDestroy() {
-                System.out.println("onHostDestroy called in Camera2View");
-                releaseCamera();
-            }
-        };
     }
 
     //TODO
@@ -792,6 +761,11 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
     public void labelTouch() {
         // Finish the activity with a result
         //finishWithResult("label"); //TODO: temporarily disabled
+    }
+
+    @Override
+    public void startCamera() {
+        createPreview();
     }
 
     @Override

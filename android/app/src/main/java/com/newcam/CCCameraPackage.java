@@ -18,7 +18,7 @@ public class CCCameraPackage implements ReactPackage {
 
     @Override
     public List<NativeModule> createNativeModules(ReactApplicationContext reactContext) {
-        return Collections.emptyList();
+        return Collections.<NativeModule>singletonList(new CCCameraModule(reactContext));
     }
 
     @Override

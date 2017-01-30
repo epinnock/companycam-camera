@@ -27,7 +27,8 @@ public class CCCameraManager extends SimpleViewManager<CCCameraView> {
     private static final boolean FORCE_CAMERA_1 = true;
 
     public static final String REACT_CLASS = "CompanyCamCamera";
-    public CCCameraView currentView;
+
+    private static CCCameraView latestView;
 
     @Override
     public String getName() {
@@ -37,25 +38,19 @@ public class CCCameraManager extends SimpleViewManager<CCCameraView> {
     @Override
     protected CCCameraView createViewInstance(ThemedReactContext context) {
 
-        // If there's a current CCCameraView already instantiated, remove its lifecycleListener from the context
-        if (currentView != null && currentView.lifecycleListener != null) {
-            context.removeLifecycleEventListener(currentView.lifecycleListener);
-        }
-
         // Return the appropriate view class according to the device's version and available cameras
         if (!FORCE_CAMERA_1 && android.os.Build.VERSION.SDK_INT >= 21 && hasNonLegacyCamera(context)) {
-            currentView = new Camera2View(context);
+            latestView = new Camera2View(context);
         }
         else {
-            currentView = new NewCameraView(context);
+            latestView = new NewCameraView(context);
         }
 
-        // After instantiating a new view, add its liefcycleListener to the context
-        if (currentView != null && currentView.lifecycleListener != null) {
-            context.addLifecycleEventListener(currentView.lifecycleListener);
-        }
+        return latestView;
+    }
 
-        return currentView;
+    public static CCCameraView getLatestView(){
+        return latestView;
     }
 
     @ReactProp(name = "storagePath")
