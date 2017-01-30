@@ -292,9 +292,8 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         mToggleFlash.setRotation(rotationValue);
         mToggleCamera.setRotation(rotationValue);
 
-        //TODO: Only start when setActive called
-        //System.err.println("[DEBUG] startPreview being called - Constructor"); //TODO
-        //startPreview();
+        System.err.println("[DEBUG] startPreview being called - Constructor"); //TODO
+        startPreview();
 
         // Set the visibility of the flash button
         setFlashButtonVisibility();
@@ -663,6 +662,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     @Override
     public void releaseCamera() {
 
+        System.err.println("[NewCameraView] Releasing camera");
         if (mCamera != null) {
 
             // Close the current camera
@@ -670,6 +670,9 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             mCamera.setPreviewCallback(null);
             mCamera.release();
             mCamera = null;
+            System.err.println("[NewCameraView] Success!");
+        }else {
+            System.err.println("[NewCameraView] Nothing to release!");
         }
     }
 
@@ -754,6 +757,8 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     }
 
     private void startPreview() {
+        System.err.println("[NewCameraView] Starting preview");
+
         // Create an instance of Camera
         mCamera = getCameraInstance();
 
@@ -761,11 +766,13 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
 
             // Initialize the camera for the preview
             initializeCameraForPreview();
+            System.err.println("[NewCameraView] Success!");
         }
         else {
 
             // Finish with an error describing that the camera is already in use
             finishWithError("camera in use");
+            System.err.println("[NewCameraView] Camera already in use!");
         }
     }
 

@@ -77,28 +77,28 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
     @ReactMethod
     public void setActive() {
         printDebug("setActive called");
-        CCCameraView camView = CCCameraManager.getLatestView();
+        /*CCCameraView camView = CCCameraManager.getLatestView();
         if(camView == null){
             printDebug("No CCCameraView instance; failed");
             return;
         }
+        camView.startCamera();*/
 
         isActive = true;
-        camView.startCamera();
         printDebug("Active status: " + (isActive ? "Active" : "Inactive"));
     }
 
     @ReactMethod
     public void setInactive() {
         printDebug("setInactive called");
-        CCCameraView camView = CCCameraManager.getLatestView();
+        /*CCCameraView camView = CCCameraManager.getLatestView();
         if(camView == null) {
             printDebug("No CCCameraView instance; failed");
             return;
         }
+        camView.releaseCamera();*/
 
         isActive = false;
-        camView.releaseCamera();
         printDebug("Active status: " + (isActive ? "Active" : "Inactive"));
     }
 }

@@ -714,10 +714,9 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         mToggleFlash.setRotation(rotationValue);
         mToggleCamera.setRotation(rotationValue);
 
-        //TODO: Only start when setActive called
         // Create the camera preview
-        //System.err.println("[DEBUG] createPreview being called - Constructor"); //TODO
-        //createPreview();
+        System.err.println("[DEBUG] createPreview being called - Constructor"); //TODO
+        createPreview();
 
         // Setup all the button listeners
         setupListeners();
