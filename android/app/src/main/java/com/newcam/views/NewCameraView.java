@@ -29,7 +29,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.facebook.react.bridge.LifecycleEventListener;
 import com.newcam.CCCameraView;
 import com.newcam.R;
 import com.newcam.utils.ExifUtils;
@@ -163,9 +162,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
     // This is used to reject multiple clicks in quick succession.
     private static int CLICK_REJECTION_INTERVAL = 1500;
 
-    //TODO: only re-acquire the camera on onHostResume if onHostPause has occurred
-    private boolean hostHasPausedWithoutResume = false;
-
     public NewCameraView(Context context) {
         super(context);
     }
@@ -296,42 +292,15 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         mToggleFlash.setRotation(rotationValue);
         mToggleCamera.setRotation(rotationValue);
 
-        System.err.println("[DEBUG] startPreview being called - Constructor"); //TODO
-        startPreview();
+        //TODO: Only start when setActive called
+        //System.err.println("[DEBUG] startPreview being called - Constructor"); //TODO
+        //startPreview();
 
         // Set the visibility of the flash button
         setFlashButtonVisibility();
 
         // Set the visibility of the camera button
         setCameraButtonVisibility();
-
-        lifecycleListener = new LifecycleEventListener() {
-            @Override
-            public void onHostResume() {
-
-                System.out.println("onHostResume called in NewCameraView");
-                if(hostHasPausedWithoutResume){
-                    hostHasPausedWithoutResume = false;
-                    startPreview();
-                    System.err.println("[DEBUG] startPreview IS being called - onHostResume"); //TODO
-                }else{
-                    System.err.println("[DEBUG] startPreview NOT being called - onHostResume"); //TODO
-                }
-            }
-
-            @Override
-            public void onHostPause() {
-                System.out.println("onHostPause called in NewCameraView");
-                releaseCamera();
-                hostHasPausedWithoutResume = true;
-            }
-
-            @Override
-            public void onHostDestroy() {
-                System.out.println("onHostDestroy called in NewCameraView");
-                releaseCamera();
-            }
-        };
     }
 
     @Override
@@ -683,6 +652,11 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         }
 
         return c; // returns null if camera is unavailable
+    }
+
+    @Override
+    public void startCamera() {
+        startPreview();
     }
 
     // This method releases the camera reference

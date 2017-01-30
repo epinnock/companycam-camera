@@ -13,7 +13,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.facebook.react.bridge.Arguments;
-import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
@@ -49,9 +48,6 @@ public abstract class CCCameraView extends RelativeLayout {
 
     // The useTabletLayout flag describes whether the tablet layout is being used for this device
     public boolean useTabletLayout = false;
-
-    // Each subclass will create a lifecycleListener to properly release and reacquire the camera when the app transitions from background to foreground
-    public LifecycleEventListener lifecycleListener;
 
     public CCCameraView(Context context) {
         super(context);
@@ -99,6 +95,7 @@ public abstract class CCCameraView extends RelativeLayout {
         return true;
     }
 
+    public abstract void startCamera();
     public abstract void releaseCamera();
 
     protected void finishWithError(String errmsg){
