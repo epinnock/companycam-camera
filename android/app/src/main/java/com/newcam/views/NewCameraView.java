@@ -1298,17 +1298,18 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         return Math.sqrt(x * x + y * y);
     }
 
-
     private void setResolution(String resolution) {
 
         if (mCamera != null) {
 
             Camera.Parameters param = mCamera.getParameters();
+
+            //these are returned in descending order
             List<Camera.Size> lsps = param.getSupportedPictureSizes();
 
             if (resolution.equals("super")) {
                 for (Camera.Size size : lsps) {
-                    if (size.width < 2160) {
+                    if ((size.width < 2160) || (size.width == size.height)) {
                         break;
                     }
                     param.setPictureSize(size.width, size.height);
@@ -1318,7 +1319,7 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             }
             else if (resolution.equals("high")) {
                 for (Camera.Size size : lsps) {
-                    if (size.width < 1920) {
+                    if ((size.width < 1920) || (size.width == size.height)) {
                         break;
                     }
                     param.setPictureSize(size.width, size.height);
@@ -1328,9 +1329,10 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
             }
             else {
                 for (Camera.Size size : lsps) {
-                    if (size.width == 1280 && size.height == 720) {
-                        param.setPictureSize(size.width, size.height);
+                    if ((size.width < 1440) || (size.width == size.height)) {
+                        break;
                     }
+                    param.setPictureSize(size.width, size.height);
                 }
                 setResolutionImage("normal");
                 LogUtil.e(TAG, "IN LOW RES MODE");
