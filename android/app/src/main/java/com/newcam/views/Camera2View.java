@@ -87,6 +87,7 @@ import static android.content.Context.CAMERA_SERVICE;
 
 @TargetApi(21)
 public class Camera2View extends CCCameraView implements SurfaceHolder.Callback {
+
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // Much of the camera-related content of this Activity is taken from the Google example project Camera2Basic on github.
     // https://github.com/googlesamples/android-Camera2Basic
@@ -757,11 +758,6 @@ public class Camera2View extends CCCameraView implements SurfaceHolder.Callback 
         }
     }
     */
-
-    public void labelTouch() {
-        // Finish the activity with a result
-        //finishWithResult("label"); //TODO: temporarily disabled
-    }
 
     @Override
     public void startCamera() {

@@ -324,17 +324,6 @@ public class NewCameraView extends CCCameraView implements SurfaceHolder.Callbac
         }
     }
 
-    public void labelTouch() {
-
-        // If the resolution layout is displayed, this button click shouldn't have any action, so simply return
-        if (mResolutionLayoutVisible) {
-            return;
-        }
-
-        // Finish the activity with a result
-        //finishWithResult("label"); //TODO: temporarily disabled
-    }
-
     protected void toggleResolution() {
 
         // If the resolution layout is displayed, this button click shouldn't have any action, so simply return
