@@ -36,14 +36,12 @@ import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.widget.RelativeLayout;
 
 import com.newcam.CCCameraView;
 import com.newcam.R;
 import com.newcam.utils.ExifUtils;
 import com.newcam.utils.PhotoUtils;
 import com.notagilx.companycam.util.LogUtil;
-import com.notagilx.companycam.util.StorageUtility;
 import com.notagilx.companycam.util.views.CameraPreview;
 
 import java.io.BufferedOutputStream;
@@ -136,8 +134,8 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
     private int mCameraType = CameraCharacteristics.LENS_FACING_BACK;
 
     private CameraPreview mPreview;
-    private Surface mJpegCaptureSurface, mPreviewSurface;
     private Size mPreviewSize;
+    private Surface mJpegCaptureSurface, mPreviewSurface;
     private CameraCharacteristics mCharacteristics;
 
     // The ImageReader object is used to read the camera stream output
@@ -646,6 +644,17 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
         configurePreviewLayout();
     }
 
+    // This method configures the size of the mPreviewLayout given the chosen camera preview size
+    @Override
+    public void configurePreviewLayout() {
+
+        // Make sure the mPreviewWidth and mPreviewHeight variables are set in the superclass before calling the superclass method.
+        // mPreviewSize can't be included in the superclass directly because the Size class wasn't added until API 21.
+        mPreviewWidth = mPreviewSize.getWidth();
+        mPreviewHeight = mPreviewSize.getHeight();
+        super.configurePreviewLayout();
+    }
+
     // This method begins displaying the camera preview after the camera object has been initialized.
     private void initPreview() {
 
@@ -685,61 +694,6 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
         } catch (CameraAccessException e) {
             Log.d(TAG, "Failed to create camera capture session", e);
         }
-    }
-
-    // This method configures the size of the mPreviewLayout given the chosen camera preview size
-    private void configurePreviewLayout() {
-
-        // The preview layout needs to be sized so that the chosen camera preview size fits the bounds exactly.  However, in order to get the preview
-        // to exactly fill the screen without being distorted, the preview layout needs to be sized larger than the screen with negative margins.
-
-        // Get the height and width of the screen in portrait coordinates (where height > width)
-        //TODO: I guess this should really be the view size and not the screen size?
-        double screenWidth = (double) mCameraView.getWidth(); //CompanyCamApplication.getInstance().getScreenPortraitPixelWidth();
-        double screenHeight = (double) mCameraView.getHeight(); //CompanyCamApplication.getInstance().getScreenPortraitPixelHeight();
-
-        // Calculate the aspect ratio of the screen
-        double screenAspectRatio = screenHeight/screenWidth;
-
-        // Get the height and width of the chosen preview size in portrait coordinates (where height > width)
-        int theWidth = mPreviewSize.getWidth();
-        int theHeight = mPreviewSize.getHeight();
-        System.out.println("theWidth = " + theWidth + " theHeight = " + theHeight);
-        double mPreviewWidth = (double) Math.min(mPreviewSize.getWidth(), mPreviewSize.getHeight());
-        double mPreviewHeight =(double) Math.max(mPreviewSize.getWidth(), mPreviewSize.getHeight());
-
-        // Calculate the aspect ratio of the chosen preview size
-        double previewAspectRatio = mPreviewHeight/mPreviewWidth;
-
-        // Determine the necessary height and width for the preview layout that will cause the preview to fill the screen
-        int newWidth = (int) screenWidth;
-        int newHeight = (int) screenHeight;
-        if (previewAspectRatio > screenAspectRatio) {
-            newHeight = (int) (previewAspectRatio * newWidth);
-        }
-        else {
-            newWidth = (int) (newHeight / previewAspectRatio);
-        }
-
-        // Set the layout parameters for the mPreview.
-        RelativeLayout.LayoutParams mPreviewParams = new RelativeLayout.LayoutParams(newWidth, newHeight);
-
-        int marginX = -(newWidth - (int)screenWidth)/2;
-        int marginY = -(newHeight - (int)screenHeight)/2;
-
-        System.out.println("left margin = " + marginX);
-        System.out.println("top margin = " + marginY);
-        System.out.println("right margin = " + marginX);
-        System.out.println("bottom margin = " + marginY);
-
-        mPreviewParams.setMargins(marginX, marginY, marginX, marginY);
-        mPreview.setLayoutParams(mPreviewParams);
-        mPreview.mWidth = newWidth;
-        mPreview.mHeight = newHeight;
-        mPreview.mLeft = marginX;
-        mPreview.mTop = marginY;
-
-        mPreview.requestLayout();
     }
 
     // Call this whenever some camera control changes (e.g., focus distance, white balance, etc) that should affect the preview
@@ -1604,7 +1558,16 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
         if (mCamera != null) {
 
             // Initialize the camera again
-            createPreview();
+            //createPreview();
+
+            try {
+                setupCameraOutputs();
+                initCamera(mPreview.getHolder());
+                initPreview();
+            }
+            catch (CameraAccessException cae) {
+            }
+
         }
     }
 

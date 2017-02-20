@@ -17,6 +17,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.newcam.CCCameraManager;
+import com.newcam.CCCameraModule;
+import com.newcam.CCCameraView;
 import com.newcam.R;
 import com.newcam.cameras.CCCamera;
 import com.newcam.utils.CCCameraLayoutInterface;
@@ -32,6 +34,8 @@ import java.lang.ref.WeakReference;
 public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInterface {
 
     private static String TAG = CCCameraLayout.class.getSimpleName();
+
+    public Context mContext;
 
     // The CCCamera object maintains a reference to the camera and implements the necessary camera API methods
     public CCCamera mCamera;
@@ -135,6 +139,8 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
 
     public void init(Context context) {
 
+        mContext = context;
+
         // Inflate the layout resource for this view
         inflate(context, R.layout.layout_cccamera, this);
 
@@ -184,9 +190,9 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
 
             // Create two TabletButtonViews
             LinearLayout.LayoutParams tabletParams = new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-            mTabletButtonView = new TabletButtonView(context);
+            mTabletButtonView = new TabletButtonView(mContext);
             tabletButtonLayout.addView(mTabletButtonView, tabletParams);
-            mTabletButtonViewLand = new TabletButtonView(context);
+            mTabletButtonViewLand = new TabletButtonView(mContext);
             tableButtonLayoutLand.addView(mTabletButtonViewLand, tabletParams);
 
             // Set the layout resources for the two tablet button views
@@ -194,8 +200,8 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
             mTabletButtonViewLand.layoutResourceID = R.layout.view_tablet_button_land;
 
             // Initialize the tablet button views
-            mTabletButtonView.initView(context);
-            mTabletButtonViewLand.initView(context);
+            mTabletButtonView.initView(mContext);
+            mTabletButtonViewLand.initView(mContext);
 
             // Set the useTableLayout flag
             useTabletLayout = true;
@@ -216,7 +222,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
             });
             mLabelTouchTargetLand.setClickable(true);
 
-            // Show the mTableButtonView by default
+            // Show the mTabletButtonView by default
             showTabletButtonView();
         }
         else {
@@ -303,12 +309,12 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
                                 if (useTabletLayout) {
                                     showTabletButtonView();
                                 }
-                                else {
+                                //else {
 
                                     // Set the icons for the mToggleResolution and mCloseButton
                                     setResolutionImage(mCamera.mResolutionMode);
                                     mCloseButton.setImageResource(R.drawable.close_icon);
-                                }
+                                //}
                             }
                             else if ((orientation < 315 && orientation >= 225) && !(mLastOrientation < 315 && mLastOrientation >= 225)) {
                                 rotationValue = 90;
@@ -644,9 +650,9 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
     public void setResolutionImage(String resolutionMode) {
 
         // Determine whether the mToggleResolution button or the mCloseButton is currently controlling the resolution selection based on the
-        // device orientation
+        // device orientation.  If this device is using the tablet layout, then the buttons are never reversed.
         ImageButton resolutionButton = mToggleResolution;
-        if (mPhonePosition == LANDSCAPE_TOP_LEFT) {
+        if (mPhonePosition == LANDSCAPE_TOP_LEFT && !useTabletLayout) {
             resolutionButton = mCloseButton;
         }
 
@@ -999,6 +1005,8 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
     public void showTabletButtonView() {
 
         // Set the view references
+        mPlaceName = (TextView)mLabelTouchTarget.findViewById(R.id.place_name);
+        mPlaceAddress = (TextView)mLabelTouchTarget.findViewById(R.id.place_address);
         mCaptureButton = mTabletButtonView.mCaptureButton;
         mToggleResolution = mTabletButtonView.mToggleResolution;
         mToggleFlash = mTabletButtonView.mToggleFlash;
@@ -1018,13 +1026,20 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         setupListeners();
 
         // Set the button states
-        if (mCamera.mCameraMode != null) {
+        CCCameraView thisCameraView = CCCameraManager.getLatestView();
+        if (thisCameraView != null && thisCameraView.placeName != null) {
+            mPlaceName.setText(thisCameraView.placeName);
+        }
+        if (thisCameraView != null && thisCameraView.placeAddress != null) {
+            mPlaceAddress.setText(thisCameraView.placeAddress);
+        }
+        if (mCamera != null && mCamera.mCameraMode != null) {
             setCameraMode(mCamera.mCameraMode);
         }
-        if (mCamera.mResolutionMode != null) {
+        if (mCamera != null && mCamera.mResolutionMode != null) {
             setResolutionImage(mCamera.mResolutionMode);
         }
-        if (mCamera.mFlashMode != null) {
+        if (mCamera != null && mCamera.mFlashMode != null) {
             setFlashModeImage(mCamera.mFlashMode);
         }
         setCameraButtonVisibility();
@@ -1043,6 +1058,8 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
     public void showTabletButtonViewLand() {
 
         // Set the view references
+        mPlaceName = (TextView)mLabelTouchTargetLand.findViewById(R.id.place_name_land);
+        mPlaceAddress = (TextView)mLabelTouchTargetLand.findViewById(R.id.place_address_land);
         mCaptureButton = mTabletButtonViewLand.mCaptureButton;
         mToggleResolution = mTabletButtonViewLand.mToggleResolution;
         mToggleFlash = mTabletButtonViewLand.mToggleFlash;
@@ -1062,13 +1079,20 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         setupListeners();
 
         // Set the button states
-        if (mCamera.mCameraMode != null) {
+        CCCameraView thisCameraView = CCCameraManager.getLatestView();
+        if (thisCameraView != null && thisCameraView.placeName != null) {
+            mPlaceName.setText(thisCameraView.placeName);
+        }
+        if (thisCameraView != null && thisCameraView.placeAddress != null) {
+            mPlaceAddress.setText(thisCameraView.placeAddress);
+        }
+        if (mCamera != null && mCamera.mCameraMode != null) {
             setCameraMode(mCamera.mCameraMode);
         }
-        if (mCamera.mResolutionMode != null) {
+        if (mCamera != null && mCamera.mResolutionMode != null) {
             setResolutionImage(mCamera.mResolutionMode);
         }
-        if (mCamera.mFlashMode != null) {
+        if (mCamera != null && mCamera.mFlashMode != null) {
             setFlashModeImage(mCamera.mFlashMode);
         }
         setCameraButtonVisibility();

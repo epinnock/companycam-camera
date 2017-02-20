@@ -13,6 +13,7 @@ import android.location.Location;
 import android.support.v4.content.ContextCompat;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -49,8 +50,8 @@ public class CCCameraView extends RelativeLayout {
     public RelativeLayout mPreviewLayout;
 
     // Component props: values
-    protected String placeName;
-    protected String placeAddress;
+    public String placeName;
+    public String placeAddress;
     protected File appPhotoDirectory;
     protected double propExifLocationLatitude;
     protected double propExifLocationLongitude;
@@ -77,8 +78,12 @@ public class CCCameraView extends RelativeLayout {
             inflate(context, R.layout.view_cccamera, this);
 
             // Get references to the subviews
-            mCameraLayout = (CCCameraLayout) findViewById(R.id.layout_cccamera);
+            //mCameraLayout = (CCCameraLayout) findViewById(R.id.layout_cccamera);
             mPreviewLayout = (RelativeLayout) findViewById(R.id.camera_preview);
+
+            mCameraLayout = new CCCameraLayout(context);
+            RelativeLayout.LayoutParams newParams = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            this.addView(mCameraLayout, newParams);
 
             init(context);
         }else{

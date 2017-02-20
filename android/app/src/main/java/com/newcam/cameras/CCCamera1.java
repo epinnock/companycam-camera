@@ -174,6 +174,18 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         else {
             if (mCamera != null) {
                 try {
+
+                    // Set the camera display orientation
+                    setCameraDisplayOrientation(0, mCamera);
+
+                    // Set the visibility of the flash button
+                    mCameraView.mCameraLayout.setFlashButtonVisibility();
+                    updateFlashSetting(mFlashMode);
+
+                    // Set the resolution mode
+                    setResolution(mResolutionMode);
+
+                    // Start the camera preview
                     mCamera.setPreviewDisplay(mPreview.getHolder());
                     mCamera.startPreview();
                 }
@@ -181,18 +193,6 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 }
             }
         }
-
-        setCameraDisplayOrientation(0, mCamera);
-
-        // Set the visibility of the flash button
-        mCameraView.mCameraLayout.setFlashButtonVisibility();
-
-        //setFlashModeImage(mFlashMode);
-        updateFlashSetting(mFlashMode);
-        setResolution(mResolutionMode);
-
-        //Set up Listeners
-        //setupListeners();
     }
 
     // This method gets a reference to the camera and starts the camera preview
@@ -375,7 +375,8 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                     if ((size.width < 2160) || (size.width == size.height)) {
                         break;
                     }
-                    param.setPictureSize(size.width, size.height);
+                    mPreviewWidth = size.width;
+                    mPreviewHeight = size.height;
                 }
                 LogUtil.e(TAG, "IN SUPER HIGH RES MODE");
             }
@@ -384,7 +385,8 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                     if ((size.width < 1920) || (size.width == size.height)) {
                         break;
                     }
-                    param.setPictureSize(size.width, size.height);
+                    mPreviewWidth = size.width;
+                    mPreviewHeight = size.height;
                 }
                 LogUtil.e(TAG, "IN HIGH RES MODE");
             }
@@ -393,11 +395,17 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                     if ((size.width < 1440) || (size.width == size.height)) {
                         break;
                     }
-                    param.setPictureSize(size.width, size.height);
+                    mPreviewWidth = size.width;
+                    mPreviewHeight = size.height;
                 }
                 LogUtil.e(TAG, "IN LOW RES MODE");
             }
 
+            // Once the preview size is determined, updated the size of mPreview so that the camera view will fill the screen properly.
+            configurePreviewLayout();
+
+            // Update the camera parameters
+            param.setPictureSize(mPreviewWidth, mPreviewHeight);
             param.setJpegQuality(100);
             mCamera.setParameters(param);
 
@@ -627,30 +635,46 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
         // The Surface has been created, now tell the camera where to draw the preview.
         try {
-            if (mCamera != null) {
+
+            if (mCamera == null) {
+
+                // Create an instance of Camera
+                mCamera = getCameraInstance();
+            }
+
+            // Set the camera display orientation
+            setCameraDisplayOrientation(0, mCamera);
+
+            // Set the visibility of the flash button
+            mCameraView.mCameraLayout.setFlashButtonVisibility();
+            updateFlashSetting(mFlashMode);
+
+            // Set the resolution mode
+            setResolution(mResolutionMode);
+
+            // Start the camera preview
+            mCamera.setPreviewDisplay(holder);
+            mCamera.startPreview();
+
+            /*if (mCamera != null) {
                 mCamera.setPreviewDisplay(holder);
                 mCamera.startPreview();
             }
             else {
 
-                // Create an instance of Camera
-                mCamera = getCameraInstance();
-
                 if (mCamera != null) {
 
+                    // Set the camera display orientation
                     setCameraDisplayOrientation(0, mCamera);
 
                     // Set the visibility of the flash button
                     mCameraView.mCameraLayout.setFlashButtonVisibility();
-
-                    //setFlashModeImage(mFlashMode);
                     updateFlashSetting(mFlashMode);
-                    setResolution(mResolutionMode);
 
-                    //Set up Listeners
-                    //setupListeners();
+                    // Set the resolution mode
+                    setResolution(mResolutionMode);
                 }
-            }
+            }*/
         } catch (IOException e) {
             Log.d(TAG, "Error setting camera preview: " + e.getMessage());
         }

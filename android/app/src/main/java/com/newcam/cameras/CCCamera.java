@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.util.Size;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.widget.RelativeLayout;
@@ -63,6 +64,10 @@ public abstract class CCCamera implements CCCameraInterface {
 
     // The mPreview is a custom SurfaceView for rendering the camera preview
     public CameraPreview mPreview;
+
+    // The mPreviewWidth and mPreviewHeight are the width and height for the preview for the current camera
+    public int mPreviewWidth;
+    public int mPreviewHeight;
 
     public CCCamera(Context context, CCCameraView cameraView) {
         mContext = context;
@@ -152,6 +157,61 @@ public abstract class CCCamera implements CCCameraInterface {
     ///////////////////////////
     // Miscellaneous methods //
     ///////////////////////////
+
+    // This method configures the size of the mPreviewLayout given the chosen camera preview size
+    public void configurePreviewLayout() {
+
+        // The preview layout needs to be sized so that the chosen camera preview size fits the bounds exactly.  However, in order to get the preview
+        // to exactly fill the screen without being distorted, the preview layout needs to be sized larger than the screen with negative margins.
+
+        // Get the height and width of the screen in portrait coordinates (where height > width)
+        //TODO: I guess this should really be the view size and not the screen size?
+        double screenWidth = (double) mCameraView.getWidth(); //CompanyCamApplication.getInstance().getScreenPortraitPixelWidth();
+        double screenHeight = (double) mCameraView.getHeight(); //CompanyCamApplication.getInstance().getScreenPortraitPixelHeight();
+
+        // Calculate the aspect ratio of the screen
+        double screenAspectRatio = screenHeight/screenWidth;
+
+        // Get the height and width of the chosen preview size in portrait coordinates (where height > width)
+        int theWidth = mPreviewWidth;
+        int theHeight = mPreviewHeight;
+        System.out.println("theWidth = " + theWidth + " theHeight = " + theHeight);
+        double previewWidth = (double) Math.min(mPreviewWidth, mPreviewHeight);
+        double previewHeight =(double) Math.max(mPreviewWidth, mPreviewHeight);
+
+        // Calculate the aspect ratio of the chosen preview size
+        double previewAspectRatio = previewHeight/previewWidth;
+
+        // Determine the necessary height and width for the preview layout that will cause the preview to fill the screen
+        int newWidth = (int) screenWidth;
+        int newHeight = (int) screenHeight;
+        if (previewAspectRatio > screenAspectRatio) {
+            newHeight = (int) (previewAspectRatio * newWidth);
+        }
+        else {
+            newWidth = (int) (newHeight / previewAspectRatio);
+        }
+
+        // Set the layout parameters for the mPreview.
+        RelativeLayout.LayoutParams mPreviewParams = new RelativeLayout.LayoutParams(newWidth, newHeight);
+
+        int marginX = -(newWidth - (int)screenWidth)/2;
+        int marginY = -(newHeight - (int)screenHeight)/2;
+
+        System.out.println("left margin = " + marginX);
+        System.out.println("top margin = " + marginY);
+        System.out.println("right margin = " + marginX);
+        System.out.println("bottom margin = " + marginY);
+
+        mPreviewParams.setMargins(marginX, marginY, marginX, marginY);
+        mPreview.setLayoutParams(mPreviewParams);
+        mPreview.mWidth = newWidth;
+        mPreview.mHeight = newHeight;
+        mPreview.mLeft = marginX;
+        mPreview.mTop = marginY;
+
+        mPreview.requestLayout();
+    }
 
     // This method determines the space between the first two fingers of the given touch event
     public double getFingerSpacing(MotionEvent event) {
