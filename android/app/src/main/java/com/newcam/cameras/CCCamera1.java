@@ -10,6 +10,7 @@ import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.media.AudioManager;
 import android.util.Log;
+import android.util.Size;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -28,6 +29,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +50,10 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
     // mCameraType is a reference to the camera type (rear- or forward-facing) currently being used
     private int mCameraType = Camera.CameraInfo.CAMERA_FACING_BACK;
+
+    // Define the maximum preview width and height guaranteed by the Camera1 API.
+    private static final int MAX_PREVIEW_WIDTH = 4000;
+    private static final int MAX_PREVIEW_HEIGHT = 3000;
 
     // The HIGH_QUALITY int is used to define the JPEG compression quality when processing a photo.
     private final int HIGH_QUALITY = 80;
@@ -204,6 +212,28 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
         if (mCamera != null) {
 
+            // These are returned in descending order
+            Camera.Parameters param = mCamera.getParameters();
+            List<Camera.Size> lsps = param.getSupportedPreviewSizes();
+
+            // Choose the optimal preview size based on the available output sizes, the screen size, and the preview layout size.
+            Camera.Size optimalSize;
+            if (this.hasShortAspectRatio()) {
+                optimalSize = chooseOptimalSize(lsps, MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT, 4, 3);
+            }
+            else {
+                optimalSize = chooseOptimalSize(lsps, MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT, 16, 9);
+            }
+
+            // Update the camera parameters
+            param.setPreviewSize(optimalSize.width, optimalSize.height);
+            mCamera.setParameters(param);
+
+            // Once the preview size is determined, updated the size of mPreview so that the camera view will fill the screen properly.
+            mPreviewWidth = optimalSize.width;
+            mPreviewHeight = optimalSize.height;
+            configurePreviewLayout();
+
             // Initialize the camera for the preview
             initializeCameraForPreview();
             System.err.println("[CCCamera1] Success!");
@@ -356,6 +386,107 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         }
     };
 
+    /**
+     * Given {@code choices} of {@code Size}s supported by a camera, choose the smallest one that
+     * is at least as large as the respective texture view size, and that is at most as large as the
+     * respective max size, and whose aspect ratio matches with the specified value. If such size
+     * doesn't exist, choose the largest one that is at most as large as the respective max size,
+     * and whose aspect ratio matches with the specified value.
+     *
+     * @param choices           The list of sizes that the camera supports for the intended output
+     *                          class
+     * @param maxWidth          The maximum width that can be chosen
+     * @param maxHeight         The maximum height that can be chosen
+     * @param aspectWidth       The width of the container view
+     * @param aspectHeight      The height of the container view
+     * @return The optimal {@code Camera.Size}, or an arbitrary one if none were big enough
+     */
+    private Camera.Size chooseOptimalSize(List<Camera.Size> choices, int maxWidth, int maxHeight, int aspectWidth, int aspectHeight) {
+
+        // Collect the supported resolutions that are at least as big as the preview Surface
+        List<Camera.Size> bigEnough = new ArrayList<>();
+
+        // Collect the supported resolutions that are smaller than the preview Surface
+        List<Camera.Size> notBigEnough = new ArrayList<>();
+
+        // Get the width and height of the reference size that's passed in.
+        int w = aspectWidth;
+        int h = aspectHeight;
+
+        // Go through each of the camera's supported preview sizes and compare them to the reference size to find the optimal preview size to use.
+        for (Camera.Size option : choices) {
+
+            // Check if this preview size is no bigger than the max allowed width and height and that its aspect ratio matches the aspect ratio
+            // of the reference size.
+            if ((option.width <= maxWidth) && (option.height <= maxHeight) && (option.height*w == option.width*h)) {
+
+                // Ignore any preview sizes that are exactly square
+                if (option.width == option.height) {
+                    continue;
+                }
+
+                // Check if the largest dimension of this preview size is at least as large as the minimum requirement for the current
+                // resolution selection
+                if (Math.max(option.width, option.height) >= getDesiredImageHeightForResolution(mResolutionMode)) {
+                    bigEnough.add(option);
+                }
+                else {
+                    notBigEnough.add(option);
+                }
+            }
+        }
+
+        // Pick the smallest preview size of those big enough. If there is none big enough, pick the largest of those not big enough.
+        if (bigEnough.size() > 0) {
+            return Collections.min(bigEnough, new CCCamera1.CompareSizesByArea());
+        }
+        else if (notBigEnough.size() > 0) {
+            return Collections.max(notBigEnough, new CCCamera1.CompareSizesByArea());
+        }
+        else {
+            Log.e(TAG, "Couldn't find any suitable preview size");
+            return choices.get(0);
+        }
+    }
+
+    // This class compares two Size objects and returns a 1 if the area of the first Size is larger or a -1 if the area of the second Size is larger.
+    static class CompareSizesByArea implements Comparator<Camera.Size> {
+
+        @Override
+        public int compare(Camera.Size lhs, Camera.Size rhs) {
+
+            // We cast here to ensure the multiplications won't overflow
+            return Long.signum((long) lhs.width * lhs.height - (long) rhs.width * rhs.height);
+        }
+    }
+
+    // This method returns a boolean if the CCCameraView has an aspect ratio closer to 4:3 than 16:9
+    public boolean hasShortAspectRatio() {
+
+        // Find the largest preview size that will fit the aspect ratio of the preview layout.
+
+        // Get the height and width of the screen in portrait coordinates (where height > width)
+        //TODO: I guess this should really be the view size and not the screen size?
+        int screenWidth = mCameraView.getWidth(); //CompanyCamApplication.getInstance().getScreenPortraitPixelWidth();
+        int screenHeight = mCameraView.getHeight(); //CompanyCamApplication.getInstance().getScreenPortraitPixelHeight();
+
+        // Calculate the aspect ratio of the screen
+        double screenAspectRatio = (double)screenHeight/(double)screenWidth;
+
+        // Determine if the screen's aspect ratio is closer to 4x3 or 16x9
+        double aspect4x3 = 4.0/3.0;
+        double aspect16x9 = 16.0/9.0;
+        boolean hasShortAspect = false;
+        if (Math.abs(screenAspectRatio - aspect4x3) < Math.abs(screenAspectRatio - aspect16x9)) {
+            hasShortAspect = true;
+        }
+        else {
+            hasShortAspect = false;
+        }
+
+        return hasShortAspect;
+    }
+
     ///////////////////////////////
     // CCCameraInterface methods //
     ///////////////////////////////
@@ -370,10 +501,13 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             //these are returned in descending order
             List<Camera.Size> lsps = param.getSupportedPictureSizes();
 
-            if (resolutionMode.equals("super")) {
+            /*if (resolutionMode.equals("super")) {
                 for (Camera.Size size : lsps) {
-                    if ((size.width < 2160) || (size.width == size.height)) {
+                    if (size.width < 2160) {
                         break;
+                    }
+                    else if (size.width == size.height) {
+                        continue;
                     }
                     mPreviewWidth = size.width;
                     mPreviewHeight = size.height;
@@ -382,8 +516,11 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             }
             else if (resolutionMode.equals("high")) {
                 for (Camera.Size size : lsps) {
-                    if ((size.width < 1920) || (size.width == size.height)) {
+                    if (size.width < 1920) {
                         break;
+                    }
+                    else if (size.width == size.height) {
+                        continue;
                     }
                     mPreviewWidth = size.width;
                     mPreviewHeight = size.height;
@@ -392,20 +529,29 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             }
             else {
                 for (Camera.Size size : lsps) {
-                    if ((size.width < 1440) || (size.width == size.height)) {
+                    if (size.width < 1440) {
                         break;
+                    }
+                    else if (size.width == size.height) {
+                        continue;
                     }
                     mPreviewWidth = size.width;
                     mPreviewHeight = size.height;
                 }
                 LogUtil.e(TAG, "IN LOW RES MODE");
+            }*/
+
+            // Choose the optimal preview size based on the available output sizes, the screen size, and the preview layout size.
+            Camera.Size optimalSize;
+            if (this.hasShortAspectRatio()) {
+                optimalSize = chooseOptimalSize(lsps, MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT, 4, 3);
+            }
+            else {
+                optimalSize = chooseOptimalSize(lsps, MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT, 16, 9);
             }
 
-            // Once the preview size is determined, updated the size of mPreview so that the camera view will fill the screen properly.
-            configurePreviewLayout();
-
             // Update the camera parameters
-            param.setPictureSize(mPreviewWidth, mPreviewHeight);
+            param.setPictureSize(optimalSize.width, optimalSize.height);
             param.setJpegQuality(100);
             mCamera.setParameters(param);
 
@@ -641,6 +787,28 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 // Create an instance of Camera
                 mCamera = getCameraInstance();
             }
+
+            // These are returned in descending order
+            Camera.Parameters param = mCamera.getParameters();
+            List<Camera.Size> lsps = param.getSupportedPreviewSizes();
+
+            // Choose the optimal preview size based on the available output sizes, the screen size, and the preview layout size.
+            Camera.Size optimalSize;
+            if (this.hasShortAspectRatio()) {
+                optimalSize = chooseOptimalSize(lsps, MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT, 4, 3);
+            }
+            else {
+                optimalSize = chooseOptimalSize(lsps, MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT, 16, 9);
+            }
+
+            // Update the camera parameters
+            param.setPreviewSize(optimalSize.width, optimalSize.height);
+            mCamera.setParameters(param);
+
+            // Once the preview size is determined, updated the size of mPreview so that the camera view will fill the screen properly.
+            mPreviewWidth = optimalSize.width;
+            mPreviewHeight = optimalSize.height;
+            configurePreviewLayout();
 
             // Set the camera display orientation
             setCameraDisplayOrientation(0, mCamera);

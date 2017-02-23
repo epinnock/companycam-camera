@@ -133,7 +133,6 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
     // mCameraType is a reference to the camera type (rear- or forward-facing) currently being used
     private int mCameraType = CameraCharacteristics.LENS_FACING_BACK;
 
-    private CameraPreview mPreview;
     private Size mPreviewSize;
     private Surface mJpegCaptureSurface, mPreviewSurface;
     private CameraCharacteristics mCharacteristics;
@@ -648,6 +647,10 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
     @Override
     public void configurePreviewLayout() {
 
+        if (mPreview == null) {
+            System.out.println("mPreview was null in CCCamera2");
+        }
+
         // Make sure the mPreviewWidth and mPreviewHeight variables are set in the superclass before calling the superclass method.
         // mPreviewSize can't be included in the superclass directly because the Size class wasn't added until API 21.
         mPreviewWidth = mPreviewSize.getWidth();
@@ -851,19 +854,6 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
 
         // Set the JPEG orientation
         builder.set(CaptureRequest.JPEG_ORIENTATION, jpegOrientation);
-    }
-
-    // This method returns the minimum desired image height in pixels for the given resolution setting
-    private int getDesiredImageHeightForResolution(String resolutionMode) {
-        if (resolutionMode.equals("super")) {
-            return 2160;
-        }
-        else if (resolutionMode.equals("high")) {
-            return 1920;
-        }
-        else {
-            return 1440;
-        }
     }
 
     // This method initiates the mJPEGReader object with the given Size object

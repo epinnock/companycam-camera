@@ -158,8 +158,26 @@ public abstract class CCCamera implements CCCameraInterface {
     // Miscellaneous methods //
     ///////////////////////////
 
+    // This method returns the minimum desired image height in pixels for the given resolution setting
+    public int getDesiredImageHeightForResolution(String resolutionMode) {
+        if (resolutionMode.equals("super")) {
+            return 2160;
+        }
+        else if (resolutionMode.equals("high")) {
+            return 1920;
+        }
+        else {
+            return 1440;
+        }
+    }
+
     // This method configures the size of the mPreviewLayout given the chosen camera preview size
     public void configurePreviewLayout() {
+
+        if (mPreview == null) {
+            System.out.println("mPreview was null when configurePreviewLayout was called");
+            return;
+        }
 
         // The preview layout needs to be sized so that the chosen camera preview size fits the bounds exactly.  However, in order to get the preview
         // to exactly fill the screen without being distorted, the preview layout needs to be sized larger than the screen with negative margins.
@@ -168,6 +186,7 @@ public abstract class CCCamera implements CCCameraInterface {
         //TODO: I guess this should really be the view size and not the screen size?
         double screenWidth = (double) mCameraView.getWidth(); //CompanyCamApplication.getInstance().getScreenPortraitPixelWidth();
         double screenHeight = (double) mCameraView.getHeight(); //CompanyCamApplication.getInstance().getScreenPortraitPixelHeight();
+        System.out.println("screenWidth = " + screenWidth + " screenHeight = " + screenHeight);
 
         // Calculate the aspect ratio of the screen
         double screenAspectRatio = screenHeight/screenWidth;
