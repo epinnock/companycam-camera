@@ -156,7 +156,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             // Make sure that setting the flash setting is supported or setting the camera parameters will fail
             if (p.getFlashMode() != null) {
                 p.setFlashMode(flashMode);
-                mCamera.setParameters(p);
+                safeSetParameters(mCamera, p, "updateFlashSetting()");
             }
         }
     }
@@ -170,7 +170,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         boolean hasContinuousFocus = supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
         if (hasContinuousFocus) {
             p.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-            mCamera.setParameters(p);
+            safeSetParameters(mCamera, p, "initializeCameraForPreview()");
         }
 
         // Create the preview if is hasn't been created before.  If it's already been created, then the camera preview can just be started again.
@@ -203,6 +203,26 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         }
     }
 
+    // This method safely sets the camera parameters and catches the RunTimeException that can be thrown if any of the parameters are
+    // invalid.  It returns a boolean that describes whether or not the parameters were set without throwing the exception
+    private boolean safeSetParameters(Camera camera, Camera.Parameters params, String message) {
+
+        boolean safelySetParameters = false;
+
+        // Try to set the camera parameters
+        try {
+            camera.setParameters(params);
+            safelySetParameters = true;
+        }
+        catch (RuntimeException rte) {
+            // If any of the parameters are invalid, trying to call setParameters will throw a RuntimeException.  The error doesn't
+            // provide any information about which parameter was invalid.
+            Log.d(TAG, "mCamera.setParameters failed when called from " + message);
+        }
+
+        return safelySetParameters;
+    }
+
     // This method gets a reference to the camera and starts the camera preview
     private void startPreview() {
         System.err.println("[CCCamera1] Starting preview");
@@ -227,7 +247,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
             // Update the camera parameters
             param.setPreviewSize(optimalSize.width, optimalSize.height);
-            mCamera.setParameters(param);
+            safeSetParameters(mCamera, param, "startPreview()");
 
             // Once the preview size is determined, updated the size of mPreview so that the camera view will fill the screen properly.
             mPreviewWidth = optimalSize.width;
@@ -553,7 +573,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             // Update the camera parameters
             param.setPictureSize(optimalSize.width, optimalSize.height);
             param.setJpegQuality(100);
-            mCamera.setParameters(param);
+            safeSetParameters(mCamera, param, "setResolution()");
 
             LogUtil.e(TAG, "Width is " + mCamera.getParameters().getPictureSize().width + " height is " + mCamera.getParameters().getPictureSize().height);
         }
@@ -735,7 +755,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         }
         zoomdistance = newDist;
         params.setZoom(zoom);
-        mCamera.setParameters(params);
+        safeSetParameters(mCamera, params, "handleZoom()");
     }
 
     // This method handles auto focus events
@@ -803,7 +823,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
             // Update the camera parameters
             param.setPreviewSize(optimalSize.width, optimalSize.height);
-            mCamera.setParameters(param);
+            safeSetParameters(mCamera, param, "surfaceCreated()");
 
             // Once the preview size is determined, updated the size of mPreview so that the camera view will fill the screen properly.
             mPreviewWidth = optimalSize.width;
