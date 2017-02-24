@@ -245,6 +245,11 @@ public class CCCameraView extends RelativeLayout {
     }
 
     public void doPhotoTaken(File imgFile, int imgWidth, int imgHeight){
+        if(!imgFile.exists()) {
+            propOnClose("There was an error saving the photo file.", "error");
+            return;
+        }
+
         //invoke photoTaken prop
         WritableMap event = Arguments.createMap();
         event.putString("filename", imgFile.getAbsolutePath());
@@ -254,6 +259,11 @@ public class CCCameraView extends RelativeLayout {
     }
 
     public void doPhotoAccepted(File imgFile, int imgWidth, int imgHeight){
+        if(!imgFile.exists()) {
+            propOnClose("There was an error saving the photo file.", "error");
+            return;
+        }
+
         // Invoke photoAccepted prop
         WritableMap event = Arguments.createMap();
         event.putString("filename", imgFile.getAbsolutePath());
