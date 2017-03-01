@@ -36,7 +36,7 @@ import java.io.File;
 
 public class CCCameraView extends RelativeLayout {
 
-    private static final boolean FORCE_CAMERA_1 = false;
+    private static final boolean FORCE_CAMERA_1 = true;
 
     private static final String APP_PACKAGE ="com.agilx.companycam";
 
