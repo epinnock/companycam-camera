@@ -3,25 +3,21 @@ package com.newcam.cameras;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.media.AudioManager;
 import android.util.Log;
-import android.util.Size;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.widget.RelativeLayout;
 
 import com.newcam.CCCameraView;
 import com.newcam.R;
 import com.newcam.utils.ExifUtils;
 import com.newcam.utils.PhotoUtils;
 import com.notagilx.companycam.util.LogUtil;
-import com.notagilx.companycam.util.StorageUtility;
 import com.notagilx.companycam.util.views.CameraPreview;
 
 import java.io.BufferedOutputStream;
@@ -32,9 +28,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by mattboyd on 2/5/17.
