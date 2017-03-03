@@ -1,9 +1,12 @@
 package com.newcam;
 
+import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.newcam.utils.AppPreferences;
+import com.newcam.utils.CameraCheck;
 
 /**
  * Created by dan on 1/30/17.
@@ -100,5 +103,22 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
 
         isActive = false;
         printDebug("Active status: " + (isActive ? "Active" : "Inactive"));
+    }
+
+    @ReactMethod
+    public void setForceCamera1(Boolean val) {
+        AppPreferences.setForceCamera1(getReactApplicationContext(), val);
+    }
+
+    @ReactMethod
+    public void getForceCamera1(Callback handleResult) {
+        boolean val = AppPreferences.getForceCamera1(getReactApplicationContext());
+        handleResult.invoke(val);
+    }
+
+    @ReactMethod
+    public void getCamera2Available(Callback handleResult) {
+        boolean val = CameraCheck.getCamera2Available(getReactApplicationContext());
+        handleResult.invoke(val);
     }
 }

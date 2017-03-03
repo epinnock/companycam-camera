@@ -4,7 +4,6 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCharacteristics;
@@ -26,6 +25,8 @@ import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.newcam.cameras.CCCamera;
 import com.newcam.cameras.CCCamera1;
 import com.newcam.cameras.CCCamera2;
+import com.newcam.utils.AppPreferences;
+import com.newcam.utils.CameraCheck;
 import com.newcam.views.CCCameraLayout;
 
 import java.io.File;
@@ -35,10 +36,6 @@ import java.io.File;
  */
 
 public class CCCameraView extends RelativeLayout {
-
-    private static final boolean FORCE_CAMERA_1 = true;
-
-    private static final String APP_PACKAGE ="com.agilx.companycam";
 
     // The mCamera object implements the camera-related behavior
     public CCCamera mCamera;
@@ -104,9 +101,11 @@ public class CCCameraView extends RelativeLayout {
     }
 
     public void init(Context context) {
+        boolean forceCamera1 = AppPreferences.getForceCamera1(context);
+        boolean camera2Available = CameraCheck.getCamera2Available(context);
 
         // Create the appropriate CCCamera class according to the device's version and available cameras
-        if (!FORCE_CAMERA_1 && android.os.Build.VERSION.SDK_INT >= 21 && hasNonLegacyCamera(context)) {
+        if (!forceCamera1 && camera2Available) {
             mCamera = new CCCamera2(context, this);
         }
         else {
@@ -135,10 +134,6 @@ public class CCCameraView extends RelativeLayout {
     public Activity getActivity() {
         ThemedReactContext context = (ThemedReactContext)this.getContext();
         return context.getCurrentActivity();
-    }
-
-    protected SharedPreferences getSharedPreferences() {
-        return getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
     }
 
     // This method returns a boolean that describes whether or not each of the necessary camera permissions has been granted.
@@ -183,34 +178,6 @@ public class CCCameraView extends RelativeLayout {
         loc.setLatitude(this.propExifLocationLatitude);
         loc.setTime(this.propExifLocationTimestamp);
         return loc;
-    }
-
-    // This method checks if there's at least one non-LEGACY rear-facing camera available on this device
-    @TargetApi(21)
-    public boolean hasNonLegacyCamera(Context context) {
-
-        boolean foundNonLegacyCamera = false;
-
-        // At least SDK 21 is required to support the camera2 API
-        CameraManager manager = (CameraManager) getActivity().getSystemService(Context.CAMERA_SERVICE);
-        try {
-            for (String cameraId : manager.getCameraIdList()) {
-                CameraCharacteristics cc = manager.getCameraCharacteristics(cameraId);
-
-                // Check if this is a rear-facing camera and it's hardware support level is greater than LEGACY
-                if (cc.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_BACK) {
-                    int deviceLevel = cc.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
-                    if (deviceLevel != CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
-                        foundNonLegacyCamera = true;
-                    }
-                }
-            }
-        }
-        catch (CameraAccessException cae) {
-            System.out.println("caught a CameraAccessException");
-        }
-
-        return foundNonLegacyCamera;
     }
 
     ////////////////////

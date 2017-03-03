@@ -17,7 +17,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.newcam.CCCameraManager;
-import com.newcam.CCCameraModule;
 import com.newcam.CCCameraView;
 import com.newcam.R;
 import com.newcam.cameras.CCCamera;

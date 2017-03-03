@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.util.Size;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.widget.RelativeLayout;
@@ -13,6 +12,7 @@ import android.widget.RelativeLayout;
 import com.newcam.CCCameraManager;
 import com.newcam.CCCameraView;
 import com.newcam.R;
+import com.newcam.utils.AppPreferences;
 import com.newcam.utils.CCCameraInterface;
 import com.notagilx.companycam.react_bridges.PhotoActions;
 import com.notagilx.companycam.util.StorageUtility;
@@ -29,7 +29,6 @@ import java.util.Map;
 public abstract class CCCamera implements CCCameraInterface {
 
     public Context mContext;
-    private static final String APP_PACKAGE ="com.agilx.companycam";
 
     // The mCameraView is a reference to the latest CCCameraView that contains this camera object
     public CCCameraView mCameraView;
@@ -151,7 +150,7 @@ public abstract class CCCamera implements CCCameraInterface {
 
     // This method retrieves the SharedPreferences object
     protected SharedPreferences getSharedPreferences() {
-        return mContext.getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
+        return AppPreferences.getSharedPreferences(mContext);
     }
 
     ///////////////////////////

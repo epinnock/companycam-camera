@@ -1,18 +1,9 @@
 package com.newcam;
 
-import android.annotation.TargetApi;
-import android.app.Activity;
-import android.content.Context;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraManager;
-
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.annotations.ReactProp;
-import com.newcam.views.Camera2View;
-import com.newcam.views.NewCameraView;
 
 import java.util.Map;
 
