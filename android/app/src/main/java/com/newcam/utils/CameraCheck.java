@@ -10,10 +10,14 @@ import android.hardware.camera2.CameraManager;
  * Created by dan on 3/2/17.
  */
 
+
 public class CameraCheck {
 
+    private static boolean FORCE_CAMERA_1 = true;
+
     public static boolean getCamera2Available(Context context) {
-        return android.os.Build.VERSION.SDK_INT >= 21 && CameraCheck.hasNonLegacyCamera(context);
+        boolean trueValue = android.os.Build.VERSION.SDK_INT >= 21 && CameraCheck.hasNonLegacyCamera(context);
+        return FORCE_CAMERA_1 ? false : trueValue;
     }
 
     // This method checks if there's at least one non-LEGACY rear-facing camera available on this device
