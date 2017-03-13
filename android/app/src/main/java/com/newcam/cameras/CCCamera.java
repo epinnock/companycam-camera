@@ -260,15 +260,8 @@ public abstract class CCCamera implements CCCameraInterface {
                             dialog.dismiss();
                         }
                     }).create().show();
-
-            // Add the touch listener back to the mFrameLayout again
-            //setupListeners();
-
             return;
         }
-
-        Map<String, Object> attributes = new HashMap<>();
-        attributes.put("quality", mResolutionMode);
 
         File file = new File(photoPath);
 
