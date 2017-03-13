@@ -1,13 +1,18 @@
 package com.newcam;
 
 import android.Manifest;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
 import android.location.Location;
 import android.support.v4.content.ContextCompat;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -17,6 +22,12 @@ import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
+import com.newcam.cameras.CCCamera;
+import com.newcam.cameras.CCCamera1;
+import com.newcam.cameras.CCCamera2;
+import com.newcam.utils.AppPreferences;
+import com.newcam.utils.CameraCheck;
+import com.newcam.views.CCCameraLayout;
 
 import java.io.File;
 
@@ -24,23 +35,30 @@ import java.io.File;
  * Created by dan on 12/16/16.
  */
 
-public abstract class CCCameraView extends RelativeLayout {
+public class CCCameraView extends RelativeLayout {
 
-    private static final String APP_PACKAGE ="com.agilx.companycam";
+    // The mCamera object implements the camera-related behavior
+    public CCCamera mCamera;
+
+    // The mCameraLayout object contains all the UI elements for the camera interface
+    public CCCameraLayout mCameraLayout;
+
+    // The mPreviewLayout contains the camera preview
+    public RelativeLayout mPreviewLayout;
+
+    // Component props: values
+    public String placeName;
+    public String placeAddress;
+    protected File appPhotoDirectory;
+    protected double propExifLocationLatitude;
+    protected double propExifLocationLongitude;
+    protected long propExifLocationTimestamp;
 
     // Permissions required to take a picture
     private static final String[] CAMERA_PERMISSIONS = {
             Manifest.permission.CAMERA,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
     };
-
-    // Component props: values
-    protected String placeName;
-    protected String placeAddress;
-    protected File appPhotoDirectory;
-    protected double propExifLocationLatitude;
-    protected double propExifLocationLongitude;
-    protected long propExifLocationTimestamp;
 
     // Common layout features
     protected TextView mPlaceName;
@@ -55,6 +73,15 @@ public abstract class CCCameraView extends RelativeLayout {
         // Request/verify permissions before initializing
         if(checkCameraPermissions()){
             inflate(context, R.layout.view_cccamera, this);
+
+            // Get references to the subviews
+            //mCameraLayout = (CCCameraLayout) findViewById(R.id.layout_cccamera);
+            mPreviewLayout = (RelativeLayout) findViewById(R.id.camera_preview);
+
+            mCameraLayout = new CCCameraLayout(context);
+            RelativeLayout.LayoutParams newParams = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            this.addView(mCameraLayout, newParams);
+
             init(context);
         }else{
             System.err.println("No camera permissions");
@@ -73,19 +100,44 @@ public abstract class CCCameraView extends RelativeLayout {
         }
     }
 
-    public abstract void init(Context context);
+    public void init(Context context) {
+        boolean forceCamera1 = AppPreferences.getForceCamera1(context);
+        boolean camera2Available = CameraCheck.getCamera2Available(context);
 
-    protected Activity getActivity(){
+        // Create the appropriate CCCamera class according to the device's version and available cameras
+        if (!forceCamera1 && camera2Available) {
+            mCamera = new CCCamera2(context, this);
+        }
+        else {
+            mCamera = new CCCamera1(context, this);
+        }
+
+        // Set the layout object's reference to the camera
+        mCameraLayout.setCamera(this.mCamera);
+
+        // Add a touch listener to the mPreviewLayout
+        mPreviewLayout.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(final View v, final MotionEvent event) {
+
+                // Dismiss the resolution layout if it's showing
+                if (mCameraLayout.mResolutionLayoutVisible) {
+                    mCameraLayout.hideResolutionLayout();
+                }
+
+                // Pass the touch event to the mCamera object and let it handle it
+                return mCamera.handleTouchEvent(event);
+            }
+        });
+    }
+
+    public Activity getActivity() {
         ThemedReactContext context = (ThemedReactContext)this.getContext();
         return context.getCurrentActivity();
     }
 
-    protected SharedPreferences getSharedPreferences() {
-        return getContext().getSharedPreferences(APP_PACKAGE, Context.MODE_PRIVATE);
-    }
-
     // This method returns a boolean that describes whether or not each of the necessary camera permissions has been granted.
-    protected boolean checkCameraPermissions() {
+    public boolean checkCameraPermissions() {
         for (String permission : CAMERA_PERMISSIONS) {
             int result = ContextCompat.checkSelfPermission(getContext(), permission);
             if (result != PackageManager.PERMISSION_GRANTED) {
@@ -95,26 +147,42 @@ public abstract class CCCameraView extends RelativeLayout {
         return true;
     }
 
-    public abstract void startCamera();
-    public abstract void releaseCamera();
+    // This method starts the camera based on the camera API being implemented
+    public void startCamera() {
+        mCamera.startCamera();
+    }
 
-    protected void finishWithError(String errmsg){
+    // This method releases the camera based on the camera API being implemented
+    public void releaseCamera() {
+        mCamera.releaseCamera();
+    }
+
+    public void labelTouch() {
+        // Finish the view with a result
+        //finishWithResult("label"); //TODO: temporarily disabled
+    }
+
+    public void finishWithError(String errmsg){
         releaseCamera();
         propOnClose(errmsg, "error");
     }
 
-    protected void finishWithResult(String button){
+    public void finishWithResult(String button){
         releaseCamera();
         propOnClose("", button);
     }
 
-    protected Location getExifLocation(){
+    public Location getExifLocation(){
         Location loc = new Location("Component props");
         loc.setLongitude(this.propExifLocationLongitude);
         loc.setLatitude(this.propExifLocationLatitude);
         loc.setTime(this.propExifLocationTimestamp);
         return loc;
     }
+
+    ////////////////////
+    // Layout methods //
+    ////////////////////
 
     private final Runnable measureAndLayout = new Runnable() {
         @Override
@@ -143,7 +211,12 @@ public abstract class CCCameraView extends RelativeLayout {
         rctEventEmitter.receiveEvent(getId(), eventName, event);
     }
 
-    protected void doPhotoTaken(File imgFile, int imgWidth, int imgHeight){
+    public void doPhotoTaken(File imgFile, int imgWidth, int imgHeight){
+        if(!imgFile.exists()) {
+            propOnClose("There was an error saving the photo file.", "error");
+            return;
+        }
+
         //invoke photoTaken prop
         WritableMap event = Arguments.createMap();
         event.putString("filename", imgFile.getAbsolutePath());
@@ -152,7 +225,12 @@ public abstract class CCCameraView extends RelativeLayout {
         _doEvent("photoTaken", event);
     }
 
-    protected void doPhotoAccepted(File imgFile, int imgWidth, int imgHeight){
+    public void doPhotoAccepted(File imgFile, int imgWidth, int imgHeight){
+        if(!imgFile.exists()) {
+            propOnClose("There was an error saving the photo file.", "error");
+            return;
+        }
+
         // Invoke photoAccepted prop
         WritableMap event = Arguments.createMap();
         event.putString("filename", imgFile.getAbsolutePath());
@@ -181,12 +259,16 @@ public abstract class CCCameraView extends RelativeLayout {
         }
     }
 
+    public File getStoragePath() {
+        return this.appPhotoDirectory;
+    }
+
     public void setProjectName(String str){
         placeName = str;
 
         // Set the mPlaceName label
-        if (mPlaceName != null) {
-            mPlaceName.setText(placeName);
+        if (mCameraLayout.mPlaceName != null) {
+            mCameraLayout.mPlaceName.setText(placeName);
         }
     }
 
@@ -194,8 +276,8 @@ public abstract class CCCameraView extends RelativeLayout {
         placeAddress = str;
 
         // Set the mPlaceAddress label
-        if (mPlaceAddress != null) {
-            mPlaceAddress.setText(placeAddress);
+        if (mCameraLayout.mPlaceAddress != null) {
+            mCameraLayout.mPlaceAddress.setText(placeAddress);
         }
     }
 

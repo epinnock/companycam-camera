@@ -43,7 +43,13 @@ public class VerticalTextView extends TextView {
             canvas.rotate(-90);
         }
 
-        canvas.translate(getCompoundPaddingLeft(), getExtendedPaddingTop());
+        // getCompoundPaddingLeft() and getExtendedPaddingTop() can sometimes throw null pointer exceptions depending on when they get
+        // called in the layout process.
+        try {
+            canvas.translate(getCompoundPaddingLeft(), getExtendedPaddingTop());
+        }
+        catch (NullPointerException npe) {
+        }
 
         // getLayout() can return null depending on when this method is called, so check to make sure it returns a valid object.
         if (getLayout() != null) {
