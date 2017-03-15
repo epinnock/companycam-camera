@@ -29,12 +29,12 @@ public abstract class SingleClickListener implements View.OnClickListener {
         // Get the current time
         long lastClick = lastClickTime;
         long now = System.currentTimeMillis();
-        lastClickTime = now;
 
         // Check if enough time has elapsed since the last click was received
         if (lastClick == 0 || (now - lastClick > minClickInterval)) {
 
             // If enough time has elapsed then this click can actually be processed.
+            lastClickTime = now;
             onSingleClick(v);
         }
         else {
