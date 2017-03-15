@@ -257,7 +257,7 @@ public class CCCameraView extends RelativeLayout {
     private void propOnAuxModeClicked() {
         // Invoke onAuxModeClicked prop
         WritableMap event = Arguments.createMap();
-        _doEvent("onClose", event);
+        _doEvent("onAuxModeClicked", event);
     }
     //-------------------------------------
 
