@@ -8,9 +8,6 @@ class CCCamera extends React.Component {
 
   constructor(props){
     super(props);
-    this._onClose = this._onClose.bind(this);
-    this._photoAccepted = this._photoAccepted.bind(this);
-    this._photoTaken = this._photoTaken.bind(this);
   }
   
   _onClose(event) {
@@ -35,13 +32,20 @@ class CCCamera extends React.Component {
     this.props.photoTaken(filename, [imgWidth, imgHeight]);
   }
   
+  _onAuxModeClicked(event) {
+    if(!this.props.onAuxModeClicked){ return; }
+    
+    this.props.onAuxModeClicked();
+  }
+  
   render() {
     return (
       <RNCCCamera 
         {...this.props} 
-        onClose={this._onClose} 
-        photoAccepted={this._photoAccepted}
-        photoTaken={this._photoTaken}
+        onClose={this._onClose.bind(this)} 
+        photoAccepted={this._photoAccepted.bind(this)}
+        photoTaken={this._photoTaken.bind(this)}
+        onAuxModeClicked={this._onAuxModeClicked.bind(this)}
       />
     );
   }
@@ -51,10 +55,14 @@ CCCamera.propTypes = {
   storagePath: PropTypes.string,
   projectName: PropTypes.string,
   projectAddress: PropTypes.string,
+
   exifLat: PropTypes.number,
   exifLon: PropTypes.number,
   exifLocTimestamp: PropTypes.number,
-  
+
+  auxModeCaption: PropTypes.string,
+  onAuxModeClicked: PropTypes.func,  
+    
   onClose: PropTypes.func,
   photoAccepted: PropTypes.func,
   photoTaken: PropTypes.func,

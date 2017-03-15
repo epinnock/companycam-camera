@@ -39,6 +39,11 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
     // The CCCamera object maintains a reference to the camera and implements the necessary camera API methods
     public CCCamera mCamera;
 
+    public interface AuxModeListener{
+        public void onAuxModeClicked();
+    }
+    protected AuxModeListener auxModeListener;
+
     // The mOrientationListener is used to update the UI elements after major device orientation changes
     private OrientationEventListener mOrientationListener;
     private int mLastOrientation = OrientationEventListener.ORIENTATION_UNKNOWN;
@@ -134,6 +139,16 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
     public CCCameraLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context);
+    }
+
+    public void setAuxModeListener(AuxModeListener auxModeListener){
+        this.auxModeListener = auxModeListener;
+    }
+
+    public void setAuxModeCaption(String auxModeCaption){
+        if(mScannerLabel != null){
+            mScannerLabel.setText(auxModeCaption);
+        }
     }
 
     public void init(Context context) {
@@ -240,8 +255,9 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
             mLabelTouchTarget.setClickable(true);
         }
 
-        // Set the place name label--will be updated when props are received
+        // Set the place name and aux mode labels--will be updated when props are received
         mPlaceName.setText("Location");
+        mScannerLabel.setText("Aux Mode");
 
         // Set the button orientations for the resolution layout
         setupResolutionLayout();
@@ -397,10 +413,13 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         });
 
         // Set a listener for the scanner layout
+        final CCCameraLayout thisLayout = this;
         mScannerLayout.setOnClickListener(new SingleClickListener(CLICK_REJECTION_INTERVAL) {
             @Override
             public void onSingleClick(View v) {
-                setCameraMode("scanner");
+                if(thisLayout != null && thisLayout.auxModeListener != null){
+                    thisLayout.auxModeListener.onAuxModeClicked();
+                }
             }
         });
 
@@ -1032,6 +1051,9 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         if (thisCameraView != null && thisCameraView.placeAddress != null) {
             mPlaceAddress.setText(thisCameraView.placeAddress);
         }
+        if (thisCameraView != null && thisCameraView.propAuxModeCaption != null) {
+            mScannerLabel.setText(thisCameraView.propAuxModeCaption);
+        }
         if (mCamera != null && mCamera.mCameraMode != null) {
             setCameraMode(mCamera.mCameraMode);
         }
@@ -1084,6 +1106,9 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         }
         if (thisCameraView != null && thisCameraView.placeAddress != null) {
             mPlaceAddress.setText(thisCameraView.placeAddress);
+        }
+        if (thisCameraView != null && thisCameraView.propAuxModeCaption != null) {
+            mScannerLabel.setText(thisCameraView.propAuxModeCaption);
         }
         if (mCamera != null && mCamera.mCameraMode != null) {
             setCameraMode(mCamera.mCameraMode);

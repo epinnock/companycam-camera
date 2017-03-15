@@ -53,6 +53,7 @@ public class CCCameraView extends RelativeLayout {
     protected double propExifLocationLatitude;
     protected double propExifLocationLongitude;
     protected long propExifLocationTimestamp;
+    public String propAuxModeCaption;
 
     // Permissions required to take a picture
     private static final String[] CAMERA_PERMISSIONS = {
@@ -79,6 +80,12 @@ public class CCCameraView extends RelativeLayout {
             mPreviewLayout = (RelativeLayout) findViewById(R.id.camera_preview);
 
             mCameraLayout = new CCCameraLayout(context);
+            mCameraLayout.setAuxModeListener(new CCCameraLayout.AuxModeListener(){
+                @Override
+                public void onAuxModeClicked() {
+                    propOnAuxModeClicked();
+                }
+            });
             RelativeLayout.LayoutParams newParams = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             this.addView(mCameraLayout, newParams);
 
@@ -246,6 +253,12 @@ public class CCCameraView extends RelativeLayout {
         event.putString("button", button);
         _doEvent("onClose", event);
     }
+
+    private void propOnAuxModeClicked() {
+        // Invoke onAuxModeClicked prop
+        WritableMap event = Arguments.createMap();
+        _doEvent("onClose", event);
+    }
     //-------------------------------------
 
     //component props: values
@@ -291,6 +304,15 @@ public class CCCameraView extends RelativeLayout {
 
     public void setExifLocTimestamp(double val){
         this.propExifLocationTimestamp = (long)val;
+    }
+
+    public void setAuxModeCaption(String val){
+        propAuxModeCaption = val;
+
+        // Set mScannerLabel text
+        if(mCameraLayout != null) {
+            mCameraLayout.setAuxModeCaption(val);
+        }
     }
     //-------------------------------------
 }

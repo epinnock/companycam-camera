@@ -64,6 +64,11 @@ public class CCCameraManager extends SimpleViewManager<CCCameraView> {
         view.setExifLocTimestamp(val);
     }
 
+    @ReactProp(name = "auxModeCaption")
+    public void setAuxModeCaption(CCCameraView view, String val){
+        view.setAuxModeCaption(val);
+    }
+
     @Override
     @Nullable
     public Map getExportedCustomDirectEventTypeConstants() {
@@ -73,7 +78,9 @@ public class CCCameraManager extends SimpleViewManager<CCCameraView> {
             "photoAccepted",
             MapBuilder.of("registrationName", "photoAccepted"),
             "photoTaken",
-            MapBuilder.of("registrationName", "photoTaken")
+            MapBuilder.of("registrationName", "photoTaken"),
+            "onAuxModeClicked",
+            MapBuilder.of("registrationName", "onAuxModeClicked")
         );
     }
 }
