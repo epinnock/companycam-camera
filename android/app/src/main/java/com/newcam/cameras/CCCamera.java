@@ -68,6 +68,12 @@ public abstract class CCCamera implements CCCameraInterface {
     public int mPreviewWidth;
     public int mPreviewHeight;
 
+    // The mCurrentZoomLevel and mCurrentFingerSpacing are used to handle pinch/zoom gestures
+    public double mCurrentZoomLevel = 1.0;
+    public double mStartingZoomLevel = 1.0;
+    public double mStartingFingerSpacing = -1.0;
+    public boolean mMultiTouchDetected = false;
+
     public CCCamera(Context context, CCCameraView cameraView) {
         mContext = context;
 

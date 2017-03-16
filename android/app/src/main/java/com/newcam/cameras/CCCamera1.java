@@ -620,6 +620,10 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         // Close the current camera
         releaseCamera();
 
+        // Reset the mCurrentZoomLevel and the mStartingFingerSpacing
+        mCurrentZoomLevel = 1.0;
+        mStartingFingerSpacing = -1.0;
+
         // Initialize the camera again
         startCamera();
     }
@@ -713,12 +717,35 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                     zoomdistance = getFingerSpacing(event);
                 } else if (action == MotionEvent.ACTION_MOVE && params.isZoomSupported()) {
                     mCamera.cancelAutoFocus();
+
+                    // Set the mMultiTouchDetected flag
+                    mMultiTouchDetected = true;
+
+                    // Record the initial finger spacing and zoom level if necessary
+                    if (mStartingFingerSpacing == -1.0) {
+                        mStartingFingerSpacing = getFingerSpacing(event);
+                        mStartingZoomLevel = mCurrentZoomLevel;
+                    }
+
                     handleZoom(event, params);
+                }
+                else if (action == MotionEvent.ACTION_UP) {
+                    // Reset the mMultiTouchDetected flag
+                    mMultiTouchDetected = false;
+
+                    // Reset the mStartingFingerSpacing
+                    mStartingFingerSpacing = -1.0;
                 }
             } else {
                 // handle single touch events
                 if (action == MotionEvent.ACTION_UP) {
                     handleFocus(event, params);
+
+                    // Reset the mMultiTouchDetected flag
+                    mMultiTouchDetected = false;
+
+                    // Reset the mStartingFingerSpacing
+                    mStartingFingerSpacing = -1.0;
                 }
             }
         } else {
@@ -735,21 +762,47 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
     // This method handles zoom events
     private void handleZoom(MotionEvent event, Camera.Parameters params) {
-        int maxZoom = params.getMaxZoom();
-        int zoom = params.getZoom();
-        double newDist = getFingerSpacing(event);
-        if (newDist > zoomdistance) {
-            //zoom in
-            if (zoom < maxZoom)
-                zoom++;
-        } else if (newDist < zoomdistance) {
-            //zoom out
-            if (zoom > 0)
-                zoom--;
+
+        // Get the maximum digital zoom level for the current camera
+        float maxZoom = params.getMaxZoom();
+
+        // Get the finger spacing for this touch event
+        double fingerSpacing = getFingerSpacing(event);
+
+        // Get the numerical zoom value that corresponds to the starting zoom level
+        List<Integer> zoomRatios = params.getZoomRatios();
+        int startingZoomValue = 0;
+        if (mStartingZoomLevel < zoomRatios.size()) {
+            startingZoomValue = zoomRatios.get((int)mStartingZoomLevel);
         }
-        zoomdistance = newDist;
-        params.setZoom(zoom);
-        safeSetParameters(mCamera, params, "handleZoom()");
+
+        if (fingerSpacing != 0) {
+
+            // Calculate the ratio of the finger spacing at the beginning of this touch event to this finger spacing
+            double fingerRatio = mStartingFingerSpacing/fingerSpacing;
+
+            // Calculate a new zoom level that's a multiple of the zoom level at the beginning of this touch event
+            double newZoomValue = startingZoomValue/fingerRatio;
+            double newZoom = 1.0;
+            for (int i = 0; i < zoomRatios.size(); i++) {
+                if (zoomRatios.get(i) < newZoomValue) {
+                    newZoom = i;
+                }
+            }
+
+            // Bound the new zoom level by the minimum and maximum zoom levels
+            newZoom = Math.min(newZoom, maxZoom);
+            newZoom = Math.max(newZoom, 1.0);
+
+            System.out.println("mStartingFingerSpacing = " + mStartingFingerSpacing + " and fingerSpacing = " + fingerSpacing);
+            System.out.println("fingerRatio = " + fingerRatio + " and newZoom = " + newZoom);
+            System.out.println("mStaringZoomLevel = " + mStartingZoomLevel + " and mCurrentZoomLevel = " + mCurrentZoomLevel);
+
+            // Set the new zoom level and update the camera preview
+            mCurrentZoomLevel = newZoom;
+            params.setZoom((int)newZoom);
+            safeSetParameters(mCamera, params, "handleZoom()");
+        }
     }
 
     // This method handles auto focus events

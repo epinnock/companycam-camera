@@ -56,7 +56,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
     public static final int PORTRAIT_TOP_DOWN = 2;
     public static final int LANDSCAPE_TOP_LEFT = 3;
     public static final int LANDSCAPE_TOP_RIGHT = 4;
-    private int mPhonePosition;
+    private int mPhonePosition = PORTRAIT_TOP_UP;
 
     // The mTopLayout contains the place labels, close button, and resolution button
     private LinearLayout mTopLayout;

@@ -141,12 +141,6 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
     private ImageReader mJPEGReader;
     private final int HIGH_QUALITY = 80;
 
-    // The mCurrentZoomLevel and mCurrentFingerSpacing are used to handle pinch/zoom gestures
-    private double mCurrentZoomLevel = 1.0;
-    private double mStartingZoomLevel = 1.0;
-    private double mStartingFingerSpacing = -1.0;
-    private boolean mMultiTouchDetected = false;
-
     // The mManualAutoFocus flag indicates whether or not the user initialized tap-to-autofocus
     private boolean mManualAutoFocus = false;
 
@@ -1229,13 +1223,16 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
                 mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL);
             }
 
-            // Start the preview again
-            mCaptureSession.capture(mPreviewRequestBuilder.build(), mCaptureCallback, null);
-
             // Set the camera state back to the default preview state
             mState = STATE_PREVIEW;
-            mCaptureSession.setRepeatingRequest(mPreviewRequest, mCaptureCallback, null);
-        } catch (CameraAccessException e) {
+
+            // Start the preview again
+            if (mCaptureSession != null) {
+                mCaptureSession.capture(mPreviewRequestBuilder.build(), mCaptureCallback, null);
+                mCaptureSession.setRepeatingRequest(mPreviewRequest, mCaptureCallback, null);
+            }
+        }
+        catch (CameraAccessException e) {
             e.printStackTrace();
         }
     }
@@ -1617,8 +1614,9 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
             mCameraType = CameraCharacteristics.LENS_FACING_BACK;
         }
 
-        // Reset the current zoom level
+        // Reset the mCurrentZoomLevel and the mStartingFingerSpacing
         mCurrentZoomLevel = 1.0;
+        mStartingFingerSpacing = -1.0;
 
         // Initialize the camera again
         createPreview();
@@ -1767,6 +1765,9 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
 
         // Set the mSurfaceCreated flag
         mPreview.mSurfaceCreated = false;
+        if (mCaptureSession != null) {
+            mCaptureSession.close();
+        }
 
         LogUtil.e(TAG, "surfaceDestroyed was called");
 
