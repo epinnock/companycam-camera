@@ -55,6 +55,9 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
     // The zoomdistance is used while handling pinch and zoom gestures to
     private double zoomdistance;
 
+    // The mDefaultParams is a default set of camera parameters that can be accessed to avoid errors in the event that the call to getParameters() fails.
+    private Camera.Parameters mDefaultParams;
+
     public CCCamera1(Context context, CCCameraView cameraView) {
         super(context, cameraView);
 
@@ -104,6 +107,10 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                     c = Camera.open(camIdx);
                     mCameraId = camIdx;
                     LogUtil.e(TAG, "The camera instance was retrieved.");
+
+                    // Set the mDefaultParams object
+                    mDefaultParams = c.getParameters();
+
                     return c;
                 }
                 catch (Exception e){
@@ -145,7 +152,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
     private void updateFlashSetting(String flashMode) {
 
         if (mCamera != null) {
-            Camera.Parameters p = mCamera.getParameters();
+            Camera.Parameters p = safeGetParameters(mCamera, "updateFlashSetting()");
 
             // Make sure that setting the flash setting is supported or setting the camera parameters will fail
             if (p.getFlashMode() != null) {
@@ -158,14 +165,24 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
     // This method initializes the camera for the camera preview
     private void initializeCameraForPreview() {
 
-        final Camera.Parameters p = mCamera.getParameters();
+        final Camera.Parameters params = safeGetParameters(mCamera, "initializeCameraForPreview()");
 
-        List<String> supportedFocusModes = mCamera.getParameters().getSupportedFocusModes();
+        // Check the available focus modes
+        List<String> supportedFocusModes = params.getSupportedFocusModes();
         boolean hasContinuousFocus = supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
         if (hasContinuousFocus) {
-            p.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-            safeSetParameters(mCamera, p, "initializeCameraForPreview()");
+            params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
         }
+
+        // Check the available scene modes
+        List<String> supportedSceneModes = params.getSupportedSceneModes();
+        boolean hasSteadyPhotoMode = supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_STEADYPHOTO);
+        if (hasSteadyPhotoMode) {
+            params.setSceneMode(Camera.Parameters.SCENE_MODE_STEADYPHOTO);
+        }
+
+        // Set the parameters for the focus mode and scene mode
+        safeSetParameters(mCamera, params, "initializeCameraForPreview()");
 
         // Create the preview if is hasn't been created before.  If it's already been created, then the camera preview can just be started again.
         if (mPreview == null) {
@@ -203,6 +220,11 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
         boolean safelySetParameters = false;
 
+        // Check that the camera reference isn't null
+        if (camera == null) {
+            return safelySetParameters;
+        }
+
         // Try to set the camera parameters
         try {
             camera.setParameters(params);
@@ -217,6 +239,24 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         return safelySetParameters;
     }
 
+    // This method safely sets the camera parameters and catches the RunTimeException that can be thrown if any of the parameters are
+    // invalid.  It returns a boolean that describes whether or not the parameters were set without throwing the exception
+    private Camera.Parameters safeGetParameters(Camera camera, String message) {
+
+        Camera.Parameters params = mDefaultParams;
+
+        // Try to get the camera parameters
+        try {
+            params = camera.getParameters();
+        }
+        catch (RuntimeException rte) {
+            // If getParameters fails for any reason, it will throw a RuntimeException.
+            Log.d(TAG, "mCamera.getParameters failed when called from " + message);
+        }
+
+        return params;
+    }
+
     // This method gets a reference to the camera and starts the camera preview
     private void startPreview() {
         System.err.println("[CCCamera1] Starting preview");
@@ -227,7 +267,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         if (mCamera != null) {
 
             // These are returned in descending order
-            Camera.Parameters param = mCamera.getParameters();
+            Camera.Parameters param = safeGetParameters(mCamera, "startPreview()");
             List<Camera.Size> lsps = param.getSupportedPreviewSizes();
 
             // Choose the optimal preview size based on the available output sizes, the screen size, and the preview layout size.
@@ -481,8 +521,8 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
         // Get the height and width of the screen in portrait coordinates (where height > width)
         //TODO: I guess this should really be the view size and not the screen size?
-        int screenWidth = mCameraView.getWidth(); //CompanyCamApplication.getInstance().getScreenPortraitPixelWidth();
-        int screenHeight = mCameraView.getHeight(); //CompanyCamApplication.getInstance().getScreenPortraitPixelHeight();
+        int screenWidth = Math.min(mCameraView.getWidth(), mCameraView.getHeight());
+        int screenHeight = Math.max(mCameraView.getWidth(), mCameraView.getHeight());
 
         // Calculate the aspect ratio of the screen
         double screenAspectRatio = (double)screenHeight/(double)screenWidth;
@@ -510,7 +550,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
         if (mCamera != null) {
 
-            Camera.Parameters param = mCamera.getParameters();
+            Camera.Parameters param = safeGetParameters(mCamera, "setResolution()");
 
             //these are returned in descending order
             List<Camera.Size> lsps = param.getSupportedPictureSizes();
@@ -569,7 +609,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             param.setJpegQuality(100);
             safeSetParameters(mCamera, param, "setResolution()");
 
-            LogUtil.e(TAG, "Width is " + mCamera.getParameters().getPictureSize().width + " height is " + mCamera.getParameters().getPictureSize().height);
+            LogUtil.e(TAG, "Width is " + safeGetParameters(mCamera, "").getPictureSize().width + " height is " + safeGetParameters(mCamera, "").getPictureSize().height);
         }
     }
 
@@ -635,7 +675,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             return false;
         }
 
-        Camera.Parameters parameters = mCamera.getParameters();
+        Camera.Parameters parameters = safeGetParameters(mCamera, "hasFlash()");
 
         if (parameters.getFlashMode() == null) {
             return false;
@@ -681,8 +721,10 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             try {
                 mCamera.takePicture(shutterCallback, null, mPicture);
 
+                // TODO - Is there a reason the touch listener still needs to be removed after a photo is taken?
                 // Remove the touch listener from the mFrameLayout after a picture has been taken
-                mCameraView.mPreviewLayout.setOnTouchListener(null);
+                //mCameraView.mPreviewLayout.setOnTouchListener(null);
+
             } catch (RuntimeException re) {
                 Log.e(TAG, "RuntimeEx takePicture" + re.getMessage());
             }
@@ -709,7 +751,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         if (mCamera != null) {
 
             // Get the pointer ID
-            final Camera.Parameters params = mCamera.getParameters();
+            final Camera.Parameters params = safeGetParameters(mCamera, "handleTouchEvent()");
             final int action = event.getAction();
             if (event.getPointerCount() > 1) {
                 // handle multi-touch events
@@ -856,7 +898,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             }
 
             // These are returned in descending order
-            Camera.Parameters param = mCamera.getParameters();
+            Camera.Parameters param = safeGetParameters(mCamera, "surfaceCreated()");
             List<Camera.Size> lsps = param.getSupportedPreviewSizes();
 
             // Choose the optimal preview size based on the available output sizes, the screen size, and the preview layout size.

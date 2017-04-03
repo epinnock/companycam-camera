@@ -189,9 +189,9 @@ public abstract class CCCamera implements CCCameraInterface {
 
         // Get the height and width of the screen in portrait coordinates (where height > width)
         //TODO: I guess this should really be the view size and not the screen size?
-        double screenWidth = (double) mCameraView.getWidth(); //CompanyCamApplication.getInstance().getScreenPortraitPixelWidth();
-        double screenHeight = (double) mCameraView.getHeight(); //CompanyCamApplication.getInstance().getScreenPortraitPixelHeight();
-        System.out.println("screenWidth = " + screenWidth + " screenHeight = " + screenHeight);
+        double screenWidth = (double) Math.min(mCameraView.getWidth(), mCameraView.getHeight());
+        double screenHeight = (double) Math.max(mCameraView.getWidth(), mCameraView.getHeight());
+        System.out.println("In configurePreviewLayout screenWidth = " + screenWidth + " screenHeight = " + screenHeight);
 
         // Calculate the aspect ratio of the screen
         double screenAspectRatio = screenHeight/screenWidth;
@@ -199,7 +199,7 @@ public abstract class CCCamera implements CCCameraInterface {
         // Get the height and width of the chosen preview size in portrait coordinates (where height > width)
         int theWidth = mPreviewWidth;
         int theHeight = mPreviewHeight;
-        System.out.println("theWidth = " + theWidth + " theHeight = " + theHeight);
+        System.out.println("In configurePreviewLayout theWidth = " + theWidth + " theHeight = " + theHeight);
         double previewWidth = (double) Math.min(mPreviewWidth, mPreviewHeight);
         double previewHeight =(double) Math.max(mPreviewWidth, mPreviewHeight);
 
@@ -222,10 +222,10 @@ public abstract class CCCamera implements CCCameraInterface {
         int marginX = -(newWidth - (int)screenWidth)/2;
         int marginY = -(newHeight - (int)screenHeight)/2;
 
-        System.out.println("left margin = " + marginX);
-        System.out.println("top margin = " + marginY);
-        System.out.println("right margin = " + marginX);
-        System.out.println("bottom margin = " + marginY);
+        System.out.println("In configurePreviewLayout left margin = " + marginX);
+        System.out.println("In configurePreviewLayout top margin = " + marginY);
+        System.out.println("In configurePreviewLayout right margin = " + marginX);
+        System.out.println("In configurePreviewLayout bottom margin = " + marginY);
 
         mPreviewParams.setMargins(marginX, marginY, marginX, marginY);
         mPreview.setLayoutParams(mPreviewParams);
