@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.apptimize.Apptimize;
 import com.newcam.CCCameraManager;
 import com.newcam.CCCameraView;
 import com.newcam.R;
@@ -258,6 +259,14 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         // Set the place name and aux mode labels--will be updated when props are received
         mPlaceName.setText("Location");
         mScannerLabel.setText("Aux Mode");
+
+        // Check Apptimize to show or hide the scannerLayout
+        if (Apptimize.isFeatureFlagOn("beforeAfterCam")) {
+            mScannerLayout.setVisibility(View.VISIBLE);
+        }
+        else {
+            mScannerLayout.setVisibility(View.GONE);
+        }
 
         // Set the button orientations for the resolution layout
         setupResolutionLayout();
