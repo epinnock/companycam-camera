@@ -6,6 +6,8 @@ import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
+import android.graphics.PointF;
+import android.graphics.Rect;
 import android.hardware.Camera;
 import android.media.AudioManager;
 import android.util.Log;
@@ -54,6 +56,9 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
     // The zoomdistance is used while handling pinch and zoom gestures to
     private double zoomdistance;
+
+    // The METERING_AREA_SIZE is used to calculate the metering rectangle for focusing and exposing the camera at a touch point
+    private static final int METERING_AREA_SIZE= 200;
 
     // The mDefaultParams is a default set of camera parameters that can be accessed to avoid errors in the event that the call to getParameters() fails.
     private Camera.Parameters mDefaultParams;
@@ -123,8 +128,9 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         return c;
     }
 
-    // This method sets the display orientation for the camera
-    public void setCameraDisplayOrientation(int cameraId, Camera camera) {
+    // This method gets the display orientation for the camera
+    public int getCameraDisplayOrientation(int cameraId, Camera camera) {
+
         android.hardware.Camera.CameraInfo info =
                 new android.hardware.Camera.CameraInfo();
         android.hardware.Camera.getCameraInfo(cameraId, info);
@@ -145,17 +151,30 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         } else {  // back-facing
             result = (info.orientation - degrees + 360) % 360;
         }
+
+        return result;
+    }
+
+    // This method sets the display orientation for the camera
+    public void setCameraDisplayOrientation(int cameraId, Camera camera) {
+
+        int result = this.getCameraDisplayOrientation(cameraId, camera);
         camera.setDisplayOrientation(result);
     }
 
     // This method updates the flash mode in the camera parameters
     private void updateFlashSetting(String flashMode) {
 
+        System.err.println("Trying to set the flash");
+
         if (mCamera != null) {
             Camera.Parameters p = safeGetParameters(mCamera, "updateFlashSetting()");
 
+            System.err.println("Trying to set the flash and the camera wasn't null");
+
             // Make sure that setting the flash setting is supported or setting the camera parameters will fail
             if (p.getFlashMode() != null) {
+                System.err.println("Trying to set the flash and the flash mode was " + p.getFlashMode());
                 p.setFlashMode(flashMode);
                 safeSetParameters(mCamera, p, "updateFlashSetting()");
             }
@@ -178,7 +197,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         List<String> supportedSceneModes = params.getSupportedSceneModes();
         boolean hasSteadyPhotoMode = supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_STEADYPHOTO);
         if (hasSteadyPhotoMode) {
-            params.setSceneMode(Camera.Parameters.SCENE_MODE_STEADYPHOTO);
+            //params.setSceneMode(Camera.Parameters.SCENE_MODE_STEADYPHOTO);
         }
 
         // Set the parameters for the focus mode and scene mode
@@ -781,7 +800,11 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             } else {
                 // handle single touch events
                 if (action == MotionEvent.ACTION_UP) {
-                    handleFocus(event, params);
+
+                    // Trigger the tap-to-autofocus if this was a single tap
+                    if (event.getPointerCount() == 1 && !mMultiTouchDetected) {
+                        handleFocus(event, params);
+                    }
 
                     // Reset the mMultiTouchDetected flag
                     mMultiTouchDetected = false;
@@ -852,29 +875,119 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
         LogUtil.e(TAG, "handleFocus was called");
 
-        int pointerId = event.getPointerId(0);
-        int pointerIndex = event.findPointerIndex(pointerId);
-
-        // Get the pointer's current position
-        float x = event.getX(pointerIndex);
-        float y = event.getY(pointerIndex);
-
+        // Check to make sure that the camera supports focus
         List<String> supportedFocusModes = params.getSupportedFocusModes();
         if (supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
 
             // Check to make sure the surface has been created, otherwise the autofocus will fail
             if (mPreview != null && mPreview.mSurfaceCreated) {
 
-                mCamera.autoFocus(new Camera.AutoFocusCallback() {
+                // Check if the camera supports metering areas for focus and/or exposure
+                if (params.getMaxNumFocusAreas() > 0 || params.getMaxNumMeteringAreas() > 0){
+
+                    int pointerId = event.getPointerId(0);
+                    int pointerIndex = event.findPointerIndex(pointerId);
+
+                    // Get the pointer's current position
+                    float x = event.getX(pointerIndex);
+                    float y = event.getY(pointerIndex);
+
+                    // Normalize the touch point coordinates with respect to the height and width of the preview layout
+                    int previewWidth = mCameraView.mPreviewLayout.getWidth();
+                    int previewHeight = mCameraView.mPreviewLayout.getHeight();
+
+                    // The x and y coordinates from the touch event need to be converted to normalized portrait coordinates in order to calculate the metering region
+                    float n_y = y/previewHeight;
+                    float n_x = x/previewWidth;
+
+                    // n_x, n_y are normalized coordinates in the screen reference frame.
+                    // The metering region is expressed in the camera sensor reference frame.
+                    // Calculate the point nsc which is (n_x, n_y) expressed in the camera sensor reference frame.
+                    PointF nsc = convertNormalizedCoords(n_x, n_y, this.getCameraDisplayOrientation(mCameraId, mCamera));
+                    Rect rect = regionsForNormalizedCoord(nsc.x, nsc.y);
+
+                    // Set the focus mode to FOCUS_MODE_AUTO
+                    params.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+
+                    // Set the focus area for the camera.  Make sure to actually call safeSetParameters before calling setMeteringAreas
+                    // to add the metering areas for auto exposure otherwise the auto focus won't execute properly.
+                    List<Camera.Area> meteringAreas = new ArrayList<Camera.Area>();
+                    meteringAreas.add(new Camera.Area(rect, 800));
+                    if (params.getMaxNumFocusAreas() > 0) {
+                        params.setFocusAreas(meteringAreas);
+                        safeSetParameters(mCamera, params, "handleFocus()");
+                    }
+
+                    // Set the metering area for the camera
+                    if (params.getMaxNumMeteringAreas() > 0) {
+                        params.setMeteringAreas(meteringAreas);
+                        safeSetParameters(mCamera, params, "handleFocus()");
+                    }
+                    /*else {
+                        params.set("metering", "spot");
+                        params.setMeteringAreas(meteringAreas);
+                        safeSetParameters(mCamera, params, "handleFocus()");
+                    }*/
+
+                    // Start the focus
+                    mCamera.autoFocus(mAutoFocusCallback);
+
+                    // Show the mFocusIndicatorView
+                    mCameraView.mCameraLayout.showAutoFocusIndicator(x, y, true);
+                }
+
+                // If metering areas aren't supported, then just call the autoFocus method.
+                else {
+                    mCamera.autoFocus(mAutoFocusCallback);
+                }
+
+                /*mCamera.autoFocus(new Camera.AutoFocusCallback() {
                     @Override
                     public void onAutoFocus(boolean b, Camera camera) {
                         // currently set to auto-focus on single touch
                         LogUtil.e(TAG, "handleFocus was called and autofocus was actually fired");
                     }
-                });
+                });*/
             }
         }
     }
+
+    // This method calculates the metering regions for the given normalized portrait coordinates n_X and n_y.
+    private static Rect regionsForNormalizedCoord(float n_x, float n_y) {
+
+        // Convert the given normalized coordinates into a frame where (-1000, -1000) represents the upper left-hand corner and
+        // (1000, 1000) is the lower right-hand corner
+        float region_x = (n_x * 2000.0f) - 1000.0f;
+        float region_y = (n_y * 2000.0f) - 1000.0f;
+
+        // Calculate the metering rect for this touch point.  The rect can't extend outside the range of -1000 to 1000, so if the touch
+        // point is near the edge of the view, then shift the center of the rect accordingly
+        region_x = Math.min(1000.0f - METERING_AREA_SIZE/2.0f, region_x);
+        region_x = Math.max(-1000.0f + METERING_AREA_SIZE/2.0f, region_x);
+        region_y = Math.min(1000.0f - METERING_AREA_SIZE/2.0f, region_y);
+        region_y = Math.max(-1000.0f + METERING_AREA_SIZE/2.0f, region_y);
+
+        int left = (int)(region_x - METERING_AREA_SIZE/2.0f);
+        int top = (int)(region_y - METERING_AREA_SIZE/2.0f);
+
+        return new Rect(left, top, left + METERING_AREA_SIZE, top + METERING_AREA_SIZE);
+    }
+
+    private Camera.AutoFocusCallback mAutoFocusCallback = new Camera.AutoFocusCallback() {
+        @Override
+        public void onAutoFocus(boolean success, Camera camera) {
+            if (success) {
+                // do something...
+                Log.i("tap_to_focus","success!");
+            } else {
+                // do something...
+                Log.i("tap_to_focus","fail!");
+            }
+
+            // Hide the mFocusIndicatorView
+            mCameraView.mCameraLayout.hideAutoFocusIndicator();
+        }
+    };
 
     ///////////////////////////////////
     // SurfaceHolderCallback methods //

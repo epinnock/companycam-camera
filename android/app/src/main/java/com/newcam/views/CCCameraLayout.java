@@ -2,6 +2,7 @@ package com.newcam.views;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -992,7 +993,6 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         mFocusIndicatorView.requestLayout();
 
         // Show the mFocusIndicatorView and add an animation to it
-        mFocusIndicatorView.setVisibility(View.VISIBLE);
         FocusIndicatorAnimation animation = new FocusIndicatorAnimation(this);
         animation.setDuration(700);
         animation.setRepeatCount(Animation.INFINITE);
@@ -1016,6 +1016,9 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
             }
         });
         mFocusIndicatorView.startAnimation(animation);
+
+        // Set the visibility for the view
+        mFocusIndicatorView.setVisibility(View.VISIBLE);
     }
 
     @Override

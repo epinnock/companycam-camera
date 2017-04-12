@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.graphics.PointF;
 import android.net.Uri;
 import android.view.MotionEvent;
 import android.view.OrientationEventListener;
@@ -243,6 +244,23 @@ public abstract class CCCamera implements CCCameraInterface {
         double x = event.getX(0) - event.getX(1);
         double y = event.getY(0) - event.getY(1);
         return Math.sqrt(x * x + y * y);
+    }
+
+    // This method returns normalized coordinates in a reference frame that's rotated by rotationAngle from the reference frame in which
+    // n_x and n_y are represented.
+    public static PointF convertNormalizedCoords(float n_x, float n_y, int rotationAngle) {
+        switch (rotationAngle) {
+            case 0:
+                return new PointF(n_x, n_y);
+            case 90:
+                return new PointF(n_y, 1.0f - n_x);
+            case 180:
+                return new PointF(1.0f - n_x, 1.0f - n_y);
+            case 270:
+                return new PointF(1.0f - n_y, n_x);
+            default:
+                return null;
+        }
     }
 
     // This method gets the storage path for the photo file

@@ -1126,23 +1126,6 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
         return new MeteringRectangle[]{new MeteringRectangle(meteringRegion, 800)};
     }
 
-    // This method returns normalized coordinates in a reference frame that's rotated by rotationAngle from the reference frame in which
-    // n_x and n_y are represented.
-    public static PointF convertNormalizedCoords(float n_x, float n_y, int rotationAngle) {
-        switch (rotationAngle) {
-            case 0:
-                return new PointF(n_x, n_y);
-            case 90:
-                return new PointF(n_y, 1.0f - n_x);
-            case 180:
-                return new PointF(1.0f - n_x, 1.0f - n_y);
-            case 270:
-                return new PointF(1.0f - n_y, n_x);
-            default:
-                return null;
-        }
-    }
-
     // This method locks the focus to a particular metering rectangle based on the user's touch point.  The metering rectangle must be expressed
     // in the current camera's active pixel array reference frame.
     private void lockFocusToRegion(MeteringRectangle[] meteringRect) {
