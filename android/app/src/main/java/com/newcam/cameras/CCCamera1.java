@@ -5,9 +5,11 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.media.AudioManager;
 import android.util.Log;
@@ -23,10 +25,12 @@ import com.notagilx.companycam.util.LogUtil;
 import com.notagilx.companycam.util.views.CameraPreview;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -57,8 +61,14 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
     // The zoomdistance is used while handling pinch and zoom gestures to
     private double zoomdistance;
 
-    // The METERING_AREA_SIZE is used to calculate the metering rectangle for focusing and exposing the camera at a touch point
-    private static final int METERING_AREA_SIZE= 200;
+    // The METERING_AREA_FRACTION is used to calculate the metering rectangle for focusing and exposing the camera at a touch point
+    private static final float METERING_AREA_FRACTION = 0.1f;
+
+    // The EXPOSURE_AREA_FRACTION is used to calculate the metering rectangle for the custom auto exposure routine
+    private static final float EXPOSURE_AREA_FRACTION = 0.05f;
+
+    // The mLastNormalizedTouchPoint is the normalized coordinate of the last touch point
+    private PointF mLastNormalizedTouchPoint;
 
     // The mDefaultParams is a default set of camera parameters that can be accessed to avoid errors in the event that the call to getParameters() fails.
     private Camera.Parameters mDefaultParams;
@@ -870,6 +880,45 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         }
     }
 
+    // This callback is used during the custom auto exposure routine to analyze the area of the camera preview near the touch point.
+    Camera.PreviewCallback mPreviewCallback = new Camera.PreviewCallback() {
+        @Override
+        public void onPreviewFrame(byte[] data, Camera camera) {
+
+            // Get the width and height of the camera preview
+            Camera.Parameters params = safeGetParameters(mCamera, "");
+            int width = params.getPreviewSize().width;
+            int height = params.getPreviewSize().height;
+            System.err.println("In onPreviewFrame width = " + width + " and height = " + height);
+
+            // Calculate the metering rect around the touch point by using the saved normalized coordinates
+            Rect rect = CCCamera1.exposureRegionForNormalizedCoord(mLastNormalizedTouchPoint.x, mLastNormalizedTouchPoint.y, width, height);
+
+            // Calculate the average luminosity over the metering rect
+            int averageLuminosity = getLuminosityInRect(rect, data, width);
+
+            // Calculate the average luminosity over the entire view
+            int totalLuminosity = getLuminosityInRect(new Rect(0, 0, width, height), data, width);
+
+            System.err.println("In onPreviewFrame the average luminosity is " + averageLuminosity);
+            System.err.println("In onPreviewFrame the total luminosity is " + totalLuminosity);
+
+            // Get the min and max exposure compensation values
+            int minExposure = params.getMinExposureCompensation();
+            int maxExposure = params.getMaxExposureCompensation();
+            float exposureStep = params.getExposureCompensationStep();
+
+            System.err.println("In onPreviewFrame minExposure = " + minExposure + ", maxExposure = " + maxExposure);
+
+            int newExposure = (int)(maxExposure - ((float)(maxExposure - minExposure)/256.0f)*(128.0f - (float)averageLuminosity));
+
+            System.err.println("In onPreviewFrame newExposure = " + newExposure);
+
+            params.setExposureCompensation(newExposure);
+            safeSetParameters(mCamera, params, "");
+        }
+    };
+
     // This method handles auto focus events
     public void handleFocus(MotionEvent event, Camera.Parameters params) {
 
@@ -923,11 +972,16 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                         params.setMeteringAreas(meteringAreas);
                         safeSetParameters(mCamera, params, "handleFocus()");
                     }
-                    /*else {
-                        params.set("metering", "spot");
-                        params.setMeteringAreas(meteringAreas);
+                    else {
+
+                        // Record this touch point and attach a callback to get the next camera frame.
+                        mLastNormalizedTouchPoint = nsc;
+                        mCamera.setOneShotPreviewCallback(mPreviewCallback);
+
+                        /*params.set("metering", "spot");
+                        params.setMeteringAreas(meteringAreas);*/
                         safeSetParameters(mCamera, params, "handleFocus()");
-                    }*/
+                    }
 
                     // Start the focus
                     mCamera.autoFocus(mAutoFocusCallback);
@@ -940,19 +994,11 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 else {
                     mCamera.autoFocus(mAutoFocusCallback);
                 }
-
-                /*mCamera.autoFocus(new Camera.AutoFocusCallback() {
-                    @Override
-                    public void onAutoFocus(boolean b, Camera camera) {
-                        // currently set to auto-focus on single touch
-                        LogUtil.e(TAG, "handleFocus was called and autofocus was actually fired");
-                    }
-                });*/
             }
         }
     }
 
-    // This method calculates the metering regions for the given normalized portrait coordinates n_X and n_y.
+    // This method calculates the metering regions for the given normalized portrait coordinates n_x and n_y.
     private static Rect regionsForNormalizedCoord(float n_x, float n_y) {
 
         // Convert the given normalized coordinates into a frame where (-1000, -1000) represents the upper left-hand corner and
@@ -962,15 +1008,64 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
         // Calculate the metering rect for this touch point.  The rect can't extend outside the range of -1000 to 1000, so if the touch
         // point is near the edge of the view, then shift the center of the rect accordingly
-        region_x = Math.min(1000.0f - METERING_AREA_SIZE/2.0f, region_x);
-        region_x = Math.max(-1000.0f + METERING_AREA_SIZE/2.0f, region_x);
-        region_y = Math.min(1000.0f - METERING_AREA_SIZE/2.0f, region_y);
-        region_y = Math.max(-1000.0f + METERING_AREA_SIZE/2.0f, region_y);
+        int meteringAreaSize = (int) (2000.0f * METERING_AREA_FRACTION);
+        region_x = Math.min(1000.0f - meteringAreaSize/2.0f, region_x);
+        region_x = Math.max(-1000.0f + meteringAreaSize/2.0f, region_x);
+        region_y = Math.min(1000.0f - meteringAreaSize/2.0f, region_y);
+        region_y = Math.max(-1000.0f + meteringAreaSize/2.0f, region_y);
 
-        int left = (int)(region_x - METERING_AREA_SIZE/2.0f);
-        int top = (int)(region_y - METERING_AREA_SIZE/2.0f);
+        int left = (int)(region_x - meteringAreaSize/2.0f);
+        int top = (int)(region_y - meteringAreaSize/2.0f);
 
-        return new Rect(left, top, left + METERING_AREA_SIZE, top + METERING_AREA_SIZE);
+        return new Rect(left, top, left + meteringAreaSize, top + meteringAreaSize);
+    }
+
+    // This method calculates the custom exposure regions for the given normalized portrait coordinates n_x and n_y for the given preview size
+    private static Rect exposureRegionForNormalizedCoord(float n_x, float n_y, int previewWidth, int previewHeight) {
+
+        // Convert the given normalized coordinates into a frame represented by the previewWidth and previewHeight
+        float region_x = n_x * previewWidth;
+        float region_y = n_y * previewHeight;
+
+        // Calculate the metering rect for this touch point.  The rect can't extend outside the range of the preview width and height,
+        // so if the touch point is near the edge of the view, then shift the center of the rect accordingly.
+        int meteringAreaSize = (int) ((Math.min(previewWidth, previewHeight)) * EXPOSURE_AREA_FRACTION);
+        region_x = Math.min(previewWidth - meteringAreaSize/2.0f, region_x);
+        region_x = Math.max(meteringAreaSize/2.0f, region_x);
+        region_y = Math.min(previewHeight - meteringAreaSize/2.0f, region_y);
+        region_y = Math.max(meteringAreaSize/2.0f, region_y);
+
+        int left = (int)(region_x - meteringAreaSize/2.0f);
+        int top = (int)(region_y - meteringAreaSize/2.0f);
+
+        return new Rect(left, top, left + meteringAreaSize, top + meteringAreaSize);
+    }
+
+    // This method calculates the average luminosity value for the given rect in a YUV NV21 image
+    private int getLuminosityInRect(Rect rect, byte[] data, int width) {
+
+        // Calculate the size of the rect
+        int rectWidth = rect.width();
+        int rectHeight = rect.height();
+        int size = rectWidth * rectHeight;
+
+        // Iterate through the given rect and sum all the luminosity values
+        int totalLuminosity = 0;
+        for (int i = 0; i < rectHeight; i++) {
+            for (int j = 0; j < rectWidth; j++) {
+
+                // Calculate the index in the byte array that corresponds to this point in the rect
+                int thisIndex = ((rect.top + i) * width) + rect.left + j;
+
+                // Get the luminosity of this point.  Double check that the index isn't outside the data range to avoid errors
+                if (thisIndex < data.length) {
+                    totalLuminosity += data[thisIndex];
+                }
+            }
+        }
+
+        // Return the average luminosity over the rect
+        return totalLuminosity/size;
     }
 
     private Camera.AutoFocusCallback mAutoFocusCallback = new Camera.AutoFocusCallback() {
