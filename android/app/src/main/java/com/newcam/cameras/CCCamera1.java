@@ -910,7 +910,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
             System.err.println("In onPreviewFrame minExposure = " + minExposure + ", maxExposure = " + maxExposure);
 
-            int newExposure = (int)(maxExposure - ((float)(maxExposure - minExposure)/256.0f)*(128.0f - (float)averageLuminosity));
+            int newExposure = (int)( maxExposure - ((float)(maxExposure - minExposure)/256.0f)*((float)averageLuminosity) );
 
             System.err.println("In onPreviewFrame newExposure = " + newExposure);
 
@@ -1059,7 +1059,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
                 // Get the luminosity of this point.  Double check that the index isn't outside the data range to avoid errors
                 if (thisIndex < data.length) {
-                    totalLuminosity += data[thisIndex];
+                    totalLuminosity += data[thisIndex] & 0xFF;
                 }
             }
         }
