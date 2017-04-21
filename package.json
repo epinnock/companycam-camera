@@ -1,6 +1,6 @@
 {
 	"name": "companycam-camera",
-	"version": "0.0.38",
+	"version": "0.0.39",
 	"description": "CompanyCam react native camera component",
   "main": "cccamera.js",
 	"scripts": {
