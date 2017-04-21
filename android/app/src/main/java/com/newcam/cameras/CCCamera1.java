@@ -972,16 +972,16 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                         params.setMeteringAreas(meteringAreas);
                         safeSetParameters(mCamera, params, "handleFocus()");
                     }
-                    else {
+                    /*else {
 
                         // Record this touch point and attach a callback to get the next camera frame.
                         mLastNormalizedTouchPoint = nsc;
                         mCamera.setOneShotPreviewCallback(mPreviewCallback);
 
-                        /*params.set("metering", "spot");
-                        params.setMeteringAreas(meteringAreas);*/
+                        //params.set("metering", "spot");
+                        //params.setMeteringAreas(meteringAreas);
                         safeSetParameters(mCamera, params, "handleFocus()");
-                    }
+                    }*/
 
                     // Start the focus
                     mCamera.autoFocus(mAutoFocusCallback);
