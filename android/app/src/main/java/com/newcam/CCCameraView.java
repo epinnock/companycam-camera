@@ -161,7 +161,9 @@ public class CCCameraView extends RelativeLayout {
 
     // This method releases the camera based on the camera API being implemented
     public void releaseCamera() {
-        mCamera.releaseCamera();
+        if (mCamera != null){
+            mCamera.releaseCamera();
+        }
     }
 
     public void labelTouch() {
