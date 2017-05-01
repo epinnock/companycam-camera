@@ -19,6 +19,7 @@ import android.view.SurfaceHolder;
 
 import com.newcam.CCCameraView;
 import com.newcam.R;
+import com.newcam.imageprocessing.CCCameraImageProcessor;
 import com.newcam.utils.ExifUtils;
 import com.newcam.utils.PhotoUtils;
 import com.notagilx.companycam.util.LogUtil;
@@ -73,11 +74,15 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
     private int numExposureAttempts;
     private float lastExposureValue;
 
+    private CCCameraImageProcessor ccImageProcessor;
+
     // The mDefaultParams is a default set of camera parameters that can be accessed to avoid errors in the event that the call to getParameters() fails.
     private Camera.Parameters mDefaultParams;
 
-    public CCCamera1(Context context, CCCameraView cameraView) {
+    public CCCamera1(Context context, CCCameraView cameraView, CCCameraImageProcessor ccImageProcessor) {
         super(context, cameraView);
+
+        this.ccImageProcessor = ccImageProcessor;
 
         // Start the camera preview
         startCamera();
@@ -244,6 +249,26 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 }
             }
         }
+
+        //TODO: Start capturing frames using setPreviewCallbackWithBuffer
+        //========================================================================
+        LogUtil.e(TAG, "Preparing setPreviewCallbackWithBuffer");
+
+        int videoBufferSize = mPreviewWidth * mPreviewHeight * ImageFormat.getBitsPerPixel(params.getPreviewFormat()) / 8;
+        LogUtil.e(TAG, "Initializing capture buffer (" + videoBufferSize + ")");
+
+        ccImageProcessor.setImageParams(mPreviewWidth, mPreviewHeight, params.getPreviewFormat());
+
+        byte[] videoBuffer = new byte[videoBufferSize];
+        mCamera.addCallbackBuffer(videoBuffer);
+
+        mCamera.setPreviewCallbackWithBuffer(new Camera.PreviewCallback() {
+            public void onPreviewFrame(byte[] data, Camera camera) {
+                ccImageProcessor.setBytes(data);
+                mCamera.addCallbackBuffer(data);
+            }
+        });
+        //========================================================================
     }
 
     // This method safely sets the camera parameters and catches the RunTimeException that can be thrown if any of the parameters are
