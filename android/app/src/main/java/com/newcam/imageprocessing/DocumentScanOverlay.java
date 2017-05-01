@@ -20,6 +20,8 @@ import android.view.View;
 
 public class DocumentScanOverlay extends View implements CCCameraImageProcessor {
 
+    protected Context context;
+
     protected boolean didReceiveImageParams = false;
 
     protected int width;
@@ -34,6 +36,7 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
 
     public DocumentScanOverlay(Context context) {
         super(context);
+        this.context = context;
 
         this.setBackgroundColor(Color.argb(0,0,0,0));
     }
@@ -52,6 +55,27 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         canvas.drawBitmap(overlayBitmap, rSrc, rDst, null);
     }
 
+    public Allocation renderScriptNV21ToRGBA888(Context context, int width, int height, byte[] nv21) {
+        if(android.os.Build.VERSION.SDK_INT < 17) {
+            return null;
+        }
+
+        RenderScript rs = RenderScript.create(context);
+        ScriptIntrinsicYuvToRGB yuvToRgbIntrinsic = ScriptIntrinsicYuvToRGB.create(rs, Element.U8_4(rs));
+
+        Type.Builder yuvType = new Type.Builder(rs, Element.U8(rs)).setX(nv21.length);
+        Allocation in = Allocation.createTyped(rs, yuvType.create(), Allocation.USAGE_SCRIPT);
+
+        Type.Builder rgbaType = new Type.Builder(rs, Element.RGBA_8888(rs)).setX(width).setY(height);
+        Allocation out = Allocation.createTyped(rs, rgbaType.create(), Allocation.USAGE_SCRIPT);
+
+        in.copyFrom(nv21);
+
+        yuvToRgbIntrinsic.setInput(in);
+        yuvToRgbIntrinsic.forEach(out);
+        return out;
+    }
+
     @Override
     public void setBytes(byte[] data) {
         if(!didReceiveImageParams){ return; }
@@ -60,30 +84,22 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
 
         long startMS = System.currentTimeMillis();
 
-        overlayBitmap.eraseColor(Color.argb(32, 255,0,0));
+        Allocation bmData = renderScriptNV21ToRGBA888(context, width, height, data);
+        bmData.copyTo(overlayBitmap);
 
         int maxVal = 0;
         int maxX = 0;
         int maxY = 0;
 
-        //TODO transformed
         int index = 0;
         for(int y = 0; y < height; y++){
         for(int x = 0; x < width; x++){
             int val = data[index] & 0xFF;
 
-            //TODO transform
-            int tx = height - y - 1;
-            int ty = x;
-
-            if((tx % 5 == 0) && (ty % 5 == 0)) {
-                overlayBitmap.setPixel(tx, ty, Color.argb(192, val, val, val));
-            }
-
             if(val > maxVal){
                 maxVal = val;
-                maxX = tx;
-                maxY = ty;
+                maxX = x;
+                maxY = y;
             }
 
             index++;
@@ -108,8 +124,7 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         this.height = height;
         this.previewFormat = previewFormat;
 
-        //TODO transformed
-        overlayBitmap = Bitmap.createBitmap(height, width, Bitmap.Config.ARGB_8888);
+        overlayBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
         overlayCanvas = new Canvas(overlayBitmap);
 
         didReceiveImageParams = true;
