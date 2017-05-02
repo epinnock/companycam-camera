@@ -38,4 +38,5 @@ dependencies {
     compile 'com.google.code.gson:gson:2.4'
     compile 'org.parceler:parceler:1.1.2'
     compile 'com.apptimize:apptimize-android:2.12.4'
+    compile project(path: ':openCVLibrary320')
 }
