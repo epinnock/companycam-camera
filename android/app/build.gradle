@@ -30,6 +30,12 @@ repositories {
     mavenCentral()
 }
 
+// Remove libraries that conflict with libraries already included with Android
+configurations {
+    all*.exclude group: "xmlpull", module: "xmlpull"
+    all*.exclude group: "org.apache.commons", module: "commons-compress"
+}
+
 dependencies {
     compile 'com.android.support:appcompat-v7:23.2.1'
     compile 'com.android.support:design:23.1.0'
@@ -39,8 +45,6 @@ dependencies {
     compile 'org.parceler:parceler:1.1.2'
     compile 'com.apptimize:apptimize-android:2.12.4'
 
-    compile('org.boofcv:core:0.26') {
-      exclude group: 'org.apache.commons'
-      exclude group: "xmlpull", module: "xmlpull"
-    }
+    compile 'org.boofcv:core:0.26'
+    compile 'org.boofcv:android:0.26'
 }

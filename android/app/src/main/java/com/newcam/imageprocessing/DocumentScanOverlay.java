@@ -17,6 +17,9 @@ import android.view.View;
 
 import java.nio.ByteBuffer;
 
+import boofcv.android.ConvertBitmap;
+import boofcv.struct.image.GrayU8;
+
 /**
  * Created by dan on 5/1/17.
  */
@@ -101,8 +104,12 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         Rect rSrc = new Rect(0, 0, bitmapOriginal.getWidth(), bitmapOriginal.getHeight());
         Rect rDst = new Rect(0, 0, bitmapTransform.getWidth(), bitmapTransform.getHeight());
         canvasTransform.drawBitmap(bitmapOriginal, rSrc, rDst, null);
+        
+        GrayU8 boofImg = ConvertBitmap.bitmapToGray(bitmapTransform, (GrayU8)null, null);
+        byte[] workBuffer = ConvertBitmap.declareStorage(bitmapTransform, null);
+        ConvertBitmap.grayToBitmap(boofImg, bitmapTransform, workBuffer);
 
-        bitmapTransformBytes.rewind();
+        /*bitmapTransformBytes.rewind();
         bitmapTransform.copyPixelsToBuffer(bitmapTransformBytes);
         byte[] data = bitmapTransformBytes.array();
 
@@ -131,7 +138,7 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         Paint paint = new Paint();
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(Color.argb(128, 0,255,0));
-        canvasTransform.drawRect(maxX - 5, maxY - 5, maxX + 5, maxY + 5, paint);
+        canvasTransform.drawRect(maxX - 5, maxY - 5, maxX + 5, maxY + 5, paint);*/
 
         long endMS = System.currentTimeMillis();
         DEBUG_OUTPUT("Finished processing: " + (endMS - startMS) + " ms");
