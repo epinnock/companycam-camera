@@ -15,17 +15,13 @@ import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.renderscript.Type;
 import android.view.View;
 
-import org.opencv.android.InstallCallbackInterface;
-import org.opencv.android.LoaderCallbackInterface;
-import org.opencv.android.OpenCVLoader;
-
 import java.nio.ByteBuffer;
 
 /**
  * Created by dan on 5/1/17.
  */
 
-public class DocumentScanOverlay extends View implements CCCameraImageProcessor, LoaderCallbackInterface {
+public class DocumentScanOverlay extends View implements CCCameraImageProcessor {
 
     protected Context context;
 
@@ -44,14 +40,11 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor,
     protected Allocation allocOut;
     protected ScriptIntrinsicYuvToRGB yuvToRgbIntrinsic;
 
-
     public DocumentScanOverlay(Context context) {
         super(context);
         this.context = context;
 
         this.setBackgroundColor(Color.argb(0,0,0,0));
-
-        OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_2_0, context, this);
     }
 
     protected void DEBUG_OUTPUT(String message){
@@ -165,17 +158,5 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor,
         prepareRenderScriptYUVToRGB(width*height*3/2);
 
         didReceiveImageParams = true;
-    }
-
-    // LoaderCallbackInterface
-    //====================================================================
-    @Override
-    public void onManagerConnected(int status) {
-        DEBUG_OUTPUT("LoaderCallbackInterface onManagerConnected: " + status);
-    }
-
-    @Override
-    public void onPackageInstall(int operation, InstallCallbackInterface callback) {
-        DEBUG_OUTPUT("LoaderCallbackInterface onPackageInstall: " + operation);
     }
 }

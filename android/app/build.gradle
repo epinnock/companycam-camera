@@ -38,5 +38,9 @@ dependencies {
     compile 'com.google.code.gson:gson:2.4'
     compile 'org.parceler:parceler:1.1.2'
     compile 'com.apptimize:apptimize-android:2.12.4'
-    compile project(path: ':openCVLibrary320')
+
+    compile('org.boofcv:core:0.26') {
+      exclude group: 'org.apache.commons'
+      exclude group: "xmlpull", module: "xmlpull"
+    }
 }
