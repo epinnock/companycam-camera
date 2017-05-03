@@ -5,7 +5,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Build;
 import android.renderscript.Allocation;
@@ -17,6 +16,7 @@ import android.view.View;
 
 import java.nio.ByteBuffer;
 
+import boofcv.alg.filter.blur.BlurImageOps;
 import boofcv.android.ConvertBitmap;
 import boofcv.struct.image.GrayU8;
 
@@ -104,10 +104,21 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         Rect rSrc = new Rect(0, 0, bitmapOriginal.getWidth(), bitmapOriginal.getHeight());
         Rect rDst = new Rect(0, 0, bitmapTransform.getWidth(), bitmapTransform.getHeight());
         canvasTransform.drawBitmap(bitmapOriginal, rSrc, rDst, null);
-        
-        GrayU8 boofImg = ConvertBitmap.bitmapToGray(bitmapTransform, (GrayU8)null, null);
+
+        //convert bitmap to boof U8; prepare boof U8 image for edges
+        GrayU8 boofOrigImg = ConvertBitmap.bitmapToGray(bitmapTransform, (GrayU8)null, null);
+        GrayU8 boofProcImg = boofOrigImg.createSameShape();
+
+        //CannyEdge<GrayU8,GrayS16> canny = FactoryEdgeDetectors.canny(2,true, true, GrayU8.class, GrayS16.class);
+        //canny.process(boofOrigImg,0.1f,0.3f,boofEdgeImg);
+        //List<EdgeContour> edgeContours = canny.getContours();
+        //List<Contour> contours = BinaryImageOps.contour(boofEdgeImg, ConnectRule.EIGHT, null);
+
+        BlurImageOps.median(boofOrigImg, boofProcImg, 8);
+
+        //convert edges image back to bitmap
         byte[] workBuffer = ConvertBitmap.declareStorage(bitmapTransform, null);
-        ConvertBitmap.grayToBitmap(boofImg, bitmapTransform, workBuffer);
+        ConvertBitmap.grayToBitmap(boofProcImg, bitmapTransform, workBuffer);
 
         /*bitmapTransformBytes.rewind();
         bitmapTransform.copyPixelsToBuffer(bitmapTransformBytes);
