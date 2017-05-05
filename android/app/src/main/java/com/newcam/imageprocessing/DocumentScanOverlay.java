@@ -16,17 +16,27 @@ import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.renderscript.Type;
 import android.view.View;
 
+import org.ddogleg.struct.FastQueue;
+
 import java.util.List;
 
 import boofcv.alg.feature.detect.edge.CannyEdge;
 import boofcv.alg.filter.binary.BinaryImageOps;
 import boofcv.alg.filter.binary.Contour;
+import boofcv.alg.filter.binary.GThresholdImageOps;
+import boofcv.alg.filter.binary.ThresholdImageOps;
+import boofcv.alg.misc.GPixelMath;
+import boofcv.alg.shapes.polygon.BinaryPolygonDetector;
 import boofcv.android.ConvertBitmap;
 import boofcv.factory.feature.detect.edge.FactoryEdgeDetectors;
+import boofcv.factory.shape.ConfigPolygonDetector;
+import boofcv.factory.shape.FactoryShapeDetector;
 import boofcv.struct.ConnectRule;
 import boofcv.struct.image.GrayS16;
 import boofcv.struct.image.GrayU8;
+import georegression.struct.point.Point2D_F64;
 import georegression.struct.point.Point2D_I32;
+import georegression.struct.shapes.Polygon2D_F64;
 
 /**
  * Created by dan on 5/1/17.
@@ -50,6 +60,9 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
     protected GrayU8 boofOrigImg;
     protected GrayU8 boofProcImg;
     byte[] workBuffer;
+
+    ConfigPolygonDetector config;
+    BinaryPolygonDetector<GrayU8> detector;
 
     protected boolean didPrepareRenderScript = false;
     protected Allocation allocIn;
@@ -127,7 +140,7 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
 
         long step2MS = System.currentTimeMillis();
 
-        canny.process(boofOrigImg, 0.1f, 0.3f, boofProcImg);
+        /*canny.process(boofOrigImg, 0.1f, 0.3f, boofProcImg);
 
         long step3MS = System.currentTimeMillis();
 
@@ -136,7 +149,6 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         long step4MS = System.currentTimeMillis();
 
         //convert edges image back to bitmap
-        //byte[] workBuffer = ConvertBitmap.declareStorage(bitmapTransform, null);
         //ConvertBitmap.grayToBitmap(boofOrigImg, bitmapTransform, workBuffer);
 
         Paint paint = new Paint();
@@ -165,7 +177,43 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         DEBUG_OUTPUT(" - Image prep: " + (step2MS - step1MS) + " ms");
         DEBUG_OUTPUT(" - Canny:      " + (step3MS - step2MS) + " ms");
         DEBUG_OUTPUT(" - Contours:   " + (step4MS - step3MS) + " ms");
-        DEBUG_OUTPUT(" - Draw lines: " + (step5MS - step4MS) + " ms");
+        DEBUG_OUTPUT(" - Draw lines: " + (step5MS - step4MS) + " ms");*/
+
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(Color.argb(192, 0,96,255));
+
+        int threshold = GThresholdImageOps.computeOtsu(boofOrigImg, 0, 255);
+        ThresholdImageOps.threshold(boofOrigImg, boofProcImg, threshold, true);
+
+        detector.process(boofOrigImg, boofProcImg);
+        FastQueue<Polygon2D_F64> polyList = detector.getFoundPolygons();
+
+        for(int pi = 0; pi < polyList.size; pi++){
+            Polygon2D_F64 poly = polyList.get(pi);
+
+            Path cpath = new Path();
+            FastQueue<Point2D_F64> vertList = poly.vertexes;
+
+            for(int vi = 0; vi < vertList.size; vi++){
+                Point2D_F64 p = vertList.get(vi);
+
+                if(vi == 0) {
+                    cpath.moveTo((float)p.getX(), (float)p.getY());
+                }else {
+                    cpath.lineTo((float)p.getX(), (float)p.getY());
+                }
+            }
+
+            cpath.close();
+            canvasTransform.drawPath(cpath, paint);
+        }
+
+        long step3MS = System.currentTimeMillis();
+
+        DEBUG_OUTPUT("Finished processing: ");
+        DEBUG_OUTPUT(" - Image prep: " + (step2MS - step1MS) + " ms");
+        DEBUG_OUTPUT(" - Otsu, poly: " + (step3MS - step2MS) + " ms");
 
         didPrepareOverlay = true;
         this.invalidate();
@@ -188,6 +236,11 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         boofOrigImg = ConvertBitmap.bitmapToGray(bitmapTransform, (GrayU8)null, null);
         boofProcImg = boofOrigImg.createSameShape();
         workBuffer = ConvertBitmap.declareStorage(bitmapTransform, null);
+
+        config = new ConfigPolygonDetector(4,4);
+        config.convex = true;
+        detector = FactoryShapeDetector.polygon(config, GrayU8.class);
+
         didPrepareBoof = true;
 
         //NV21: YUV 12 bits per pixel
