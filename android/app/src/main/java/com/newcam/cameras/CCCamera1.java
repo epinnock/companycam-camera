@@ -70,6 +70,9 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
     // The mLastNormalizedTouchPoint is the normalized coordinate of the last touch point
     private PointF mLastNormalizedTouchPoint;
 
+    private int numExposureAttempts;
+    private float lastExposureValue;
+
     // The mDefaultParams is a default set of camera parameters that can be accessed to avoid errors in the event that the call to getParameters() fails.
     private Camera.Parameters mDefaultParams;
 
@@ -906,7 +909,6 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             // Get the min and max exposure compensation values
             int minExposure = params.getMinExposureCompensation();
             int maxExposure = params.getMaxExposureCompensation();
-            float exposureStep = params.getExposureCompensationStep();
 
             System.err.println("In onPreviewFrame minExposure = " + minExposure + ", maxExposure = " + maxExposure);
 
@@ -916,6 +918,18 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
             params.setExposureCompensation(newExposure);
             safeSetParameters(mCamera, params, "");
+
+            if (numExposureAttempts < 10) {
+                System.err.println("Callback test: EV changed by " + (newExposure - lastExposureValue));
+                lastExposureValue = newExposure;
+                numExposureAttempts++;
+                mCamera.setOneShotPreviewCallback(mPreviewCallback);
+            }
+            else {
+
+                // Start the auto focus after the exposure is complete.
+                mCamera.autoFocus(mAutoFocusCallback);
+            }
         }
     };
 
@@ -962,29 +976,53 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                     // to add the metering areas for auto exposure otherwise the auto focus won't execute properly.
                     List<Camera.Area> meteringAreas = new ArrayList<Camera.Area>();
                     meteringAreas.add(new Camera.Area(rect, 800));
+
+                    // Set the focus region
                     if (params.getMaxNumFocusAreas() > 0) {
+
+                        LogUtil.e(TAG, "num focus areas > 0");
+
                         params.setFocusAreas(meteringAreas);
                         safeSetParameters(mCamera, params, "handleFocus()");
                     }
 
-                    // Set the metering area for the camera
-                    if (params.getMaxNumMeteringAreas() > 0) {
-                        params.setMeteringAreas(meteringAreas);
-                        safeSetParameters(mCamera, params, "handleFocus()");
-                    }
-                    /*else {
+                    // Get the min and max exposure compensation values
+                    int minExposure = params.getMinExposureCompensation();
+                    int maxExposure = params.getMaxExposureCompensation();
+
+                    // Try to use the custom exposure routine.  The camera can support direct manipulation of the exposure value if
+                    // the min and max exposure compensation values aren't both zero.  The auto focus will be called after
+                    // after the custom exposure is complete if the device supports auto focus
+                    if (!(minExposure == 0 && maxExposure == 0)) {
 
                         // Record this touch point and attach a callback to get the next camera frame.
                         mLastNormalizedTouchPoint = nsc;
+
+                        // Reset the number of exposure attempts and add a preview callback to return the next camera preview frame.
+                        numExposureAttempts = 0;
                         mCamera.setOneShotPreviewCallback(mPreviewCallback);
+                    }
 
-                        //params.set("metering", "spot");
-                        //params.setMeteringAreas(meteringAreas);
+                    // Check if this device can use auto exposure.  If the camera supports spot metering, then the max number of
+                    // metering areas should be greater than 0.
+                    else if (params.getMaxNumMeteringAreas() > 0) {
+
+                        LogUtil.e(TAG, "num metering areas > 0");
+
+                        // This device can use auto exposure, so set the auto exposure region
+                        params.setMeteringAreas(meteringAreas);
                         safeSetParameters(mCamera, params, "handleFocus()");
-                    }*/
 
-                    // Start the focus
-                    mCamera.autoFocus(mAutoFocusCallback);
+                        // Start the focus callback which will actually trigger the auto exposure as well
+                        mCamera.autoFocus(mAutoFocusCallback);
+                    }
+
+                    // If the camera doesn't support auto exposure or setting the exposure directly, then simply focus the camera
+                    else {
+
+                        // Start the focus
+                        mCamera.autoFocus(mAutoFocusCallback);
+                    }
 
                     // Show the mFocusIndicatorView
                     mCameraView.mCameraLayout.showAutoFocusIndicator(x, y, true);
@@ -1049,6 +1087,8 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         int rectHeight = rect.height();
         int size = rectWidth * rectHeight;
 
+        System.err.println("onPreviewFrame calculated a rect of width " + rectWidth + " and height " + rectHeight + ". size = " + size);
+
         // Iterate through the given rect and sum all the luminosity values
         int totalLuminosity = 0;
         for (int i = 0; i < rectHeight; i++) {
@@ -1057,7 +1097,8 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 // Calculate the index in the byte array that corresponds to this point in the rect
                 int thisIndex = ((rect.top + i) * width) + rect.left + j;
 
-                // Get the luminosity of this point.  Double check that the index isn't outside the data range to avoid errors
+                // Get the luminosity of this point.  Double check that the index isn
+                // 't outside the data range to avoid errors
                 if (thisIndex < data.length) {
                     totalLuminosity += data[thisIndex] & 0xFF;
                 }
