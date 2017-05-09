@@ -261,14 +261,6 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         mPlaceName.setText("Location");
         mScannerLabel.setText("Aux Mode");
 
-        // Check Apptimize to show or hide the scannerLayout
-        if (Apptimize.isFeatureFlagOn("beforeAfterCam")) {
-            mScannerLayout.setVisibility(View.VISIBLE);
-        }
-        else {
-            mScannerLayout.setVisibility(View.GONE);
-        }
-
         // Set the button orientations for the resolution layout
         setupResolutionLayout();
 
