@@ -40,7 +40,7 @@ public class DocScanUtil {
 		
 		edgeImageU8 = imageU8.createSameShape();
 		
-		canny = FactoryEdgeDetectors.canny(2, true, true, GrayU8.class, GrayS16.class);
+		canny = FactoryEdgeDetectors.canny(1, false, true, GrayU8.class, GrayS16.class);
 		
 		ConfigHoughPolar configHough = new ConfigHoughPolar(3, 30, 2, Math.PI / 180, edgeThreshold, maxLines);
 		lineDetector = FactoryDetectLineAlgs.houghPolar(configHough, GrayU8.class, GrayS16.class);
@@ -49,20 +49,26 @@ public class DocScanUtil {
 	/** tempCanvas should have same size as the imageU8 passed into constructor **/
 	public PerspectiveRect scan(DrawableU8 tempCanvas){
 
-		long startCanny = System.currentTimeMillis();
+		long timeCanny1 = System.currentTimeMillis();
 		
 		// The edge image is actually an optional parameter.  If you don't need it just pass in null
 		canny.process(imageU8, 0.1f, 0.3f, edgeImageU8);
 
+		long timeCanny2 = System.currentTimeMillis();
+
 		// First get the contour created by canny
 		//List<EdgeContour> edgeContours = canny.getContours();
 		List<Contour> contours = BinaryImageOps.contour(edgeImageU8, ConnectRule.EIGHT, null);
-		
+
+		long timeCanny3 = System.currentTimeMillis();
+
 		//find contour with biggest-area AABB
 		maxAABBContour = GeomUtils.findBiggestContour(contours);
 
-		long endCanny = System.currentTimeMillis();
-		BoofLogUtil.d("Canny: " + (endCanny - startCanny) + " ms");
+		long timeCanny4 = System.currentTimeMillis();
+		BoofLogUtil.d("Canny 1: " + (timeCanny2 - timeCanny1) + " ms");
+		BoofLogUtil.d("Canny 2: " + (timeCanny3 - timeCanny2) + " ms");
+		BoofLogUtil.d("Canny 3: " + (timeCanny4 - timeCanny3) + " ms");
 		
 		if(maxAABBContour == null){
 			BoofLogUtil.d("MAX AABB NULL!");

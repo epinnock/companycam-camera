@@ -2,7 +2,7 @@ package com.newcam.imageprocessing.utils;
 
 public class BoofLogUtil {
 	
-	private static final String TAG = "Boof";
+	private static final String TAG = "CCAM:Boof";
 
 	public static void v(String msg){
 		System.out.println("[" + TAG + "] (v) " + msg);

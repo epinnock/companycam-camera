@@ -15,12 +15,24 @@ import boofcv.struct.image.GrayU8;
 
 public class DrawableU8Android implements DrawableU8 {
 
-    private Bitmap bitmap;
+    private Bitmap image;
+    private GrayU8 imageU8;
     private DrawingUtil drawutil;
 
-    public DrawableU8Android(int width, int height){
-        bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        drawutil = new DrawingUtilAndroid(bitmap);
+    private byte[] workBuffer;
+
+    public DrawableU8Android(Bitmap image){
+        this.image = image;
+
+        Canvas canvas = new Canvas(image);
+        drawutil = new DrawingUtilAndroid(canvas);
+
+        workBuffer = ConvertBitmap.declareStorage(image, null);
+        imageU8 = ConvertBitmap.bitmapToGray(image, (GrayU8)null, null);
+    }
+
+    public void clearBitmap(int color){
+        image.eraseColor(color);
     }
 
     public DrawingUtil getDrawingUtil(){
@@ -28,6 +40,7 @@ public class DrawableU8Android implements DrawableU8 {
     }
 
     public GrayU8 getGrayU8(){
-        return ConvertBitmap.bitmapToGray(bitmap, (GrayU8)null, null);
+        ConvertBitmap.bitmapToGray(image, imageU8, workBuffer);
+        return imageU8;
     }
 }

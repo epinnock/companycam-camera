@@ -32,6 +32,8 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
     protected Bitmap bitmapTransform;
     protected Canvas canvasTransform;
 
+    protected DrawableU8Android tempCanvas;
+
     protected boolean didReceiveImageParams = false;
     protected int width;
     protected int height;
@@ -40,7 +42,8 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
     protected int WORKING_H = 256;
 
     protected GrayU8 imageU8;
-    byte[] workBuffer;
+    protected byte[] workBuffer;
+    protected DocScanUtil docScanner;
 
     protected boolean didPrepareRenderScript = false;
     protected Allocation allocIn;
@@ -117,10 +120,8 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
 
         long step2MS = System.currentTimeMillis();
 
-        //initialize scanner
-        DocScanUtil docScanner = new DocScanUtil(imageU8);
-
-        DrawableU8Android tempCanvas = new DrawableU8Android(WORKING_W, WORKING_H);
+        //scan
+        tempCanvas.clearBitmap(Color.argb(255,0,0,0));
         PerspectiveRect rect = docScanner.scan(tempCanvas);
 
         //BufferedImage output = generateOutputImage(rect, 512);
@@ -130,7 +131,7 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         //    graphics.drawImage(output, IMAGE_W + 20, 0, this);
         //}
 
-        DrawingUtilAndroid drawutil = new DrawingUtilAndroid(bitmapTransform);
+        DrawingUtilAndroid drawutil = new DrawingUtilAndroid(new Canvas(bitmapTransform));
         docScanner.drawLastMaxContour(drawutil);
         rect.drawLines(drawutil);
         rect.drawPoints(drawutil);
@@ -154,11 +155,16 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         this.previewFormat = previewFormat;
 
         bitmapOriginal = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        bitmapTransform = Bitmap.createBitmap(WORKING_W, WORKING_H, Bitmap.Config.ARGB_8888);
-        canvasTransform = new Canvas(bitmapTransform);
 
+        bitmapTransform = Bitmap.createBitmap(WORKING_W, WORKING_H, Bitmap.Config.ARGB_8888);
         imageU8 = ConvertBitmap.bitmapToGray(bitmapTransform, (GrayU8)null, null);
+        canvasTransform = new Canvas(bitmapTransform);
         workBuffer = ConvertBitmap.declareStorage(bitmapTransform, null);
+
+        Bitmap bitmapExtra = Bitmap.createBitmap(WORKING_W, WORKING_H, Bitmap.Config.ARGB_8888);
+        tempCanvas = new DrawableU8Android(bitmapExtra);
+
+        docScanner = new DocScanUtil(imageU8);
 
         didReceiveImageParams = true;
 

@@ -21,12 +21,10 @@ import georegression.struct.point.Point2D_I32;
 
 public class DrawingUtilAndroid implements DrawingUtil {
 
-    private Bitmap bitmap;
     private Canvas canvas;
 
-    public DrawingUtilAndroid(Bitmap bitmap){
-        this.bitmap = bitmap;
-        this.canvas = new Canvas(bitmap);
+    public DrawingUtilAndroid(Canvas canvas){
+        this.canvas = canvas;
     }
 
     private void _drawContour(List<Point2D_I32> points, Paint paint){
