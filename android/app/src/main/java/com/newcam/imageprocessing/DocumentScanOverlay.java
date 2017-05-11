@@ -5,8 +5,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.Build;
 import android.renderscript.Allocation;
@@ -16,27 +14,11 @@ import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.renderscript.Type;
 import android.view.View;
 
-import org.ddogleg.struct.FastQueue;
+import com.newcam.imageprocessing.utils.DocScanUtil;
+import com.newcam.imageprocessing.utils.PerspectiveRect;
 
-import java.util.List;
-
-import boofcv.alg.feature.detect.edge.CannyEdge;
-import boofcv.alg.filter.binary.BinaryImageOps;
-import boofcv.alg.filter.binary.Contour;
-import boofcv.alg.filter.binary.GThresholdImageOps;
-import boofcv.alg.filter.binary.ThresholdImageOps;
-import boofcv.alg.misc.GPixelMath;
-import boofcv.alg.shapes.polygon.BinaryPolygonDetector;
 import boofcv.android.ConvertBitmap;
-import boofcv.factory.feature.detect.edge.FactoryEdgeDetectors;
-import boofcv.factory.shape.ConfigPolygonDetector;
-import boofcv.factory.shape.FactoryShapeDetector;
-import boofcv.struct.ConnectRule;
-import boofcv.struct.image.GrayS16;
 import boofcv.struct.image.GrayU8;
-import georegression.struct.point.Point2D_F64;
-import georegression.struct.point.Point2D_I32;
-import georegression.struct.shapes.Polygon2D_F64;
 
 /**
  * Created by dan on 5/1/17.
@@ -54,15 +36,11 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
     protected int width;
     protected int height;
     protected int previewFormat;
+    protected int WORKING_W = 256;
+    protected int WORKING_H = 256;
 
-    protected boolean didPrepareBoof = false;
-    protected CannyEdge<GrayU8,GrayS16> canny;
-    protected GrayU8 boofOrigImg;
-    protected GrayU8 boofProcImg;
+    protected GrayU8 imageU8;
     byte[] workBuffer;
-
-    ConfigPolygonDetector config;
-    BinaryPolygonDetector<GrayU8> detector;
 
     protected boolean didPrepareRenderScript = false;
     protected Allocation allocIn;
@@ -122,7 +100,6 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
     @Override
     public void setBytes(byte[] dataOriginal) {
         if(!didReceiveImageParams){ return; }
-        if(!didPrepareBoof){ return; }
         if(!didPrepareRenderScript){ return; }
 
         DEBUG_OUTPUT("Received bytes!");
@@ -136,84 +113,33 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         canvasTransform.drawBitmap(bitmapOriginal, rSrc, rDst, null);
 
         //convert bitmap to boof U8; prepare boof U8 image for edges
-        ConvertBitmap.bitmapToGray(bitmapTransform, boofOrigImg, workBuffer);
+        ConvertBitmap.bitmapToGray(bitmapTransform, imageU8, workBuffer);
 
         long step2MS = System.currentTimeMillis();
 
-        /*canny.process(boofOrigImg, 0.1f, 0.3f, boofProcImg);
+        //initialize scanner
+        DocScanUtil docScanner = new DocScanUtil(imageU8);
 
-        long step3MS = System.currentTimeMillis();
+        DrawableU8Android tempCanvas = new DrawableU8Android(WORKING_W, WORKING_H);
+        PerspectiveRect rect = docScanner.scan(tempCanvas);
 
-        List<Contour> contours = BinaryImageOps.contour(boofProcImg, ConnectRule.EIGHT, null);
+        //BufferedImage output = generateOutputImage(rect, 512);
 
-        long step4MS = System.currentTimeMillis();
+        //graphics.drawImage(imageResize, 0, 0, this);
+        //if(output != null){
+        //    graphics.drawImage(output, IMAGE_W + 20, 0, this);
+        //}
 
-        //convert edges image back to bitmap
-        //ConvertBitmap.grayToBitmap(boofOrigImg, bitmapTransform, workBuffer);
-
-        Paint paint = new Paint();
-        paint.setStyle(Paint.Style.STROKE);
-        paint.setColor(Color.argb(255, 0,255,0));
-
-        for(Contour c : contours){
-            Path cpath = new Path();
-
-            int i = 0;
-            for(Point2D_I32 p : c.external) {
-                if(i == 0) {
-                    cpath.moveTo(p.getX(), p.getY());
-                }else {
-                    cpath.lineTo(p.getX(), p.getY());
-                }
-                i++;
-            }
-
-            canvasTransform.drawPath(cpath, paint);
-        }
-
-        long step5MS = System.currentTimeMillis();
-
-        DEBUG_OUTPUT("Finished processing: ");
-        DEBUG_OUTPUT(" - Image prep: " + (step2MS - step1MS) + " ms");
-        DEBUG_OUTPUT(" - Canny:      " + (step3MS - step2MS) + " ms");
-        DEBUG_OUTPUT(" - Contours:   " + (step4MS - step3MS) + " ms");
-        DEBUG_OUTPUT(" - Draw lines: " + (step5MS - step4MS) + " ms");*/
-
-        Paint paint = new Paint();
-        paint.setStyle(Paint.Style.FILL);
-        paint.setColor(Color.argb(192, 0,96,255));
-
-        int threshold = GThresholdImageOps.computeOtsu(boofOrigImg, 0, 255);
-        ThresholdImageOps.threshold(boofOrigImg, boofProcImg, threshold, true);
-
-        detector.process(boofOrigImg, boofProcImg);
-        FastQueue<Polygon2D_F64> polyList = detector.getFoundPolygons();
-
-        for(int pi = 0; pi < polyList.size; pi++){
-            Polygon2D_F64 poly = polyList.get(pi);
-
-            Path cpath = new Path();
-            FastQueue<Point2D_F64> vertList = poly.vertexes;
-
-            for(int vi = 0; vi < vertList.size; vi++){
-                Point2D_F64 p = vertList.get(vi);
-
-                if(vi == 0) {
-                    cpath.moveTo((float)p.getX(), (float)p.getY());
-                }else {
-                    cpath.lineTo((float)p.getX(), (float)p.getY());
-                }
-            }
-
-            cpath.close();
-            canvasTransform.drawPath(cpath, paint);
-        }
+        DrawingUtilAndroid drawutil = new DrawingUtilAndroid(bitmapTransform);
+        docScanner.drawLastMaxContour(drawutil);
+        rect.drawLines(drawutil);
+        rect.drawPoints(drawutil);
 
         long step3MS = System.currentTimeMillis();
 
         DEBUG_OUTPUT("Finished processing: ");
-        DEBUG_OUTPUT(" - Image prep: " + (step2MS - step1MS) + " ms");
-        DEBUG_OUTPUT(" - Otsu, poly: " + (step3MS - step2MS) + " ms");
+        DEBUG_OUTPUT(" - Image prep:  " + (step2MS - step1MS) + " ms");
+        DEBUG_OUTPUT(" - Doc scanner: " + (step3MS - step2MS) + " ms");
 
         didPrepareOverlay = true;
         this.invalidate();
@@ -226,26 +152,17 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         this.width = width;
         this.height = height;
         this.previewFormat = previewFormat;
-        didReceiveImageParams = true;
 
         bitmapOriginal = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        bitmapTransform = Bitmap.createBitmap(256, 256, Bitmap.Config.ARGB_8888);
+        bitmapTransform = Bitmap.createBitmap(WORKING_W, WORKING_H, Bitmap.Config.ARGB_8888);
         canvasTransform = new Canvas(bitmapTransform);
 
-        canny = FactoryEdgeDetectors.canny(2, true, true, GrayU8.class, GrayS16.class);
-        boofOrigImg = ConvertBitmap.bitmapToGray(bitmapTransform, (GrayU8)null, null);
-        boofProcImg = boofOrigImg.createSameShape();
+        imageU8 = ConvertBitmap.bitmapToGray(bitmapTransform, (GrayU8)null, null);
         workBuffer = ConvertBitmap.declareStorage(bitmapTransform, null);
 
-        config = new ConfigPolygonDetector(4,4);
-        config.convex = true;
-        detector = FactoryShapeDetector.polygon(config, GrayU8.class);
-
-        didPrepareBoof = true;
+        didReceiveImageParams = true;
 
         //NV21: YUV 12 bits per pixel
         prepareRenderScriptYUVToRGB(width*height*3/2);
-
-
     }
 }
