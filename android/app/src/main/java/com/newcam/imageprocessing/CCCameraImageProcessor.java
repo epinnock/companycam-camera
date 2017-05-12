@@ -6,6 +6,6 @@ package com.newcam.imageprocessing;
 
 public interface CCCameraImageProcessor {
 
-    public void setBytes(byte[] data);
-    public void setImageParams(int width, int height, int previewFormat);
+    public void setBytes(byte[] data, int rotation);
+    public void setImageParams(int widthOrig, int heightOrig, int widthContainer, int heightContainer, int previewFormat);
 }

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.Build;
 import android.renderscript.Allocation;
@@ -15,7 +16,6 @@ import android.renderscript.Type;
 import android.view.View;
 
 import com.newcam.imageprocessing.utils.DocScanUtil;
-import com.newcam.imageprocessing.utils.PerspectiveRect;
 
 import boofcv.android.ConvertBitmap;
 import boofcv.struct.image.GrayU8;
@@ -28,18 +28,19 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
 
     protected Context context;
 
+    protected boolean didReceiveImageParams = false;
+    protected boolean didPrepareOverlay = false;
+
+    protected int widthOrig;
+    protected int heightOrig;
     protected Bitmap bitmapOriginal;
+
+    protected int widthTransform;
+    protected int heightTransform;
     protected Bitmap bitmapTransform;
     protected Canvas canvasTransform;
 
     protected DrawableU8Android tempCanvas;
-
-    protected boolean didReceiveImageParams = false;
-    protected int width;
-    protected int height;
-    protected int previewFormat;
-    protected int WORKING_W = 256;
-    protected int WORKING_H = 256;
 
     protected GrayU8 imageU8;
     protected byte[] workBuffer;
@@ -49,8 +50,6 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
     protected Allocation allocIn;
     protected Allocation allocOut;
     protected ScriptIntrinsicYuvToRGB yuvToRgbIntrinsic;
-
-    protected boolean didPrepareOverlay = false;
 
 
     public DocumentScanOverlay(Context context) {
@@ -72,7 +71,7 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         Type.Builder yuvType = new Type.Builder(rs, Element.U8(rs)).setX(byteCount);
         allocIn = Allocation.createTyped(rs, yuvType.create(), Allocation.USAGE_SCRIPT);
 
-        Type.Builder rgbaType = new Type.Builder(rs, Element.RGBA_8888(rs)).setX(width).setY(height);
+        Type.Builder rgbaType = new Type.Builder(rs, Element.RGBA_8888(rs)).setX(widthOrig).setY(heightOrig);
         allocOut = Allocation.createTyped(rs, rgbaType.create(), Allocation.USAGE_SCRIPT);
 
         yuvToRgbIntrinsic.setInput(allocIn);
@@ -93,7 +92,7 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
 
         if(!didPrepareOverlay){ return; }
 
-        Rect rSrc = new Rect(0, 0, bitmapTransform.getWidth(), bitmapTransform.getHeight());
+        Rect rSrc = new Rect(0, 0, widthTransform, heightTransform);
         Rect rDst = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
         canvas.drawBitmap(bitmapTransform, rSrc, rDst, null);
     }
@@ -101,19 +100,41 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
     // CCCameraImageProcessor
     //====================================================================
     @Override
-    public void setBytes(byte[] dataOriginal) {
+    public void setBytes(byte[] dataOriginal, int rotation) {
         if(!didReceiveImageParams){ return; }
         if(!didPrepareRenderScript){ return; }
 
-        DEBUG_OUTPUT("Received bytes!");
+        DEBUG_OUTPUT("Received bytes! (Rotation angle: " + rotation + ")");
 
         long step1MS = System.currentTimeMillis();
 
         convertYUVToRGB(bitmapOriginal, dataOriginal);
 
-        Rect rSrc = new Rect(0, 0, bitmapOriginal.getWidth(), bitmapOriginal.getHeight());
-        Rect rDst = new Rect(0, 0, bitmapTransform.getWidth(), bitmapTransform.getHeight());
-        canvasTransform.drawBitmap(bitmapOriginal, rSrc, rDst, null);
+        float scaleX = (float)widthTransform / (float)widthOrig;
+        float scaleY = (float)heightTransform / (float)heightOrig;
+        float scale = Math.max(scaleX, scaleY);
+
+        //------------------------------------
+        Matrix mtransFirst = new Matrix();
+        mtransFirst.setTranslate(-(float)widthOrig / 2.0f, -(float)heightOrig / 2.0f);
+
+        Matrix mscale = new Matrix();
+        mscale.setScale(scale, scale);
+
+        Matrix mrotate = new Matrix();
+        mrotate.setRotate(rotation);
+
+        Matrix mtransLast = new Matrix();
+        mtransLast.setTranslate((float)widthTransform / 2.0f, (float)heightTransform / 2.0f);
+
+        Matrix m = mtransFirst;
+        m.postConcat(mscale);
+        m.postConcat(mrotate);
+        m.postConcat(mtransLast);
+        //------------------------------------
+
+        canvasTransform.setMatrix(m);
+        canvasTransform.drawBitmap(bitmapOriginal, 0, 0, null);
 
         //convert bitmap to boof U8; prepare boof U8 image for edges
         ConvertBitmap.bitmapToGray(bitmapTransform, imageU8, workBuffer);
@@ -121,7 +142,7 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         long step2MS = System.currentTimeMillis();
 
         //scan
-        tempCanvas.clearBitmap(Color.argb(255,0,0,0));
+        /*tempCanvas.clearBitmap(Color.argb(255,0,0,0));
         PerspectiveRect rect = docScanner.scan(tempCanvas);
 
         //BufferedImage output = generateOutputImage(rect, 512);
@@ -134,7 +155,7 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         DrawingUtilAndroid drawutil = new DrawingUtilAndroid(new Canvas(bitmapTransform));
         docScanner.drawLastMaxContour(drawutil);
         rect.drawLines(drawutil);
-        rect.drawPoints(drawutil);
+        rect.drawPoints(drawutil);*/
 
         long step3MS = System.currentTimeMillis();
 
@@ -147,28 +168,37 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
     }
 
     @Override
-    public void setImageParams(int width, int height, int previewFormat) {
-        DEBUG_OUTPUT("setImageParams received!");
+    public void setImageParams(int widthOrig, int heightOrig, int widthContainer, int heightContainer, int previewFormat) {
+        this.widthOrig = widthOrig;
+        this.heightOrig = heightOrig;
+        bitmapOriginal = Bitmap.createBitmap(widthOrig, heightOrig, Bitmap.Config.ARGB_8888);
 
-        this.width = width;
-        this.height = height;
-        this.previewFormat = previewFormat;
+        int MAX_WORKING_DIM = 384;
+        float scaleX = (float)MAX_WORKING_DIM / (float)this.getWidth();
+        float scaleY = (float)MAX_WORKING_DIM / (float)this.getHeight();
+        float scale = Math.min(scaleX, scaleY);
 
-        bitmapOriginal = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-
-        bitmapTransform = Bitmap.createBitmap(WORKING_W, WORKING_H, Bitmap.Config.ARGB_8888);
-        imageU8 = ConvertBitmap.bitmapToGray(bitmapTransform, (GrayU8)null, null);
+        this.widthTransform = (int)((float)this.getWidth() * scale);
+        this.heightTransform = (int)((float)this.getHeight() * scale);
+        bitmapTransform = Bitmap.createBitmap(widthTransform, heightTransform, Bitmap.Config.ARGB_8888);
         canvasTransform = new Canvas(bitmapTransform);
+
+        imageU8 = ConvertBitmap.bitmapToGray(bitmapTransform, (GrayU8)null, null);
         workBuffer = ConvertBitmap.declareStorage(bitmapTransform, null);
-
-        Bitmap bitmapExtra = Bitmap.createBitmap(WORKING_W, WORKING_H, Bitmap.Config.ARGB_8888);
-        tempCanvas = new DrawableU8Android(bitmapExtra);
-
         docScanner = new DocScanUtil(imageU8);
+
+        Bitmap bitmapExtra = Bitmap.createBitmap(widthTransform, heightTransform, Bitmap.Config.ARGB_8888);
+        tempCanvas = new DrawableU8Android(bitmapExtra);
 
         didReceiveImageParams = true;
 
         //NV21: YUV 12 bits per pixel
-        prepareRenderScriptYUVToRGB(width*height*3/2);
+        prepareRenderScriptYUVToRGB(widthOrig*heightOrig*3/2);
+
+        DEBUG_OUTPUT("setImageParams received!");
+        DEBUG_OUTPUT("- Raw preview size: (" + widthOrig + ", " + heightOrig + ")");
+        DEBUG_OUTPUT("- Container size: (" + this.getWidth() + ", " + this.getHeight() + ")");
+        DEBUG_OUTPUT("- Transform size: (" + widthTransform + ", " + heightTransform + ")");
+
     }
 }

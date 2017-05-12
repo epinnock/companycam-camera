@@ -147,6 +147,10 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
     }
 
     // This method gets the display orientation for the camera
+    public int getCameraDisplayOrientation() {
+        return getCameraDisplayOrientation(mCameraId, mCamera);
+    }
+
     public int getCameraDisplayOrientation(int cameraId, Camera camera) {
 
         android.hardware.Camera.CameraInfo info =
@@ -249,26 +253,6 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 }
             }
         }
-
-        //TODO: Start capturing frames using setPreviewCallbackWithBuffer
-        //========================================================================
-        LogUtil.e(TAG, "Preparing setPreviewCallbackWithBuffer");
-
-        int videoBufferSize = mPreviewWidth * mPreviewHeight * ImageFormat.getBitsPerPixel(params.getPreviewFormat()) / 8;
-        LogUtil.e(TAG, "Initializing capture buffer (" + videoBufferSize + ")");
-
-        ccImageProcessor.setImageParams(mPreviewWidth, mPreviewHeight, params.getPreviewFormat());
-
-        byte[] videoBuffer = new byte[videoBufferSize];
-        mCamera.addCallbackBuffer(videoBuffer);
-
-        mCamera.setPreviewCallbackWithBuffer(new Camera.PreviewCallback() {
-            public void onPreviewFrame(byte[] data, Camera camera) {
-                ccImageProcessor.setBytes(data);
-                mCamera.addCallbackBuffer(data);
-            }
-        });
-        //========================================================================
     }
 
     // This method safely sets the camera parameters and catches the RunTimeException that can be thrown if any of the parameters are
@@ -1247,6 +1231,33 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             // Start the camera preview
             mCamera.setPreviewDisplay(holder);
             mCamera.startPreview();
+
+            //TODO: Start capturing frames using setPreviewCallbackWithBuffer
+            //========================================================================
+            LogUtil.d(TAG, "Preparing setPreviewCallbackWithBuffer");
+
+            if (ccImageProcessor != null) {
+                int containerWidth = mCameraView.getWidth();
+                int containerHeight = mCameraView.getHeight();
+                System.out.println("[CCAM] CONTAINER SIZE: (" + containerWidth + ", " + containerHeight + ")");
+                ccImageProcessor.setImageParams(mPreviewWidth, mPreviewHeight, containerWidth, containerHeight, param.getPreviewFormat());
+
+                int videoBufferSize = mPreviewWidth * mPreviewHeight * ImageFormat.getBitsPerPixel(param.getPreviewFormat()) / 8;
+                byte[] videoBuffer = new byte[videoBufferSize];
+                LogUtil.d(TAG, "Initialized capture buffer (" + videoBufferSize + ")");
+
+                final CCCamera1 _this = this;
+                mCamera.addCallbackBuffer(videoBuffer);
+                mCamera.setPreviewCallbackWithBuffer(new Camera.PreviewCallback() {
+                    public void onPreviewFrame(byte[] data, Camera camera) {
+                        ccImageProcessor.setBytes(data, _this.getCameraDisplayOrientation());
+                        mCamera.addCallbackBuffer(data);
+                    }
+                });
+            } else {
+                LogUtil.d(TAG, "No ccImageProcessor was specified.");
+            }
+            //========================================================================
 
             /*if (mCamera != null) {
                 mCamera.setPreviewDisplay(holder);
