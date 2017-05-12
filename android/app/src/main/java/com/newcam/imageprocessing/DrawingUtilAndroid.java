@@ -11,6 +11,7 @@ import com.newcam.imageprocessing.utils.DrawingUtil;
 
 import java.util.List;
 
+import boofcv.alg.feature.detect.edge.EdgeSegment;
 import georegression.struct.line.LineParametric2D_F32;
 import georegression.struct.point.Point2D_F32;
 import georegression.struct.point.Point2D_I32;
@@ -101,6 +102,13 @@ public class DrawingUtilAndroid implements DrawingUtil {
     public void drawLines(List<LineParametric2D_F32> lines){
         for(LineParametric2D_F32 line : lines){
             drawLine(line.getPointOnLine(-500), line.getPointOnLine(500));
+        }
+    }
+
+    @Override
+    public void drawEdgesLight(List<EdgeSegment> segments){
+        for(EdgeSegment segment : segments){
+            drawContourLight(segment.points);
         }
     }
 }

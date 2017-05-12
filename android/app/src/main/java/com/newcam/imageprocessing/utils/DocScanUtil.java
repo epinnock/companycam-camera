@@ -4,6 +4,7 @@ import java.util.List;
 
 import boofcv.abst.feature.detect.line.DetectLineHoughPolar;
 import boofcv.alg.feature.detect.edge.CannyEdge;
+import boofcv.alg.feature.detect.edge.EdgeContour;
 import boofcv.alg.filter.binary.BinaryImageOps;
 import boofcv.alg.filter.binary.Contour;
 import boofcv.factory.feature.detect.edge.FactoryEdgeDetectors;
@@ -40,12 +41,12 @@ public class DocScanUtil {
 		
 		edgeImageU8 = imageU8.createSameShape();
 		
-		canny = FactoryEdgeDetectors.canny(1, false, true, GrayU8.class, GrayS16.class);
+		canny = FactoryEdgeDetectors.canny(2, true, true, GrayU8.class, GrayS16.class);
 		
 		ConfigHoughPolar configHough = new ConfigHoughPolar(3, 30, 2, Math.PI / 180, edgeThreshold, maxLines);
 		lineDetector = FactoryDetectLineAlgs.houghPolar(configHough, GrayU8.class, GrayS16.class);
 	}
-	
+
 	/** tempCanvas should have same size as the imageU8 passed into constructor **/
 	public PerspectiveRect scan(DrawableU8 tempCanvas){
 
@@ -74,10 +75,6 @@ public class DocScanUtil {
 			BoofLogUtil.d("MAX AABB NULL!");
 			return null;
 		}
-		
-		// display the results
-		//BufferedImage visualBinary = VisualizeBinaryData.renderBinary(edgeImageU8, false, null);
-		//BufferedImage visualCannyContour = VisualizeBinaryData.renderContours(edgeContours, null, imageU8.width, imageU8.height, null);
 
 		long startHough = System.currentTimeMillis();
 		
@@ -96,7 +93,17 @@ public class DocScanUtil {
 		
 		return rect;
 	}
-	
+
+	public void drawCannyDebug(DrawingUtil drawutil){
+		canny.process(imageU8, 0.1f, 0.3f, null);//edgeImageU8);
+		List<EdgeContour> contours = canny.getContours();
+		//List<Contour> contours = BinaryImageOps.contour(edgeImageU8, ConnectRule.EIGHT, null);
+
+		for(EdgeContour contour : contours){
+			drawutil.drawEdgesLight(contour.segments);
+		}
+	}
+
 	public void drawLastMaxContour(DrawingUtil drawutil){
 		if(maxAABBContour == null){ return; }
 		drawutil.drawContourHeavy(maxAABBContour.external);

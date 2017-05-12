@@ -16,6 +16,7 @@ import android.renderscript.Type;
 import android.view.View;
 
 import com.newcam.imageprocessing.utils.DocScanUtil;
+import com.newcam.imageprocessing.utils.PerspectiveRect;
 
 import boofcv.android.ConvertBitmap;
 import boofcv.struct.image.GrayU8;
@@ -141,10 +142,14 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
 
         long step2MS = System.currentTimeMillis();
 
+        //DrawingUtilAndroid drawutil = new DrawingUtilAndroid(new Canvas(bitmapTransform));
+        //docScanner.drawCannyDebug(drawutil);
+
         //scan
-        /*tempCanvas.clearBitmap(Color.argb(255,0,0,0));
+        tempCanvas.clearBitmap(Color.argb(255,0,0,0));
         PerspectiveRect rect = docScanner.scan(tempCanvas);
 
+        //TODO
         //BufferedImage output = generateOutputImage(rect, 512);
 
         //graphics.drawImage(imageResize, 0, 0, this);
@@ -155,7 +160,7 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         DrawingUtilAndroid drawutil = new DrawingUtilAndroid(new Canvas(bitmapTransform));
         docScanner.drawLastMaxContour(drawutil);
         rect.drawLines(drawutil);
-        rect.drawPoints(drawutil);*/
+        rect.drawPoints(drawutil);
 
         long step3MS = System.currentTimeMillis();
 
