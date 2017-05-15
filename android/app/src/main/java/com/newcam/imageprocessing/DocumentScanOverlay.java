@@ -6,6 +6,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.os.Build;
 import android.renderscript.Allocation;
@@ -18,8 +20,11 @@ import android.view.View;
 import com.newcam.imageprocessing.utils.DocScanUtil;
 import com.newcam.imageprocessing.utils.PerspectiveRect;
 
+import java.util.List;
+
 import boofcv.android.ConvertBitmap;
 import boofcv.struct.image.GrayU8;
+import georegression.struct.point.Point2D_F32;
 
 /**
  * Created by dan on 5/1/17.
@@ -35,6 +40,9 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
     protected int widthOrig;
     protected int heightOrig;
     protected Bitmap bitmapOriginal;
+    protected Bitmap bitmapOverlay;
+
+    protected Canvas canvasOverlay;
 
     protected int widthTransform;
     protected int heightTransform;
@@ -93,9 +101,13 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
 
         if(!didPrepareOverlay){ return; }
 
-        Rect rSrc = new Rect(0, 0, widthTransform, heightTransform);
+        //Rect rSrc = new Rect(0, 0, widthTransform, heightTransform);
+        //Rect rDst = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
+        //canvas.drawBitmap(bitmapTransform, rSrc, rDst, null);
+
+        Rect rSrc = new Rect(0, 0, widthOrig, heightOrig);
         Rect rDst = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
-        canvas.drawBitmap(bitmapTransform, rSrc, rDst, null);
+        canvas.drawBitmap(bitmapOverlay, rSrc, rDst, null);
     }
 
     // CCCameraImageProcessor
@@ -111,9 +123,15 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
 
         convertYUVToRGB(bitmapOriginal, dataOriginal);
 
-        float scaleX = (float)widthTransform / (float)widthOrig;
-        float scaleY = (float)heightTransform / (float)heightOrig;
-        float scale = Math.max(scaleX, scaleY);
+        float dimTransformLarge = Math.max(widthTransform, heightTransform);
+        float dimTransformSmall = Math.min(widthTransform, heightTransform);
+
+        float dimOrigLarge = (float)Math.max(widthOrig, heightOrig);
+        float dimOrigSmall = (float)Math.min(widthOrig, heightOrig);
+
+        float scaleL = dimTransformLarge / dimOrigLarge;
+        float scaleS = dimTransformSmall / dimOrigSmall;
+        float scale = Math.max(scaleL, scaleS);
 
         //------------------------------------
         Matrix mtransFirst = new Matrix();
@@ -146,8 +164,6 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         //docScanner.drawCannyDebug(drawutil);
 
         //scan
-        tempCanvas.clearBitmap(Color.argb(255,0,0,0));
-        PerspectiveRect rect = docScanner.scan(tempCanvas);
 
         //TODO
         //BufferedImage output = generateOutputImage(rect, 512);
@@ -157,10 +173,41 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         //    graphics.drawImage(output, IMAGE_W + 20, 0, this);
         //}
 
-        DrawingUtilAndroid drawutil = new DrawingUtilAndroid(new Canvas(bitmapTransform));
-        docScanner.drawLastMaxContour(drawutil);
-        rect.drawLines(drawutil);
-        rect.drawPoints(drawutil);
+        //DrawingUtilAndroid drawutil = new DrawingUtilAndroid(new Canvas(bitmapTransform));
+        //docScanner.drawLastMaxContour(drawutil);
+        //rect.drawLines(drawutil);
+        //rect.drawPoints(drawutil);
+
+        bitmapOverlay.eraseColor(Color.argb(0,0,0,0));
+
+        tempCanvas.clearBitmap(Color.argb(255,0,0,0));
+        PerspectiveRect rect = docScanner.scan(tempCanvas);
+
+        if(rect != null) {
+            List<Point2D_F32> pointsAsPercent = rect.getPointsAsPercent();
+            if (pointsAsPercent != null) {
+                Path opath = new Path();
+                int i = 0;
+                for (Point2D_F32 point : pointsAsPercent) {
+                    float px = point.getX() * widthOrig;
+                    float py = point.getY() * heightOrig;
+
+                    if (i == 0) {
+                        opath.moveTo(px, py);
+                    } else {
+                        opath.lineTo(px, py);
+                    }
+                    i++;
+                }
+                opath.close();
+
+                Paint paint = new Paint();
+                paint.setStyle(Paint.Style.FILL);
+                paint.setColor(Color.argb(128, 0, 128, 255));
+
+                canvasOverlay.drawPath(opath, paint);
+            }
+        }
 
         long step3MS = System.currentTimeMillis();
 
@@ -177,6 +224,8 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         this.widthOrig = widthOrig;
         this.heightOrig = heightOrig;
         bitmapOriginal = Bitmap.createBitmap(widthOrig, heightOrig, Bitmap.Config.ARGB_8888);
+        bitmapOverlay = Bitmap.createBitmap(widthOrig, heightOrig, Bitmap.Config.ARGB_8888);
+        canvasOverlay = new Canvas(bitmapOverlay);
 
         int MAX_WORKING_DIM = 384;
         float scaleX = (float)MAX_WORKING_DIM / (float)this.getWidth();
@@ -190,10 +239,11 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
 
         imageU8 = ConvertBitmap.bitmapToGray(bitmapTransform, (GrayU8)null, null);
         workBuffer = ConvertBitmap.declareStorage(bitmapTransform, null);
-        docScanner = new DocScanUtil(imageU8);
 
         Bitmap bitmapExtra = Bitmap.createBitmap(widthTransform, heightTransform, Bitmap.Config.ARGB_8888);
         tempCanvas = new DrawableU8Android(bitmapExtra);
+
+        docScanner = new DocScanUtil(imageU8);
 
         didReceiveImageParams = true;
 

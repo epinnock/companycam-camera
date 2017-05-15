@@ -11,6 +11,7 @@ public class PerspectiveRect {
 
 	private List<LineParametric2D_F32> lines;
 	private LinkedList<Point2D_F32> points;
+	private LinkedList<Point2D_F32> pointsAsPercent;
 	private int sourceImageW;
 	private int sourceImageH;
 	
@@ -22,6 +23,7 @@ public class PerspectiveRect {
 	
 	public PerspectiveRect(int sourceImageW, int sourceImageH){
 		points = new LinkedList<Point2D_F32>();
+		pointsAsPercent = new LinkedList<Point2D_F32>();
 		
 		this.sourceImageW = sourceImageW;
 		this.sourceImageH = sourceImageH;
@@ -85,6 +87,13 @@ public class PerspectiveRect {
 		
 		//TODO: rearrange in predictable order: also lazy but good enough for now
 		points = GeomUtils.sortInCCWOrder(pointsTemp);
+
+		pointsAsPercent.clear();
+		for(Point2D_F32 point : points){
+			float xpct = point.getX() / (float)sourceImageW;
+			float ypct = point.getY() / (float)sourceImageH;
+			pointsAsPercent.add(new Point2D_F32(xpct, ypct));
+		}
 		
 		if(points.size() != 4){
 			BoofLogUtil.e("Number of ordered points is " + points.size() + ", should be 4!");
@@ -168,5 +177,15 @@ public class PerspectiveRect {
 		dims[0] = VectorUtils.len(u3d);
 		dims[1] = VectorUtils.len(v3d);
 		return true;
+	}
+
+	/**
+	 * Get the points, in screen space, at the corners of the 3D rectangle projected onto
+	 * the image.  Coordinates are in [0,1]x[0,1], for use in drawing on scaled images.
+	 * @return List of points, or null if not ready yet.
+	 */
+	public List<Point2D_F32> getPointsAsPercent(){
+		if(!isReady){ return null; }
+		return pointsAsPercent;
 	}
 }
