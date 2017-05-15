@@ -9,7 +9,6 @@ import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.media.AudioManager;
 import android.util.Log;
@@ -26,12 +25,10 @@ import com.notagilx.companycam.util.LogUtil;
 import com.notagilx.companycam.util.views.CameraPreview;
 
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -428,6 +425,14 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                     Log.d(TAG, "After cropping the photo is " + bPhoto.getWidth() + " x " + bPhoto.getHeight());
 
                     Log.d(TAG, "bPhoto rotated and ready for storage.");
+
+                    //TODO: intercept image and process if there is an image processor
+                    //========================================================================
+                    if(ccImageProcessor != null){
+                        ccImageProcessor.setImageParams(bPhoto.getWidth(), bPhoto.getHeight(), 100, 100);
+                        bPhoto = ccImageProcessor.createFinalImage(bPhoto, 0, 800);
+                    }
+                    //========================================================================
 
                     File photo = getPhotoPath();
                     if (photo.exists()) {
@@ -1304,7 +1309,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 int containerWidth = mCameraView.getWidth();
                 int containerHeight = mCameraView.getHeight();
                 System.out.println("[CCAM] CONTAINER SIZE: (" + containerWidth + ", " + containerHeight + ")");
-                ccImageProcessor.setImageParams(mPreviewWidth, mPreviewHeight, containerWidth, containerHeight, param.getPreviewFormat());
+                ccImageProcessor.setImageParams(mPreviewWidth, mPreviewHeight, containerWidth, containerHeight); //param.getPreviewFormat()
 
                 int videoBufferSize = mPreviewWidth * mPreviewHeight * ImageFormat.getBitsPerPixel(param.getPreviewFormat()) / 8;
                 byte[] videoBuffer = new byte[videoBufferSize];
@@ -1314,7 +1319,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 mCamera.addCallbackBuffer(videoBuffer);
                 mCamera.setPreviewCallbackWithBuffer(new Camera.PreviewCallback() {
                     public void onPreviewFrame(byte[] data, Camera camera) {
-                        ccImageProcessor.setBytes(data, _this.getCameraDisplayOrientation());
+                        ccImageProcessor.setPreviewBytes(data, _this.getCameraDisplayOrientation());
                         mCamera.addCallbackBuffer(data);
                     }
                 });
