@@ -114,6 +114,8 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
     //====================================================================
     @Override
     public void setBytes(byte[] dataOriginal, int rotation) {
+        DEBUG_OUTPUT("setBytes: didReceiveImageParams = " + didReceiveImageParams + ", didPrepareRenderScript = " + didPrepareRenderScript);
+
         if(!didReceiveImageParams){ return; }
         if(!didPrepareRenderScript){ return; }
 

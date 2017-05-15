@@ -33,19 +33,7 @@ public class PerspectiveRect {
 		cam.imgh = (float)sourceImageH;
 		cam.aspect = (float)sourceImageW/(float)sourceImageH;
 	}
-	
-	/** Draw the lines making up the boundary of the perspective rectangle. **/
-	public void drawLines(DrawingUtil drawutil){
-		if(!isReady){ return; }
-		drawutil.drawLines(lines);
-	}
-	
-	/** Draw the corner points of the perspective rectangle. **/
-	public void drawPoints(DrawingUtil drawutil){
-		if(!isReady){ return; }
-		drawutil.drawPoints(points);
-	}
-	
+
 	private void addPointIfWithinBounds(Collection<Point2D_F32> target, Point2D_F32 p){
 		if(p == null){ return; }
 		
@@ -138,7 +126,19 @@ public class PerspectiveRect {
 		u3d = VectorUtils.linearCombination(t[1], v[1], -t[0], v[0]);
 		v3d = VectorUtils.linearCombination(t[3], v[3], -t[0], v[0]);
 	}
-	
+
+	/** Draw the lines making up the boundary of the perspective rectangle. **/
+	public void drawLines(DrawingUtil drawutil){
+		if(!isReady){ return; }
+		drawutil.drawLines(lines);
+	}
+
+	/** Draw the corner points of the perspective rectangle. **/
+	public void drawPoints(DrawingUtil drawutil){
+		if(!isReady){ return; }
+		drawutil.drawPoints(points);
+	}
+
 	/**
 	 * Map the coordinates on the 3D rectangle to the original image which has
 	 * the perspective-distorted rectangle drawn onto it.

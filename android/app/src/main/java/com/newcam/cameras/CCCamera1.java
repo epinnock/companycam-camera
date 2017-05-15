@@ -1232,33 +1232,6 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             mCamera.setPreviewDisplay(holder);
             mCamera.startPreview();
 
-            //TODO: Start capturing frames using setPreviewCallbackWithBuffer
-            //========================================================================
-            LogUtil.d(TAG, "Preparing setPreviewCallbackWithBuffer");
-
-            if (ccImageProcessor != null) {
-                int containerWidth = mCameraView.getWidth();
-                int containerHeight = mCameraView.getHeight();
-                System.out.println("[CCAM] CONTAINER SIZE: (" + containerWidth + ", " + containerHeight + ")");
-                ccImageProcessor.setImageParams(mPreviewWidth, mPreviewHeight, containerWidth, containerHeight, param.getPreviewFormat());
-
-                int videoBufferSize = mPreviewWidth * mPreviewHeight * ImageFormat.getBitsPerPixel(param.getPreviewFormat()) / 8;
-                byte[] videoBuffer = new byte[videoBufferSize];
-                LogUtil.d(TAG, "Initialized capture buffer (" + videoBufferSize + ")");
-
-                final CCCamera1 _this = this;
-                mCamera.addCallbackBuffer(videoBuffer);
-                mCamera.setPreviewCallbackWithBuffer(new Camera.PreviewCallback() {
-                    public void onPreviewFrame(byte[] data, Camera camera) {
-                        ccImageProcessor.setBytes(data, _this.getCameraDisplayOrientation());
-                        mCamera.addCallbackBuffer(data);
-                    }
-                });
-            } else {
-                LogUtil.d(TAG, "No ccImageProcessor was specified.");
-            }
-            //========================================================================
-
             /*if (mCamera != null) {
                 mCamera.setPreviewDisplay(holder);
                 mCamera.startPreview();
@@ -1321,6 +1294,35 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         // start preview with new settings
         try {
             mCamera.setPreviewDisplay(mPreview.getHolder());
+
+            //TODO: Start capturing frames using setPreviewCallbackWithBuffer
+            //========================================================================
+            Camera.Parameters param = safeGetParameters(mCamera, "surfaceChanged()");
+            LogUtil.d(TAG, "Preparing setPreviewCallbackWithBuffer");
+
+            if (ccImageProcessor != null) {
+                int containerWidth = mCameraView.getWidth();
+                int containerHeight = mCameraView.getHeight();
+                System.out.println("[CCAM] CONTAINER SIZE: (" + containerWidth + ", " + containerHeight + ")");
+                ccImageProcessor.setImageParams(mPreviewWidth, mPreviewHeight, containerWidth, containerHeight, param.getPreviewFormat());
+
+                int videoBufferSize = mPreviewWidth * mPreviewHeight * ImageFormat.getBitsPerPixel(param.getPreviewFormat()) / 8;
+                byte[] videoBuffer = new byte[videoBufferSize];
+                LogUtil.d(TAG, "Initialized capture buffer (" + videoBufferSize + ")");
+
+                final CCCamera1 _this = this;
+                mCamera.addCallbackBuffer(videoBuffer);
+                mCamera.setPreviewCallbackWithBuffer(new Camera.PreviewCallback() {
+                    public void onPreviewFrame(byte[] data, Camera camera) {
+                        ccImageProcessor.setBytes(data, _this.getCameraDisplayOrientation());
+                        mCamera.addCallbackBuffer(data);
+                    }
+                });
+            } else {
+                LogUtil.d(TAG, "No ccImageProcessor was specified.");
+            }
+            //========================================================================
+
             mCamera.startPreview();
 
         } catch (Exception e){
