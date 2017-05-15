@@ -1,6 +1,5 @@
 package com.newcam.imageprocessing;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -9,7 +8,6 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
-import android.os.Build;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
@@ -41,7 +39,6 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
     protected int heightOrig;
     protected Bitmap bitmapOriginal;
     protected Bitmap bitmapOverlay;
-
     protected Canvas canvasOverlay;
 
     protected int widthTransform;
@@ -49,17 +46,27 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
     protected Bitmap bitmapTransform;
     protected Canvas canvasTransform;
 
+    protected Bitmap bitmapOutput;
+    protected Canvas canvasOutput;
+    protected boolean outputBitmapIsValid = false;
+
+    // BoofCV and scanning utility stuff
+    //-------------------------------------------------
     protected DrawableU8Android tempCanvas;
 
     protected GrayU8 imageU8;
     protected byte[] workBuffer;
     protected DocScanUtil docScanner;
+    //-------------------------------------------------
 
+    // RenderScript stuff
+    //-------------------------------------------------
     protected boolean didPrepareRenderScript = false;
-    protected Allocation allocIn;
-    protected Allocation allocOut;
-    protected ScriptIntrinsicYuvToRGB yuvToRgbIntrinsic;
 
+    protected Allocation allocInYUV;
+    protected Allocation allocOutRGBA;
+    protected ScriptIntrinsicYuvToRGB scriptYUVtoRGB;
+    //-------------------------------------------------
 
     public DocumentScanOverlay(Context context) {
         super(context);
@@ -72,30 +79,6 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         System.err.println("[CCAM] DocumentScanOverlay: " + message);
     }
 
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    public void prepareRenderScriptYUVToRGB(int byteCount){
-        RenderScript rs = RenderScript.create(context);
-        yuvToRgbIntrinsic = ScriptIntrinsicYuvToRGB.create(rs, Element.U8_4(rs));
-
-        Type.Builder yuvType = new Type.Builder(rs, Element.U8(rs)).setX(byteCount);
-        allocIn = Allocation.createTyped(rs, yuvType.create(), Allocation.USAGE_SCRIPT);
-
-        Type.Builder rgbaType = new Type.Builder(rs, Element.RGBA_8888(rs)).setX(widthOrig).setY(heightOrig);
-        allocOut = Allocation.createTyped(rs, rgbaType.create(), Allocation.USAGE_SCRIPT);
-
-        yuvToRgbIntrinsic.setInput(allocIn);
-        didPrepareRenderScript = true;
-    }
-
-    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    public void convertYUVToRGB(Bitmap target, byte[] data){
-        if(!didPrepareRenderScript){ return; }
-
-        allocIn.copyFrom(data);
-        yuvToRgbIntrinsic.forEach(allocOut);
-        allocOut.copyTo(target);
-    }
-
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
@@ -105,37 +88,57 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         //Rect rDst = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
         //canvas.drawBitmap(bitmapTransform, rSrc, rDst, null);
 
+        //Rect rSrc = new Rect(0, 0, widthOrig, heightOrig);
+        //Rect rDst = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
+        //canvas.drawBitmap(bitmapOverlay, rSrc, rDst, null);
+
         Rect rSrc = new Rect(0, 0, widthOrig, heightOrig);
         Rect rDst = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
-        canvas.drawBitmap(bitmapOverlay, rSrc, rDst, null);
+        canvas.drawBitmap(bitmapOutput, rSrc, rDst, null);
+    }
+
+    // RenderScript stuff
+    //====================================================================
+    protected void prepareRenderScriptYUVToRGB(){
+        DEBUG_OUTPUT("RenderScript (YUV -> RGB): Preparing");
+
+        RenderScript rs = RenderScript.create(context);
+        scriptYUVtoRGB = ScriptIntrinsicYuvToRGB.create(rs, Element.U8_4(rs));
+
+        int byteCount = widthOrig*heightOrig*3/2;
+        Type.Builder typeYUV = new Type.Builder(rs, Element.U8(rs)).setX(byteCount);
+        allocInYUV = Allocation.createTyped(rs, typeYUV.create(), Allocation.USAGE_SCRIPT);
+
+        Type.Builder typeRGBA = new Type.Builder(rs, Element.RGBA_8888(rs)).setX(widthOrig).setY(heightOrig);
+        allocOutRGBA = Allocation.createTyped(rs, typeRGBA.create(), Allocation.USAGE_SCRIPT);
+
+        scriptYUVtoRGB.setInput(allocInYUV);
+        didPrepareRenderScript = true;
+
+        DEBUG_OUTPUT("RenderScript (YUV -> RGB): Ready!");
+    }
+
+    protected void convertYUVToRGB(Bitmap target, byte[] data){
+        if(!didPrepareRenderScript){ return; }
+
+        allocInYUV.copyFrom(data);
+        scriptYUVtoRGB.forEach(allocOutRGBA);
+        allocOutRGBA.copyTo(target);
     }
 
     // CCCameraImageProcessor
     //====================================================================
-    @Override
-    public void setBytes(byte[] dataOriginal, int rotation) {
-        DEBUG_OUTPUT("setBytes: didReceiveImageParams = " + didReceiveImageParams + ", didPrepareRenderScript = " + didPrepareRenderScript);
+    private Matrix getOrigToTransform(int rotation){
+        int dimTransformLarge = Math.max(widthTransform, heightTransform);
+        int dimTransformSmall = Math.min(widthTransform, heightTransform);
 
-        if(!didReceiveImageParams){ return; }
-        if(!didPrepareRenderScript){ return; }
+        int dimOrigLarge = Math.max(widthOrig, heightOrig);
+        int dimOrigSmall = Math.min(widthOrig, heightOrig);
 
-        DEBUG_OUTPUT("Received bytes! (Rotation angle: " + rotation + ")");
-
-        long step1MS = System.currentTimeMillis();
-
-        convertYUVToRGB(bitmapOriginal, dataOriginal);
-
-        float dimTransformLarge = Math.max(widthTransform, heightTransform);
-        float dimTransformSmall = Math.min(widthTransform, heightTransform);
-
-        float dimOrigLarge = (float)Math.max(widthOrig, heightOrig);
-        float dimOrigSmall = (float)Math.min(widthOrig, heightOrig);
-
-        float scaleL = dimTransformLarge / dimOrigLarge;
-        float scaleS = dimTransformSmall / dimOrigSmall;
+        float scaleL = (float)dimTransformLarge / (float)dimOrigLarge;
+        float scaleS = (float)dimTransformSmall / (float)dimOrigSmall;
         float scale = Math.max(scaleL, scaleS);
 
-        //------------------------------------
         Matrix mtransFirst = new Matrix();
         mtransFirst.setTranslate(-(float)widthOrig / 2.0f, -(float)heightOrig / 2.0f);
 
@@ -152,33 +155,38 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         m.postConcat(mscale);
         m.postConcat(mrotate);
         m.postConcat(mtransLast);
-        //------------------------------------
+        return m;
+    }
 
-        canvasTransform.setMatrix(m);
-        canvasTransform.drawBitmap(bitmapOriginal, 0, 0, null);
+    @Override
+    public void setBytes(byte[] dataOriginal, int rotation) {
+        DEBUG_OUTPUT("Received bytes! (Rotation angle: " + rotation + ")");
+        DEBUG_OUTPUT("- didReceiveImageParams = " + didReceiveImageParams);
+        DEBUG_OUTPUT("- didPrepareRenderScript = " + didPrepareRenderScript);
 
-        //convert bitmap to boof U8; prepare boof U8 image for edges
+        if(!didReceiveImageParams){ return; }
+        if(!didPrepareRenderScript){ return; }
+
+        long step1MS = System.currentTimeMillis();
+
+        //original YUV -> rotated/scaled bitmapTransform -> GrayU8
+        convertYUVToRGB(bitmapOriginal, dataOriginal);
+
+        Matrix matOrigToTransform = getOrigToTransform(rotation);
+        canvasTransform.drawBitmap(bitmapOriginal, matOrigToTransform, null);
+
         ConvertBitmap.bitmapToGray(bitmapTransform, imageU8, workBuffer);
 
         long step2MS = System.currentTimeMillis();
 
+        // Debug output
+        //-------------------------
         //DrawingUtilAndroid drawutil = new DrawingUtilAndroid(new Canvas(bitmapTransform));
         //docScanner.drawCannyDebug(drawutil);
-
-        //scan
-
-        //TODO
-        //BufferedImage output = generateOutputImage(rect, 512);
-
-        //graphics.drawImage(imageResize, 0, 0, this);
-        //if(output != null){
-        //    graphics.drawImage(output, IMAGE_W + 20, 0, this);
-        //}
-
-        //DrawingUtilAndroid drawutil = new DrawingUtilAndroid(new Canvas(bitmapTransform));
         //docScanner.drawLastMaxContour(drawutil);
         //rect.drawLines(drawutil);
         //rect.drawPoints(drawutil);
+        //-------------------------
 
         bitmapOverlay.eraseColor(Color.argb(0,0,0,0));
 
@@ -188,6 +196,8 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         if(rect != null) {
             List<Point2D_F32> pointsAsPercent = rect.getPointsAsPercent();
             if (pointsAsPercent != null) {
+                // Draw translucent overlay quad onto bitmapOverlay
+                //-------------------------
                 Path opath = new Path();
                 int i = 0;
                 for (Point2D_F32 point : pointsAsPercent) {
@@ -208,6 +218,37 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
                 paint.setColor(Color.argb(128, 0, 128, 255));
 
                 canvasOverlay.drawPath(opath, paint);
+                //-------------------------
+
+                // Draw perspective-corrected quad onto bitmapOutput
+                //-------------------------
+                float[] pOut = new float[]{
+                    0.0f, heightOrig,
+                    widthOrig, heightOrig,
+                    widthOrig, 0.0f,
+                    0.0f, 0.0f,
+                };
+
+                float[] pIn = new float[8];
+                int j = 0;
+                for (Point2D_F32 point : pointsAsPercent) {
+                    float px = point.getX() * widthTransform;
+                    float py = point.getY() * heightTransform;
+
+                    pIn[j*2  ] = px;
+                    pIn[j*2+1] = py;
+
+                    j++;
+                }
+
+                Matrix matPerspective = new Matrix();
+                matPerspective.setPolyToPoly(pIn, 0, pOut, 0, 4);
+
+                matPerspective.preConcat(matOrigToTransform);
+
+                canvasOutput.drawBitmap(bitmapOriginal, matPerspective, null);
+                outputBitmapIsValid = true;
+                //-------------------------
             }
         }
 
@@ -223,39 +264,45 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
 
     @Override
     public void setImageParams(int widthOrig, int heightOrig, int widthContainer, int heightContainer, int previewFormat) {
+
+        // YUV -> RGB conversion Bitmap and RenderScript converter
         this.widthOrig = widthOrig;
         this.heightOrig = heightOrig;
         bitmapOriginal = Bitmap.createBitmap(widthOrig, heightOrig, Bitmap.Config.ARGB_8888);
+
+        prepareRenderScriptYUVToRGB();
+
+        // Bitmaps for UI overlay and final output
         bitmapOverlay = Bitmap.createBitmap(widthOrig, heightOrig, Bitmap.Config.ARGB_8888);
         canvasOverlay = new Canvas(bitmapOverlay);
 
+        bitmapOutput = Bitmap.createBitmap(widthOrig, heightOrig, Bitmap.Config.ARGB_8888);
+        canvasOutput = new Canvas(bitmapOutput);
+
+        // Bitmap and GrayU8 on which to do the actual CV ops
         int MAX_WORKING_DIM = 384;
-        float scaleX = (float)MAX_WORKING_DIM / (float)this.getWidth();
-        float scaleY = (float)MAX_WORKING_DIM / (float)this.getHeight();
+        float scaleX = (float)MAX_WORKING_DIM / (float)widthContainer;
+        float scaleY = (float)MAX_WORKING_DIM / (float)heightContainer;
         float scale = Math.min(scaleX, scaleY);
 
-        this.widthTransform = (int)((float)this.getWidth() * scale);
-        this.heightTransform = (int)((float)this.getHeight() * scale);
+        widthTransform = (int)((float)widthContainer * scale);
+        heightTransform = (int)((float)heightContainer * scale);
         bitmapTransform = Bitmap.createBitmap(widthTransform, heightTransform, Bitmap.Config.ARGB_8888);
         canvasTransform = new Canvas(bitmapTransform);
 
         imageU8 = ConvertBitmap.bitmapToGray(bitmapTransform, (GrayU8)null, null);
         workBuffer = ConvertBitmap.declareStorage(bitmapTransform, null);
 
+        // Scanning util instance and a DrawableU8 used internally by the scanner
         Bitmap bitmapExtra = Bitmap.createBitmap(widthTransform, heightTransform, Bitmap.Config.ARGB_8888);
         tempCanvas = new DrawableU8Android(bitmapExtra);
 
         docScanner = new DocScanUtil(imageU8);
 
         didReceiveImageParams = true;
-
-        //NV21: YUV 12 bits per pixel
-        prepareRenderScriptYUVToRGB(widthOrig*heightOrig*3/2);
-
         DEBUG_OUTPUT("setImageParams received!");
         DEBUG_OUTPUT("- Raw preview size: (" + widthOrig + ", " + heightOrig + ")");
-        DEBUG_OUTPUT("- Container size: (" + this.getWidth() + ", " + this.getHeight() + ")");
+        DEBUG_OUTPUT("- Container size: (" + widthContainer + ", " + heightContainer + ")");
         DEBUG_OUTPUT("- Transform size: (" + widthTransform + ", " + heightTransform + ")");
-
     }
 }
