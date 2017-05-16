@@ -2,6 +2,7 @@ package com.newcam.imageprocessing;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 
 import com.newcam.imageprocessing.utils.DrawableU8;
 import com.newcam.imageprocessing.utils.DrawingUtil;
@@ -42,5 +43,10 @@ public class DrawableU8Android implements DrawableU8 {
     public GrayU8 getGrayU8(){
         ConvertBitmap.bitmapToGray(image, imageU8, workBuffer);
         return imageU8;
+    }
+
+    @Override
+    public void clearBlack() {
+        image.eraseColor(Color.BLACK);
     }
 }

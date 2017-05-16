@@ -6,4 +6,5 @@ public interface DrawableU8 {
 
 	public DrawingUtil getDrawingUtil();
 	public GrayU8 getGrayU8();
+	public void clearBlack();
 }

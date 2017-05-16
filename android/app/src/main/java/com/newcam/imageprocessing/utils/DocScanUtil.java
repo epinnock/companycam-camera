@@ -1,16 +1,12 @@
 package com.newcam.imageprocessing.utils;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import boofcv.abst.feature.detect.line.DetectLineHoughPolar;
-import boofcv.alg.feature.detect.edge.CannyEdge;
-import boofcv.alg.feature.detect.edge.EdgeContour;
-import boofcv.alg.filter.binary.BinaryImageOps;
-import boofcv.alg.filter.binary.Contour;
-import boofcv.factory.feature.detect.edge.FactoryEdgeDetectors;
+import boofcv.alg.filter.blur.BlurImageOps;
 import boofcv.factory.feature.detect.line.ConfigHoughPolar;
 import boofcv.factory.feature.detect.line.FactoryDetectLineAlgs;
-import boofcv.struct.ConnectRule;
 import boofcv.struct.image.GrayS16;
 import boofcv.struct.image.GrayU8;
 import georegression.struct.line.LineParametric2D_F32;
@@ -19,93 +15,96 @@ public class DocScanUtil {
 
 	private GrayU8 imageU8;
 	private int IMAGE_W, IMAGE_H;
-	
-	private GrayU8 edgeImageU8;
-	
-	private CannyEdge<GrayU8,GrayS16> canny;
+
+	private static final int BLUR_RADIUS = 10;
+
 	private	DetectLineHoughPolar<GrayU8,GrayS16> lineDetector;
-	
-	//keep this around for debug rendering the contour
-	private Contour maxAABBContour;
-	
-	// adjusts edge threshold for identifying pixels belonging to a line
-	private static final float edgeThreshold = 25;
-	// adjust the maximum number of found lines in the image
-	private static final int maxLines = 4;
-	
-	
+
+	//keep this around for debug rendering
+	private List<LineParametric2D_F32> linesAll;
+
+
 	public DocScanUtil(GrayU8 imageU8){
 		this.imageU8 = imageU8;
 		IMAGE_W = imageU8.getWidth();
 		IMAGE_H = imageU8.getHeight();
-		
-		edgeImageU8 = imageU8.createSameShape();
-		
-		canny = FactoryEdgeDetectors.canny(2, true, true, GrayU8.class, GrayS16.class);
-		
-		ConfigHoughPolar configHough = new ConfigHoughPolar(3, 30, 2, Math.PI / 180, edgeThreshold, maxLines);
+
+		//Radius for local maximum suppression.
+		int localMaxRadius = 10;
+		//Maximum number of lines to return.
+		int maxLines = 1000;
+		//Minimum number of counts for detected line.
+		int minCounts = 30;
+		//Resolution of line angle in radius.
+		double resolutionAngle = Math.PI / 180;
+		//Resolution of line range in pixels.
+		double resolutionRange = 2;
+		//Edge detection threshold.
+		float thresholdEdge = 25;
+
+		ConfigHoughPolar configHough = new ConfigHoughPolar(localMaxRadius, minCounts, resolutionRange, resolutionAngle, thresholdEdge, maxLines);
 		lineDetector = FactoryDetectLineAlgs.houghPolar(configHough, GrayU8.class, GrayS16.class);
 	}
 
 	/** tempCanvas should have same size as the imageU8 passed into constructor **/
 	public PerspectiveRect scan(DrawableU8 tempCanvas){
 
-		long timeCanny1 = System.currentTimeMillis();
-		
-		// The edge image is actually an optional parameter.  If you don't need it just pass in null
-		canny.process(imageU8, 0.1f, 0.3f, edgeImageU8);
+		long startBlur = System.currentTimeMillis();
 
-		long timeCanny2 = System.currentTimeMillis();
+		GrayU8 blurU8 = tempCanvas.getGrayU8();
+		BlurImageOps.gaussian(imageU8, blurU8, -1, BLUR_RADIUS, null);
 
-		// First get the contour created by canny
-		//List<EdgeContour> edgeContours = canny.getContours();
-		List<Contour> contours = BinaryImageOps.contour(edgeImageU8, ConnectRule.EIGHT, null);
+		long endBlur = System.currentTimeMillis();
+		BoofLogUtil.d("Blur: " + (endBlur - startBlur) + " ms");
 
-		long timeCanny3 = System.currentTimeMillis();
+		long startHough = System.currentTimeMillis();
 
-		//find contour with biggest-area AABB
-		maxAABBContour = GeomUtils.findBiggestContour(contours);
+		linesAll = lineDetector.detect(blurU8);
+		BoofLogUtil.v("FOUND LINES: " + linesAll.size());
 
-		long timeCanny4 = System.currentTimeMillis();
-		BoofLogUtil.d("Canny 1: " + (timeCanny2 - timeCanny1) + " ms");
-		BoofLogUtil.d("Canny 2: " + (timeCanny3 - timeCanny2) + " ms");
-		BoofLogUtil.d("Canny 3: " + (timeCanny4 - timeCanny3) + " ms");
-		
-		if(maxAABBContour == null){
-			BoofLogUtil.d("MAX AABB NULL!");
+		long endHough = System.currentTimeMillis();
+		BoofLogUtil.d("Hough: " + (endHough - startHough) + " ms");
+
+		//find rect edges from all hough lines
+		//------------------------------------
+		long startSort = System.currentTimeMillis();
+
+		List<LineParametric2D_F32> linesV = new LinkedList<LineParametric2D_F32>();
+		List<LineParametric2D_F32> linesH = new LinkedList<LineParametric2D_F32>();
+		for(LineParametric2D_F32 line : linesAll){
+			float angle = line.getAngle();
+			float absx = (float)Math.abs(Math.cos(angle));
+			float absy = (float)Math.abs(Math.sin(angle));
+			if(absx < 0.5f){ linesV.add(line); }
+			if(absy < 0.5f){ linesH.add(line); }
+		}
+		linesH = GeomUtils.sortLinesByAreaAbove(linesH, IMAGE_W, IMAGE_H);
+		linesV = GeomUtils.sortLinesByAreaToLeft(linesV, IMAGE_W, IMAGE_H);
+
+		if(linesH.size() < 2 || linesV.size() < 2){
+			BoofLogUtil.v("Did not find enough horizontal or vertical lines!");
 			return null;
 		}
 
-		long startHough = System.currentTimeMillis();
-		
-		DrawingUtil tempDrawUtil = tempCanvas.getDrawingUtil();
-		tempDrawUtil.drawContourLight(maxAABBContour.external);
-		GrayU8 outlineImageU8 = tempCanvas.getGrayU8();
-		
-		List<LineParametric2D_F32> lines = lineDetector.detect(outlineImageU8);
-		BoofLogUtil.v("FOUND LINES: " + lines.size());
-		
+		List<LineParametric2D_F32> linesRect = new LinkedList<LineParametric2D_F32>();
+		linesRect.add(linesH.get(0));
+		linesRect.add(linesH.get(linesH.size()-1));
+		linesRect.add(linesV.get(0));
+		linesRect.add(linesV.get(linesV.size()-1));
+
+		long endSort = System.currentTimeMillis();
+		BoofLogUtil.d("Sort: " + (endSort - startSort) + " ms");
+		//------------------------------------
+
 		PerspectiveRect rect = new PerspectiveRect(IMAGE_W, IMAGE_H);
-		rect.setLines(lines);
-		
-		long endHough = System.currentTimeMillis();
-		BoofLogUtil.d("Hough: " + (endHough - startHough) + " ms");
-		
+		rect.setLines(linesRect);
+
 		return rect;
 	}
 
-	public void drawCannyDebug(DrawingUtil drawutil){
-		canny.process(imageU8, 0.1f, 0.3f, null);//edgeImageU8);
-		List<EdgeContour> contours = canny.getContours();
-		//List<Contour> contours = BinaryImageOps.contour(edgeImageU8, ConnectRule.EIGHT, null);
-
-		for(EdgeContour contour : contours){
-			drawutil.drawEdgesLight(contour.segments);
-		}
-	}
-
-	public void drawLastMaxContour(DrawingUtil drawutil){
-		if(maxAABBContour == null){ return; }
-		drawutil.drawContourHeavy(maxAABBContour.external);
+	/** Draw the lines making up the boundary of the perspective rectangle. **/
+	public void drawLines(DrawingUtil drawutil){
+		if(linesAll == null){ return; }
+		drawutil.drawLines(linesAll);
 	}
 }
