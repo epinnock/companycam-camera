@@ -42,6 +42,8 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
     private static String TAG = CCCamera1.class.getSimpleName();
 
+    private static final int MAX_DIM_SCANNER_OUTPUT = 1024;
+
     // The mCamera is the reference to the current camera and the mCameraId is the id of that camera
     private Camera mCamera;
     private int mCameraId;
@@ -362,9 +364,27 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
 
-            if (data != null) {
-                Bitmap bPhoto = null;
-                try {
+            if (data == null) {
+                return;
+            }
+
+            Bitmap bPhoto = null;
+            try {
+                //========================================================================
+                if(ccImageProcessor != null){
+                    Log.d(TAG, "Found image processor; trying to obtain output image");
+                    Bitmap ipOutput = ccImageProcessor.getOutputImage();
+                    if(ipOutput != null){
+                        bPhoto = ipOutput;
+                        Log.d(TAG, "Image processor output found; bypassing camera image");
+                    }else{
+                        Log.d(TAG, "Image processor output not found; proceeding as usual");
+                    }
+                }
+                //========================================================================
+
+                // Only process photo data if the image processor did not succeed in supplying output
+                if(bPhoto == null) {
 
                     int orientation = ((mLastOrientation + 45) / 90) * 90;
                     int rotation = 0;
@@ -425,65 +445,58 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                     Log.d(TAG, "After cropping the photo is " + bPhoto.getWidth() + " x " + bPhoto.getHeight());
 
                     Log.d(TAG, "bPhoto rotated and ready for storage.");
+                }
 
-                    //TODO: intercept image and process if there is an image processor
-                    //========================================================================
-                    if(ccImageProcessor != null){
-                        ccImageProcessor.setImageParams(bPhoto.getWidth(), bPhoto.getHeight(), 100, 100);
-                        bPhoto = ccImageProcessor.createFinalImage(bPhoto, 0, 800);
-                    }
-                    //========================================================================
+                File photo = getPhotoPath();
+                if (photo.exists()) {
+                    photo.delete();
+                }
 
-                    File photo = getPhotoPath();
-                    if (photo.exists()) {
-                        photo.delete();
-                    }
+                FileOutputStream out = new FileOutputStream(photo.getPath());
+                BufferedOutputStream bos = new BufferedOutputStream(out);
+                bPhoto.compress(Bitmap.CompressFormat.JPEG, HIGH_QUALITY, bos);
+                int imgWidth = bPhoto.getWidth();
+                int imgHeight = bPhoto.getHeight();
 
-                    FileOutputStream out = new FileOutputStream(photo.getPath());
-                    BufferedOutputStream bos = new BufferedOutputStream(out);
-                    bPhoto.compress(Bitmap.CompressFormat.JPEG, HIGH_QUALITY, bos);
-                    int imgWidth = bPhoto.getWidth();
-                    int imgHeight = bPhoto.getHeight();
+                bos.flush();
+                bos.close();
+                out.close();
 
-                    bos.flush();
-                    bos.close();
-                    out.close();
+                // Transition to the EditPhotoCaptureActivity as long as the current mode isn't FastCam
+                if (!mCameraMode.equals("fastcam")) {
+                    gotoEditPhotoCapture(photo.getPath(), imgWidth, imgHeight);
+                }
 
-                    // Transition to the EditPhotoCaptureActivity as long as the current mode isn't FastCam
-                    if (!mCameraMode.equals("fastcam")) {
-                        gotoEditPhotoCapture(photo.getPath(), imgWidth, imgHeight);
-                    }
+                // If the current mode is FastCam, then upload the photo immediately
+                else {
+                    uploadFastCamPhoto(photo, imgWidth, imgHeight);
 
-                    // If the current mode is FastCam, then upload the photo immediately
-                    else {
-                        uploadFastCamPhoto(photo, imgWidth, imgHeight);
+                    // Start the camera preview again
+                    mCamera.startPreview();
+                    //setupListeners();
+                }
 
-                        // Start the camera preview again
-                        mCamera.startPreview();
-                        //setupListeners();
-                    }
-
-                    try {
-                        ExifUtils.setAttributes(photo, mCameraView.getExifLocation(), mFlashMode);
-                    } catch (IOException e) {
-                        LogUtil.e(TAG, e.getLocalizedMessage());
-                    }
-
-                } catch (FileNotFoundException e) {
-                    Log.d(TAG, "File not found: " + e.getMessage());
+                try {
+                    ExifUtils.setAttributes(photo, mCameraView.getExifLocation(), mFlashMode);
                 } catch (IOException e) {
-                    Log.d(TAG, "Error accessing file: " + e.getMessage());
-                } catch (OutOfMemoryError oome) {
-                    Log.e(TAG, "OutOfMemoryError: " + oome.getMessage());
-                    mCameraView.finishWithError("Out of memory: " + oome.getMessage());
-                } finally {
-                    if (bPhoto != null) {
-                        bPhoto.recycle();
-                        bPhoto = null;
-                    }
+                    LogUtil.e(TAG, e.getLocalizedMessage());
+                }
+
+            } catch (FileNotFoundException e) {
+                Log.d(TAG, "File not found: " + e.getMessage());
+            } catch (IOException e) {
+                Log.d(TAG, "Error accessing file: " + e.getMessage());
+            } catch (OutOfMemoryError oome) {
+                Log.e(TAG, "OutOfMemoryError: " + oome.getMessage());
+                mCameraView.finishWithError("Out of memory: " + oome.getMessage());
+            } finally {
+                if (bPhoto != null) {
+                    bPhoto.recycle();
+                    bPhoto = null;
                 }
             }
         }
+
     };
 
     /**
@@ -1309,7 +1322,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 int containerWidth = mCameraView.getWidth();
                 int containerHeight = mCameraView.getHeight();
                 System.out.println("[CCAM] CONTAINER SIZE: (" + containerWidth + ", " + containerHeight + ")");
-                ccImageProcessor.setImageParams(mPreviewWidth, mPreviewHeight, containerWidth, containerHeight); //param.getPreviewFormat()
+                ccImageProcessor.setImageParams(mPreviewWidth, mPreviewHeight, containerWidth, containerHeight, MAX_DIM_SCANNER_OUTPUT);
 
                 int videoBufferSize = mPreviewWidth * mPreviewHeight * ImageFormat.getBitsPerPixel(param.getPreviewFormat()) / 8;
                 byte[] videoBuffer = new byte[videoBufferSize];
