@@ -15,6 +15,7 @@ import android.renderscript.ScriptIntrinsicYuvToRGB;
 import android.renderscript.Type;
 import android.view.View;
 
+import com.newcam.imageprocessing.utils.BoofLogUtil;
 import com.newcam.imageprocessing.utils.DocScanUtil;
 import com.newcam.imageprocessing.utils.PerspectiveRect;
 
@@ -49,6 +50,25 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
     protected Bitmap bitmapTransform;
     protected Canvas canvasTransform;
 
+    // Color overlay based on stability of PerspectiveRect
+    //-------------------------------------------------
+    protected final static int RECTANGLE_UNSTABLE = 0;
+    protected final static int RECTANGLE_STABLE = 1;
+
+    protected final static int RECTANGLE_COLOR_UNSTABLE = Color.argb(64, 255,0,0);
+    protected final static int RECTANGLE_COLOR_STABLE = Color.argb(128, 0,128,255);
+    protected final static int RECTANGLE_COLOR_FOUND = Color.argb(128, 0,255,0);
+
+    protected final static long RECTANGLE_FOUND_THRESHOLD = 1000;
+    protected final static float RECT_STABILITY_THRESHOLD = 15.0f;
+
+    protected PerspectiveRect rectPrevious1 = null;
+    protected PerspectiveRect rectPrevious2 = null;
+
+    protected int overlayRectangleColor = RECTANGLE_COLOR_UNSTABLE;
+    protected int rectangleStability = RECTANGLE_UNSTABLE;
+    protected long stableStartMS = 0;
+
     // Output image
     //-------------------------------------------------
     protected Bitmap bitmapOutput;
@@ -61,8 +81,6 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
 
     // BoofCV and scanning utility stuff
     //-------------------------------------------------
-    protected DrawableU8Android tempCanvas;
-
     protected GrayU8 imageU8;
     protected byte[] workBuffer;
     protected DocScanUtil docScanner;
@@ -119,10 +137,7 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         imageU8 = ConvertBitmap.bitmapToGray(bitmapTransform, (GrayU8)null, null);
         workBuffer = ConvertBitmap.declareStorage(bitmapTransform, null);
 
-        // Scanning util instance and a DrawableU8 used internally by the scanner
-        Bitmap bitmapExtra = Bitmap.createBitmap(widthTransform, heightTransform, Bitmap.Config.ARGB_8888);
-        tempCanvas = new DrawableU8Android(bitmapExtra);
-
+        // Scanner
         docScanner = new DocScanUtil(imageU8);
 
         didReceiveImageParams = true;
@@ -195,20 +210,64 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
 
     // NOTE: bitmapSrc should have size (widthOrig, heightOrig)
     protected void generatePreviewAndOutput(Bitmap bitmapSrc, int rotation){
-        long startMS = System.currentTimeMillis();
-
-        bitmapOverlay.eraseColor(Color.argb(0,0,0,0));
 
         //convert bitmapSrc to smaller, rotated GrayU8; scan
         //-------------------------
+        long startMS = System.currentTimeMillis();
+
         Matrix matOrigToTransform = getOrigToTransform(rotation);
         canvasTransform.drawBitmap(bitmapSrc, matOrigToTransform, null);
 
         ConvertBitmap.bitmapToGray(bitmapTransform, imageU8, workBuffer);
 
-        tempCanvas.clearBitmap(Color.argb(255,0,0,0));
-        PerspectiveRect rect = docScanner.scan(tempCanvas);
+        PerspectiveRect rectCurrent = docScanner.scan();
+
+        long endMS = System.currentTimeMillis();
+        DEBUG_OUTPUT("Finished processing (" + (endMS - startMS) + " ms)");
         //-------------------------
+
+        // Determine stability and color
+        //-------------------------
+        rectPrevious2 = rectPrevious1;
+        rectPrevious1 = rectCurrent;
+
+        float dist = PerspectiveRect.maxScreenSpacePointDistance(rectPrevious1, rectPrevious2);
+        boolean isStable = !Float.isNaN(dist) && (dist < RECT_STABILITY_THRESHOLD);
+
+        BoofLogUtil.d("COMPARING: ");
+        BoofLogUtil.d("- dist: " + dist);
+        BoofLogUtil.d("- isNaN: " + Float.isNaN(dist));
+        BoofLogUtil.d("- isStable: " + isStable);
+        BoofLogUtil.d("- timer: " + stableStartMS);
+
+        if(!isStable){
+            BoofLogUtil.d("Unstable! resetting");
+            //if unstable, reset everything and color unstable
+            overlayRectangleColor = RECTANGLE_COLOR_UNSTABLE;
+            rectangleStability = RECTANGLE_UNSTABLE;
+            stableStartMS = 0;
+        }else{
+            if(rectangleStability == RECTANGLE_UNSTABLE){
+                BoofLogUtil.d("Transition unstable -> stable");
+                //if transitioning from unstable -> stable, color as stable and start timer
+                overlayRectangleColor = RECTANGLE_COLOR_STABLE;
+                rectangleStability = RECTANGLE_STABLE;
+                stableStartMS = System.currentTimeMillis();
+            }else{
+                BoofLogUtil.d("Maintaining stable -> stable");
+                //if stable -> stable, check if enough time has elapsed
+                long stableTime = System.currentTimeMillis() - stableStartMS;
+                rectangleStability = RECTANGLE_STABLE;
+                overlayRectangleColor = (stableTime > RECTANGLE_FOUND_THRESHOLD) ? RECTANGLE_COLOR_FOUND : RECTANGLE_COLOR_STABLE;
+            }
+        }
+        //-------------------------
+
+        bitmapOverlay.eraseColor(Color.argb(0,0,0,0));
+
+        if(rectCurrent == null){ return; }
+        List<Point2D_F32> pointsAsPercent = rectCurrent.getPointsAsPercent();
+        if(pointsAsPercent == null){ return; }
 
         // Debug output
         //-------------------------
@@ -219,83 +278,75 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         //rect.drawPoints(drawutil);
         //-------------------------
 
-        if(rect != null) {
-            List<Point2D_F32> pointsAsPercent = rect.getPointsAsPercent();
-            if (pointsAsPercent != null) {
-                // Draw translucent overlay quad onto bitmapOverlay
-                //-------------------------
-                Path opath = new Path();
-                int i = 0;
-                for (Point2D_F32 point : pointsAsPercent) {
-                    float px = point.getX() * widthOrig;
-                    float py = point.getY() * heightOrig;
+        // Draw translucent overlay quad onto bitmapOverlay
+        //-------------------------
+        Path opath = new Path();
+        int i = 0;
+        for (Point2D_F32 point : pointsAsPercent) {
+            float px = point.getX() * widthOrig;
+            float py = point.getY() * heightOrig;
 
-                    if (i == 0) {
-                        opath.moveTo(px, py);
-                    } else {
-                        opath.lineTo(px, py);
-                    }
-                    i++;
-                }
-                opath.close();
-
-                Paint paint = new Paint();
-                paint.setStyle(Paint.Style.FILL);
-                paint.setColor(Color.argb(128, 0, 128, 255));
-
-                canvasOverlay.drawPath(opath, paint);
-                didPrepareOverlay = true;
-                //-------------------------
-
-                // Prepare bitmapOutput
-                //-------------------------
-                float[] dims = new float[]{ 0.0f, 0.0f };
-                rect.get3DRectDims(dims);
-
-                float scaleX = (float) MAX_OUTPUT_DIM / dims[0];
-                float scaleY = (float) MAX_OUTPUT_DIM / dims[1];
-                float scale = Math.min(scaleX, scaleY);
-
-                int finalW = (int)(dims[0] * scale);
-                int finalH = (int)(dims[1] * scale);
-                //-------------------------
-
-                // Draw perspective-corrected quad onto bitmapOutput
-                //-------------------------
-                float[] pOut = new float[]{
-                        0.0f, finalH,
-                        finalW, finalH,
-                        finalW, 0.0f,
-                        0.0f, 0.0f,
-                };
-
-                float[] pIn = new float[8];
-                int j = 0;
-                for (Point2D_F32 point : pointsAsPercent) {
-                    float px = point.getX() * widthTransform;
-                    float py = point.getY() * heightTransform;
-
-                    pIn[j*2  ] = px;
-                    pIn[j*2+1] = py;
-
-                    j++;
-                }
-
-                Matrix matPerspective = new Matrix();
-                matPerspective.setPolyToPoly(pIn, 0, pOut, 0, 4);
-
-                matPerspective.preConcat(matOrigToTransform);
-
-                canvasOutput.drawBitmap(bitmapSrc, matPerspective, null);
-                didPrepareOutput = true;
-                outputImageW = finalW;
-                outputImageH = finalH;
-                //-------------------------
+            if (i == 0) {
+                opath.moveTo(px, py);
+            } else {
+                opath.lineTo(px, py);
             }
+            i++;
+        }
+        opath.close();
+
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(overlayRectangleColor);
+
+        canvasOverlay.drawPath(opath, paint);
+        didPrepareOverlay = true;
+        //-------------------------
+
+        // Determine output image size
+        //-------------------------
+        float[] dims = new float[]{ 0.0f, 0.0f };
+        rectCurrent.get3DRectDims(dims);
+
+        float scaleX = (float) MAX_OUTPUT_DIM / dims[0];
+        float scaleY = (float) MAX_OUTPUT_DIM / dims[1];
+        float scale = Math.min(scaleX, scaleY);
+
+        int finalW = (int)(dims[0] * scale);
+        int finalH = (int)(dims[1] * scale);
+        //-------------------------
+
+        // Draw perspective-corrected quad onto bitmapOutput
+        //-------------------------
+        float[] pOut = new float[]{
+                0.0f, finalH,
+                finalW, finalH,
+                finalW, 0.0f,
+                0.0f, 0.0f,
+        };
+
+        float[] pIn = new float[8];
+        int j = 0;
+        for (Point2D_F32 point : pointsAsPercent) {
+            float px = point.getX() * widthTransform;
+            float py = point.getY() * heightTransform;
+
+            pIn[j*2  ] = px;
+            pIn[j*2+1] = py;
+
+            j++;
         }
 
-        long endMS = System.currentTimeMillis();
-        DEBUG_OUTPUT("Finished processing (" + (endMS - startMS) + " ms)");
+        Matrix matPerspective = new Matrix();
+        matPerspective.setPolyToPoly(pIn, 0, pOut, 0, 4);
+
+        matPerspective.preConcat(matOrigToTransform);
+
+        canvasOutput.drawBitmap(bitmapSrc, matPerspective, null);
+        didPrepareOutput = true;
+        outputImageW = finalW;
+        outputImageH = finalH;
+        //-------------------------
     }
 
     // CCCameraImageProcessor

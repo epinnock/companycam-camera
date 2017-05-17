@@ -188,4 +188,28 @@ public class PerspectiveRect {
 		if(!isReady){ return null; }
 		return pointsAsPercent;
 	}
+
+	/**
+	 * Returns the max distance (in screen space) between corresponding points of PerspectiveRects.
+     * @return Returns NaN if either PerspectiveRect is null or is not ready.
+     */
+	public static float maxScreenSpacePointDistance(PerspectiveRect pr1, PerspectiveRect pr2){
+		boolean rectsInvalid = (pr1 == null) || (pr2 == null) || !pr1.isReady || !pr2.isReady;
+		if(rectsInvalid){ return Float.NaN; }
+
+		List<Point2D_F32> points1 = pr1.points;
+		List<Point2D_F32> points2 = pr2.points;
+		boolean pointsInvalid = (points1 == null) || (points2 == null) || (points1.size() != 4) || (points2.size() != 4);
+		if(pointsInvalid){ return Float.NaN; }
+
+		float maxdist = Float.NaN;
+		for(Point2D_F32 p : points1){
+			float dist = GeomUtils.getDistance(p, points2);
+			if(Float.isNaN(dist)){ continue; }
+			if(Float.isNaN(maxdist) || (dist > maxdist)){
+				maxdist = dist;
+			}
+		}
+		return maxdist;
+	}
 }

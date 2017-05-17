@@ -67,6 +67,27 @@ public class GeomUtils {
 		return p;
 	}
 
+	/**
+	 * Return the distance from p to the closest point in qlist.
+     * @return The distance, or -1 if qlist is empty.
+     */
+	public static float getDistance(Point2D_F32 p, List<Point2D_F32> qlist){
+		float mindist = -1;
+
+		int i=0;
+		for(Point2D_F32 q : qlist){
+			float dist = p.distance(q);
+			if(i == 0){
+				mindist = dist;
+			}else{
+				mindist = (dist < mindist) ? dist : mindist;
+			}
+			i++;
+		}
+
+		return mindist;
+	}
+
 	private static class PointWithAngle{
 		Point2D_F32 p;
 		float angle;

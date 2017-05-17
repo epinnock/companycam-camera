@@ -14,6 +14,7 @@ import georegression.struct.line.LineParametric2D_F32;
 public class DocScanUtil {
 
 	private GrayU8 imageU8;
+	private GrayU8 blurU8;
 	private int IMAGE_W, IMAGE_H;
 
 	private static final int BLUR_RADIUS = 10;
@@ -28,6 +29,8 @@ public class DocScanUtil {
 		this.imageU8 = imageU8;
 		IMAGE_W = imageU8.getWidth();
 		IMAGE_H = imageU8.getHeight();
+
+		blurU8 = imageU8.createSameShape();
 
 		//Radius for local maximum suppression.
 		int localMaxRadius = 10;
@@ -47,11 +50,10 @@ public class DocScanUtil {
 	}
 
 	/** tempCanvas should have same size as the imageU8 passed into constructor **/
-	public PerspectiveRect scan(DrawableU8 tempCanvas){
+	public PerspectiveRect scan(){
 
 		long startBlur = System.currentTimeMillis();
 
-		GrayU8 blurU8 = tempCanvas.getGrayU8();
 		BlurImageOps.gaussian(imageU8, blurU8, -1, BLUR_RADIUS, null);
 
 		long endBlur = System.currentTimeMillis();
