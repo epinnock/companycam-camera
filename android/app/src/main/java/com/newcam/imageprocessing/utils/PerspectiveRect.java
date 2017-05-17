@@ -73,7 +73,7 @@ public class PerspectiveRect {
 			return;
 		}
 		
-		//TODO: rearrange in predictable order: also lazy but good enough for now
+		//rearrange in predictable order
 		points = GeomUtils.sortInCCWOrder(pointsTemp);
 
 		pointsAsPercent.clear();

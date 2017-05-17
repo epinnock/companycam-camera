@@ -8,7 +8,14 @@ import android.graphics.Bitmap;
 
 public interface CCCameraImageProcessor {
 
+    public static interface ImageProcessorListener{
+        public void receiveResult();
+    }
+
+    public void setListener(ImageProcessorListener listener);
+
     public void setImageParams(int widthOrig, int heightOrig, int widthContainer, int heightContainer, int MAX_OUTPUT_DIM);
-    public void setPreviewBytes(byte[] data, int rotation);
+    public boolean setPreviewBytes(byte[] data, int rotation);
+
     public Bitmap getOutputImage();
 }

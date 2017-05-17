@@ -31,6 +31,20 @@ import georegression.struct.point.Point2D_F32;
 
 public class DocumentScanOverlay extends View implements CCCameraImageProcessor {
 
+    //--------------------------------------
+    protected ImageProcessorListener listener;
+
+    @Override
+    public void setListener(ImageProcessorListener listener){
+        this.listener = listener;
+    }
+
+    protected void notifyListeners(){
+        if(listener == null){ return; }
+        listener.receiveResult();
+    }
+    //--------------------------------------
+
     protected Context context;
 
     protected boolean didReceiveImageParams = false;
@@ -54,6 +68,7 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
     //-------------------------------------------------
     protected final static int RECTANGLE_UNSTABLE = 0;
     protected final static int RECTANGLE_STABLE = 1;
+    protected final static int RECTANGLE_FOUND = 2;
 
     protected final static int RECTANGLE_COLOR_UNSTABLE = Color.argb(64, 255,0,0);
     protected final static int RECTANGLE_COLOR_STABLE = Color.argb(128, 0,128,255);
@@ -65,7 +80,6 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
     protected PerspectiveRect rectPrevious1 = null;
     protected PerspectiveRect rectPrevious2 = null;
 
-    protected int overlayRectangleColor = RECTANGLE_COLOR_UNSTABLE;
     protected int rectangleStability = RECTANGLE_UNSTABLE;
     protected long stableStartMS = 0;
 
@@ -209,7 +223,7 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
     }
 
     // NOTE: bitmapSrc should have size (widthOrig, heightOrig)
-    protected void generatePreviewAndOutput(Bitmap bitmapSrc, int rotation){
+    protected boolean generatePreviewAndOutput(Bitmap bitmapSrc, int rotation){
 
         //convert bitmapSrc to smaller, rotated GrayU8; scan
         //-------------------------
@@ -231,6 +245,8 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         rectPrevious2 = rectPrevious1;
         rectPrevious1 = rectCurrent;
 
+        boolean doNotifyListeners = false;
+
         float dist = PerspectiveRect.maxScreenSpacePointDistance(rectPrevious1, rectPrevious2);
         boolean isStable = !Float.isNaN(dist) && (dist < RECT_STABILITY_THRESHOLD);
 
@@ -241,33 +257,49 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         BoofLogUtil.v("- timer: " + stableStartMS);
 
         if(!isStable){
+            //unstable; reset everything
             BoofLogUtil.v("Unstable! resetting");
-            //if unstable, reset everything and color unstable
-            overlayRectangleColor = RECTANGLE_COLOR_UNSTABLE;
             rectangleStability = RECTANGLE_UNSTABLE;
             stableStartMS = 0;
         }else{
             if(rectangleStability == RECTANGLE_UNSTABLE){
+                //transitioning unstable -> stable; update status and start timer
                 BoofLogUtil.v("Transition unstable -> stable");
-                //if transitioning from unstable -> stable, color as stable and start timer
-                overlayRectangleColor = RECTANGLE_COLOR_STABLE;
                 rectangleStability = RECTANGLE_STABLE;
                 stableStartMS = System.currentTimeMillis();
-            }else{
-                BoofLogUtil.v("Maintaining stable -> stable");
-                //if stable -> stable, check if enough time has elapsed
+            }else if(rectangleStability == RECTANGLE_STABLE){
+                //maintaining stability; check how long it has been stable
                 long stableTime = System.currentTimeMillis() - stableStartMS;
-                rectangleStability = RECTANGLE_STABLE;
-                overlayRectangleColor = (stableTime > RECTANGLE_FOUND_THRESHOLD) ? RECTANGLE_COLOR_FOUND : RECTANGLE_COLOR_STABLE;
+                if(stableTime > RECTANGLE_FOUND_THRESHOLD){
+                    //transitioning stable -> found; update status
+                    BoofLogUtil.v("Transitioning stable -> found");
+                    rectangleStability = RECTANGLE_FOUND;
+                    doNotifyListeners = true;
+                }
             }
+        }
+
+        int overlayRectangleColor;
+        switch(rectangleStability){
+            case RECTANGLE_UNSTABLE:
+                overlayRectangleColor = RECTANGLE_COLOR_UNSTABLE;
+                break;
+            case RECTANGLE_STABLE:
+                overlayRectangleColor = RECTANGLE_COLOR_STABLE;
+                break;
+            case RECTANGLE_FOUND:
+                overlayRectangleColor = RECTANGLE_COLOR_FOUND;
+                break;
+            default:
+                overlayRectangleColor = Color.BLACK;
         }
         //-------------------------
 
         bitmapOverlay.eraseColor(Color.argb(0,0,0,0));
 
-        if(rectCurrent == null){ return; }
+        if(rectCurrent == null){ return true; }
         List<Point2D_F32> pointsAsPercent = rectCurrent.getPointsAsPercent();
-        if(pointsAsPercent == null){ return; }
+        if(pointsAsPercent == null){ return true; }
 
         // Debug output
         //-------------------------
@@ -346,25 +378,33 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         didPrepareOutput = true;
         outputImageW = finalW;
         outputImageH = finalH;
+
+        if(doNotifyListeners){
+            this.notifyListeners();
+        }
         //-------------------------
+
+        //do not request next frame if listeners were just notified
+        return !doNotifyListeners;
     }
 
     // CCCameraImageProcessor
     //====================================================================
     @Override
-    public void setPreviewBytes(byte[] dataOriginal, int rotation) {
+    public boolean setPreviewBytes(byte[] dataOriginal, int rotation) {
         DEBUG_OUTPUT("Received bytes! (Rotation angle: " + rotation + ")");
         DEBUG_OUTPUT("- didReceiveImageParams = " + didReceiveImageParams);
         DEBUG_OUTPUT("- didPrepareRenderScript = " + didPrepareRenderScript);
 
-        if(!didReceiveImageParams){ return; }
-        if(!didPrepareRenderScript){ return; }
+        if(!didReceiveImageParams){ return true; }
+        if(!didPrepareRenderScript){ return true; }
 
         //original YUV -> rotated/scaled bitmapTransform -> GrayU8
         convertYUVToRGB(bitmapOriginal, dataOriginal);
-        generatePreviewAndOutput(bitmapOriginal, rotation);
+        boolean requestNextFrame = generatePreviewAndOutput(bitmapOriginal, rotation);
 
         this.invalidate();
+        return requestNextFrame;
     }
 
     protected void onDraw(Canvas canvas) {

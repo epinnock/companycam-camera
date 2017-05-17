@@ -22,6 +22,8 @@ public class DocScanUtil {
 	private	DetectLineHoughPolar<GrayU8,GrayS16> lineDetector;
 
 	//keep this around for debug rendering
+	private List<LineParametric2D_F32> linesV;
+	private List<LineParametric2D_F32> linesH;
 	private List<LineParametric2D_F32> linesAll;
 
 
@@ -71,8 +73,8 @@ public class DocScanUtil {
 		//------------------------------------
 		long startSort = System.currentTimeMillis();
 
-		List<LineParametric2D_F32> linesV = new LinkedList<LineParametric2D_F32>();
-		List<LineParametric2D_F32> linesH = new LinkedList<LineParametric2D_F32>();
+		linesV = new LinkedList<LineParametric2D_F32>();
+		linesH = new LinkedList<LineParametric2D_F32>();
 		for(LineParametric2D_F32 line : linesAll){
 			float angle = line.getAngle();
 			float absx = (float)Math.abs(Math.cos(angle));

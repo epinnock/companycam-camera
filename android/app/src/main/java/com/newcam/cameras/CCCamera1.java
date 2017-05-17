@@ -42,7 +42,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
     private static String TAG = CCCamera1.class.getSimpleName();
 
-    private static final int MAX_DIM_SCANNER_OUTPUT = 1024;
+    private static final int MAX_DIM_PROCESSING_OUTPUT = 1024;
 
     // The mCamera is the reference to the current camera and the mCameraId is the id of that camera
     private Camera mCamera;
@@ -78,10 +78,50 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
     // The mDefaultParams is a default set of camera parameters that can be accessed to avoid errors in the event that the call to getParameters() fails.
     private Camera.Parameters mDefaultParams;
 
-    public CCCamera1(Context context, CCCameraView cameraView, CCCameraImageProcessor ccImageProcessor) {
+    public CCCamera1(Context context, CCCameraView cameraView, final CCCameraImageProcessor ccImageProcessor) {
         super(context, cameraView);
 
         this.ccImageProcessor = ccImageProcessor;
+        if(ccImageProcessor != null) {
+            ccImageProcessor.setListener(new CCCameraImageProcessor.ImageProcessorListener() {
+                @Override
+                public void receiveResult() {
+                    mCamera.setPreviewCallbackWithBuffer(null);
+
+                    Bitmap bPhoto = ccImageProcessor.getOutputImage();
+                    if (bPhoto == null) {
+                        return;
+                    }
+
+                    File photo = getPhotoPath();
+                    if (photo.exists()) {
+                        photo.delete();
+                    }
+
+                    try {
+                        FileOutputStream out = new FileOutputStream(photo.getPath());
+                        BufferedOutputStream bos = new BufferedOutputStream(out);
+                        bPhoto.compress(Bitmap.CompressFormat.JPEG, HIGH_QUALITY, bos);
+                        int imgWidth = bPhoto.getWidth();
+                        int imgHeight = bPhoto.getHeight();
+
+                        bos.flush();
+                        bos.close();
+                        out.close();
+
+                        gotoEditPhotoCapture(photo.getPath(), imgWidth, imgHeight);
+
+                        try {
+                            ExifUtils.setAttributes(photo, mCameraView.getExifLocation(), mFlashMode);
+                        } catch (IOException e) {
+                            LogUtil.e(TAG, e.getLocalizedMessage());
+                        }
+                    } catch (IOException e) {
+                        LogUtil.e(TAG, e.getLocalizedMessage());
+                    }
+                }
+            });
+        }
 
         // Start the camera preview
         startCamera();
@@ -1318,11 +1358,11 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             Camera.Parameters param = safeGetParameters(mCamera, "surfaceChanged()");
             LogUtil.d(TAG, "Preparing setPreviewCallbackWithBuffer");
 
-            if (ccImageProcessor != null) {
+            if (ccImageProcessor != null && mCamera != null) {
                 int containerWidth = mCameraView.getWidth();
                 int containerHeight = mCameraView.getHeight();
                 System.out.println("[CCAM] CONTAINER SIZE: (" + containerWidth + ", " + containerHeight + ")");
-                ccImageProcessor.setImageParams(mPreviewWidth, mPreviewHeight, containerWidth, containerHeight, MAX_DIM_SCANNER_OUTPUT);
+                ccImageProcessor.setImageParams(mPreviewWidth, mPreviewHeight, containerWidth, containerHeight, MAX_DIM_PROCESSING_OUTPUT);
 
                 int videoBufferSize = mPreviewWidth * mPreviewHeight * ImageFormat.getBitsPerPixel(param.getPreviewFormat()) / 8;
                 byte[] videoBuffer = new byte[videoBufferSize];
@@ -1332,8 +1372,10 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 mCamera.addCallbackBuffer(videoBuffer);
                 mCamera.setPreviewCallbackWithBuffer(new Camera.PreviewCallback() {
                     public void onPreviewFrame(byte[] data, Camera camera) {
-                        ccImageProcessor.setPreviewBytes(data, _this.getCameraDisplayOrientation());
-                        mCamera.addCallbackBuffer(data);
+                        boolean requestNextFrame = ccImageProcessor.setPreviewBytes(data, _this.getCameraDisplayOrientation());
+                        if(requestNextFrame && mCamera != null) {
+                            mCamera.addCallbackBuffer(data);
+                        }
                     }
                 });
             } else {
