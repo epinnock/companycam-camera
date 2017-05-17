@@ -234,27 +234,27 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
         float dist = PerspectiveRect.maxScreenSpacePointDistance(rectPrevious1, rectPrevious2);
         boolean isStable = !Float.isNaN(dist) && (dist < RECT_STABILITY_THRESHOLD);
 
-        BoofLogUtil.d("COMPARING: ");
-        BoofLogUtil.d("- dist: " + dist);
-        BoofLogUtil.d("- isNaN: " + Float.isNaN(dist));
-        BoofLogUtil.d("- isStable: " + isStable);
-        BoofLogUtil.d("- timer: " + stableStartMS);
+        BoofLogUtil.v("COMPARING RECTS: ");
+        BoofLogUtil.v("- dist: " + dist);
+        BoofLogUtil.v("- isNaN: " + Float.isNaN(dist));
+        BoofLogUtil.v("- isStable: " + isStable);
+        BoofLogUtil.v("- timer: " + stableStartMS);
 
         if(!isStable){
-            BoofLogUtil.d("Unstable! resetting");
+            BoofLogUtil.v("Unstable! resetting");
             //if unstable, reset everything and color unstable
             overlayRectangleColor = RECTANGLE_COLOR_UNSTABLE;
             rectangleStability = RECTANGLE_UNSTABLE;
             stableStartMS = 0;
         }else{
             if(rectangleStability == RECTANGLE_UNSTABLE){
-                BoofLogUtil.d("Transition unstable -> stable");
+                BoofLogUtil.v("Transition unstable -> stable");
                 //if transitioning from unstable -> stable, color as stable and start timer
                 overlayRectangleColor = RECTANGLE_COLOR_STABLE;
                 rectangleStability = RECTANGLE_STABLE;
                 stableStartMS = System.currentTimeMillis();
             }else{
-                BoofLogUtil.d("Maintaining stable -> stable");
+                BoofLogUtil.v("Maintaining stable -> stable");
                 //if stable -> stable, check if enough time has elapsed
                 long stableTime = System.currentTimeMillis() - stableStartMS;
                 rectangleStability = RECTANGLE_STABLE;
