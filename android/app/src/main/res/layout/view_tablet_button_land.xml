@@ -24,6 +24,34 @@
             android:orientation="vertical"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:id="@+id/aux_layout"
+            android:visibility="visible"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:gravity="bottom|center_horizontal">
+
+            <com.notagilx.companycam.util.views.VerticalTextView
+                android:id="@+id/aux_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="AUX"
+                android:textColor="@android:color/white"
+                android:fontFamily="sans-serif-light"
+                android:gravity="bottom"/>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/mode_icon"
+                android:id="@+id/aux_selected_icon"
+                android:layout_margin="10dp"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:id="@+id/scanner_layout"
             android:visibility="visible"
             android:layout_marginLeft="10dp"

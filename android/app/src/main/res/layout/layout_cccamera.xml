@@ -460,6 +460,32 @@
                     android:fontFamily="sans-serif-light"/>
 
             </LinearLayout>
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_height="wrap_content"
+                android:layout_width="100dp"
+                android:gravity="center_horizontal"
+                android:id="@+id/aux_layout"
+                android:visibility="visible">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/mode_icon"
+                    android:id="@+id/aux_selected_icon"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="5dp"/>
+
+                <TextView
+                    android:id="@+id/aux_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="AUX"
+                    android:textColor="@android:color/white"
+                    android:fontFamily="sans-serif-light"/>
+
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 
