@@ -162,7 +162,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             (ipAllocatedPreviewHeight == mPreviewHeight)
         );
         if(alreadyDone){
-            ipDebugLog("Already ");
+            ipDebugLog("Already allocated with preview size (" + mPreviewWidth + ", " + mPreviewHeight + ")");
             return true;
         }
 
@@ -233,6 +233,9 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             ipStartCapturing();
         }else{
             ipStopCapturing();
+            if(ccImageProcessor != null){
+                ccImageProcessor.clearVisiblePreview();
+            }
         }
     }
     //========================================================================
@@ -1129,9 +1132,13 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 mCamera.setOneShotPreviewCallback(mPreviewCallback);
             }
             else {
-
                 // Start the auto focus after the exposure is complete.
                 mCamera.autoFocus(mAutoFocusCallback);
+
+                // Restart the scanner if necessary (one shot preview callback drops the scanner's callback)
+                if(mCameraMode.equals("scanner")) {
+                    ipStartCapturing();
+                }
             }
         }
     };

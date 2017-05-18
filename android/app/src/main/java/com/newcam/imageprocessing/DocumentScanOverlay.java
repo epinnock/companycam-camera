@@ -391,6 +391,17 @@ public class DocumentScanOverlay extends View implements CCCameraImageProcessor 
     // CCCameraImageProcessor
     //====================================================================
     @Override
+    public void clearVisiblePreview() {
+        DEBUG_OUTPUT("Clearing visible preview!");
+
+        didPrepareOverlay = false;
+        if(bitmapOverlay != null) {
+            bitmapOverlay.eraseColor(Color.argb(0,0,0,0));
+        }
+        this.invalidate();
+    }
+
+    @Override
     public boolean setPreviewBytes(byte[] dataOriginal, int rotation) {
         DEBUG_OUTPUT("Received bytes! (Rotation angle: " + rotation + ")");
         DEBUG_OUTPUT("- didReceiveImageParams = " + didReceiveImageParams);

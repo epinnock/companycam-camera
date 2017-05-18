@@ -16,6 +16,7 @@ public interface CCCameraImageProcessor {
 
     public void setImageParams(int widthOrig, int heightOrig, int widthContainer, int heightContainer, int MAX_OUTPUT_DIM);
     public boolean setPreviewBytes(byte[] data, int rotation);
+    public void clearVisiblePreview();
 
     public Bitmap getOutputImage();
 }
