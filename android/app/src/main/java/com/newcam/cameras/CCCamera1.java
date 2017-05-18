@@ -1057,9 +1057,22 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                     int minExposure = params.getMinExposureCompensation();
                     int maxExposure = params.getMaxExposureCompensation();
 
-                    // Check if this device can use auto exposure or if the custom exposure routine will be used.  If the camera supports
-                    // spot metering, then the max number of metering areas should be greater than 0.
-                    if (params.getMaxNumMeteringAreas() > 0) {
+                    // Try to use the custom exposure routine.  The camera can support direct manipulation of the exposure value if
+                    // the min and max exposure compensation values aren't both zero.  The auto focus will be called after
+                    // after the custom exposure is complete if the device supports auto focus
+                    if (!(minExposure == 0 && maxExposure == 0)) {
+
+                        // Record this touch point and attach a callback to get the next camera frame.
+                        mLastNormalizedTouchPoint = nsc;
+
+                        // Reset the number of exposure attempts and add a preview callback to return the next camera preview frame.
+                        numExposureAttempts = 0;
+                        mCamera.setOneShotPreviewCallback(mPreviewCallback);
+                    }
+
+                    // Check if this device can use auto exposure.  If the camera supports spot metering, then the max number of
+                    // metering areas should be greater than 0.
+                    else if (params.getMaxNumMeteringAreas() > 0) {
 
                         LogUtil.e(TAG, "num metering areas > 0");
 
@@ -1071,66 +1084,12 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                         mCamera.autoFocus(mAutoFocusCallback);
                     }
 
-                    // Use the custom exposure routine if the device doesn't support auto exposure.  The camera can support direct manipulation
-                    // of the exposure value if the min and max exposure compensation values aren't both zero.  The auto focus will be called after
-                    // after the custom exposure is complete if the device supports auto focus
-                    else if (!(minExposure == 0 && maxExposure == 0)) {
-
-                        // Set the focus region
-                        if (params.getMaxNumFocusAreas() > 0) {
-
-                            LogUtil.e(TAG, "num focus areas > 0");
-
-                            params.setFocusAreas(meteringAreas);
-                            safeSetParameters(mCamera, params, "handleFocus()");
-                        }
-
-                        // Record this touch point and attach a callback to get the next camera frame.
-                        mLastNormalizedTouchPoint = nsc;
-
-                        // Reset the number of exposure attempts and add a preview callback to return the next camera preview frame.
-                        numExposureAttempts = 0;
-                        mCamera.setOneShotPreviewCallback(mPreviewCallback);
-                    }
-
                     // If the camera doesn't support auto exposure or setting the exposure directly, then simply focus the camera
                     else {
 
                         // Start the focus
                         mCamera.autoFocus(mAutoFocusCallback);
                     }
-
-
-                    /*if (params.getMaxNumFocusAreas() > 0) {
-
-                        LogUtil.e(TAG, "num focus areas > 0");
-
-                        params.setFocusAreas(meteringAreas);
-                        safeSetParameters(mCamera, params, "handleFocus()");
-                    }
-
-                    // Set the metering area for the camera
-                    if (params.getMaxNumMeteringAreas() > 5) {
-
-                        LogUtil.e(TAG, "num metering areas > 0");
-
-                        params.setMeteringAreas(meteringAreas);
-                        safeSetParameters(mCamera, params, "handleFocus()");
-                    }
-                    else {
-
-                        // Record this touch point and attach a callback to get the next camera frame.
-                        mLastNormalizedTouchPoint = nsc;
-
-                        lastExposureValue = -1;
-                        numExposureAttempts = 0;
-
-                        mCamera.setOneShotPreviewCallback(mPreviewCallback);
-
-                    }*/
-
-                    // Start the focus
-                    //mCamera.autoFocus(mAutoFocusCallback);
 
                     // Show the mFocusIndicatorView
                     mCameraView.mCameraLayout.showAutoFocusIndicator(x, y, true);
