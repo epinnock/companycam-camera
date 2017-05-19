@@ -42,6 +42,8 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
     private static String TAG = CCCamera1.class.getSimpleName();
 
+    private static final String SCANNER_INSTRUCTIONS = "Hold camera steady over the document.\nYour photo will be taken automatically.";
+
     // The mCamera is the reference to the current camera and the mCameraId is the id of that camera
     private Camera mCamera;
     private int mCameraId;
@@ -230,8 +232,10 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
         ipDebugLog("[persistCameraMode] " + cameraMode);
         if(cameraMode.equals("scanner")){
+            mCameraView.setInstructions(SCANNER_INSTRUCTIONS);
             ipStartCapturing();
         }else{
+            mCameraView.setInstructions("");
             ipStopCapturing();
             if(ccImageProcessor != null){
                 ccImageProcessor.clearVisiblePreview();

@@ -69,6 +69,9 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
     private LinearLayout mLabelTouchTarget;
     private LinearLayout mLabelTouchTargetLand;
 
+    // mLabelInstructions is used to display any instructions to the user
+    private TextView mInstructions;
+
     // The mBottomLayout contains the camera buttons and camera mode labels
     private LinearLayout mBottomLayout;
 
@@ -157,6 +160,13 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         }
     }
 
+    @Override
+    public void setInstructionsText(String text){
+        if(mInstructions != null){
+            mInstructions.setText(text);
+        }
+    }
+
     public void init(Context context) {
 
         mContext = context;
@@ -169,6 +179,9 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         mPlaceAddress = (TextView) findViewById(R.id.place_address);
         mLabelTouchTarget = (LinearLayout) findViewById(R.id.label_touch_target);
         mLabelTouchTargetLand = (LinearLayout) findViewById(R.id.label_touch_target_land);
+
+        mInstructions = (TextView) findViewById(R.id.label_instructions);
+
         mToggleResolution = (ImageButton) findViewById(R.id.toggle_resolution);
         mToggleFlash = (ImageButton) findViewById(R.id.toggle_flash);
         mCloseButton = (ImageButton) findViewById(R.id.close_button);
@@ -272,6 +285,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         // Set the place name and aux mode labels--will be updated when props are received
         mPlaceName.setText("Location");
         mAuxLabel.setText("Aux Mode");
+        mInstructions.setText("");
 
         // Set the button orientations for the resolution layout
         setupResolutionLayout();
@@ -785,6 +799,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         // FastCam mode
         if (cameraMode.equals("fastcam")) {
             mCaptureButton.setImageResource(R.drawable.fast_cam_icon);
+            mCaptureButton.setVisibility(View.VISIBLE);
 
             mFastCamIndicator.setVisibility(View.VISIBLE);
             mFastCamLabel.setTextColor(getResources().getColor(R.color.sun_yellow));
@@ -798,6 +813,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         // Camera mode
         if (cameraMode.equals("camera")) {
             mCaptureButton.setImageResource(R.drawable.snap_icon);
+            mCaptureButton.setVisibility(View.VISIBLE);
 
             mCameraIndicator.setVisibility(View.VISIBLE);
             mCameraLabel.setTextColor(getResources().getColor(R.color.sun_yellow));
@@ -810,7 +826,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
 
         // Scanner mode
         if (cameraMode.equals("scanner")) {
-            mCaptureButton.setImageResource(R.drawable.snap_icon); //TODO?
+            mCaptureButton.setVisibility(View.INVISIBLE);
 
             mScannerIndicator.setVisibility(View.VISIBLE);
             mScannerLabel.setTextColor(getResources().getColor(R.color.sun_yellow));

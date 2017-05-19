@@ -39,7 +39,7 @@ public class DocScanUtil {
 		//Maximum number of lines to return.
 		int maxLines = 1000;
 		//Minimum number of counts for detected line.
-		int minCounts = 30;
+		int minCounts = 60;
 		//Resolution of line angle in radius.
 		double resolutionAngle = Math.PI / 180;
 		//Resolution of line range in pixels.

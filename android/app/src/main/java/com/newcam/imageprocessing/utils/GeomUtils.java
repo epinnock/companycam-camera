@@ -136,7 +136,7 @@ public class GeomUtils {
 	// (in other words, the line needs to cut across horizontally, or at least nearly do so)
 	// sortLinesByAreaToLeft discards lines in an analogous way.
 	//==========================================================
-	private static final float LINE_DISCARD_THRESHOLD = 0.75f;
+	private static final float LINE_DISCARD_THRESHOLD = 0.7f;
 
 	public static class LineWithArea{
 		public LineParametric2D_F32 line;
