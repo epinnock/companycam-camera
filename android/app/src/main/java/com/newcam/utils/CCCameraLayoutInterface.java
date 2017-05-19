@@ -37,7 +37,4 @@ public interface CCCameraLayoutInterface {
 
     // This method hides the auto focus indicator view
     void hideAutoFocusIndicator();
-
-    // Set instructions
-    void setInstructionsText(String text);
 }

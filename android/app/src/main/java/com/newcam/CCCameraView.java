@@ -182,10 +182,6 @@ public class CCCameraView extends RelativeLayout {
         //finishWithResult("label"); //TODO: temporarily disabled
     }
 
-    public void setInstructions(String text){
-        mCameraLayout.setInstructionsText(text);
-    }
-
     public void finishWithError(String errmsg){
         releaseCamera();
         propOnClose(errmsg, "error");

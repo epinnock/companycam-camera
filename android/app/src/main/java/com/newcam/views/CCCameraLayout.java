@@ -34,6 +34,8 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
 
     private static String TAG = CCCameraLayout.class.getSimpleName();
 
+    private static final String SCANNER_INSTRUCTIONS = "Hold camera steady over the document.\nYour photo will be taken automatically.";
+
     public Context mContext;
 
     // The CCCamera object maintains a reference to the camera and implements the necessary camera API methods
@@ -160,8 +162,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         }
     }
 
-    @Override
-    public void setInstructionsText(String text){
+    private void setInstructionsText(String text){
         if(mInstructions != null){
             mInstructions.setText(text);
         }
@@ -800,6 +801,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         if (cameraMode.equals("fastcam")) {
             mCaptureButton.setImageResource(R.drawable.fast_cam_icon);
             mCaptureButton.setVisibility(View.VISIBLE);
+            setInstructionsText("");
 
             mFastCamIndicator.setVisibility(View.VISIBLE);
             mFastCamLabel.setTextColor(getResources().getColor(R.color.sun_yellow));
@@ -814,6 +816,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         if (cameraMode.equals("camera")) {
             mCaptureButton.setImageResource(R.drawable.snap_icon);
             mCaptureButton.setVisibility(View.VISIBLE);
+            setInstructionsText("");
 
             mCameraIndicator.setVisibility(View.VISIBLE);
             mCameraLabel.setTextColor(getResources().getColor(R.color.sun_yellow));
@@ -827,7 +830,8 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         // Scanner mode
         if (cameraMode.equals("scanner")) {
             mCaptureButton.setVisibility(View.INVISIBLE);
-
+            setInstructionsText(SCANNER_INSTRUCTIONS);
+            
             mScannerIndicator.setVisibility(View.VISIBLE);
             mScannerLabel.setTextColor(getResources().getColor(R.color.sun_yellow));
             mScannerLabel.setAlpha(1.0f);
