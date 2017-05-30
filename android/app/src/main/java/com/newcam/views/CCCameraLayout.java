@@ -73,6 +73,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
 
     // mLabelInstructions is used to display any instructions to the user
     private TextView mInstructions;
+    private TextView mInstructionsLand;
 
     // The mBottomLayout contains the camera buttons and camera mode labels
     private LinearLayout mBottomLayout;
@@ -166,6 +167,9 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         if(mInstructions != null){
             mInstructions.setText(text);
         }
+        if(mInstructionsLand != null){
+            mInstructionsLand.setText(text);
+        }
     }
 
     public void init(Context context) {
@@ -180,8 +184,8 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         mPlaceAddress = (TextView) findViewById(R.id.place_address);
         mLabelTouchTarget = (LinearLayout) findViewById(R.id.label_touch_target);
         mLabelTouchTargetLand = (LinearLayout) findViewById(R.id.label_touch_target_land);
-
         mInstructions = (TextView) findViewById(R.id.label_instructions);
+        mInstructionsLand = (TextView) findViewById(R.id.label_instructions_land);
 
         mToggleResolution = (ImageButton) findViewById(R.id.toggle_resolution);
         mToggleFlash = (ImageButton) findViewById(R.id.toggle_flash);

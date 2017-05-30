@@ -22,57 +22,126 @@
     </com.notagilx.companycam.util.views.FocusIndicatorView>
 
     <LinearLayout
-        android:id="@+id/label_touch_target"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:textAlignment="center"
-        android:gravity="center_vertical|center_horizontal"
-        android:layout_height="50dp"
-        android:layout_weight="1">
+        android:layout_height="wrap_content"
+        >
 
-        <TextView
-            android:id="@+id/place_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Test Project"
-            android:textColor="@android:color/white"/>
+        <LinearLayout
+            android:id="@+id/label_touch_target"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:textAlignment="center"
+            android:gravity="center_vertical|center_horizontal"
+            android:layout_height="50dp"
+            android:layout_weight="1">
 
-        <TextView
-            android:id="@+id/place_address"
-            android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/place_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Test Project"
+                android:textColor="@android:color/white"/>
+
+            <TextView
+                android:id="@+id/place_address"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="123 Test Street"
+                android:textColor="@android:color/white"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="123 Test Street"
-            android:textColor="@android:color/white"
-            android:visibility="gone"/>
+            >
+
+            <LinearLayout
+                android:id="@+id/label_instructions_wrapper"
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:textAlignment="center"
+                android:gravity="center_vertical|center_horizontal"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/label_instructions"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hold camera steady over the document.\nYour photo will be taken automatically."
+                    android:textColor="@android:color/white"/>
+
+            </LinearLayout>
+        </LinearLayout>
 
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/label_touch_target_land"
         android:orientation="horizontal"
-        android:layout_width="50dp"
-        android:textAlignment="center"
-        android:gravity="center_vertical|center_horizontal"
+        android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:layout_alignParentRight="true">
+        android:layout_alignParentRight="true"
+        >
 
-        <com.notagilx.companycam.util.views.VerticalTextView
-            android:id="@+id/place_name_land"
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Test Project"
-            android:textColor="@android:color/white"
-            android:gravity="bottom"/>
+            android:layout_height="match_parent"
+            android:layout_alignParentRight="true"
+            >
 
-        <com.notagilx.companycam.util.views.VerticalTextView
-            android:id="@+id/place_address_land"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="123 Test Street"
-            android:textColor="@android:color/white"
-            android:visibility="gone"
-            android:gravity="bottom"/>
+            <LinearLayout
+                android:id="@+id/label_instructions_wrapper_land"
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:textAlignment="center"
+                android:gravity="center_vertical|center_horizontal"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <com.notagilx.companycam.util.views.VerticalTextView
+                    android:id="@+id/label_instructions_land"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hold camera steady over the document.\nYour photo will be taken automatically."
+                    android:textColor="@android:color/white"
+                    android:gravity="bottom"/>
+
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/label_touch_target_land"
+            android:orientation="horizontal"
+            android:layout_width="50dp"
+            android:textAlignment="center"
+            android:gravity="center_vertical|center_horizontal"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_alignParentRight="true">
+
+            <com.notagilx.companycam.util.views.VerticalTextView
+                android:id="@+id/place_name_land"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Test Project"
+                android:textColor="@android:color/white"
+                android:gravity="bottom"/>
+
+            <com.notagilx.companycam.util.views.VerticalTextView
+                android:id="@+id/place_address_land"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="123 Test Street"
+                android:textColor="@android:color/white"
+                android:visibility="gone"
+                android:gravity="bottom"/>
+
+        </LinearLayout>
 
     </LinearLayout>
 
