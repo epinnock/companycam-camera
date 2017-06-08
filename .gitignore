@@ -42,3 +42,4 @@ android/app/libs
 *.keystore
 
 android/app/src/main/jniLibs
+.externalNativeBuild
