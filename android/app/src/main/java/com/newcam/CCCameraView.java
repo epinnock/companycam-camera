@@ -1,13 +1,9 @@
 package com.newcam;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraManager;
 import android.location.Location;
 import android.support.v4.content.ContextCompat;
 import android.view.MotionEvent;
@@ -26,7 +22,7 @@ import com.newcam.cameras.CCCamera;
 import com.newcam.cameras.CCCamera1;
 import com.newcam.cameras.CCCamera2;
 import com.newcam.imageprocessing.CCCameraImageProcessor;
-import com.newcam.imageprocessing.DocumentScanOverlay;
+import com.newcam.imageprocessing.DocScanOpenCV;
 import com.newcam.utils.AppPreferences;
 import com.newcam.utils.CameraCheck;
 import com.newcam.views.CCCameraLayout;
@@ -93,7 +89,7 @@ public class CCCameraView extends RelativeLayout {
             RelativeLayout.LayoutParams newParams = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             this.addView(mCameraLayout, newParams);
 
-            DocumentScanOverlay dso = new DocumentScanOverlay(context);
+            DocScanOpenCV dso = new DocScanOpenCV(context);
             dso.setLayoutParams(newParams);
             dso.bringToFront();
             this.addView(dso);

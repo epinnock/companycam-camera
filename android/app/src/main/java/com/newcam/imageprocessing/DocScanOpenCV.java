@@ -62,6 +62,7 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
 
     @Override
     public boolean setPreviewBytes(byte[] data, int rotation) {
+        System.err.println("[CCAM DocScan] " + stringFromJNI());
         return false;
     }
 

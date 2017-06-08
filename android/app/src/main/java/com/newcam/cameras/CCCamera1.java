@@ -136,7 +136,9 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 ipStopCapturing();
 
                 Bitmap bPhoto = ccImageProcessor.getOutputImage();
-                forceNormalPhotoCapture(bPhoto);
+                if(bPhoto != null) {
+                    forceNormalPhotoCapture(bPhoto);
+                }
             }
         });
     }
