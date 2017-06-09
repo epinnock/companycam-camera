@@ -7,21 +7,15 @@
 
 class DocScanner
 {
-    int wResize;
-    int hResize;
-    float scaleResizeToOrig;
     cv::Mat imageResized;
     cv::Mat imageGray;
     cv::Mat imageBlur;
     cv::Mat imageEdges;
+    cv::Mat imageOutput;
 
 public:
     DocScanner();
     cv::Mat scan(const cv::Mat& imageOrig);
-    cv::Mat perspectiveTransform(
-        const cv::Mat& imageSource,
-        const geom::PerspectiveRect& rect);
-    cv::Mat findLines(const cv::Mat& imageOrig, std::vector<cv::Vec4i>& lines);
 };
 
 #endif

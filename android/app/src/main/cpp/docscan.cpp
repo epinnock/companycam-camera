@@ -11,30 +11,25 @@ DocScanner::DocScanner()
 
 }
 
-cv::Mat DocScanner::findLines(
-    const cv::Mat& imageOrig,
-    std::vector<cv::Vec4i>& lines)
+cv::Mat DocScanner::scan(const cv::Mat& imageOrig)
 {
     // Determine proportional working size
     //--------------------------------
-    int wOrig = imageOrig.cols;
-    int hOrig = imageOrig.rows;
+    const int wOrig = imageOrig.cols;
+    const int hOrig = imageOrig.rows;
 
-    float scaleX = (float)WORKING_SIZE/(float)wOrig;
-    float scaleY = (float)WORKING_SIZE/(float)hOrig;
-    float scale = (scaleX < scaleY) ? scaleX : scaleY;
-
-    //keep track of some info about most recent imageResized
-    this->wResize = (int)(scale * (float)wOrig);
-    this->hResize = (int)(scale * (float)hOrig);
-    this->scaleResizeToOrig = 1/scale;
+    const float scaleX = (float)WORKING_SIZE/(float)wOrig;
+    const float scaleY = (float)WORKING_SIZE/(float)hOrig;
+    const float scale = (scaleX < scaleY) ? scaleX : scaleY;
+    const int wResize = (int)(scale * (float)wOrig);
+    const int hResize = (int)(scale * (float)hOrig);
 
     // Resize, grayscale and blur
     //--------------------------------
     cv::resize(
         imageOrig,
         this->imageResized,
-        cv::Size(this->wResize,this->hResize),
+        cv::Size(wResize, hResize),
         0,
         0,
         CV_INTER_LINEAR);
@@ -45,18 +40,20 @@ cv::Mat DocScanner::findLines(
     //--------------------------------
     //threshold1 – first threshold for the hysteresis procedure.
     //threshold2 – second threshold for the hysteresis procedure.
-    double cannyThresh1 = 24;
-    double cannyThresh2 = 3*cannyThresh1;
+    const double cannyThresh1 = 24;
+    const double cannyThresh2 = 3*cannyThresh1;
     cv::Canny(this->imageBlur, this->imageEdges, cannyThresh1, cannyThresh2);
 
     // Hough
     //--------------------------------
+    std::vector<cv::Vec4i> lines;
+
     //threshold – Accumulator threshold parameter. Only those lines are returned that get enough votes ( >\texttt{threshold} ).
     //minLineLength – Minimum line length. Line segments shorter than that are rejected.
     //maxLineGap – Maximum allowed gap between points on the same line to link them.
-    int houghThreshold = 50;
-    double houghMinLength = 50;
-    double houghMaxGap = 40;
+    const int houghThreshold = 50;
+    const double houghMinLength = 50;
+    const double houghMaxGap = 40;
     cv::HoughLinesP(
         this->imageEdges,
         lines,
@@ -66,22 +63,24 @@ cv::Mat DocScanner::findLines(
         houghMinLength,
         houghMaxGap);
 
-    return this->imageResized;
-}
+    // Find perspective rect
+    //--------------------------------
+    const geom::PerspectiveRect rect = geom::rectFromLines(lines, wResize, hResize);
+    if (!rect.valid) {
+        //TODO
+        return this->imageResized;
+    }
 
-cv::Mat DocScanner::perspectiveTransform(
-    const cv::Mat& imageSource,
-    const geom::PerspectiveRect& rect)
-{
-    cv::Mat imageTransformed;
+    // Perspective correction
+    //--------------------------------
     const int outputW = 500 * rect.correctedWidth;
     const int outputH = 500 * rect.correctedHeight;
 
     std::vector<cv::Point2f> rectPerspective;
-    rectPerspective.push_back( rect.p00 * this->scaleResizeToOrig );
-    rectPerspective.push_back( rect.p01 * this->scaleResizeToOrig );
-    rectPerspective.push_back( rect.p11 * this->scaleResizeToOrig );
-    rectPerspective.push_back( rect.p10 * this->scaleResizeToOrig );
+    rectPerspective.push_back( rect.p00 / scale );
+    rectPerspective.push_back( rect.p01 / scale );
+    rectPerspective.push_back( rect.p11 / scale );
+    rectPerspective.push_back( rect.p10 / scale );
 
     std::vector<cv::Point2f> rectTarget;
     rectTarget.push_back( cv::Point2f(0,0) );
@@ -89,25 +88,12 @@ cv::Mat DocScanner::perspectiveTransform(
     rectTarget.push_back( cv::Point2f(outputW,outputH) );
     rectTarget.push_back( cv::Point2f(outputW,0) );
 
-    cv::Mat m = cv::getPerspectiveTransform(rectPerspective, rectTarget);
+    const cv::Mat m = cv::getPerspectiveTransform(rectPerspective, rectTarget);
     cv::warpPerspective(
-        imageSource,
-        imageTransformed,
+        imageOrig,
+        this->imageOutput,
         m,
-        cv::Size(outputW,outputH));
+        cv::Size(outputW, outputH));
 
-    return imageTransformed;
-}
-
-cv::Mat DocScanner::scan(const cv::Mat& imageOrig){
-
-    std::vector<cv::Vec4i> lines;
-    this->findLines(imageOrig, lines);
-
-    geom::PerspectiveRect rect = geom::rectFromLines(
-        lines,
-        this->wResize,
-        this->hResize);
-
-    return this->perspectiveTransform(imageOrig, rect);
+    return this->imageOutput;
 }

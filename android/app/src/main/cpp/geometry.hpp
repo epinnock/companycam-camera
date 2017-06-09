@@ -28,10 +28,10 @@ namespace geom
         const cv::Vec4i& l,
         int containerW,
         int containerH);
-    float computeAreaX(const cv::Vec4i& l, int containerW, int containerH);
-    float computeAreaY(const cv::Vec4i& l, int containerW, int containerH);
+    float computeAreaX(const cv::Vec4i& l, const int containerW, const int containerH);
+    float computeAreaY(const cv::Vec4i& l, const int containerW, const int containerH);
 
-    cv::Vec3f screenToRay(const cv::Point2f& p, int screenW, int screenH);
+    cv::Vec3f screenToRay(const cv::Point2f& p, const int screenW, const int screenH);
     float det3(const cv::Vec3f& u, const cv::Vec3f& v, const cv::Vec3f& w);
     PerspectiveRect invalidPerspectiveRect();
     PerspectiveRect perspectiveRectFromPoints(
@@ -39,12 +39,12 @@ namespace geom
         const cv::Point2f& p10,
         const cv::Point2f& p11,
         const cv::Point2f& p01,
-        int screenW,
-        int screenH);
+        const int screenW,
+        const int screenH);
     PerspectiveRect rectFromLines(
         const std::vector<cv::Vec4i>& lines,
-        int containerW,
-        int containerH);
+        const int containerW,
+        const int containerH);
 }
 
 #endif
