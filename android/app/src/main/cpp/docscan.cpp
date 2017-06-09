@@ -11,7 +11,9 @@ DocScanner::DocScanner()
 
 }
 
-cv::Mat DocScanner::findLines(const cv::Mat& imageOrig, std::vector<cv::Vec4i>& lines)
+cv::Mat DocScanner::findLines(
+    const cv::Mat& imageOrig,
+    std::vector<cv::Vec4i>& lines)
 {
     // Determine proportional working size
     //--------------------------------
@@ -21,13 +23,21 @@ cv::Mat DocScanner::findLines(const cv::Mat& imageOrig, std::vector<cv::Vec4i>& 
     float scaleX = (float)WORKING_SIZE/(float)wOrig;
     float scaleY = (float)WORKING_SIZE/(float)hOrig;
     float scale = (scaleX < scaleY) ? scaleX : scaleY;
-    float wResize = (int)(scale * (float)wOrig);
-    float hResize = (int)(scale * (float)hOrig);
+
+    //keep track of some info about most recent imageResized
+    this->wResize = (int)(scale * (float)wOrig);
+    this->hResize = (int)(scale * (float)hOrig);
     this->scaleResizeToOrig = 1/scale;
 
     // Resize, grayscale and blur
     //--------------------------------
-    cv::resize(imageOrig, this->imageResized, cv::Size(wResize,hResize), 0, 0, CV_INTER_LINEAR);
+    cv::resize(
+        imageOrig,
+        this->imageResized,
+        cv::Size(this->wResize,this->hResize),
+        0,
+        0,
+        CV_INTER_LINEAR);
     cv::cvtColor(this->imageResized, this->imageGray, CV_BGR2GRAY);
     cv::GaussianBlur(this->imageGray, this->imageBlur, cv::Size(9,9), 0, 0);
 
@@ -47,16 +57,25 @@ cv::Mat DocScanner::findLines(const cv::Mat& imageOrig, std::vector<cv::Vec4i>& 
     int houghThreshold = 50;
     double houghMinLength = 50;
     double houghMaxGap = 40;
-    cv::HoughLinesP(this->imageEdges, lines, 1, CV_PI/180, houghThreshold, houghMinLength, houghMaxGap);
+    cv::HoughLinesP(
+        this->imageEdges,
+        lines,
+        1,
+        CV_PI/180,
+        houghThreshold,
+        houghMinLength,
+        houghMaxGap);
 
     return this->imageResized;
 }
 
-cv::Mat DocScanner::perspectiveTransform(const cv::Mat& imageSource, const geom::PerspectiveRect& rect)
+cv::Mat DocScanner::perspectiveTransform(
+    const cv::Mat& imageSource,
+    const geom::PerspectiveRect& rect)
 {
     cv::Mat imageTransformed;
-    const int targetW = 800;
-    const int targetH = 500;
+    const int outputW = 500 * rect.correctedWidth;
+    const int outputH = 500 * rect.correctedHeight;
 
     std::vector<cv::Point2f> rectPerspective;
     rectPerspective.push_back( rect.p00 * this->scaleResizeToOrig );
@@ -66,12 +85,16 @@ cv::Mat DocScanner::perspectiveTransform(const cv::Mat& imageSource, const geom:
 
     std::vector<cv::Point2f> rectTarget;
     rectTarget.push_back( cv::Point2f(0,0) );
-    rectTarget.push_back( cv::Point2f(0,targetH) );
-    rectTarget.push_back( cv::Point2f(targetW,targetH) );
-    rectTarget.push_back( cv::Point2f(targetW,0) );
+    rectTarget.push_back( cv::Point2f(0,outputH) );
+    rectTarget.push_back( cv::Point2f(outputW,outputH) );
+    rectTarget.push_back( cv::Point2f(outputW,0) );
 
     cv::Mat m = cv::getPerspectiveTransform(rectPerspective, rectTarget);
-    cv::warpPerspective(imageSource, imageTransformed, m, cv::Size(targetW,targetH));
+    cv::warpPerspective(
+        imageSource,
+        imageTransformed,
+        m,
+        cv::Size(outputW,outputH));
 
     return imageTransformed;
 }
@@ -81,7 +104,10 @@ cv::Mat DocScanner::scan(const cv::Mat& imageOrig){
     std::vector<cv::Vec4i> lines;
     this->findLines(imageOrig, lines);
 
-    geom::PerspectiveRect rect = geom::rectFromLines(lines);
+    geom::PerspectiveRect rect = geom::rectFromLines(
+        lines,
+        this->wResize,
+        this->hResize);
 
     return this->perspectiveTransform(imageOrig, rect);
 }

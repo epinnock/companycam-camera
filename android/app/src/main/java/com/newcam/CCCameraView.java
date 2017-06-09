@@ -147,7 +147,10 @@ public class CCCameraView extends RelativeLayout {
 
     public Activity getActivity() {
         ThemedReactContext context = (ThemedReactContext)this.getContext();
-        return context.getCurrentActivity();
+
+        // TODO: For some reason getCurrentActivity no longer exists?
+        //return context.getCurrentActivity();
+        return null;
     }
 
     // This method returns a boolean that describes whether or not each of the necessary camera permissions has been granted.

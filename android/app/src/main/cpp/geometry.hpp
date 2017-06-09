@@ -13,6 +13,8 @@ namespace geom
 
     typedef struct {
         bool valid;
+        float correctedWidth;
+        float correctedHeight;
         cv::Point2f p00;
         cv::Point2f p10;
         cv::Point2f p11;
@@ -22,9 +24,27 @@ namespace geom
     LineOrientation getLineOrientation(const cv::Vec4i& l);
     cv::Point2f pointAlongLine(const cv::Vec4i& l, const float t);
     cv::Point2f intersectLines(const cv::Vec4i& l, const cv::Vec4i& m);
-    float computeAreaX(const cv::Vec4i& l);
-    float computeAreaY(const cv::Vec4i& l);
-    PerspectiveRect rectFromLines(const std::vector<cv::Vec4i>& lines);
+    float intersectHalfPlaneWithBox(
+        const cv::Vec4i& l,
+        int containerW,
+        int containerH);
+    float computeAreaX(const cv::Vec4i& l, int containerW, int containerH);
+    float computeAreaY(const cv::Vec4i& l, int containerW, int containerH);
+
+    cv::Vec3f screenToRay(const cv::Point2f& p, int screenW, int screenH);
+    float det3(const cv::Vec3f& u, const cv::Vec3f& v, const cv::Vec3f& w);
+    PerspectiveRect invalidPerspectiveRect();
+    PerspectiveRect perspectiveRectFromPoints(
+        const cv::Point2f& p00,
+        const cv::Point2f& p10,
+        const cv::Point2f& p11,
+        const cv::Point2f& p01,
+        int screenW,
+        int screenH);
+    PerspectiveRect rectFromLines(
+        const std::vector<cv::Vec4i>& lines,
+        int containerW,
+        int containerH);
 }
 
 #endif

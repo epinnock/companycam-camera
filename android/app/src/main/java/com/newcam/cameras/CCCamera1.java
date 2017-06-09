@@ -1,5 +1,6 @@
 package com.newcam.cameras;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -311,7 +312,8 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 new android.hardware.Camera.CameraInfo();
         android.hardware.Camera.getCameraInfo(cameraId, info);
 
-        int rotation = mCameraView.getActivity().getWindowManager().getDefaultDisplay().getRotation();
+        Activity activity = mCameraView.getActivity();
+        int rotation = (activity == null) ? Surface.ROTATION_0 : activity.getWindowManager().getDefaultDisplay().getRotation();
         int degrees = 0;
         switch (rotation) {
             case Surface.ROTATION_0: degrees = 0; break;
