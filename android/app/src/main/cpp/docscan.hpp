@@ -11,11 +11,15 @@ class DocScanner
     cv::Mat imageGray;
     cv::Mat imageBlur;
     cv::Mat imageEdges;
+
+    cv::Mat imageOutputContainer;
     cv::Mat imageOutput;
 
 public:
     DocScanner();
-    cv::Mat scan(const cv::Mat& imageOrig);
+    geom::PerspectiveRect scan(const cv::Mat& imageOrig, const bool doGenerateOutput);
+    cv::Mat getDebugImage();
+    cv::Mat getOutputImage();
 };
 
 #endif

@@ -22,7 +22,10 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
     }
 
     public native String stringFromJNI();
-    public native void nativeScan(int width, int height, byte yuv[], int[] rgba);
+
+    public native long newScanner();
+    public native void deleteScanner(long ptr);
+    public native void nativeScan(long ptr, int width, int height, byte yuv[], int[] rgba);
     //----------------------------------------------
 
     protected static void DEBUG_OUTPUT(String message){
@@ -44,12 +47,16 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
     protected Bitmap bitmapTransform;
     protected Canvas canvasTransform;
 
+    protected long docScanPtr;
+
 
     public DocScanOpenCV(Context context) {
         super(context);
         this.context = context;
 
         this.setBackgroundColor(Color.argb(0,0,0,0));
+
+        docScanPtr = newScanner();
     }
 
     // CCCameraImageProcessor stuff
@@ -125,7 +132,7 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
         int frameSize = widthOrig*heightOrig;
         int[] rgba = new int[frameSize];
 
-        nativeScan(widthOrig, heightOrig, data, rgba);
+        nativeScan(docScanPtr, widthOrig, heightOrig, data, rgba);
 
         bitmapFromNative.setPixels(rgba, 0, widthOrig, 0, 0, widthOrig, heightOrig);
         //----------------------------------

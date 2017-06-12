@@ -16,7 +16,7 @@ message(STATUS "opencv found: ${OpenCV_LIBS}")
 # You can define multiple libraries, and CMake builds them for you.
 # Gradle automatically packages shared libraries with your APK.
 
-file(GLOB_RECURSE sources src/main/cpp "*.cpp")
+file(GLOB_RECURSE sources "src/main/cpp/*.cpp")
 
 add_library( # Sets the name of the library.
              native-lib
@@ -52,3 +52,5 @@ target_link_libraries( # Specifies the target library.
                        # Links the target library to the log library
                        # included in the NDK.
                        ${log-lib} )
+
+set(CMAKE_CXX_FLAGS "-std=c++0x")

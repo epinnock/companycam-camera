@@ -26,10 +26,31 @@ Java_com_newcam_imageprocessing_DocScanOpenCV_stringFromJNI(JNIEnv *env, jobject
 //TODO from OpenCV sample
 //https://stackoverflow.com/questions/12695232/using-native-functions-in-android-with-opencv
 //----------------------------------
+JNIEXPORT jlong JNICALL
+Java_com_newcam_imageprocessing_DocScanOpenCV_newScanner(JNIEnv *env, jobject thiz)
+{
+    DocScanner* docScanPtr = new DocScanner();
+    return (jlong) docScanPtr;
+}
+
 JNIEXPORT void JNICALL
-Java_com_newcam_imageprocessing_DocScanOpenCV_nativeScan(JNIEnv *env, jobject thiz, jint width,
-                                                         jint height, jbyteArray yuv,
-                                                         jintArray bgra) {
+Java_com_newcam_imageprocessing_DocScanOpenCV_deleteScanner(JNIEnv *env, jobject thiz,
+                                                            jlong ptr)
+{
+    DocScanner* docScanPtr = (DocScanner*)ptr;
+    delete docScanPtr;
+}
+
+JNIEXPORT void JNICALL
+Java_com_newcam_imageprocessing_DocScanOpenCV_nativeScan(JNIEnv *env, jobject thiz,
+                                                         jlong ptr,
+                                                         jint width,
+                                                         jint height,
+                                                         jbyteArray yuv,
+                                                         jintArray bgra)
+{
+    if (!ptr) { return; }
+
     jbyte *_yuv = env->GetByteArrayElements(yuv, 0);
     jint *_bgra = env->GetIntArrayElements(bgra, 0);
 
@@ -40,12 +61,17 @@ Java_com_newcam_imageprocessing_DocScanOpenCV_nativeScan(JNIEnv *env, jobject th
     //ARGB stored in java as int array becomes BGRA at native level
     cvtColor(myuv, mbgra, CV_YUV420sp2BGR, 4);
 
-    DocScanner docScan;
-    cv::Mat imageResult = docScan.scan(mbgra);
+    DocScanner* docScanPtr = (DocScanner*)ptr;
 
-    int copyrows = imageResult.rows < mbgra.rows ? imageResult.rows : mbgra.rows;
-    int copycols = imageResult.cols < mbgra.cols ? imageResult.cols : mbgra.cols;
-    imageResult.copyTo(mbgra.rowRange(0,copyrows).colRange(0,copycols));
+    //geom::PerspectiveRect pRect = docScanPtr->scan(mbgra, false);
+    docScanPtr->scan(mbgra, true);
+
+    cv::Mat imageResult = docScanPtr->getOutputImage();
+    if(imageResult.rows > 0 && imageResult.cols > 0) {
+        int copyrows = imageResult.rows < mbgra.rows ? imageResult.rows : mbgra.rows;
+        int copycols = imageResult.cols < mbgra.cols ? imageResult.cols : mbgra.cols;
+        imageResult.copyTo(mbgra.rowRange(0, copyrows).colRange(0, copycols));
+    }
 
     env->ReleaseIntArrayElements(bgra, _bgra, 0);
     env->ReleaseByteArrayElements(yuv, _yuv, 0);

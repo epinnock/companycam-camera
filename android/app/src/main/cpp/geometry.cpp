@@ -1,5 +1,6 @@
-#include <opencv2/core/core.hpp>
 #include <math.h>
+
+#include <opencv2/core/core.hpp>
 
 #include "geometry.hpp"
 
@@ -184,7 +185,7 @@ namespace geom
         return rect;
     }
 
-    PerspectiveRect rectFromLines(
+    PerspectiveRect perspectiveRectFromLines(
         const std::vector<cv::Vec4i>& lines,
         const int containerW,
         const int containerH)
@@ -241,5 +242,19 @@ namespace geom
             p00, p10, p11, p01,
             containerW,
             containerH);
+    }
+
+    cv::Rect perspectiveRectBoundingBox(const PerspectiveRect& rect)
+    {
+        if (!rect.valid) {
+            return cv::Rect(0,0,0,0);
+        }
+
+        float minX = fmin(fmin(fmin(rect.p00.x, rect.p10.x), rect.p11.x), rect.p01.x);
+        float maxX = fmax(fmax(fmax(rect.p00.x, rect.p10.x), rect.p11.x), rect.p01.x);
+        float minY = fmin(fmin(fmin(rect.p00.y, rect.p10.y), rect.p11.y), rect.p01.y);
+        float maxY = fmax(fmax(fmax(rect.p00.y, rect.p10.y), rect.p11.y), rect.p01.y);
+
+        return cv::Rect(minX, minY, maxX-minX, maxY-minY);
     }
 }
