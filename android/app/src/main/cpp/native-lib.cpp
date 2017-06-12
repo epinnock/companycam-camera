@@ -8,24 +8,6 @@
 
 extern "C" {
 
-JNIEXPORT jstring JNICALL
-Java_com_newcam_imageprocessing_DocScanOpenCV_stringFromJNI(JNIEnv *env, jobject thiz) {
-
-    int x = 9;
-
-    cv::Mat mat;
-
-    DocScanner docScan;
-
-    std::ostringstream oss;
-    oss << "Hello 2 " << x;
-
-    return env->NewStringUTF(oss.str().c_str());
-}
-
-//TODO from OpenCV sample
-//https://stackoverflow.com/questions/12695232/using-native-functions-in-android-with-opencv
-//----------------------------------
 JNIEXPORT jlong JNICALL
 Java_com_newcam_imageprocessing_DocScanOpenCV_newScanner(JNIEnv *env, jobject thiz)
 {
@@ -41,6 +23,8 @@ Java_com_newcam_imageprocessing_DocScanOpenCV_deleteScanner(JNIEnv *env, jobject
     delete docScanPtr;
 }
 
+//Basic method for converting YUV->RGB and returning image data:
+//https://stackoverflow.com/questions/12695232/using-native-functions-in-android-with-opencv
 JNIEXPORT void JNICALL
 Java_com_newcam_imageprocessing_DocScanOpenCV_nativeScan(JNIEnv *env, jobject thiz,
                                                          jlong ptr,
@@ -76,6 +60,5 @@ Java_com_newcam_imageprocessing_DocScanOpenCV_nativeScan(JNIEnv *env, jobject th
     env->ReleaseIntArrayElements(bgra, _bgra, 0);
     env->ReleaseByteArrayElements(yuv, _yuv, 0);
 }
-//----------------------------------
 
 }

@@ -21,8 +21,6 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
         System.loadLibrary("native-lib");
     }
 
-    public native String stringFromJNI();
-
     public native long newScanner();
     public native void deleteScanner(long ptr);
     public native void nativeScan(long ptr, int width, int height, byte yuv[], int[] rgba);
@@ -119,8 +117,6 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
     public boolean setPreviewBytes(byte[] data, int rotation) {
         DEBUG_OUTPUT("Received bytes! (Rotation angle: " + rotation + ")");
         DEBUG_OUTPUT("- didReceiveImageParams = " + didReceiveImageParams);
-
-        System.err.println("[CCAM DocScan] " + stringFromJNI());
 
         if(!didReceiveImageParams){ return true; }
 
