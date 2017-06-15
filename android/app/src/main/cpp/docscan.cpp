@@ -1,6 +1,7 @@
 #include <math.h>
 #include <memory>
 #include <iostream>
+#include <chrono>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -8,36 +9,87 @@
 #include "docscan.hpp"
 #include "geometry.hpp"
 
-const int WORKING_SIZE = 384;
-const int MAX_OUTPUT_DIM = 1024;
+const int DEFAULT_WORKING_SIZE = 384;
+const int DEFAULT_MAX_OUTPUT_DIM = 1024;
+const float MAX_STABLE_DEVIATION_PCT = 0.03;
+const unsigned long REQUIRED_STABLE_DURATION_MS = 500;
 
-DocScanner::DocScanner()
-{
+DocScanner::DocScanner(const int optWorkingSize, const int optMaxOutputDim) :
+    optWorkingSize(optWorkingSize),
+    optMaxOutputDim(optMaxOutputDim),
+    didGenerateOutput(false),
+    timeLastUnstable(std::chrono::high_resolution_clock::now()),
+    pRect(geom::invalidPerspectiveRect())
+{ }
 
-}
+DocScanner::DocScanner() :
+    DocScanner(DEFAULT_WORKING_SIZE, DEFAULT_MAX_OUTPUT_DIM)
+{ }
 
-cv::Mat DocScanner::getDebugImage()
+cv::Mat DocScanner::getDebugImage() const
 {
     return imageResized;
 }
 
-cv::Mat DocScanner::getOutputImage()
+cv::Mat DocScanner::getOutputImage() const
 {
     return imageOutput;
 }
 
-geom::PerspectiveRect DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
+geom::PerspectiveRect getPerspectiveRect() const
+{
+    return pRect;
+}
+
+// This will keep track of successive scans, and determine whether the scan is
+// part of an uninterrupted sequence of successful scans.  Once enough time has
+// elapsed with only successful scans, the output image will be generated.
+DocScanner::ScanStatus DocScanner::smartScan(const cv::Mat& imageOrig)
+{
+    const auto timeNow = std::chrono::high_resolution_clock::now();
+
+    const geom::PerspectiveRect pRectOld = pRect;
+    scan(imageOrig, false);
+
+    bool isStable = false;
+    if (pRect.valid && pRectOld.valid) {
+        const float maxDeviation = optWorkingSize * MAX_STABLE_DEVIATION_PCT;
+        isStable = geom::dist(pRect, pRectOld) < maxDeviation;
+    }
+
+    if (!isStable) {
+        didGenerateOutput = false;
+        timeLastUnstable = timeNow;
+        return DocScanner::UNSTABLE;
+    }
+
+    const unsigned long msStable = std::chrono::duration_cast<std::chrono::milliseconds>(timeNow-timeLastUnstable).count();
+    if (msStable > REQUIRED_STABLE_DURATION_MS) {
+        if (!didGenerateOutput) {
+            scan(imageOrig, true);
+            didGenerateOutput = true;
+        }
+        return DocScanner::DONE;
+    } else {
+        return DocScanner::STABLE;
+    }
+}
+
+// Perform a single scan of imageOrig.  The results of getPerspectiveRect and
+// getDebugImage will be updated and correct, even if the scan is unsuccessful.
+// The result of getOutputImage will only be updated if doGenerateOutput == true.
+void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
 {
     // Determine proportional working size
     //--------------------------------
     const int wOrig = imageOrig.cols;
     const int hOrig = imageOrig.rows;
 
-    const float scaleX = (float)WORKING_SIZE/(float)wOrig;
-    const float scaleY = (float)WORKING_SIZE/(float)hOrig;
+    const float scaleX = (float)optWorkingSize/(float)wOrig;
+    const float scaleY = (float)optWorkingSize/(float)hOrig;
     const float scale = (scaleX < scaleY) ? scaleX : scaleY;
-    const int wResize = (int)(scale * (float)wOrig);
-    const int hResize = (int)(scale * (float)hOrig);
+    const int wResize = scale * wOrig;
+    const int hResize = scale * hOrig;
 
     // Resize, grayscale and blur
     //--------------------------------
@@ -87,9 +139,9 @@ geom::PerspectiveRect DocScanner::scan(const cv::Mat& imageOrig, const bool doGe
         cv::line(imageResized, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), colorRed, 1);
     }
 
-    const geom::PerspectiveRect pRect = geom::perspectiveRectFromLines(lines, wResize, hResize);
+    pRect = geom::perspectiveRectFromLines(lines, wResize, hResize);
     // Quit early if no perspective rect found
-    if (!pRect.valid) { return pRect; }
+    if (!pRect.valid) { return; }
 
     cv::line(imageResized, pRect.p00, pRect.p10, colorPink, 2);
     cv::line(imageResized, pRect.p10, pRect.p11, colorPink, 2);
@@ -99,13 +151,11 @@ geom::PerspectiveRect DocScanner::scan(const cv::Mat& imageOrig, const bool doGe
     // Perspective correction
     //--------------------------------
     // Only carry out this final step if requested
-    if (!doGenerateOutput) {
-        return pRect;
-    }
+    if (!doGenerateOutput) { return; }
 
-    // Don't bother creating image bigger than the bounding box; also limit to MAX_OUTPUT_DIM
+    // Don't bother creating image bigger than the bounding box; also limit to optMaxOutputDim
     cv::Rect rectBounds = perspectiveRectBoundingBox(pRect);
-    const float outputSize = fmin(MAX_OUTPUT_DIM, fmax(rectBounds.width, rectBounds.height) / scale);
+    const float outputSize = fmin(optMaxOutputDim, fmax(rectBounds.width, rectBounds.height) / scale);
 
     // Now scale the ratio [corrW:corrH] to have max dim 'outputSize'
     const float correctedScale = outputSize / fmax(pRect.correctedWidth, pRect.correctedHeight);
@@ -128,7 +178,7 @@ geom::PerspectiveRect DocScanner::scan(const cv::Mat& imageOrig, const bool doGe
     // Since this method will be called many times with different imageOutput
     // sizes, create a fixed-size imageOutputContainer which will *not* be
     // re-allocated every frame, and then write to an ROI of the desired size.
-    imageOutputContainer.create(cv::Size(MAX_OUTPUT_DIM,MAX_OUTPUT_DIM), imageOrig.type());
+    imageOutputContainer.create(cv::Size(optMaxOutputDim,optMaxOutputDim), imageOrig.type());
     cv::Rect outputTarget(0,0,outputW,outputH);
     imageOutput = imageOutputContainer(outputTarget);
 
@@ -138,6 +188,4 @@ geom::PerspectiveRect DocScanner::scan(const cv::Mat& imageOrig, const bool doGe
         imageOutput,
         perspectiveTransform,
         cv::Size(outputW, outputH));
-
-    return pRect;
 }

@@ -160,7 +160,12 @@ namespace geom
         const int screenW,
         const int screenH)
     {
-        PerspectiveRect rect = {true, 0, 0, p00, p10, p11, p01};
+        PerspectiveRect rect;
+        rect.valid = true;
+        rect.p00 = p00;
+        rect.p10 = p10;
+        rect.p11 = p11;
+        rect.p01 = p01;
 
         // Each point ti*vi will be a corner of the 3D rectangle
         const cv::Vec3f v0 = screenToRay(p00, screenW, screenH);
@@ -256,5 +261,31 @@ namespace geom
         float maxY = fmax(fmax(fmax(rect.p00.y, rect.p10.y), rect.p11.y), rect.p01.y);
 
         return cv::Rect(minX, minY, maxX-minX, maxY-minY);
+    }
+
+    // Return smallest value among distance(p, rect.q) for each q,
+    // or -1 if the PerspectiveRect is invalid.
+    float minDist(const PerspectiveRect& rect, const cv::Point2f& p)
+    {
+        if (!rect.valid){ return -1; }
+
+        float d00 = norm(p - rect.p00);
+        float d01 = norm(p - rect.p01);
+        float d11 = norm(p - rect.p11);
+        float d10 = norm(p - rect.p10);
+        return fmin(fmin(fmin(d00, d01), d11), d10);
+    }
+
+    // Return largest value among minDist(rectA, rectB.q) for each q,
+    // or -1 if either PerspectiveRect is invalid.
+    float dist(const PerspectiveRect& rectA, const PerspectiveRect& rectB)
+    {
+        if (!rectA.valid || !rectB.valid) { return -1; }
+
+        float d00 = minDist(rectA, rectB.p00);
+        float d01 = minDist(rectA, rectB.p01);
+        float d11 = minDist(rectA, rectB.p11);
+        float d10 = minDist(rectA, rectB.p10);
+        return fmax(fmax(fmax(d00, d01), d11), d10);
     }
 }
