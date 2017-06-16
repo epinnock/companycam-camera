@@ -5,12 +5,26 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.view.View;
+
+import java.util.Arrays;
+
+import georegression.struct.point.Point2D_F32;
 
 /**
  * Created by dan on 5/1/17.
  */
+
+/*
+    TODO:
+    Right now, the overlay is drawn onto bitmapOverlay, then that bitmap is transformed
+    and drawn onto bitmapTransform; finally, bitmapTransform is drawn on the screen over the camera.
+    Instead: Draw the overlay directly onto bitmapTransform, applying the transformation to the
+    vertices in the overlay's path.  Then just get rid of bitmapOverlay.
+*/
 
 public class DocScanOpenCV extends View implements CCCameraImageProcessor {
 
@@ -23,7 +37,14 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
 
     public native long newScanner();
     public native void deleteScanner(long ptr);
-    public native void nativeScan(long ptr, int width, int height, byte yuv[], int[] rgba);
+    public native void resetScanner(long ptr);
+    public native void nativeScan(long ptr,
+          /* Image to be scanned */
+          int width, int height, byte imageYUV[], int[] imageBGRA,
+          /* Image returned by the scanner, if any */
+          boolean[] didGenerateOutput, int[] dimsImageOutput, int maxWidth, int maxHeight, int[] imageOutput,
+          /* Info about most recent scan */
+          int[] scanStatus, float pRect[]);
     //----------------------------------------------
 
     protected static void DEBUG_OUTPUT(String message){
@@ -32,21 +53,28 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
 
     protected Context context;
 
-    protected boolean didReceiveImageParams = false;
+    protected long docScanPtr;
+    protected long lastScanTimestampMS = 0;
+
+    protected boolean initializedBitmaps = false;
 
     protected int widthOrig;
     protected int heightOrig;
 
-    protected Bitmap bitmapFromNative;
-
     protected int widthTransform;
     protected int heightTransform;
+
+    protected int[] imageBGRA;
+
+    protected Bitmap bitmapOverlay;
+    protected Canvas canvasOverlay;
 
     protected Bitmap bitmapTransform;
     protected Canvas canvasTransform;
 
-    protected long docScanPtr;
-
+    protected final static int MAX_OUTPUT_DIM = 1024;
+    protected int[] imageOutput;
+    protected Bitmap bitmapFromNative;
 
     public DocScanOpenCV(Context context) {
         super(context);
@@ -57,8 +85,6 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
         docScanPtr = newScanner();
     }
 
-    // CCCameraImageProcessor stuff
-    //====================================================================
     @Override
     public void setListener(ImageProcessorListener listener) {
 
@@ -69,15 +95,25 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
 
         this.widthOrig = widthOrig;
         this.heightOrig = heightOrig;
-        bitmapFromNative = Bitmap.createBitmap(widthOrig, heightOrig, Bitmap.Config.ARGB_8888);
 
-        float scale = 1.0f;
-        widthTransform = (int)((float)widthContainer * scale);
-        heightTransform = (int)((float)heightContainer * scale);
+        widthTransform = widthContainer;
+        heightTransform = heightContainer;
+
+        imageBGRA = new int[widthOrig * heightOrig];
+
+        // Holds the overlay which is drawn on top of the camera screen
+        bitmapOverlay = Bitmap.createBitmap(widthOrig, heightOrig, Bitmap.Config.ARGB_8888);
+        canvasOverlay = new Canvas(bitmapOverlay);
+
+        // bitmapOverlay is transformed and drawn onto bitmapTransform, to account for camera rotation
         bitmapTransform = Bitmap.createBitmap(widthTransform, heightTransform, Bitmap.Config.ARGB_8888);
         canvasTransform = new Canvas(bitmapTransform);
 
-        didReceiveImageParams = true;
+        // The image returned by scan is written to imageOutput and drawn onto bitmapFromNative
+        imageOutput = new int[MAX_OUTPUT_DIM * MAX_OUTPUT_DIM];
+        bitmapFromNative = Bitmap.createBitmap(MAX_OUTPUT_DIM, MAX_OUTPUT_DIM, Bitmap.Config.ARGB_8888);
+
+        initializedBitmaps = true;
         DEBUG_OUTPUT("setImageParams received!");
         DEBUG_OUTPUT("- Raw preview size: (" + widthOrig + ", " + heightOrig + ")");
         DEBUG_OUTPUT("- Container size: (" + widthContainer + ", " + heightContainer + ")");
@@ -113,28 +149,64 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
         return m;
     }
 
+    protected void drawPerspectiveRect(Canvas target, float[] pRect){
+        int overlayColor = Color.argb(128, 0,255,0);
+
+        Path path = new Path();
+        path.moveTo(pRect[0], pRect[1]);
+        path.lineTo(pRect[2], pRect[3]);
+        path.lineTo(pRect[4], pRect[5]);
+        path.lineTo(pRect[6], pRect[7]);
+        path.close();
+
+        Paint paint = new Paint();
+        paint.setStyle(Paint.Style.FILL);
+        paint.setColor(overlayColor);
+
+        target.drawPath(path, paint);
+    }
+
     @Override
     public boolean setPreviewBytes(byte[] data, int rotation) {
         DEBUG_OUTPUT("Received bytes! (Rotation angle: " + rotation + ")");
-        DEBUG_OUTPUT("- didReceiveImageParams = " + didReceiveImageParams);
+        DEBUG_OUTPUT("- initializedBitmaps = " + initializedBitmaps);
 
-        if(!didReceiveImageParams){ return true; }
+        if(!initializedBitmaps){ return true; }
 
-        boolean requestNextFrame = true;
+        final long curTimeMS = System.currentTimeMillis();
+        if(curTimeMS - lastScanTimestampMS > 500){
+            lastScanTimestampMS = curTimeMS;
+            resetScanner(docScanPtr);
+        }
 
         //TODO from OpenCV sample
         //https://stackoverflow.com/questions/12695232/using-native-functions-in-android-with-opencv
         //----------------------------------
-        int frameSize = widthOrig*heightOrig;
-        int[] rgba = new int[frameSize];
+        boolean[] didGenerateOutput = new boolean[1];
+        int[] dimsImageOutput = new int[2];
+        int[] scanStatus = new int[1];
+        float[] pRect = new float[8];
 
-        nativeScan(docScanPtr, widthOrig, heightOrig, data, rgba);
+        nativeScan(docScanPtr,
+                /* Image to be scanned */
+                widthOrig, heightOrig, data, imageBGRA,
+                /* Image returned by the scanner, if any */
+                didGenerateOutput, dimsImageOutput, MAX_OUTPUT_DIM, MAX_OUTPUT_DIM, imageOutput,
+                /* Info about most recent scan */
+                scanStatus, pRect);
 
-        bitmapFromNative.setPixels(rgba, 0, widthOrig, 0, 0, widthOrig, heightOrig);
+        // Draw overlay
+        bitmapOverlay.eraseColor(Color.argb(0,0,0,0));
+        drawPerspectiveRect(canvasOverlay, pRect);
+
+        boolean requestNextFrame = true;
+
+        //bitmapFromNative.setPixels(imageRGB, 0, widthOrig, 0, 0, widthOrig, heightOrig);
         //----------------------------------
 
         Matrix matOrigToTransform = getOrigToTransform(rotation);
-        canvasTransform.drawBitmap(bitmapFromNative, matOrigToTransform, null);
+        bitmapTransform.eraseColor(Color.argb(0,0,0,0));
+        canvasTransform.drawBitmap(bitmapOverlay, matOrigToTransform, null);
 
         this.invalidate();
         return requestNextFrame;
@@ -143,17 +215,21 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        if(!didReceiveImageParams){ return; }
+        if(!initializedBitmaps){ return; }
 
-        Bitmap bitmapDraw = bitmapTransform;
-        Rect rSrc = new Rect(0, 0, bitmapDraw.getWidth(), bitmapDraw.getHeight());
+        Rect rSrc = new Rect(0, 0, bitmapTransform.getWidth(), bitmapTransform.getHeight());
         Rect rDst = new Rect(0, 0, canvas.getWidth(), canvas.getHeight());
-        canvas.drawBitmap(bitmapDraw, rSrc, rDst, null);
+        canvas.drawBitmap(bitmapTransform, rSrc, rDst, null);
     }
 
     @Override
     public void clearVisiblePreview() {
+        DEBUG_OUTPUT("Clearing visible preview!");
 
+        if(!initializedBitmaps){ return; }
+
+        bitmapTransform.eraseColor(Color.argb(0,0,0,0));
+        this.invalidate();
     }
 
     @Override

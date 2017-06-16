@@ -26,24 +26,37 @@ DocScanner::DocScanner() :
     DocScanner(DEFAULT_WORKING_SIZE, DEFAULT_MAX_OUTPUT_DIM)
 { }
 
+/** Returns the most recent debug image. */
 cv::Mat DocScanner::getDebugImage() const
 {
     return imageResized;
 }
 
+/** Returns the most recent output image. */
 cv::Mat DocScanner::getOutputImage() const
 {
     return imageOutput;
 }
 
-geom::PerspectiveRect getPerspectiveRect() const
+/** Returns the most recent {@link PerspectiveRect}. */
+geom::PerspectiveRect DocScanner::getPerspectiveRect() const
 {
     return pRect;
 }
 
-// This will keep track of successive scans, and determine whether the scan is
-// part of an uninterrupted sequence of successful scans.  Once enough time has
-// elapsed with only successful scans, the output image will be generated.
+/** Resets {@link smartScan}; i.e., set the status back to UNSTABLE. */
+void DocScanner::reset()
+{
+    didGenerateOutput = false;
+    timeLastUnstable = std::chrono::high_resolution_clock::now();
+    pRect = geom::invalidPerspectiveRect();
+}
+
+/** Scans imageOrig and determines whether the new {@link PerspectiveRect}
+ * differs much from the previous one:  Returns UNSTABLE if they differ and
+ * STABLE if they are similar, unless the result has been STABLE for a threshold
+ * amount of time, in which case DONE is returned and {@link getOutputImage} is updated.
+ */
 DocScanner::ScanStatus DocScanner::smartScan(const cv::Mat& imageOrig)
 {
     const auto timeNow = std::chrono::high_resolution_clock::now();
@@ -53,7 +66,7 @@ DocScanner::ScanStatus DocScanner::smartScan(const cv::Mat& imageOrig)
 
     bool isStable = false;
     if (pRect.valid && pRectOld.valid) {
-        const float maxDeviation = optWorkingSize * MAX_STABLE_DEVIATION_PCT;
+        const float maxDeviation = fmax(imageOrig.rows, imageOrig.cols) * MAX_STABLE_DEVIATION_PCT;
         isStable = geom::dist(pRect, pRectOld) < maxDeviation;
     }
 
@@ -75,9 +88,11 @@ DocScanner::ScanStatus DocScanner::smartScan(const cv::Mat& imageOrig)
     }
 }
 
-// Perform a single scan of imageOrig.  The results of getPerspectiveRect and
-// getDebugImage will be updated and correct, even if the scan is unsuccessful.
-// The result of getOutputImage will only be updated if doGenerateOutput == true.
+/** Performs a single scan of imageOrig.  The results of
+ * {@link getPerspectiveRect} and {@link getDebugImage} will be updated, even
+ * if the scan was unsuccessful.  The result of {@link getOutputImage} will
+ * only be updated if doGenerateOutput is true.
+ */
 void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
 {
     // Determine proportional working size
@@ -148,6 +163,12 @@ void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
     cv::line(imageResized, pRect.p11, pRect.p01, colorPink, 2);
     cv::line(imageResized, pRect.p01, pRect.p00, colorPink, 2);
 
+    // pRect is scaled for imageResized; scale it for imageOrig instead
+    pRect.p00 /= scale;
+    pRect.p10 /= scale;
+    pRect.p11 /= scale;
+    pRect.p01 /= scale;
+
     // Perspective correction
     //--------------------------------
     // Only carry out this final step if requested
@@ -162,12 +183,7 @@ void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
     const int outputW = correctedScale * pRect.correctedWidth;
     const int outputH = correctedScale * pRect.correctedHeight;
 
-    std::vector<cv::Point2f> rectPerspective = {
-        pRect.p00 / scale,
-        pRect.p01 / scale,
-        pRect.p11 / scale,
-        pRect.p10 / scale
-    };
+    std::vector<cv::Point2f> rectPerspective = { pRect.p00, pRect.p01, pRect.p11, pRect.p10 };
     std::vector<cv::Point2f> rectTarget = {
         cv::Point2f(0,0),
         cv::Point2f(0,outputH),

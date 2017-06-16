@@ -16,49 +16,77 @@ Java_com_newcam_imageprocessing_DocScanOpenCV_newScanner(JNIEnv *env, jobject th
 }
 
 JNIEXPORT void JNICALL
-Java_com_newcam_imageprocessing_DocScanOpenCV_deleteScanner(JNIEnv *env, jobject thiz,
-                                                            jlong ptr)
+Java_com_newcam_imageprocessing_DocScanOpenCV_deleteScanner(JNIEnv *env, jobject thiz, jlong ptr)
 {
     DocScanner* docScanPtr = (DocScanner*)ptr;
     delete docScanPtr;
 }
 
+JNIEXPORT void JNICALL
+Java_com_newcam_imageprocessing_DocScanOpenCV_resetScanner(JNIEnv *env, jobject thiz, jlong ptr)
+{
+    DocScanner* docScanPtr = (DocScanner*)ptr;
+    docScanPtr->reset();
+}
+
 //Basic method for converting YUV->RGB and returning image data:
 //https://stackoverflow.com/questions/12695232/using-native-functions-in-android-with-opencv
 JNIEXPORT void JNICALL
-Java_com_newcam_imageprocessing_DocScanOpenCV_nativeScan(JNIEnv *env, jobject thiz,
-                                                         jlong ptr,
-                                                         jint width,
-                                                         jint height,
-                                                         jbyteArray yuv,
-                                                         jintArray bgra)
+Java_com_newcam_imageprocessing_DocScanOpenCV_nativeScan(
+    JNIEnv *env, jobject thiz,
+    jlong ptr,
+    /* Image to be scanned */
+    jint width, jint height, jbyteArray imageYUV, jintArray imageBGRA,
+    /* Image returned by the scanner, if any */
+    jbooleanArray didGenerateOutput, jintArray dimsImageOutput, jint maxWidth, jint maxHeight, jintArray imageOutput,
+    /* Info about most recent scan */
+    jintArray scanStatus, jfloatArray pRectRaw)
 {
     if (!ptr) { return; }
 
-    jbyte *_yuv = env->GetByteArrayElements(yuv, 0);
-    jint *_bgra = env->GetIntArrayElements(bgra, 0);
+    jbyte *_imageYUV = env->GetByteArrayElements(imageYUV, 0);
+    jint *_imageBGRA = env->GetIntArrayElements(imageBGRA, 0);
 
-    cv::Mat myuv(height + height / 2, width, CV_8UC1, (unsigned char *) _yuv);
-    cv::Mat mbgra(height, width, CV_8UC4, (unsigned char *) _bgra);
+    jboolean *_didGenerateOutput = env->GetBooleanArrayElements(didGenerateOutput, 0);
+    jint *_dimsImageOutput = env->GetIntArrayElements(dimsImageOutput, 0);
+    jint *_imageOutput = env->GetIntArrayElements(imageOutput, 0);
+
+    jint *_scanStatus = env->GetIntArrayElements(scanStatus, 0);
+    jfloat *_pRectRaw = env->GetFloatArrayElements(pRectRaw, 0);
+
+    // Convert input image to Mat
+    cv::Mat matYUV(height + height / 2, width, CV_8UC1, (unsigned char *) _imageYUV);
+    cv::Mat matBGRA(height, width, CV_8UC4, (unsigned char *) _imageBGRA);
 
     //Please make attention about BGRA byte order
     //ARGB stored in java as int array becomes BGRA at native level
-    cvtColor(myuv, mbgra, CV_YUV420sp2BGR, 4);
+    cvtColor(matYUV, matBGRA, CV_YUV420sp2BGR, 4);
 
     DocScanner* docScanPtr = (DocScanner*)ptr;
+    docScanPtr->scan(matBGRA, false);
 
-    //geom::PerspectiveRect pRect = docScanPtr->scan(mbgra, false);
-    docScanPtr->scan(mbgra, true);
+    const geom::PerspectiveRect pRect = docScanPtr->getPerspectiveRect();
+    _pRectRaw[0] = pRect.p00.x; _pRectRaw[1] = pRect.p00.y;
+    _pRectRaw[2] = pRect.p10.x; _pRectRaw[3] = pRect.p10.y;
+    _pRectRaw[4] = pRect.p11.x; _pRectRaw[5] = pRect.p11.y;
+    _pRectRaw[6] = pRect.p01.x; _pRectRaw[7] = pRect.p01.y;
 
-    cv::Mat imageResult = docScanPtr->getOutputImage();
+    /*cv::Mat imageResult = docScanPtr->getOutputImage();
     if(imageResult.rows > 0 && imageResult.cols > 0) {
-        int copyrows = imageResult.rows < mbgra.rows ? imageResult.rows : mbgra.rows;
-        int copycols = imageResult.cols < mbgra.cols ? imageResult.cols : mbgra.cols;
-        imageResult.copyTo(mbgra.rowRange(0, copyrows).colRange(0, copycols));
-    }
+        int copyrows = imageResult.rows < matBGRA.rows ? imageResult.rows : matBGRA.rows;
+        int copycols = imageResult.cols < matBGRA.cols ? imageResult.cols : matBGRA.cols;
+        imageResult.copyTo(matBGRA.rowRange(0, copyrows).colRange(0, copycols));
+    }*/
 
-    env->ReleaseIntArrayElements(bgra, _bgra, 0);
-    env->ReleaseByteArrayElements(yuv, _yuv, 0);
+    env->ReleaseByteArrayElements(imageYUV, _imageYUV, 0);
+    env->ReleaseIntArrayElements(imageBGRA, _imageBGRA, 0);
+
+    env->ReleaseBooleanArrayElements(didGenerateOutput, _didGenerateOutput, 0);
+    env->ReleaseIntArrayElements(dimsImageOutput, _dimsImageOutput, 0);
+    env->ReleaseIntArrayElements(imageOutput, _imageOutput, 0);
+
+    env->ReleaseIntArrayElements(scanStatus, _scanStatus, 0);
+    env->ReleaseFloatArrayElements(pRectRaw, _pRectRaw, 0);
 }
 
 }

@@ -30,6 +30,7 @@ class DocScanner
 
         enum ScanStatus { UNSTABLE, STABLE, DONE };
         ScanStatus smartScan(const cv::Mat& imageOrig);
+        void reset();
 
         void scan(const cv::Mat& imageOrig, const bool doGenerateOutput);
         cv::Mat getDebugImage() const;

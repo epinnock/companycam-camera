@@ -4,11 +4,16 @@
 
 #include "geometry.hpp"
 
+/** Assorted geometry utility functions. */
 namespace geom
 {
     const float ORIENTATION_THRESHOLD = 0.5;
     const float CAM_FOVY_DEG = 50;
 
+    /** Determines whether a line is vertical or horizontal.
+     * The x-value (resp. y-value) of the unit tangent vector must be less than
+     * {@link ORIENTATION_THRESHOLD} to be considered vertical (resp. horizontal).
+     */
     LineOrientation getLineOrientation(const cv::Vec4i& l)
     {
         const float dy = l[3] - l[1];
@@ -24,6 +29,10 @@ namespace geom
         return NEITHER;
     }
 
+    /**
+     * Linear interpolation along a line l.
+     * For the line [x1,y1,x2,y2], t=0 returns (x1,y1) and t=1 returns (x2,y2).
+     */
     cv::Point2f pointAlongLine(const cv::Vec4i& l, const float t)
     {
         return cv::Point2f(
@@ -32,6 +41,9 @@ namespace geom
         );
     }
 
+    /**
+     * Returns the intersection of two lines.
+     */
     cv::Point2f intersectLines(const cv::Vec4i& l, const cv::Vec4i& m)
     {
         const float dpx = m[0] - l[0], dpy = m[1] - l[1];
@@ -43,8 +55,10 @@ namespace geom
         return pointAlongLine(l, num/det);
     }
 
-    // Intersect the region above the line 'l' and the interior of
-    // the box [0,containerW]x[0,containerH].  Return the area.
+    /**
+     * Returns the area of the region above the line and within the
+      * box [0,containerW]x[0,containerH].
+     */
     float intersectHalfPlaneWithBox(
         const cv::Vec4i& l,
         int containerW,
@@ -107,21 +121,20 @@ namespace geom
         return (pointX0.y < 0) ? 0 : containerW * containerH;
     }
 
-    // The horizontal lines with min and max value returned by this function
-    // are regarded as the top and bottom sides of the document to scan.
+    /** Returns the area above a horizontal line. */
     float computeAreaY(const cv::Vec4i& l, const int containerW, const int containerH)
     {
         return intersectHalfPlaneWithBox(l, containerW, containerH);
     }
 
-    // The vertical lines with min and max value returned by this function
-    // are regarded as the left and right sides of the document to scan.
+    /** Returns the area to the left of a vertical line. */
     float computeAreaX(const cv::Vec4i& l, const int containerW, const int containerH)
     {
         const cv::Vec4i lFlippedXY(l[1], l[0], l[3], l[2]);
         return intersectHalfPlaneWithBox(lFlippedXY, containerH, containerW);
     }
 
+    /** Returns a PerspectiveRect marked as invalid */
     PerspectiveRect invalidPerspectiveRect()
     {
         PerspectiveRect rect;
@@ -129,6 +142,9 @@ namespace geom
         return rect;
     }
 
+    /** Returns the ray that would get projected onto the point p by a camera
+     * pointing in the direction [0,0,-1] and with vertical FOV {@link CAM_FOVY_DEG}.
+     */
     cv::Vec3f screenToRay(const cv::Point2f& p, const int screenW, const int screenH)
     {
         const float tx = p.x / screenW;
@@ -143,6 +159,7 @@ namespace geom
         );
     }
 
+    /** Returns a 3x3 determinant. */
     float det3(const cv::Vec3f& u, const cv::Vec3f& v, const cv::Vec3f& w)
     {
         return (
@@ -152,6 +169,11 @@ namespace geom
         );
     }
 
+    /** Finds the rectangle with corners that would get projected onto
+     * the 4 specified points by the camera described in {@link screenToRay}.
+     * Returns a {@link PerspectiveRect} with the specified points and with
+     * correctedWidth and correctedHeight equal to the dimensions of that rectangle.
+     */
     PerspectiveRect perspectiveRectFromPoints(
         const cv::Point2f& p00,
         const cv::Point2f& p10,
@@ -190,6 +212,12 @@ namespace geom
         return rect;
     }
 
+    /** Finds the horizontal (resp. vertical) lines that are closest to
+     * the top and bottom (resp. left and right) of the container, as determined
+     * by {@link computeAreaX} (resp. {@link computeAreaY}).
+     * The corners of the resulting rectangle are supplied to
+     * {@link perspectiveRectFromPoints} and the result is returned.
+     */
     PerspectiveRect perspectiveRectFromLines(
         const std::vector<cv::Vec4i>& lines,
         const int containerW,
@@ -249,6 +277,7 @@ namespace geom
             containerH);
     }
 
+    /** Returns the screen-space bounding box of a {@link PerpsectiveRect}. */
     cv::Rect perspectiveRectBoundingBox(const PerspectiveRect& rect)
     {
         if (!rect.valid) {
@@ -263,8 +292,9 @@ namespace geom
         return cv::Rect(minX, minY, maxX-minX, maxY-minY);
     }
 
-    // Return smallest value among distance(p, rect.q) for each q,
-    // or -1 if the PerspectiveRect is invalid.
+    /** Return the smallest distance from p to one of the points of rect,
+     * or return -1 if rect is not valid.
+     */
     float minDist(const PerspectiveRect& rect, const cv::Point2f& p)
     {
         if (!rect.valid){ return -1; }
@@ -276,8 +306,9 @@ namespace geom
         return fmin(fmin(fmin(d00, d01), d11), d10);
     }
 
-    // Return largest value among minDist(rectA, rectB.q) for each q,
-    // or -1 if either PerspectiveRect is invalid.
+    /** Each point of rectA is matched up with the closest point of rectB.
+     * The largest distance among the 4 pairs is returned.
+     */
     float dist(const PerspectiveRect& rectA, const PerspectiveRect& rectB)
     {
         if (!rectA.valid || !rectB.valid) { return -1; }
