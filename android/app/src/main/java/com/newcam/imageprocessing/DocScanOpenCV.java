@@ -17,7 +17,7 @@ import android.view.View;
 public class DocScanOpenCV extends View implements CCCameraImageProcessor {
 
     // Native stuff
-    //----------------------------------------------
+    //--------------------------------------
     // Used to load the 'native-lib' library on application startup.
     static {
         System.loadLibrary("native-lib");
@@ -27,17 +27,42 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
     public native void deleteScanner(long ptr);
     public native void resetScanner(long ptr);
     public native void nativeScan(long ptr,
-          /* Image to be scanned */
-          int width, int height, byte imageYUV[], int[] imageBGRA,
-          /* Image returned by the scanner, if any */
-          boolean[] didGenerateOutput, int[] dimsImageOutput, int maxWidth, int maxHeight, int[] imageOutput,
-          /* Info about most recent scan */
-          int[] scanStatus, float pRect[]);
-    //----------------------------------------------
+        /* Image to be scanned */
+        int width, int height, byte imageYUV[], int[] imageBGRA,
+        /* Image returned by the scanner, if any */
+        int[] dimsImageOutput, int maxOutputPixels, int[] imageOutput,
+        /* Info about most recent scan */
+        int[] scanStatus, float pRect[]);
+    //--------------------------------------
+
+    // Listeners for auto-capture
+    //--------------------------------------
+    protected ImageProcessorListener listener;
+
+    @Override
+    public void setListener(ImageProcessorListener listener){
+        this.listener = listener;
+    }
+
+    protected void notifyListeners(){
+        if(listener == null){ return; }
+        listener.receiveResult();
+    }
+    //--------------------------------------
 
     protected static void DEBUG_OUTPUT(String message){
         System.err.println("[CCAM] DocScanOpenCV: " + message);
     }
+
+    protected static final int SCAN_STATUS_UNSTABLE = 0;
+    protected static final int SCAN_STATUS_STABLE = 1;
+    protected static final int SCAN_STATUS_DONE = 2;
+
+    protected final static int COLOR_UNSTABLE = Color.argb(64, 255,0,0);
+    protected final static int COLOR_STABLE = Color.argb(128, 0,128,255);
+    protected final static int COLOR_DONE = Color.argb(128, 0,255,0);
+
+    protected final static int COLOR_0000 = Color.argb(0,0,0,0);
 
     protected long docScanPtr;
     protected long lastScanTimestampMS = 0;
@@ -57,21 +82,22 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
     protected Bitmap bitmapOverlay;
     protected Canvas canvasOverlay;
 
-    // Array and bitmap used to hold the image returned by nativeScan
-    protected final static int MAX_OUTPUT_DIM = 1024;
-    protected int[] imageOutput;
-    protected Bitmap bitmapFromNative;
+    // Array used to hold the image data returned by nativeScan
+    protected final static int MAX_OUTPUT_PIXELS = 1024*1024;
+    protected int[] dataOutput;
+
+    // Bitmap to hold the result of a scan
+    protected boolean didPrepareOutput;
+    protected int outputImageW;
+    protected int outputImageH;
+    protected Bitmap bitmapOutput;
+
 
     public DocScanOpenCV(Context context) {
         super(context);
 
-        this.setBackgroundColor(Color.argb(0,0,0,0));
+        this.setBackgroundColor(COLOR_0000);
         docScanPtr = newScanner();
-    }
-
-    @Override
-    public void setListener(ImageProcessorListener listener) {
-
     }
 
     @Override
@@ -86,8 +112,8 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
         bitmapOverlay = Bitmap.createBitmap(widthOverlay, heightOverlay, Bitmap.Config.ARGB_8888);
         canvasOverlay = new Canvas(bitmapOverlay);
 
-        imageOutput = new int[MAX_OUTPUT_DIM * MAX_OUTPUT_DIM];
-        bitmapFromNative = Bitmap.createBitmap(MAX_OUTPUT_DIM, MAX_OUTPUT_DIM, Bitmap.Config.ARGB_8888);
+        dataOutput = new int[MAX_OUTPUT_PIXELS];
+        didPrepareOutput = false;
 
         initializedBitmaps = true;
         DEBUG_OUTPUT("setImageParams received!");
@@ -152,31 +178,46 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
             lastScanTimestampMS = curTimeMS;
             resetScanner(docScanPtr);
         }
+        lastScanTimestampMS = curTimeMS;
 
         // Prepare return values from nativeScan
-        boolean[] didGenerateOutput = new boolean[1];
         int[] dimsImageOutput = new int[2];
         int[] scanStatus = new int[1];
         float[] pRect = new float[8];
 
         nativeScan(docScanPtr,
-                /* Image to be scanned */
-                widthOrig, heightOrig, data, imageBGRA,
-                /* Image returned by the scanner, if any */
-                didGenerateOutput, dimsImageOutput, MAX_OUTPUT_DIM, MAX_OUTPUT_DIM, imageOutput,
-                /* Info about most recent scan */
-                scanStatus, pRect);
+            /* Image to be scanned */
+            widthOrig, heightOrig, data, imageBGRA,
+            /* Image returned by the scanner, if any */
+            dimsImageOutput, MAX_OUTPUT_PIXELS, dataOutput,
+            /* Info about most recent scan */
+            scanStatus, pRect);
 
         // Draw overlay
         Matrix matOrigToOverlay = getOrigToOverlayMatrix(rotation);
         float[] pRectTransform = new float[8];
         matOrigToOverlay.mapPoints(pRectTransform, pRect);
 
-        bitmapOverlay.eraseColor(Color.argb(0,0,0,0));
-        drawPerspectiveRect(canvasOverlay, pRectTransform, Color.argb(128, 0,255,0));
+        int overlayColor = COLOR_UNSTABLE;
+        if(scanStatus[0] == SCAN_STATUS_STABLE){ overlayColor = COLOR_STABLE; }
+        if(scanStatus[0] == SCAN_STATUS_DONE){ overlayColor = COLOR_DONE; }
 
+        bitmapOverlay.eraseColor(COLOR_0000);
+        drawPerspectiveRect(canvasOverlay, pRectTransform, overlayColor);
+
+        // Process output image if appropriate
         boolean requestNextFrame = true;
-        //bitmapFromNative.setPixels(imageRGB, 0, widthOrig, 0, 0, widthOrig, heightOrig);
+        if(scanStatus[0] == SCAN_STATUS_DONE){
+            outputImageW = dimsImageOutput[0];
+            outputImageH = dimsImageOutput[1];
+            bitmapOutput = Bitmap.createBitmap(outputImageW, outputImageH, Bitmap.Config.ARGB_8888);
+            bitmapOutput.setPixels(dataOutput, 0, outputImageW, 0, 0, outputImageW, outputImageH);
+            didPrepareOutput = true;
+
+            DEBUG_OUTPUT("Captured scan: (" + outputImageW + ", " + outputImageH + ")");
+            this.notifyListeners();
+            requestNextFrame = false;
+        }
 
         this.invalidate();
         return requestNextFrame;
@@ -193,14 +234,24 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
 
     @Override
     public void clearVisiblePreview() {
-        if(!initializedBitmaps){ return; }
+        if(!initializedBitmaps){
+            DEBUG_OUTPUT("Tried to clear overlay, but overlay was null!");
+            return;
+        }
+        DEBUG_OUTPUT("Cleared overlay");
 
-        bitmapOverlay.eraseColor(Color.argb(0,0,0,0));
+        bitmapOverlay.eraseColor(COLOR_0000);
         this.invalidate();
     }
 
     @Override
     public Bitmap getOutputImage() {
-        return null;
+        if(!didPrepareOutput){
+            DEBUG_OUTPUT("Requested output image, but image was null!");
+            return null;
+        }
+        DEBUG_OUTPUT("Returning output image");
+
+        return bitmapOutput;
     }
 }

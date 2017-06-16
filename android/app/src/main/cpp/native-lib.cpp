@@ -38,7 +38,7 @@ Java_com_newcam_imageprocessing_DocScanOpenCV_nativeScan(
     /* Image to be scanned */
     jint width, jint height, jbyteArray imageYUV, jintArray imageBGRA,
     /* Image returned by the scanner, if any */
-    jbooleanArray didGenerateOutput, jintArray dimsImageOutput, jint maxWidth, jint maxHeight, jintArray imageOutput,
+    jintArray dimsImageOutput, jint maxOutputPixels, jintArray imageOutput,
     /* Info about most recent scan */
     jintArray scanStatus, jfloatArray pRectRaw)
 {
@@ -47,7 +47,6 @@ Java_com_newcam_imageprocessing_DocScanOpenCV_nativeScan(
     jbyte *_imageYUV = env->GetByteArrayElements(imageYUV, 0);
     jint *_imageBGRA = env->GetIntArrayElements(imageBGRA, 0);
 
-    jboolean *_didGenerateOutput = env->GetBooleanArrayElements(didGenerateOutput, 0);
     jint *_dimsImageOutput = env->GetIntArrayElements(dimsImageOutput, 0);
     jint *_imageOutput = env->GetIntArrayElements(imageOutput, 0);
 
@@ -63,7 +62,12 @@ Java_com_newcam_imageprocessing_DocScanOpenCV_nativeScan(
     cvtColor(matYUV, matBGRA, CV_YUV420sp2BGR, 4);
 
     DocScanner* docScanPtr = (DocScanner*)ptr;
-    docScanPtr->scan(matBGRA, false);
+    DocScanner::ScanStatus status = docScanPtr->smartScan(matBGRA);
+    switch(status){
+        case DocScanner::UNSTABLE:  _scanStatus[0] = 0; break;
+        case DocScanner::STABLE:    _scanStatus[0] = 1; break;
+        case DocScanner::DONE:      _scanStatus[0] = 2; break;
+    }
 
     const geom::PerspectiveRect pRect = docScanPtr->getPerspectiveRect();
     _pRectRaw[0] = pRect.p00.x; _pRectRaw[1] = pRect.p00.y;
@@ -71,17 +75,25 @@ Java_com_newcam_imageprocessing_DocScanOpenCV_nativeScan(
     _pRectRaw[4] = pRect.p11.x; _pRectRaw[5] = pRect.p11.y;
     _pRectRaw[6] = pRect.p01.x; _pRectRaw[7] = pRect.p01.y;
 
-    /*cv::Mat imageResult = docScanPtr->getOutputImage();
-    if(imageResult.rows > 0 && imageResult.cols > 0) {
-        int copyrows = imageResult.rows < matBGRA.rows ? imageResult.rows : matBGRA.rows;
-        int copycols = imageResult.cols < matBGRA.cols ? imageResult.cols : matBGRA.cols;
-        imageResult.copyTo(matBGRA.rowRange(0, copyrows).colRange(0, copycols));
-    }*/
+    if (status == DocScanner::DONE) {
+        cv::Mat matScanned = docScanPtr->getOutputImage();
+        _dimsImageOutput[0] = matScanned.cols;
+        _dimsImageOutput[1] = matScanned.rows;
+
+        if (matScanned.rows*matScanned.cols > maxOutputPixels) {
+            //TODO: Image doesn't fit!
+        } else {
+            cv::Mat matOutput(matScanned.rows, matScanned.cols, CV_8UC4, (unsigned char *) _imageOutput);
+            matScanned.copyTo(matOutput);
+        }
+    } else {
+        _dimsImageOutput[0] = 0;
+        _dimsImageOutput[1] = 0;
+    }
 
     env->ReleaseByteArrayElements(imageYUV, _imageYUV, 0);
     env->ReleaseIntArrayElements(imageBGRA, _imageBGRA, 0);
 
-    env->ReleaseBooleanArrayElements(didGenerateOutput, _didGenerateOutput, 0);
     env->ReleaseIntArrayElements(dimsImageOutput, _dimsImageOutput, 0);
     env->ReleaseIntArrayElements(imageOutput, _imageOutput, 0);
 
