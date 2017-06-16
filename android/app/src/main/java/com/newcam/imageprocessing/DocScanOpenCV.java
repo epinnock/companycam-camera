@@ -14,6 +14,9 @@ import android.view.View;
  * Created by dan on 5/1/17.
  */
 
+//TODO: Look into use jnigraphics: https://developer.android.com/ndk/guides/stable_apis.html
+//"The jnigraphics library exposes a C-based interface that allows native code to reliably access the pixel buffers of Java bitmap objects"
+
 public class DocScanOpenCV extends View implements CCCameraImageProcessor {
 
     // Native stuff
