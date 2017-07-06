@@ -22,6 +22,8 @@ DerivedData
 *.xcuserstate
 project.xcworkspace
 
+ios/opencv2.framework/
+
 # Android/IntelliJ
 #
 build/
