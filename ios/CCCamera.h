@@ -11,6 +11,8 @@
 #import <AVFoundation/AVFoundation.h>
 #import "CCCameraDelegate.h"
 #import "CCCameraManager.h"
+#import "UIImage+CCHelper.h"
+#import "StorageUtility.h"
 
 @interface CCCamera : NSObject <CCCameraDelegate, AVCapturePhotoCaptureDelegate> {
     

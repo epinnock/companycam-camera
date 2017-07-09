@@ -13,6 +13,7 @@
 #import "CCCameraManager.h"
 #import "CCCameraLayoutDelegate.h"
 #import "CCCamera.h"
+#import "FocusIndicatorView.h"
 
 // Define some constant colors
 #define sunYellowColor [UIColor colorWithRed:253.0/255.0 green:216.0/255.0 blue:53.0/255.0 alpha:1.0]
@@ -88,6 +89,11 @@
     IBOutlet NSLayoutConstraint *buttonViewHeightConstraint;
     IBOutlet NSLayoutConstraint *buttonViewRightConstraint;
     
+    // The focusIndicatorView is used to indicate that the camera is in the process of focusing
+    IBOutlet FocusIndicatorView *focusIndicatorView;
+    IBOutlet NSLayoutConstraint *focusIndicatorTopConstraint;
+    IBOutlet NSLayoutConstraint *focusIndicatorLeftConstraint;
+    
     // This is a reference to the resource bundle for this project
     NSBundle *CCCameraBundle;
 }
@@ -135,6 +141,9 @@
 @property (nonatomic, retain) IBOutlet NSLayoutConstraint *buttonViewTopConstraint;
 @property (nonatomic, retain) IBOutlet NSLayoutConstraint *buttonViewHeightConstraint;
 @property (nonatomic, retain) IBOutlet NSLayoutConstraint *buttonViewRightConstraint;
+@property (nonatomic, retain) IBOutlet FocusIndicatorView *focusIndicatorView;
+@property (nonatomic, retain) IBOutlet NSLayoutConstraint *focusIndicatorTopConstraint;
+@property (nonatomic, retain) IBOutlet NSLayoutConstraint *focusIndicatorLeftConstraint;
 @property (nonatomic, retain) NSBundle *CCCameraBundle;
 
 -(IBAction)closeButtonClick:(id)sender;

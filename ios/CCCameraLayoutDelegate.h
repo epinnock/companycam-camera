@@ -50,4 +50,12 @@
 @optional
 -(void)hideResolutionLayout;
 
+// This method shows an auto focus indicator view at the given position while the camera is focusing and/or exposing
+@optional
+-(void)showAutoFocusIndicator:(CGPoint)touchPoint :(BOOL)setRepeating;
+
+// This method hides the auto focus indicator view
+@optional
+-(void)hideAutoFocusIndicator;
+
 @end

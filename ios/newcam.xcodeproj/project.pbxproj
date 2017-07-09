@@ -18,6 +18,9 @@
 		DB54DE6D1EC3AC62004AEF31 /* CCCameraManager.m in Sources */ = {isa = PBXBuildFile; fileRef = DB54DE3F1EC3A56F004AEF31 /* CCCameraManager.m */; };
 		DB54DE6E1EC3AC62004AEF31 /* CCCameraView.h in Sources */ = {isa = PBXBuildFile; fileRef = DB54DE461EC3A6B6004AEF31 /* CCCameraView.h */; };
 		DB54DE6F1EC3AC62004AEF31 /* CCCameraView.m in Sources */ = {isa = PBXBuildFile; fileRef = DB54DE471EC3A6B6004AEF31 /* CCCameraView.m */; };
+		DB58BF471F11C8E8003D503B /* StorageUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = DB58BF461F11C8E8003D503B /* StorageUtility.m */; };
+		DB58BF4D1F11D5D5003D503B /* UIImage+CCHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = DB58BF4C1F11D5D5003D503B /* UIImage+CCHelper.m */; };
+		DB58BF511F11DC72003D503B /* FocusIndicatorView.m in Sources */ = {isa = PBXBuildFile; fileRef = DB58BF501F11DC72003D503B /* FocusIndicatorView.m */; };
 		DB9F69701ECD664A004D4F85 /* CCCameraModule.m in Sources */ = {isa = PBXBuildFile; fileRef = DB9F696F1ECD664A004D4F85 /* CCCameraModule.m */; };
 		DB9F698B1ECD701E004D4F85 /* CCCameraView.xib in Resources */ = {isa = PBXBuildFile; fileRef = DB9F696C1ECD390A004D4F85 /* CCCameraView.xib */; };
 		DB9F69C91ED014CE004D4F85 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
@@ -59,6 +62,12 @@
 		DB54DE461EC3A6B6004AEF31 /* CCCameraView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = CCCameraView.h; sourceTree = "<group>"; tabWidth = 2; };
 		DB54DE471EC3A6B6004AEF31 /* CCCameraView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = CCCameraView.m; sourceTree = "<group>"; tabWidth = 2; };
 		DB54DE4E1EC3A9FC004AEF31 /* libCCCamera.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libCCCamera.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		DB58BF451F11C8E8003D503B /* StorageUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StorageUtility.h; sourceTree = "<group>"; };
+		DB58BF461F11C8E8003D503B /* StorageUtility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StorageUtility.m; sourceTree = "<group>"; };
+		DB58BF4B1F11D5D5003D503B /* UIImage+CCHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+CCHelper.h"; sourceTree = "<group>"; };
+		DB58BF4C1F11D5D5003D503B /* UIImage+CCHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+CCHelper.m"; sourceTree = "<group>"; tabWidth = 4; };
+		DB58BF4F1F11DC72003D503B /* FocusIndicatorView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FocusIndicatorView.h; sourceTree = "<group>"; };
+		DB58BF501F11DC72003D503B /* FocusIndicatorView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FocusIndicatorView.m; sourceTree = "<group>"; };
 		DB9F696C1ECD390A004D4F85 /* CCCameraView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CCCameraView.xib; sourceTree = "<group>"; };
 		DB9F696E1ECD664A004D4F85 /* CCCameraModule.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = CCCameraModule.h; sourceTree = "<group>"; tabWidth = 4; };
 		DB9F696F1ECD664A004D4F85 /* CCCameraModule.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = CCCameraModule.m; sourceTree = "<group>"; tabWidth = 4; };
@@ -188,6 +197,17 @@
 			name = views;
 			sourceTree = "<group>";
 		};
+		DB58BF4E1F11DC42003D503B /* views */ = {
+			isa = PBXGroup;
+			children = (
+				DB3DAD2F1EE67AAE005B2885 /* GradientBackgroundView.h */,
+				DB3DAD301EE67AAE005B2885 /* GradientBackgroundView.m */,
+				DB58BF4F1F11DC72003D503B /* FocusIndicatorView.h */,
+				DB58BF501F11DC72003D503B /* FocusIndicatorView.m */,
+			);
+			name = views;
+			sourceTree = "<group>";
+		};
 		DB9F696B1ECD385E004D4F85 /* nibs */ = {
 			isa = PBXGroup;
 			children = (
@@ -209,10 +229,13 @@
 		DB9F69BF1ECDFAB4004D4F85 /* utils */ = {
 			isa = PBXGroup;
 			children = (
+				DB58BF4E1F11DC42003D503B /* views */,
 				DB9F69DE1ED15728004D4F85 /* CCCameraLayoutDelegate.h */,
 				DBC969271EDE078C00578CE2 /* CCCameraDelegate.h */,
-				DB3DAD2F1EE67AAE005B2885 /* GradientBackgroundView.h */,
-				DB3DAD301EE67AAE005B2885 /* GradientBackgroundView.m */,
+				DB58BF451F11C8E8003D503B /* StorageUtility.h */,
+				DB58BF461F11C8E8003D503B /* StorageUtility.m */,
+				DB58BF4B1F11D5D5003D503B /* UIImage+CCHelper.h */,
+				DB58BF4C1F11D5D5003D503B /* UIImage+CCHelper.m */,
 			);
 			name = utils;
 			sourceTree = "<group>";
@@ -322,11 +345,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DB58BF4D1F11D5D5003D503B /* UIImage+CCHelper.m in Sources */,
 				DB3DAD311EE67AAE005B2885 /* GradientBackgroundView.m in Sources */,
 				DB9F69CC1ED10567004D4F85 /* CCCameraLayout.m in Sources */,
 				DB54DE6A1EC3AC62004AEF31 /* CCCamera.h in Sources */,
 				DB54DE6B1EC3AC62004AEF31 /* CCCamera.m in Sources */,
+				DB58BF471F11C8E8003D503B /* StorageUtility.m in Sources */,
 				DB9F69701ECD664A004D4F85 /* CCCameraModule.m in Sources */,
+				DB58BF511F11DC72003D503B /* FocusIndicatorView.m in Sources */,
 				DB2FF1E31F0379CB0005A9BE /* geometry.cpp in Sources */,
 				DB9F69D11ED109F2004D4F85 /* ResizingSubview.m in Sources */,
 				DB54DE6C1EC3AC62004AEF31 /* CCCameraManager.h in Sources */,

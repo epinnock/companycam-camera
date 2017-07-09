@@ -105,10 +105,9 @@
         @"imgWidth": [NSNumber numberWithInt:imgWidth],
         @"imgHeight": [NSNumber numberWithInt:imgHeight]
     };
-    if (self.newPhotoTaken) {
-        self.newPhotoTaken(event);
+    if (self.onPhotoTaken) {
+        self.onPhotoTaken(event);
         [self finishWithResult:@"capture"];
-        //self.onAuxModeClicked(event);
     }
 }
 

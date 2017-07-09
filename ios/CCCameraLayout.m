@@ -53,6 +53,9 @@
 @synthesize buttonViewTopConstraint;
 @synthesize buttonViewHeightConstraint;
 @synthesize buttonViewRightConstraint;
+@synthesize focusIndicatorView;
+@synthesize focusIndicatorTopConstraint;
+@synthesize focusIndicatorLeftConstraint;
 @synthesize CCCameraBundle;
 
 -(id)initWithCoder:(NSCoder *)aDecoder {
@@ -802,6 +805,26 @@
                          // Set the resolutionLayoutVisible flag
                          resolutionLayoutVisible = NO;
                      }];
+}
+
+// This method shows an auto focus indicator view at the given position while the camera is focusing and/or exposing
+-(void)showAutoFocusIndicator:(CGPoint)touchPoint :(BOOL)setRepeating {
+    
+    // Get the width and height of the focusIndicatorView
+    int width = self.focusIndicatorView.frame.size.width;
+    int height = self.focusIndicatorView.frame.size.height;
+    
+    // Set the constraints for the focusIndicatorView
+    self.focusIndicatorTopConstraint.constant = touchPoint.y - height/2;
+    self.focusIndicatorLeftConstraint.constant = touchPoint.x - width/2;
+    
+    // Show the focusIndicatorView
+    [self.focusIndicatorView setHidden:NO];
+}
+
+// This method hides the auto focus indicator view
+-(void)hideAutoFocusIndicator {
+    [self.focusIndicatorView setHidden:YES];
 }
 
 #pragma mark -

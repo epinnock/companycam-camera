@@ -132,6 +132,10 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         [self.camera setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
         [self.camera unlockForConfiguration];
         
+        // Add observers for the focus and exposure
+        [self.camera addObserver:self forKeyPath:@"adjustingFocus" options:0 context:nil];
+        [self.camera addObserver:self forKeyPath:@"adjustingExposure" options:0 context:nil];
+        
         // Setup the capture session
         [self setupSession];
         
@@ -421,6 +425,10 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         [self.captureSession beginConfiguration];
         [self.captureSession removeInput:self.deviceInput];
         [self.captureSession commitConfiguration];
+        
+        // Remove the observers for the focus and exposure
+        [self.camera removeObserver:self forKeyPath:@"isAdjustingFocus" context:nil];
+        [self.camera removeObserver:self forKeyPath:@"isAdjustingExposure" context:nil];
     }
 }
 
@@ -638,7 +646,7 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     // Handle single-touch events
     else {
         
-        // Trigger the tap-to-autofocus
+        // Trigger the tap-to-autofocus and tap-to-expose
         [self handleFocus:event];
     }
 }
@@ -685,6 +693,9 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
             [self.camera setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
         }
         [self.camera unlockForConfiguration];
+        
+        // Show the focusIndicatorView
+        [latestView.cameraLayout showAutoFocusIndicator:thisTouchPoint :YES];
     }
 }
 
@@ -714,15 +725,22 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         NSLog(@"A photo was captured!");
     }
     
+    // If the photoData wasn't nil, then save the image to the file system
     if (self.photoData != nil) {
         
-        NSString *documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
-        NSString *imageSubdirectory = [documentsDirectory stringByAppendingPathComponent:@"TestPhotoDirectory"];
+        // Create a UIImage from the photoData and rotate it to the proper orientation
+        UIImage *originalImage = [UIImage imageWithData:self.photoData scale:1.0f];
+        UIImage *rotatedImage = [originalImage rotateUIImage];
         
-        NSString *filePath = [imageSubdirectory stringByAppendingPathComponent:@"TestPhoto.png"];
+        // TODO: Need to crop the image?
         
-        [self.photoData writeToFile:filePath atomically:YES];
+        // Get the data for the rotated image
+        NSData *jpeg = UIImageJPEGRepresentation(rotatedImage, 0.6f);
         
+        // Write the rotated image data to the file system
+        NSString *filePath = [StorageUtility writeDataToFile:jpeg];
+        
+        //
         CCCameraView *thisCameraView = [CCCameraManager getLatestView];
         [thisCameraView doPhotoTaken:filePath :1080 :1920];
     }
@@ -793,6 +811,23 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     self.cameraMode = [self getCameraModeFromString:thisCameraMode];
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:PREFS_CAMERA_MODE];
     [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithInt:self.cameraMode] forKey:PREFS_CAMERA_MODE];
+}
+
+#pragma mark -
+#pragma mark Key-Value observation methods
+
+-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    
+    if ([keyPath isEqualToString:@"adjustingFocus"] || [keyPath isEqualToString:@"adjustingExposure"]) {
+                
+        // If the camera is no longer focusing or exposing, then hide the focus indicator view
+        if (self.camera != nil && !self.camera.isAdjustingFocus && !self.camera.isAdjustingExposure) {
+            
+            // Get a reference to the CCCameraView
+            CCCameraView *latestView = [CCCameraManager getLatestView];
+            [latestView.cameraLayout hideAutoFocusIndicator];
+        }
+    }
 }
 
 

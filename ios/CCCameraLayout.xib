@@ -23,6 +23,9 @@
                 <outlet property="fastCamIndicator" destination="Ok1-zG-5sI" id="Sr7-o3-PfN"/>
                 <outlet property="fastCamLabel" destination="WXh-i8-XWu" id="LC8-aI-Qix"/>
                 <outlet property="fastCamSubview" destination="E0h-a9-dRe" id="2ah-jo-qYh"/>
+                <outlet property="focusIndicatorLeftConstraint" destination="g8G-ue-ipW" id="vfX-gI-6tp"/>
+                <outlet property="focusIndicatorTopConstraint" destination="jTX-dI-Wq6" id="i6p-PE-UuA"/>
+                <outlet property="focusIndicatorView" destination="QOZ-q3-haC" id="vSf-bo-Ees"/>
                 <outlet property="highButton" destination="HC0-xc-5fD" id="qIa-Zw-FEg"/>
                 <outlet property="normalButton" destination="aaB-7E-gAI" id="ltG-L1-osI"/>
                 <outlet property="placeLabelRightConstraint" destination="ofX-OW-Bsn" id="5OG-bj-Ss5"/>
@@ -461,6 +464,14 @@
                     <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                     <nil key="highlightedColor"/>
                 </label>
+                <view hidden="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="QOZ-q3-haC" customClass="FocusIndicatorView">
+                    <rect key="frame" x="0.0" y="0.0" width="80" height="80"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="80" id="egb-01-6jR"/>
+                        <constraint firstAttribute="height" constant="80" id="y9w-JX-EIC"/>
+                    </constraints>
+                </view>
             </subviews>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
             <constraints>
@@ -476,7 +487,9 @@
                 <constraint firstItem="DTP-n4-T4H" firstAttribute="centerX" secondItem="7da-8W-gKK" secondAttribute="centerX" id="buZ-uB-0M3"/>
                 <constraint firstAttribute="trailing" secondItem="WdW-oQ-prY" secondAttribute="trailing" id="cUq-wF-53H"/>
                 <constraint firstItem="WdW-oQ-prY" firstAttribute="top" secondItem="7da-8W-gKK" secondAttribute="top" constant="-150" id="frO-ti-Y3E"/>
+                <constraint firstItem="QOZ-q3-haC" firstAttribute="leading" secondItem="7da-8W-gKK" secondAttribute="leading" id="g8G-ue-ipW"/>
                 <constraint firstItem="hwz-hZ-ITa" firstAttribute="top" secondItem="7da-8W-gKK" secondAttribute="top" id="hOx-rQ-peo"/>
+                <constraint firstItem="QOZ-q3-haC" firstAttribute="top" secondItem="7da-8W-gKK" secondAttribute="top" id="jTX-dI-Wq6"/>
                 <constraint firstItem="ad1-NS-Wzl" firstAttribute="top" secondItem="DTP-n4-T4H" secondAttribute="bottom" constant="10" id="qIJ-ZP-hoB"/>
                 <constraint firstAttribute="bottom" secondItem="ad1-NS-Wzl" secondAttribute="bottom" id="tgR-q3-LJo"/>
                 <constraint firstItem="euh-3S-d3n" firstAttribute="centerY" secondItem="DTP-n4-T4H" secondAttribute="centerY" id="xy3-wK-8Wq"/>

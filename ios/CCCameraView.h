@@ -57,8 +57,7 @@
 @property (nonatomic, retain) NSString *propAuxModeCaption;
 
 @property (nonatomic, copy) RCTDirectEventBlock onClose;
-@property (nonatomic, copy) RCTDirectEventBlock photoTaken;
-@property (nonatomic, copy) RCTDirectEventBlock newPhotoTaken;
+@property (nonatomic, copy) RCTDirectEventBlock onPhotoTaken;
 @property (nonatomic, copy) RCTDirectEventBlock onAuxModeClicked;
 
 -(id)initWithManager:(CCCameraManager*)_manager bridge:(RCTBridge *)_bridge;
