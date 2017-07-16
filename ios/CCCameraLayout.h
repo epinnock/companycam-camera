@@ -91,6 +91,7 @@
     
     // The focusIndicatorView is used to indicate that the camera is in the process of focusing
     IBOutlet FocusIndicatorView *focusIndicatorView;
+    NSTimer *focusIndicatorTimer;
     IBOutlet NSLayoutConstraint *focusIndicatorTopConstraint;
     IBOutlet NSLayoutConstraint *focusIndicatorLeftConstraint;
     
@@ -142,6 +143,7 @@
 @property (nonatomic, retain) IBOutlet NSLayoutConstraint *buttonViewHeightConstraint;
 @property (nonatomic, retain) IBOutlet NSLayoutConstraint *buttonViewRightConstraint;
 @property (nonatomic, retain) IBOutlet FocusIndicatorView *focusIndicatorView;
+@property (nonatomic, retain) NSTimer *focusIndicatorTimer;
 @property (nonatomic, retain) IBOutlet NSLayoutConstraint *focusIndicatorTopConstraint;
 @property (nonatomic, retain) IBOutlet NSLayoutConstraint *focusIndicatorLeftConstraint;
 @property (nonatomic, retain) NSBundle *CCCameraBundle;
@@ -158,5 +160,6 @@
 -(IBAction)cameraSubviewClick:(id)sender;
 -(IBAction)scannerSubviewClick:(id)sender;
 -(IBAction)auxModeSubviewClick:(id)sender;
+-(void)incrementFocusIndicatorRadius:(NSTimer *)timer;
 
 @end

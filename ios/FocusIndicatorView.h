@@ -8,6 +8,13 @@
 
 #import <UIKit/UIKit.h>
 
-@interface FocusIndicatorView : UIView
+@interface FocusIndicatorView : UIView {
+    
+    double radius;
+}
+
+@property (assign, nonatomic) double radius;
+
+-(void)incrementRadius;
 
 @end

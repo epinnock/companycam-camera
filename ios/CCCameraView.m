@@ -99,7 +99,7 @@
         return;
     }
     
-    // Invoke the newPhotoTaken prop
+    // Invoke the onPhotoTaken prop
     id event = @{
         @"filename": imgFile,
         @"imgWidth": [NSNumber numberWithInt:imgWidth],
@@ -109,6 +109,31 @@
         self.onPhotoTaken(event);
         [self finishWithResult:@"capture"];
     }
+}
+
+-(void)doPhotoAccepted:(NSString *)imgFile :(int)imgWidth :(int)imgHeight {
+    
+    if (imgFile == nil) {
+        [self propOnClose:@"There was an error saving the photo file" :@"error"];
+        return;
+    }
+    
+    // Invoke the onPhotoAccepted prop
+    id event = @{
+                 @"filename": imgFile,
+                 @"imgWidth": [NSNumber numberWithInt:imgWidth],
+                 @"imgHeight": [NSNumber numberWithInt:imgHeight]
+                 };
+    if (self.onPhotoAccepted) {
+        self.onPhotoAccepted(event);
+    }
+}
+
+-(CLLocation *)getExifLocation {
+    
+    CLLocationCoordinate2D locCoordinate = CLLocationCoordinate2DMake(self.propExifLocationLatitude, self.propExifLocationLongitude);
+    CLLocation *loc = [[CLLocation alloc] initWithCoordinate:locCoordinate altitude:0 horizontalAccuracy:kCLLocationAccuracyBest verticalAccuracy:kCLLocationAccuracyBest timestamp:[NSDate dateWithTimeIntervalSince1970:self.propExifLocationTimestamp]];
+    return loc;
 }
 
 #pragma mark Component props - values

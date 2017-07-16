@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
+#import <CoreLocation/CoreLocation.h>
 #import "RCTBridge.h"
 #import "CCCameraModule.h"
 #import "RCTUIManager.h"
@@ -58,6 +59,7 @@
 
 @property (nonatomic, copy) RCTDirectEventBlock onClose;
 @property (nonatomic, copy) RCTDirectEventBlock onPhotoTaken;
+@property (nonatomic, copy) RCTDirectEventBlock onPhotoAccepted;
 @property (nonatomic, copy) RCTDirectEventBlock onAuxModeClicked;
 
 -(id)initWithManager:(CCCameraManager*)_manager bridge:(RCTBridge *)_bridge;
@@ -72,6 +74,8 @@
 -(void)propOnAuxModeClicked;
 -(void)doEvent:(NSString *)eventName :(NSDictionary *)event;
 -(void)doPhotoTaken:(NSString *)imgFile :(int)imgWidth :(int)imgHeight;
+-(void)doPhotoAccepted:(NSString *)imgFile :(int)imgWidth :(int)imgHeight;
+-(CLLocation *)getExifLocation;
 
 //////////////////////////////
 // Component props - Values //

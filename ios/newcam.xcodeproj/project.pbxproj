@@ -21,6 +21,8 @@
 		DB58BF471F11C8E8003D503B /* StorageUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = DB58BF461F11C8E8003D503B /* StorageUtility.m */; };
 		DB58BF4D1F11D5D5003D503B /* UIImage+CCHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = DB58BF4C1F11D5D5003D503B /* UIImage+CCHelper.m */; };
 		DB58BF511F11DC72003D503B /* FocusIndicatorView.m in Sources */ = {isa = PBXBuildFile; fileRef = DB58BF501F11DC72003D503B /* FocusIndicatorView.m */; };
+		DB58BF541F153577003D503B /* NSData+CCImageExif.m in Sources */ = {isa = PBXBuildFile; fileRef = DB58BF531F153577003D503B /* NSData+CCImageExif.m */; };
+		DB58BF5A1F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.m in Sources */ = {isa = PBXBuildFile; fileRef = DB58BF591F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.m */; };
 		DB9F69701ECD664A004D4F85 /* CCCameraModule.m in Sources */ = {isa = PBXBuildFile; fileRef = DB9F696F1ECD664A004D4F85 /* CCCameraModule.m */; };
 		DB9F698B1ECD701E004D4F85 /* CCCameraView.xib in Resources */ = {isa = PBXBuildFile; fileRef = DB9F696C1ECD390A004D4F85 /* CCCameraView.xib */; };
 		DB9F69C91ED014CE004D4F85 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
@@ -66,8 +68,12 @@
 		DB58BF461F11C8E8003D503B /* StorageUtility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StorageUtility.m; sourceTree = "<group>"; };
 		DB58BF4B1F11D5D5003D503B /* UIImage+CCHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+CCHelper.h"; sourceTree = "<group>"; };
 		DB58BF4C1F11D5D5003D503B /* UIImage+CCHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+CCHelper.m"; sourceTree = "<group>"; tabWidth = 4; };
-		DB58BF4F1F11DC72003D503B /* FocusIndicatorView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FocusIndicatorView.h; sourceTree = "<group>"; };
-		DB58BF501F11DC72003D503B /* FocusIndicatorView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FocusIndicatorView.m; sourceTree = "<group>"; };
+		DB58BF4F1F11DC72003D503B /* FocusIndicatorView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = FocusIndicatorView.h; sourceTree = "<group>"; tabWidth = 4; };
+		DB58BF501F11DC72003D503B /* FocusIndicatorView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = FocusIndicatorView.m; sourceTree = "<group>"; tabWidth = 4; };
+		DB58BF521F153577003D503B /* NSData+CCImageExif.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+CCImageExif.h"; sourceTree = "<group>"; };
+		DB58BF531F153577003D503B /* NSData+CCImageExif.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+CCImageExif.m"; sourceTree = "<group>"; };
+		DB58BF581F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableDictionary+CCImageMetadata.h"; sourceTree = "<group>"; };
+		DB58BF591F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableDictionary+CCImageMetadata.m"; sourceTree = "<group>"; };
 		DB9F696C1ECD390A004D4F85 /* CCCameraView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CCCameraView.xib; sourceTree = "<group>"; };
 		DB9F696E1ECD664A004D4F85 /* CCCameraModule.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = CCCameraModule.h; sourceTree = "<group>"; tabWidth = 4; };
 		DB9F696F1ECD664A004D4F85 /* CCCameraModule.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = CCCameraModule.m; sourceTree = "<group>"; tabWidth = 4; };
@@ -236,6 +242,10 @@
 				DB58BF461F11C8E8003D503B /* StorageUtility.m */,
 				DB58BF4B1F11D5D5003D503B /* UIImage+CCHelper.h */,
 				DB58BF4C1F11D5D5003D503B /* UIImage+CCHelper.m */,
+				DB58BF521F153577003D503B /* NSData+CCImageExif.h */,
+				DB58BF531F153577003D503B /* NSData+CCImageExif.m */,
+				DB58BF581F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.h */,
+				DB58BF591F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.m */,
 			);
 			name = utils;
 			sourceTree = "<group>";
@@ -349,10 +359,12 @@
 				DB3DAD311EE67AAE005B2885 /* GradientBackgroundView.m in Sources */,
 				DB9F69CC1ED10567004D4F85 /* CCCameraLayout.m in Sources */,
 				DB54DE6A1EC3AC62004AEF31 /* CCCamera.h in Sources */,
+				DB58BF5A1F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.m in Sources */,
 				DB54DE6B1EC3AC62004AEF31 /* CCCamera.m in Sources */,
 				DB58BF471F11C8E8003D503B /* StorageUtility.m in Sources */,
 				DB9F69701ECD664A004D4F85 /* CCCameraModule.m in Sources */,
 				DB58BF511F11DC72003D503B /* FocusIndicatorView.m in Sources */,
+				DB58BF541F153577003D503B /* NSData+CCImageExif.m in Sources */,
 				DB2FF1E31F0379CB0005A9BE /* geometry.cpp in Sources */,
 				DB9F69D11ED109F2004D4F85 /* ResizingSubview.m in Sources */,
 				DB54DE6C1EC3AC62004AEF31 /* CCCameraManager.h in Sources */,

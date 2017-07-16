@@ -78,6 +78,7 @@ RCT_CUSTOM_VIEW_PROPERTY(auxModeCaption, NSString, CCCameraView) {
 
 RCT_EXPORT_VIEW_PROPERTY(onClose, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onPhotoTaken, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onPhotoAccepted, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onAuxModeClicked, RCTDirectEventBlock)
 
 

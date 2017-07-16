@@ -133,8 +133,8 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         [self.camera unlockForConfiguration];
         
         // Add observers for the focus and exposure
-        [self.camera addObserver:self forKeyPath:@"adjustingFocus" options:0 context:nil];
-        [self.camera addObserver:self forKeyPath:@"adjustingExposure" options:0 context:nil];
+//        [self.camera addObserver:self forKeyPath:@"adjustingFocus" options:0 context:nil];
+//        [self.camera addObserver:self forKeyPath:@"adjustingExposure" options:0 context:nil];
         
         // Setup the capture session
         [self setupSession];
@@ -409,6 +409,177 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     }
 }
 
+// This method updates the flash setting for the camera
+-(void)updateFlashSetting:(CCCameraFlashMode)thisFlashMode {
+    
+    if ([self.camera isTorchAvailable] && [self.camera isFlashAvailable]) {
+        BOOL success = [self.camera lockForConfiguration:nil];
+        if (success) {
+            
+            switch (self.flashMode) {
+                case CCCameraFlashModeAuto:
+                    //[self.camera setFlashMode:AVCaptureFlashModeAuto];
+                    [self.camera setTorchMode:AVCaptureTorchModeOff];
+                    break;
+                case CCCameraFlashModeOn:
+                    //[self.camera setFlashMode:AVCaptureFlashModeOn];
+                    [self.camera setTorchMode:AVCaptureTorchModeOff];
+                    break;
+                case CCCameraFlashModeOff:
+                    //[self.camera setFlashMode:AVCaptureFlashModeOff];
+                    [self.camera setTorchMode:AVCaptureTorchModeOff];
+                    break;
+                case CCCameraFlashModeTorch:
+                    //[self.camera setFlashMode:AVCaptureFlashModeOff];
+                    [self.camera setTorchMode:AVCaptureTorchModeOn];
+                    break;
+                default:
+                    //[self.camera setFlashMode:AVCaptureFlashModeOff];
+                    [self.camera setTorchMode:AVCaptureTorchModeOff];
+                    break;
+            }
+
+            [self.camera  unlockForConfiguration];
+        }
+    }
+}
+
+// This method resizes a UIImage based on the image resolution setting and the size of the CCCameraView
+-(UIImage *)resizeImage:(UIImage*)image {
+    
+    // Get a reference to the CCCameraView
+    CCCameraView *latestView = [CCCameraManager getLatestView];
+    UIDeviceOrientation currentOrientation = [latestView.cameraLayout getCurrentOrientation];
+    CGSize viewSize = latestView.bounds.size;
+    CGSize imageSize = image.size;
+    
+    CGFloat screenWidth = viewSize.width;
+    CGFloat screenHeight = viewSize.height;
+    
+    CGFloat imageRatio;
+    CGFloat screenRatio;
+    
+    if (UIDeviceOrientationIsPortrait(currentOrientation))
+    {
+        screenRatio = screenWidth / screenHeight;
+        imageRatio = imageSize.width / imageSize.height;
+        
+        CGFloat cropWidth = (screenRatio / imageRatio) * imageSize.width;
+        CGFloat xOffset = (imageSize.width - cropWidth) / 2.f;
+        CGRect cropRect = CGRectMake(xOffset, 0, cropWidth, imageSize.height);
+        
+        NSLog([NSString stringWithFormat:@"The cropRect is %0.f by %0.f", cropRect.size.width, cropRect.size.height]);
+        
+        image = [image croppedImage:cropRect];
+    }
+    else
+    {
+        // account for phone locked to portrait
+        screenRatio = fminf(screenHeight, screenWidth) / fmaxf(screenHeight, screenWidth);
+        imageRatio = imageSize.height / imageSize.width;
+      
+        CGFloat cropHeight = (screenRatio / imageRatio) * imageSize.height;
+        CGFloat yOffset = (imageSize.height - cropHeight) / 2.f;
+        CGRect cropRect = CGRectMake(0, yOffset, imageSize.width, cropHeight);
+        
+//        CGFloat cropHeight = (screenRatio / imageRatio) * imageSize.width;
+//        CGFloat yOffset = (imageSize.width - cropHeight) / 2.f;
+//        CGRect cropRect = CGRectMake(0, yOffset, imageSize.height, cropHeight);
+        
+        NSLog([NSString stringWithFormat:@"The cropRect is %0.f by %0.f", cropRect.size.width, cropRect.size.height]);
+
+        image = [image croppedImage:cropRect];
+        CGFloat croppedImageHeight = image.size.height;
+        CGFloat cropeedImageWidth = image.size.width;
+    }
+    
+    // Get the max dimension for the current resolution setting
+    CGFloat maxDimension = [self getDesiredMinimumHeightForResolution:self.resolutionMode];
+    
+    //Resize to max dimension on one side keeping aspect ratio
+    if (UIDeviceOrientationIsPortrait(currentOrientation))
+    {
+        CGFloat newImageRatio = image.size.width / image.size.height;
+        image = [image scaledToSize:CGSizeMake(floorf(newImageRatio * maxDimension), maxDimension)];
+    }
+    else
+    {
+        CGFloat newImageHeight = image.size.height;
+        CGFloat newImageWidth = image.size.width;
+        CGFloat newImageRatio = image.size.height / image.size.width;
+        image = [image scaledToSize:CGSizeMake(maxDimension, floorf(newImageRatio * maxDimension))];
+    }
+    
+    CGFloat returnedImageHeight = image.size.height;
+    CGFloat returnedImageWidth = image.size.width;
+    return image;
+}
+
+// This method returns the minimum desired image height in pixels for the given resolution setting
+-(CGFloat)getDesiredMinimumHeightForResolution:(CCCameraResolutionMode)thisResolutionMode {
+    
+    if (thisResolutionMode == CCCameraResolutionModeSuper) {
+        return 2160.0f;
+    }
+    else if (thisResolutionMode == CCCameraResolutionModeHigh) {
+        return 1920.0f;
+    }
+    else {
+        return 1440.0f;
+    }
+}
+
+// This method uses the orientation of the layout and the current camera to determine the equivalent image orientation that can be used to display the image oriented upright with the device in portrait.
+-(UIImageOrientation)getCurrentImageOrientation {
+    
+    UIImageOrientation orientation;
+    
+    // Get the current orientation of the layout
+    CCCameraView *latestView = [CCCameraManager getLatestView];
+    UIDeviceOrientation currentOrientation = [latestView.cameraLayout getCurrentOrientation];
+    
+    // Check if the current camera is forward-facing
+    BOOL cameraIsFront = self.camera.position == AVCaptureDevicePositionFront;
+    
+    // Determine an equivalent image orientation for the output image given the current orientation of the layout and whether or not the camera is front-facing
+    switch (currentOrientation) {
+        case UIDeviceOrientationLandscapeLeft:
+            if (cameraIsFront) {
+                orientation = UIImageOrientationDownMirrored;
+            }
+            else {
+                orientation = UIImageOrientationUp;
+            }
+            break;
+        case UIDeviceOrientationPortraitUpsideDown:
+            if (cameraIsFront) {
+                orientation = UIImageOrientationRightMirrored;
+            }
+            else {
+                orientation = UIImageOrientationLeft;
+            }
+            break;
+        case UIDeviceOrientationLandscapeRight:
+            if (cameraIsFront) {
+                orientation = UIImageOrientationUpMirrored;
+            }
+            else {
+                orientation = UIImageOrientationDown;
+            }
+            break;
+        default:
+            if (cameraIsFront) {
+                orientation = UIImageOrientationLeftMirrored;
+            }
+            else {
+                orientation = UIImageOrientationRight;
+            }
+            break;
+    }
+    
+    return orientation;
+}
+
 #pragma mark CCCameraDelegate methods
 
 // This method starts the camera
@@ -427,8 +598,8 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         [self.captureSession commitConfiguration];
         
         // Remove the observers for the focus and exposure
-        [self.camera removeObserver:self forKeyPath:@"isAdjustingFocus" context:nil];
-        [self.camera removeObserver:self forKeyPath:@"isAdjustingExposure" context:nil];
+//        [self.camera removeObserver:self forKeyPath:@"isAdjustingFocus" context:nil];
+//        [self.camera removeObserver:self forKeyPath:@"isAdjustingExposure" context:nil];
     }
 }
 
@@ -549,7 +720,7 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
 
 // This method returns a boolean that describes whether or not the current camera has flash capability
 -(BOOL)hasFlash {
-    return [self.camera hasFlash];
+    return [self.camera hasTorch];
 }
 
 // This method toggles the flash state
@@ -562,7 +733,8 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         self.flashMode = CCCameraFlashModeTorch;
     }
     
-    // TODO: Update the flash mode for the camera
+    // Update the flash mode for the camera
+    [self updateFlashSetting:self.flashMode];
 }
 
 // This method captures a photo from the camera
@@ -728,21 +900,37 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     // If the photoData wasn't nil, then save the image to the file system
     if (self.photoData != nil) {
         
+        // Get a reference to the CCCameraView
+        CCCameraView *thisCameraView = [CCCameraManager getLatestView];
+        
         // Create a UIImage from the photoData and rotate it to the proper orientation
         UIImage *originalImage = [UIImage imageWithData:self.photoData scale:1.0f];
-        UIImage *rotatedImage = [originalImage rotateUIImage];
+        UIImage *rotatedImage = [originalImage rotateForImageOrientation:[self getCurrentImageOrientation]];
         
-        // TODO: Need to crop the image?
+        // Crop the image to the size of the CCCameraView
+        UIImage *croppedImage = [self resizeImage:rotatedImage];
+        
+        // Set the additional pieces of metadata
+        NSMutableDictionary *mutableMetadata = [[self.photoData exifDataForImage] mutableCopy];
+        NSDate *now = [NSDate date];
+        [mutableMetadata setDateDigitized:now];
+        [mutableMetadata setDateOriginal:now];
+        [mutableMetadata setImageOrientation:croppedImage.imageOrientation];
+        [mutableMetadata setLocation:[thisCameraView getExifLocation]];
         
         // Get the data for the rotated image
-        NSData *jpeg = UIImageJPEGRepresentation(rotatedImage, 0.6f);
+        NSData *jpeg = UIImageJPEGRepresentation(croppedImage, 0.6f);
         
         // Write the rotated image data to the file system
         NSString *filePath = [StorageUtility writeDataToFile:jpeg];
         
-        //
-        CCCameraView *thisCameraView = [CCCameraManager getLatestView];
-        [thisCameraView doPhotoTaken:filePath :1080 :1920];
+        // Execute the proper callback depending on the current camera mode
+        if (self.cameraMode != CCCameraModeFastCam) {
+            [thisCameraView doPhotoTaken:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage)];
+        }
+        else {
+            [thisCameraView doPhotoAccepted:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage)];
+        }
     }
     
     
@@ -819,7 +1007,7 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     
     if ([keyPath isEqualToString:@"adjustingFocus"] || [keyPath isEqualToString:@"adjustingExposure"]) {
-                
+        
         // If the camera is no longer focusing or exposing, then hide the focus indicator view
         if (self.camera != nil && !self.camera.isAdjustingFocus && !self.camera.isAdjustingExposure) {
             

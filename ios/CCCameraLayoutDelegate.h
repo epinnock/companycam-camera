@@ -58,4 +58,8 @@
 @optional
 -(void)hideAutoFocusIndicator;
 
+// This method returns the current orientation of the layout
+@optional
+-(UIDeviceOrientation)getCurrentOrientation;
+
 @end

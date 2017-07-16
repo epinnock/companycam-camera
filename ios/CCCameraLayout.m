@@ -54,6 +54,7 @@
 @synthesize buttonViewHeightConstraint;
 @synthesize buttonViewRightConstraint;
 @synthesize focusIndicatorView;
+@synthesize focusIndicatorTimer;
 @synthesize focusIndicatorTopConstraint;
 @synthesize focusIndicatorLeftConstraint;
 @synthesize CCCameraBundle;
@@ -818,13 +819,32 @@
     self.focusIndicatorTopConstraint.constant = touchPoint.y - height/2;
     self.focusIndicatorLeftConstraint.constant = touchPoint.x - width/2;
     
+    // Add an animation to the focusIndicatorView
+    double animationIncrementTime = 0.03;
+    self.focusIndicatorView.radius = 0.0;
+    
+    // Start the timer
+    self.focusIndicatorTimer = [NSTimer scheduledTimerWithTimeInterval:animationIncrementTime target:self selector:@selector(incrementFocusIndicatorRadius:) userInfo:nil repeats:YES];
+    
     // Show the focusIndicatorView
     [self.focusIndicatorView setHidden:NO];
 }
 
 // This method hides the auto focus indicator view
 -(void)hideAutoFocusIndicator {
+    [self.focusIndicatorTimer invalidate];
+    self.focusIndicatorTimer = nil;
     [self.focusIndicatorView setHidden:YES];
+}
+
+// This method returns the current orientation of the layout
+-(UIDeviceOrientation)getCurrentOrientation {
+    return self.lastOrientation;
+}
+
+// This method updates the radius for the focusIndicatorView
+-(void)incrementFocusIndicatorRadius:(NSTimer *)timer {
+    [self.focusIndicatorView incrementRadius];
 }
 
 #pragma mark -

@@ -13,6 +13,8 @@
 #import "CCCameraManager.h"
 #import "UIImage+CCHelper.h"
 #import "StorageUtility.h"
+#import "NSData+CCImageExif.h"
+#import "NSMutableDictionary+CCImageMetadata.h"
 
 @interface CCCamera : NSObject <CCCameraDelegate, AVCapturePhotoCaptureDelegate> {
     
