@@ -9,6 +9,7 @@
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
+#import <Photos/Photos.h>
 #import "CCCameraDelegate.h"
 #import "CCCameraManager.h"
 #import "UIImage+CCHelper.h"
@@ -27,6 +28,9 @@
     // The camera is a reference to the current camera being used
     AVCaptureDevice *camera;
     
+    // The cameraType is a reference to the camera type (rear- or forward-facing) currently being used
+    AVCaptureDevicePosition cameraType;
+    
     // The deviceInput is used to capture input from the current camera
     AVCaptureDeviceInput *deviceInput;
     
@@ -36,14 +40,20 @@
     // The photoData is used to store the NSData from the photo output
     NSData *photoData;
     
+    // The currentScaleNumber and startingScaleNumber are used to handle pinch/zoom gestures
+    double currentScaleNumber;
+    double startingScaleNumber;
 }
 
 @property (nonatomic) dispatch_queue_t captureSessionQueue;
 @property (nonatomic) AVCaptureSession *captureSession;
 @property (nonatomic) AVCaptureDevice *camera;
+@property (nonatomic) AVCaptureDevicePosition cameraType;
 @property (nonatomic) AVCaptureDeviceInput *deviceInput;
 @property (nonatomic) AVCapturePhotoOutput *photoOutput;
 @property (nonatomic) NSData *photoData;
+@property (nonatomic) double currentScaleNumber;
+@property (nonatomic) double startingScaleNumber;
 
 -(void)setupSession;
 -(void)configureSession;

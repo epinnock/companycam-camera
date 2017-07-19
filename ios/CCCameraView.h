@@ -15,7 +15,9 @@
 #import "RCTUIManager.h"
 #import "ResizingSubview.h"
 #import "CCCameraLayoutDelegate.h"
+#import "CCCameraDelegate.h"
 #import "CCCameraPreviewView.h"
+#import "JPSVolumeButtonHandler/JPSVolumeButtonHandler.h"
 
 @class CCCameraManager;
 @class CCCamera;
@@ -34,6 +36,9 @@
     // The CCCameraPreviewView contains the camera preview
     IBOutlet CCCameraPreviewView *previewView;
     
+    // The volumeButtonHandler is used to snap a photo using the volume button
+    JPSVolumeButtonHandler *volumeButtonHandler;
+    
     // Component prop values
     NSString *placeName;
     NSString *placeAddress;
@@ -49,6 +54,7 @@
 @property (nonatomic, retain) CCCamera *camera;
 @property (nonatomic, retain) id<CCCameraLayoutDelegate> cameraLayout;
 @property (nonatomic, retain) IBOutlet CCCameraPreviewView *previewView;
+@property (strong, nonatomic) JPSVolumeButtonHandler *volumeButtonHandler;
 @property (nonatomic, retain) NSString *placeName;
 @property (nonatomic, retain) NSString *placeAddress;
 @property (nonatomic, retain) NSString *appPhotoDirectory;

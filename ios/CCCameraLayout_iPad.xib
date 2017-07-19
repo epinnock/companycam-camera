@@ -48,6 +48,7 @@
                 <outlet property="scannerMessageLabel" destination="qwC-60-LfP" id="uRP-Zh-Wyg"/>
                 <outlet property="scannerSubview" destination="P3a-Jz-WRD" id="gge-Jw-j0u"/>
                 <outlet property="scannerTopConstraint" destination="Les-m4-z8P" id="ruh-Cy-kxy"/>
+                <outlet property="screenFlashView" destination="gpI-4n-Dci" id="cif-gH-DJF"/>
                 <outlet property="superButton" destination="dGH-xp-uEE" id="QTm-AV-Kcb"/>
                 <outlet property="toggleCamera" destination="Tac-bQ-WUc" id="CeZ-o8-3Xm"/>
                 <outlet property="toggleFlash" destination="wWR-L0-c8Q" id="1MB-7e-har"/>
@@ -464,6 +465,10 @@
                         <constraint firstAttribute="width" constant="80" id="Ymf-He-u6P"/>
                     </constraints>
                 </view>
+                <view alpha="0.0" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gpI-4n-Dci">
+                    <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                </view>
             </subviews>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
             <constraints>
@@ -471,13 +476,17 @@
                 <constraint firstItem="aLW-gt-wLM" firstAttribute="top" secondItem="bom-HH-iD6" secondAttribute="top" constant="-150" id="Gqo-4L-MfQ"/>
                 <constraint firstItem="qwC-60-LfP" firstAttribute="top" secondItem="cxQ-pT-Aec" secondAttribute="bottom" id="Les-m4-z8P"/>
                 <constraint firstItem="iRg-DG-u72" firstAttribute="top" secondItem="bom-HH-iD6" secondAttribute="top" id="OCZ-fe-qF3"/>
+                <constraint firstAttribute="trailing" secondItem="gpI-4n-Dci" secondAttribute="trailing" id="PHf-lP-1g2"/>
                 <constraint firstItem="cxQ-pT-Aec" firstAttribute="top" secondItem="bom-HH-iD6" secondAttribute="top" id="RQT-Gy-Ut0"/>
+                <constraint firstAttribute="bottom" secondItem="gpI-4n-Dci" secondAttribute="bottom" id="d04-BS-XSl"/>
                 <constraint firstItem="qwC-60-LfP" firstAttribute="centerX" secondItem="xdR-F2-PNT" secondAttribute="centerX" id="dY1-Kp-C9q"/>
                 <constraint firstAttribute="trailing" secondItem="iRg-DG-u72" secondAttribute="trailing" id="eqQ-xk-jtd"/>
                 <constraint firstAttribute="trailing" secondItem="cxQ-pT-Aec" secondAttribute="trailing" id="gHh-Tg-GRx"/>
                 <constraint firstItem="2Sn-ur-RY3" firstAttribute="top" secondItem="bom-HH-iD6" secondAttribute="top" id="itf-pO-ETk"/>
                 <constraint firstItem="cxQ-pT-Aec" firstAttribute="leading" secondItem="bom-HH-iD6" secondAttribute="leading" id="jgW-4G-zJi"/>
                 <constraint firstAttribute="trailing" secondItem="aLW-gt-wLM" secondAttribute="trailing" id="lHn-k6-7vC"/>
+                <constraint firstItem="gpI-4n-Dci" firstAttribute="top" secondItem="aLW-gt-wLM" secondAttribute="bottom" id="sTJ-pY-IgX"/>
+                <constraint firstItem="gpI-4n-Dci" firstAttribute="leading" secondItem="bom-HH-iD6" secondAttribute="leading" id="w2I-hl-i33"/>
             </constraints>
             <point key="canvasLocation" x="101" y="-67"/>
         </view>

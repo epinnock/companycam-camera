@@ -17,6 +17,10 @@
 #define PREFS_RESOLUTION_MODE @"PREFS_RESOLUTION_MODE"
 #define PREFS_CAMERA_MODE @"PREFS_CAMERA_MODE"
 
+// Define some constants for pinch & zoom
+#define MAX_PINCH_SCALE_NUM   3.f
+#define MIN_PINCH_SCALE_NUM   1.f
+
 typedef NS_ENUM( NSInteger, CCCameraSetupResult ) {
     CCCameraSetupResultSuccess,
     CCCameraSetupResultCameraNotAuthorized,
@@ -102,16 +106,33 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
 @synthesize captureSessionQueue;
 @synthesize captureSession;
 @synthesize camera;
+@synthesize cameraType;
 @synthesize deviceInput;
 @synthesize photoOutput;
 @synthesize photoData;
+@synthesize currentScaleNumber;
+@synthesize startingScaleNumber;
 
 -(id)init {
     
     self = [super init];
     if (self) {
         
-        // Choose the back dual camera if available, otherwise default to a wide angle camera.
+        // Register to receive a notification when the CCCameraModule is made inactive
+        [[NSNotificationCenter defaultCenter] removeObserver:self];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(onSetInactive:)
+                                                     name:@"CCCameraModuleInactiveNotification"
+                                                   object:nil];
+        
+        // Register to receive notifications when the app is sent to the background or enters the foreground
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSetActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSetInactive:) name:UIApplicationDidEnterBackgroundNotification object:nil];
+        
+        // Set the default camera type to be back-facing
+        self.cameraType = AVCaptureDevicePositionBack;
+
+        /*// Choose the back dual camera if available, otherwise default to a wide angle camera.
         AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithDeviceType:AVCaptureDeviceTypeBuiltInDuoCamera mediaType:AVMediaTypeVideo position:AVCaptureDevicePositionBack];
         if (!videoDevice) {
             
@@ -133,11 +154,8 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         [self.camera unlockForConfiguration];
         
         // Add observers for the focus and exposure
-//        [self.camera addObserver:self forKeyPath:@"adjustingFocus" options:0 context:nil];
-//        [self.camera addObserver:self forKeyPath:@"adjustingExposure" options:0 context:nil];
-        
-        // Setup the capture session
-        [self setupSession];
+        [self.camera addObserver:self forKeyPath:@"adjustingFocus" options:0 context:nil];
+        [self.camera addObserver:self forKeyPath:@"adjustingExposure" options:0 context:nil];*/
         
         // Get the saved settings from the NSUserDefaults.  Restrict the possible flash modes to "torch" and "off".
         self.flashMode = [[[NSUserDefaults standardUserDefaults] objectForKey:PREFS_FLASH_MODE] intValue];
@@ -146,9 +164,35 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         }
         self.resolutionMode = [[[NSUserDefaults standardUserDefaults] objectForKey:PREFS_RESOLUTION_MODE] intValue];
         self.cameraMode = [[[NSUserDefaults standardUserDefaults] objectForKey:PREFS_CAMERA_MODE] intValue];
+        
+        // Setup the capture session
+        [self setupSession];
+        
+        // Start the default camera
+        [self startCamera];
     }
     
     return self;
+}
+
+// This method responds to the UIApplicationDidBecomeActiveNotification
+-(void)onSetActive:(NSNotification *)notification {
+    
+    // Setup the capture session
+    [self setupSession];
+    
+    // Start the camera
+    [self startCamera];
+}
+
+// This method responds to the CCCameraModuleInactiveNotification and the UIApplicationDidEnterBackgroundNotification
+-(void)onSetInactive:(NSNotification *)notification {
+    
+    // Release the camera
+    [self releaseCamera];
+    
+    // Stop the capture session
+    [self.captureSession stopRunning];
 }
 
 #pragma mark Session management methods
@@ -169,6 +213,10 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     // Set up the preview view.
     CCCameraView *thisCameraView = [CCCameraManager getLatestView];
     thisCameraView.previewView.previewLayer.session = self.captureSession;
+    
+    // Initialize the zoom scale parameters
+    currentScaleNumber = 1.0;
+    startingScaleNumber = 1.0;
     
     // Set the default setup result
     self.setupResult = CCCameraSetupResultSuccess;
@@ -234,10 +282,6 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
 
 // This method configures the capture session
 -(void)configureSession {
-    
-    if (self.setupResult != CCCameraSetupResultSuccess ) {
-        return;
-    }
     
     NSError *error = nil;
     
@@ -585,21 +629,91 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
 // This method starts the camera
 -(void)startCamera {
     
-    // TODO: Update startCamera method
+    dispatch_async( self.captureSessionQueue, ^{
+        
+        AVCaptureDeviceType preferredDeviceType;
+        
+        switch (self.cameraType) {
+            case AVCaptureDevicePositionUnspecified:
+            case AVCaptureDevicePositionFront:
+                preferredDeviceType = AVCaptureDeviceTypeBuiltInWideAngleCamera;
+                break;
+            case AVCaptureDevicePositionBack:
+                preferredDeviceType = AVCaptureDeviceTypeBuiltInDuoCamera;
+                break;
+        }
+        
+        NSArray<AVCaptureDevice *> *devices = self.cameraDeviceDiscoverySession.devices;
+        AVCaptureDevice *newVideoDevice = nil;
+        
+        // First, look for a device with both the preferred position and device type.
+        for (AVCaptureDevice *device in devices) {
+            if (device.position == self.cameraType && [device.deviceType isEqualToString:preferredDeviceType] ) {
+                newVideoDevice = device;
+                break;
+            }
+        }
+        
+        // Otherwise, look for a device with only the preferred position.
+        if (!newVideoDevice) {
+            for (AVCaptureDevice *device in devices) {
+                if (device.position == self.cameraType) {
+                    newVideoDevice = device;
+                    break;
+                }
+            }
+        }
+        
+        if (newVideoDevice) {
+            AVCaptureDeviceInput *videoDeviceInput = [AVCaptureDeviceInput deviceInputWithDevice:newVideoDevice error:NULL];
+            
+            // Set the reference to the camera
+            self.camera = newVideoDevice;
+            NSError *error;
+            [self.camera lockForConfiguration:&error];
+            if ([self.camera isFocusModeSupported:AVCaptureFocusModeContinuousAutoFocus]) {
+                [self.camera setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
+            }
+            if ([self.camera isExposureModeSupported:AVCaptureExposureModeContinuousAutoExposure]) {
+                [self.camera setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
+            }
+            [self.camera unlockForConfiguration];
+            
+            // Remove the existing device input first if there is one, since using the front and back camera simultaneously is not supported.
+            [self releaseCamera];
+            
+            // Add observers for the focus and exposure
+//            [self.camera addObserver:self forKeyPath:@"adjustingFocus" options:0 context:nil];
+//            [self.camera addObserver:self forKeyPath:@"adjustingExposure" options:0 context:nil];
+            
+            // Add the new input to the capture session
+            [self configureSession];
+            
+            // Set the layout object's reference to the camera
+            CCCameraView *latestView = [CCCameraManager getLatestView];
+            [latestView.cameraLayout setCameraObject:latestView.camera];
+            
+            // Update the flash setting for this camera
+            [self updateFlashSetting:self.flashMode];
+        }
+    });
 }
 
 // This method releases the camera
 -(void)releaseCamera {
     
-    // TODO: Update releaseCamera method
     if (self.captureSession != nil && self.deviceInput != nil) {
         [self.captureSession beginConfiguration];
         [self.captureSession removeInput:self.deviceInput];
         [self.captureSession commitConfiguration];
         
-        // Remove the observers for the focus and exposure
-//        [self.camera removeObserver:self forKeyPath:@"isAdjustingFocus" context:nil];
-//        [self.camera removeObserver:self forKeyPath:@"isAdjustingExposure" context:nil];
+        // Remove the observers for the focus and exposure if necessary
+//        @try {
+//            [self.camera removeObserver:self forKeyPath:@"adjustingFocus" context:nil];
+//            [self.camera removeObserver:self forKeyPath:@"adjustingExposure" context:nil];
+//        }
+//        @catch(id exception) {
+//        }
     }
 }
 
@@ -650,7 +764,32 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
 // This method toggles the camera between forward-facing and rear-facing
 -(void)toggleCamera {
     
-    dispatch_async( self.captureSessionQueue, ^{
+    AVCaptureDevicePosition preferredPosition;
+    
+    switch (self.cameraType) {
+        case AVCaptureDevicePositionUnspecified:
+        case AVCaptureDevicePositionFront:
+            preferredPosition = AVCaptureDevicePositionBack;
+            break;
+        case AVCaptureDevicePositionBack:
+            preferredPosition = AVCaptureDevicePositionFront;
+            break;
+    }
+    
+    // Update the camera type
+    self.cameraType = preferredPosition;
+    
+    // Close the current camera
+    [self releaseCamera];
+    
+    // Reset the currentScaleNumber and the startingScaleNumber
+    currentScaleNumber = 1.0;
+    startingScaleNumber = 1.0;
+    
+    // Initialize the camera again
+    [self startCamera];
+    
+    /*dispatch_async( self.captureSessionQueue, ^{
         AVCaptureDevicePosition currentPosition = self.camera.position;
         
         AVCaptureDevicePosition preferredPosition;
@@ -702,10 +841,6 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
             [self.captureSession beginConfiguration];
             
             if ( [self.captureSession canAddInput:videoDeviceInput] ) {
-                [[NSNotificationCenter defaultCenter] removeObserver:self name:AVCaptureDeviceSubjectAreaDidChangeNotification object:camera];
-                
-                [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(subjectAreaDidChange:) name:AVCaptureDeviceSubjectAreaDidChangeNotification object:newVideoDevice];
-                
                 [self.captureSession addInput:videoDeviceInput];
                 self.deviceInput = videoDeviceInput;
             }
@@ -715,7 +850,7 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
             
             [self.captureSession commitConfiguration];
         }
-    } );
+    } );*/
 }
 
 // This method returns a boolean that describes whether or not the current camera has flash capability
@@ -740,12 +875,21 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
 // This method captures a photo from the camera
 -(void)takePicture {
     
+    // The volumeButtonHandler may try to trigger this method, so make sure the current camera mode is CCCameraModeCamera or CCCameraModeFastCam before trying to capture a photo.
+    if (!(self.cameraMode == CCCameraModeCamera || self.cameraMode == CCCameraModeFastCam)) {
+        return;
+    }
+    
+    // Animate the screen flash
+    CCCameraView *latestView = [CCCameraManager getLatestView];
+    [latestView.cameraLayout animateScreenFlash];
+    
     /*
      Retrieve the video preview layer's video orientation on the main queue before
      entering the session queue. We do this to ensure UI elements are accessed on
      the main thread and session configuration is done on the session queue.
      */
-    CCCameraView *latestView = [CCCameraManager getLatestView];
+    
     AVCaptureVideoOrientation videoPreviewLayerVideoOrientation = latestView.previewView.previewLayer.connection.videoOrientation;
     
     dispatch_async(self.captureSessionQueue, ^{
@@ -820,6 +964,43 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         
         // Trigger the tap-to-autofocus and tap-to-expose
         [self handleFocus:event];
+    }
+}
+
+// This method handles a pinch/zoom event
+-(void)handleZoom:(double)zoomScale :(BOOL)zoomEnded {
+    
+    // Set the currentScaleNumber
+    currentScaleNumber = startingScaleNumber * zoomScale;
+    
+    // Clamp the currentScaleNumber to a range of [MIN_PINCH_SCALE_NUM - MAX_PINCH_SCALE_NUM]
+    if (currentScaleNumber < MIN_PINCH_SCALE_NUM) {
+        currentScaleNumber = MIN_PINCH_SCALE_NUM;
+    }
+    else if (currentScaleNumber > MAX_PINCH_SCALE_NUM) {
+        currentScaleNumber = MAX_PINCH_SCALE_NUM;
+    }
+    
+//    if ( [self.delegate respondsToSelector:@selector(cameraCaptureScale:)] )
+//        [self.delegate cameraCaptureScale:_scaleNum];
+    
+//    // Set the scale for the previewLayer
+//    [CATransaction begin];
+//    [CATransaction setAnimationDuration:.025];
+//    [latestView.previewView.previewLayer setAffineTransform:CGAffineTransformMakeScale(currentScaleNumber, currentScaleNumber)];
+//    [CATransaction commit];
+    
+    NSError *error = nil;
+    if ([self.camera lockForConfiguration:&error]) {
+        self.camera.videoZoomFactor = currentScaleNumber;
+        [self.camera unlockForConfiguration];
+    } else {
+        NSLog(@"error: %@", error);
+    }
+    
+    // If this zoom event has ended, then set the startingScaleNumber for the next zoome event
+    if (zoomEnded) {
+        startingScaleNumber = currentScaleNumber;
     }
 }
 
@@ -915,7 +1096,7 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         NSDate *now = [NSDate date];
         [mutableMetadata setDateDigitized:now];
         [mutableMetadata setDateOriginal:now];
-        [mutableMetadata setImageOrientation:croppedImage.imageOrientation];
+        [mutableMetadata setImageOrientation:[self getCurrentImageOrientation]];
         [mutableMetadata setLocation:[thisCameraView getExifLocation]];
         
         // Get the data for the rotated image
@@ -923,6 +1104,30 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         
         // Write the rotated image data to the file system
         NSString *filePath = [StorageUtility writeDataToFile:jpeg];
+        
+        // If saveToPhone is set, then save the image to the device in addition to sending it to the server.
+        BOOL saveToPhone = [[NSUserDefaults standardUserDefaults] boolForKey:@"SaveToPhone"];
+        if (saveToPhone) {
+            
+            // Check for permission to acceess the camera roll
+            [PHPhotoLibrary requestAuthorization:^( PHAuthorizationStatus status ) {
+                if (status == PHAuthorizationStatusAuthorized) {
+                    
+                    // Add the photo to the camera roll
+                    [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                        PHAssetCreationRequest *creationRequest = [PHAssetCreationRequest creationRequestForAsset];
+                        [creationRequest addResourceWithType:PHAssetResourceTypePhoto data:UIImageJPEGRepresentation(croppedImage, 0.7f) options:nil];
+                    } completionHandler:^( BOOL success, NSError * _Nullable error ) {
+                        if (!success) {
+                            NSLog(@"Error occurred while saving photo to photo library: %@", error);
+                        }
+                    }];
+                }
+                else {
+                    NSLog( @"Not authorized to save photo" );
+                }
+            }];
+        }
         
         // Execute the proper callback depending on the current camera mode
         if (self.cameraMode != CCCameraModeFastCam) {

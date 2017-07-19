@@ -95,6 +95,12 @@
     IBOutlet NSLayoutConstraint *focusIndicatorTopConstraint;
     IBOutlet NSLayoutConstraint *focusIndicatorLeftConstraint;
     
+    // The screenFlashView is used to provide a flash effect when the user snaps a photo
+    IBOutlet UIView *screenFlashView;
+    
+    // The pinch gesture recognizer is used to handle the pinch to zoom action
+    IBOutlet UIPinchGestureRecognizer *pinchRecognizer;
+    
     // This is a reference to the resource bundle for this project
     NSBundle *CCCameraBundle;
 }
@@ -146,6 +152,8 @@
 @property (nonatomic, retain) NSTimer *focusIndicatorTimer;
 @property (nonatomic, retain) IBOutlet NSLayoutConstraint *focusIndicatorTopConstraint;
 @property (nonatomic, retain) IBOutlet NSLayoutConstraint *focusIndicatorLeftConstraint;
+@property (nonatomic, retain) IBOutlet UIView *screenFlashView;
+@property (nonatomic, retain) IBOutlet UIPinchGestureRecognizer *pinchRecognizer;
 @property (nonatomic, retain) NSBundle *CCCameraBundle;
 
 -(IBAction)closeButtonClick:(id)sender;
@@ -160,6 +168,9 @@
 -(IBAction)cameraSubviewClick:(id)sender;
 -(IBAction)scannerSubviewClick:(id)sender;
 -(IBAction)auxModeSubviewClick:(id)sender;
+-(void)setFlashButtonVisibility;
+-(void)setCameraButtonVisibility;
 -(void)incrementFocusIndicatorRadius:(NSTimer *)timer;
+-(IBAction)handleZoom:(UIPinchGestureRecognizer *)pinchGestureRecognizer;
 
 @end

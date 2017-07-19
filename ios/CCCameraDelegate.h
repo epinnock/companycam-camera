@@ -52,6 +52,10 @@
 @optional
 -(void)handleTouchEvent:(UIEvent *)event;
 
+// This method handles a pinch/zoom event
+@optional
+-(void)handleZoom:(double)zoomScale :(BOOL)zoomEnded;
+
 @end
 
 

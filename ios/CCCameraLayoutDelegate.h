@@ -22,6 +22,10 @@
 @optional
 -(void)setPlaceNameLabel:(NSString *)name;
 
+// This method sets the aux mode label
+@optional
+-(void)setAuxModeLabel:(NSString *)name;
+
 // This method sets the visibility of the flash button
 @optional
 -(void)setFlashButtonVisibility;
@@ -49,6 +53,10 @@
 // This method hides the resolution layout
 @optional
 -(void)hideResolutionLayout;
+
+// This method animates the screen flash after capturing a photo
+@optional
+-(void)animateScreenFlash;
 
 // This method shows an auto focus indicator view at the given position while the camera is focusing and/or exposing
 @optional

@@ -57,6 +57,8 @@
 @synthesize focusIndicatorTimer;
 @synthesize focusIndicatorTopConstraint;
 @synthesize focusIndicatorLeftConstraint;
+@synthesize screenFlashView;
+@synthesize pinchRecognizer;
 @synthesize CCCameraBundle;
 
 -(id)initWithCoder:(NSCoder *)aDecoder {
@@ -124,6 +126,36 @@
     
     // Set the multipleTouchEnabled property to enable multiple touches
     self.multipleTouchEnabled = YES;
+    
+    // Add the pinchRecognizer
+    [self addGestureRecognizer:self.pinchRecognizer];
+    
+    // Register to receive a notification when the CCCameraModule is made active
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(onSetActive:)
+                                                 name:@"CCCameraModuleActiveNotification"
+                                               object:nil];
+    
+    // Register to receive a notification when the CCCameraModule is made inactive
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(onSetInactive:)
+                                                 name:@"CCCameraModuleInactiveNotification"
+                                               object:nil];
+}
+
+// This method responds to the CCCameraModuleActiveNotification
+-(void)onSetActive:(NSNotification *)notification {
+    
+    // Initialize the motionManager
+    //[self initializeMotionManager];
+}
+
+// This method responds to the CCCameraModuleInactiveNotification
+-(void)onSetInactive:(NSNotification *)notification {
+    
+    // Stop the motionManager updates
+    //[self.motionManager stopAccelerometerUpdates];
 }
 
 #pragma mark CMMotionManager methods
@@ -516,13 +548,26 @@
     }
 }
 
+// This method sets the aux mode label
+-(void)setAuxModeLabel:(NSString *)name {
+    if (self.auxModeLabel != nil) {
+        [self.auxModeLabel setText:name];
+    }
+}
+
 // This method sets the visibility of the flash button
 -(void)setFlashButtonVisibility {
     
+    // If this isn't being called from the main thread, switch it to the main thread
+    if ([NSThread currentThread] != [NSThread mainThread]) {
+        [self performSelector:@selector(setFlashButtonVisibility) onThread:[NSThread mainThread] withObject:nil waitUntilDone:NO];
+        return;
+    }
+    
     // Hide the flash button if the selected camera doesn't support flash
     if ([self.camera hasFlash]) {
-        [self.toggleFlash setHidden:NO];
         self.toggleFlash.alpha = 1.0;
+        [self.toggleFlash setHidden:NO];
     }
     else {
         [self.toggleFlash setHidden:YES];
@@ -600,10 +645,16 @@
 // This method sets the camera button visibility
 -(void)setCameraButtonVisibility {
     
+    // If this isn't being called from the main thread, switch it to the main thread
+    if ([NSThread currentThread] != [NSThread mainThread]) {
+        [self performSelector:@selector(setCameraButtonVisibility) onThread:[NSThread mainThread] withObject:nil waitUntilDone:NO];
+        return;
+    }
+    
     // Show the camera button only if the device has both a rear- and forward-facing camera
     if ([self.camera hasRearCamera] && [self.camera hasFrontCamera]) {
-        [self.toggleCamera setHidden:NO];
         self.toggleCamera.alpha = 1.0;
+        [self.toggleCamera setHidden:NO];
     }
     else {
         [self.toggleCamera setHidden:YES];
@@ -808,6 +859,26 @@
                      }];
 }
 
+// This method animates the screen flash after capturing a photo
+-(void)animateScreenFlash {
+    
+    /* http://stackoverflow.com/questions/12924094/simulate-a-picture-taken-screen-flash */
+    
+    CAKeyframeAnimation *opacityAnimation = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
+    NSArray *animationValues = @[ @0.8f, @0.0f ];
+    NSArray *animationTimes = @[ @0.3f, @1.0f ];
+    id timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
+    NSArray *animationTimingFunctions = @[ timingFunction, timingFunction ];
+    [opacityAnimation setValues:animationValues];
+    [opacityAnimation setKeyTimes:animationTimes];
+    [opacityAnimation setTimingFunctions:animationTimingFunctions];
+    opacityAnimation.fillMode = kCAFillModeForwards;
+    opacityAnimation.removedOnCompletion = YES;
+    opacityAnimation.duration = 0.4;
+    
+    [self.screenFlashView.layer addAnimation:opacityAnimation forKey:@"animation"];
+}
+
 // This method shows an auto focus indicator view at the given position while the camera is focusing and/or exposing
 -(void)showAutoFocusIndicator:(CGPoint)touchPoint :(BOOL)setRepeating {
     
@@ -844,11 +915,32 @@
 
 // This method updates the radius for the focusIndicatorView
 -(void)incrementFocusIndicatorRadius:(NSTimer *)timer {
-    [self.focusIndicatorView incrementRadius];
+    
+    // If the radius for the focusIndicatorView has reached 1.0, then stop the timer and hide the view again.
+    if (self.focusIndicatorView.radius >= 1.0) {
+        [self hideAutoFocusIndicator];
+    }
+    else {
+        [self.focusIndicatorView incrementRadius];
+    }
 }
 
 #pragma mark -
 #pragma mark Touch event handling methods
+
+-(IBAction)handleZoom:(UIPinchGestureRecognizer *)pinchGestureRecognizer {
+    
+    // Check if this zoom event has ended
+    BOOL zoomEnded = NO;
+    if ([pinchGestureRecognizer state] == UIGestureRecognizerStateEnded ||
+        [pinchGestureRecognizer state] == UIGestureRecognizerStateCancelled ||
+        [pinchGestureRecognizer state] == UIGestureRecognizerStateFailed) {
+        zoomEnded = YES;
+    }
+    
+    // Pass the scale of the pinch gesture to the camera
+    [self.camera handleZoom:pinchGestureRecognizer.scale :zoomEnded];
+}
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
     

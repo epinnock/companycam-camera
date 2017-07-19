@@ -12,6 +12,7 @@
 		DB2FF1E21F0379CB0005A9BE /* docscan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DB2FF1DE1F0379CB0005A9BE /* docscan.cpp */; };
 		DB2FF1E31F0379CB0005A9BE /* geometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DB2FF1E01F0379CB0005A9BE /* geometry.cpp */; };
 		DB3DAD311EE67AAE005B2885 /* GradientBackgroundView.m in Sources */ = {isa = PBXBuildFile; fileRef = DB3DAD301EE67AAE005B2885 /* GradientBackgroundView.m */; };
+		DB4C425F1F1E9CFE002151D2 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB4C425E1F1E9CFE002151D2 /* Photos.framework */; };
 		DB54DE6A1EC3AC62004AEF31 /* CCCamera.h in Sources */ = {isa = PBXBuildFile; fileRef = DB54DE421EC3A667004AEF31 /* CCCamera.h */; };
 		DB54DE6B1EC3AC62004AEF31 /* CCCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = DB54DE431EC3A667004AEF31 /* CCCamera.m */; };
 		DB54DE6C1EC3AC62004AEF31 /* CCCameraManager.h in Sources */ = {isa = PBXBuildFile; fileRef = DB54DE3E1EC3A56F004AEF31 /* CCCameraManager.h */; };
@@ -57,6 +58,7 @@
 		DB2FF1EE1F0433530005A9BE /* PrefixHeader.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
 		DB3DAD2F1EE67AAE005B2885 /* GradientBackgroundView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = GradientBackgroundView.h; sourceTree = "<group>"; tabWidth = 4; };
 		DB3DAD301EE67AAE005B2885 /* GradientBackgroundView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = GradientBackgroundView.m; sourceTree = "<group>"; tabWidth = 4; };
+		DB4C425E1F1E9CFE002151D2 /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
 		DB54DE3E1EC3A56F004AEF31 /* CCCameraManager.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = CCCameraManager.h; sourceTree = "<group>"; };
 		DB54DE3F1EC3A56F004AEF31 /* CCCameraManager.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = CCCameraManager.m; sourceTree = "<group>"; };
 		DB54DE421EC3A667004AEF31 /* CCCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = CCCamera.h; sourceTree = "<group>"; tabWidth = 4; };
@@ -74,6 +76,7 @@
 		DB58BF531F153577003D503B /* NSData+CCImageExif.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+CCImageExif.m"; sourceTree = "<group>"; };
 		DB58BF581F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableDictionary+CCImageMetadata.h"; sourceTree = "<group>"; };
 		DB58BF591F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableDictionary+CCImageMetadata.m"; sourceTree = "<group>"; };
+		DB58BF631F1D5E27003D503B /* JPSVolumeButtonHandler */ = {isa = PBXFileReference; lastKnownFileType = folder; path = JPSVolumeButtonHandler; sourceTree = "<group>"; };
 		DB9F696C1ECD390A004D4F85 /* CCCameraView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CCCameraView.xib; sourceTree = "<group>"; };
 		DB9F696E1ECD664A004D4F85 /* CCCameraModule.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = CCCameraModule.h; sourceTree = "<group>"; tabWidth = 4; };
 		DB9F696F1ECD664A004D4F85 /* CCCameraModule.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = CCCameraModule.m; sourceTree = "<group>"; tabWidth = 4; };
@@ -97,6 +100,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DB4C425F1F1E9CFE002151D2 /* Photos.framework in Frameworks */,
 				DB0BCA021F044141004B8447 /* opencv2.framework in Frameworks */,
 				DB0BCA011F044135004B8447 /* AssetsLibrary.framework in Frameworks */,
 			);
@@ -134,6 +138,7 @@
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
+				DB58BF631F1D5E27003D503B /* JPSVolumeButtonHandler */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -253,6 +258,7 @@
 		DBC969281EDFA9F200578CE2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				DB4C425E1F1E9CFE002151D2 /* Photos.framework */,
 				DB0BC9FE1F0440F5004B8447 /* opencv2.framework */,
 				DB2FF1E81F0413190005A9BE /* AssetsLibrary.framework */,
 				DBC969291EDFA9F300578CE2 /* AVFoundation.framework */,

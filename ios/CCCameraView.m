@@ -15,6 +15,7 @@
 @synthesize camera;
 @synthesize cameraLayout;
 @synthesize previewView;
+@synthesize volumeButtonHandler;
 @synthesize placeName;
 @synthesize placeAddress;
 @synthesize appPhotoDirectory;
@@ -36,6 +37,40 @@
         [bundle loadNibNamed:@"CCCameraView" owner:self options:nil];
         [self addSubview:self.view];
         
+        // Initialize the volumeButtonHandler
+        self.volumeButtonHandler = [JPSVolumeButtonHandler volumeButtonHandlerWithUpBlock:^{
+            
+            // Initiate the takePicture method
+            if (self.camera != nil) {
+                id<CCCameraDelegate> cameraDelegate = (id<CCCameraDelegate>)self.camera;
+                [cameraDelegate takePicture];
+            }
+            
+        } downBlock:^{
+            // Volume Down Button Pressed
+        }];
+        
+        // Start the volumeButtonHandler
+        [self.volumeButtonHandler startHandler:YES];
+        
+        // Register to receive a notification when the CCCameraModule is made active
+        [[NSNotificationCenter defaultCenter] removeObserver:self];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(onSetActive:)
+                                                     name:@"CCCameraModuleActiveNotification"
+                                                   object:nil];
+        
+        // Register to receive a notification when the CCCameraModule is made inactive
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(onSetInactive:)
+                                                     name:@"CCCameraModuleInactiveNotification"
+                                                   object:nil];
+        
+        // Register to receive notifications when the app is sent to the background or enters the foreground
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSetActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSetInactive:) name:UIApplicationDidEnterBackgroundNotification object:nil];
+
+
         NSLog(@"A CCCameraView was just created!");
     }
     
@@ -46,9 +81,23 @@
 -(void)finishWithResult:(NSString *)button {
     
     // Remove any notification listeners
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    //[[NSNotificationCenter defaultCenter] removeObserver:self];
     
     [self propOnClose:@"" :button];
+}
+
+// This method responds to the CCCameraModuleActiveNotification
+-(void)onSetActive:(NSNotification *)notification {
+    
+    // Start the volumeButtonHandler
+    [self.volumeButtonHandler startHandler:YES];
+}
+
+// This method responds to the CCCameraModuleInactiveNotification
+-(void)onSetInactive:(NSNotification *)notification {
+    
+    // Stop the volumeButtonHandler
+    [self.volumeButtonHandler stopHandler];
 }
 
 #pragma mark Component props - functions
@@ -167,8 +216,7 @@
 
 -(void)setAuxModeCaption:(NSString *)val {
     self.propAuxModeCaption = val;
-    
-    // TODO: Set the scanner label
+    [self.cameraLayout setAuxModeLabel:self.propAuxModeCaption];
 }
 
 @end

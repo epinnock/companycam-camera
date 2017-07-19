@@ -28,6 +28,7 @@
                 <outlet property="focusIndicatorView" destination="QOZ-q3-haC" id="vSf-bo-Ees"/>
                 <outlet property="highButton" destination="HC0-xc-5fD" id="qIa-Zw-FEg"/>
                 <outlet property="normalButton" destination="aaB-7E-gAI" id="ltG-L1-osI"/>
+                <outlet property="pinchRecognizer" destination="4jn-rz-OzB" id="YWg-Xd-asl"/>
                 <outlet property="placeLabelRightConstraint" destination="ofX-OW-Bsn" id="5OG-bj-Ss5"/>
                 <outlet property="placeLabelTopConstraint" destination="s3n-I3-N5j" id="OCZ-HI-DNF"/>
                 <outlet property="placeLabelView" destination="3eV-QH-OOR" id="q86-8u-wOq"/>
@@ -45,6 +46,7 @@
                 <outlet property="scannerMessageLabel" destination="aCJ-Kf-51d" id="jym-IG-1bS"/>
                 <outlet property="scannerSubview" destination="Up6-4v-5fE" id="txR-HB-7fY"/>
                 <outlet property="scannerTopConstraint" destination="NV6-os-fYx" id="iCk-Lg-caT"/>
+                <outlet property="screenFlashView" destination="vqg-pc-MUT" id="wod-q9-eUh"/>
                 <outlet property="superButton" destination="Yqe-UD-LI6" id="idJ-aO-YaI"/>
                 <outlet property="toggleCamera" destination="13b-u4-QV7" id="BgV-Oj-QPd"/>
                 <outlet property="toggleFlash" destination="euh-3S-d3n" id="h1u-u1-ly5"/>
@@ -472,18 +474,27 @@
                         <constraint firstAttribute="height" constant="80" id="y9w-JX-EIC"/>
                     </constraints>
                 </view>
+                <view alpha="0.0" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="vqg-pc-MUT">
+                    <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <gestureRecognizers/>
+                </view>
             </subviews>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+            <gestureRecognizers/>
             <constraints>
                 <constraint firstItem="DTP-n4-T4H" firstAttribute="leading" secondItem="euh-3S-d3n" secondAttribute="trailing" constant="20" id="3ZO-1Q-RTk"/>
                 <constraint firstAttribute="trailing" secondItem="ad1-NS-Wzl" secondAttribute="trailing" id="IEc-Kf-x7k"/>
                 <constraint firstItem="aCJ-Kf-51d" firstAttribute="top" secondItem="hwz-hZ-ITa" secondAttribute="bottom" id="NV6-os-fYx"/>
+                <constraint firstItem="vqg-pc-MUT" firstAttribute="leading" secondItem="7da-8W-gKK" secondAttribute="leading" id="Oi4-8l-NTT"/>
                 <constraint firstAttribute="trailing" secondItem="hwz-hZ-ITa" secondAttribute="trailing" id="POT-gj-h7v"/>
+                <constraint firstAttribute="bottom" secondItem="vqg-pc-MUT" secondAttribute="bottom" id="QJM-tM-5Bj"/>
                 <constraint firstItem="13b-u4-QV7" firstAttribute="leading" secondItem="DTP-n4-T4H" secondAttribute="trailing" constant="20" id="WOr-Xr-LT4"/>
                 <constraint firstItem="ad1-NS-Wzl" firstAttribute="leading" secondItem="7da-8W-gKK" secondAttribute="leading" id="YkY-Ab-zJX"/>
                 <constraint firstItem="13b-u4-QV7" firstAttribute="centerY" secondItem="DTP-n4-T4H" secondAttribute="centerY" id="Yna-29-EQ1"/>
                 <constraint firstItem="hwz-hZ-ITa" firstAttribute="leading" secondItem="7da-8W-gKK" secondAttribute="leading" id="ayK-QU-QOi"/>
                 <constraint firstItem="aCJ-Kf-51d" firstAttribute="centerX" secondItem="3eV-QH-OOR" secondAttribute="centerX" id="bAw-ll-9Kl"/>
+                <constraint firstAttribute="trailing" secondItem="vqg-pc-MUT" secondAttribute="trailing" id="bT4-x9-gCl"/>
                 <constraint firstItem="DTP-n4-T4H" firstAttribute="centerX" secondItem="7da-8W-gKK" secondAttribute="centerX" id="buZ-uB-0M3"/>
                 <constraint firstAttribute="trailing" secondItem="WdW-oQ-prY" secondAttribute="trailing" id="cUq-wF-53H"/>
                 <constraint firstItem="WdW-oQ-prY" firstAttribute="top" secondItem="7da-8W-gKK" secondAttribute="top" constant="-150" id="frO-ti-Y3E"/>
@@ -493,9 +504,16 @@
                 <constraint firstItem="ad1-NS-Wzl" firstAttribute="top" secondItem="DTP-n4-T4H" secondAttribute="bottom" constant="10" id="qIJ-ZP-hoB"/>
                 <constraint firstAttribute="bottom" secondItem="ad1-NS-Wzl" secondAttribute="bottom" id="tgR-q3-LJo"/>
                 <constraint firstItem="euh-3S-d3n" firstAttribute="centerY" secondItem="DTP-n4-T4H" secondAttribute="centerY" id="xy3-wK-8Wq"/>
+                <constraint firstItem="vqg-pc-MUT" firstAttribute="top" secondItem="7da-8W-gKK" secondAttribute="top" id="ybi-ea-CPs"/>
             </constraints>
             <point key="canvasLocation" x="59.5" y="43.5"/>
         </view>
+        <pinchGestureRecognizer delaysTouchesBegan="YES" id="4jn-rz-OzB">
+            <connections>
+                <action selector="handleZoom:" destination="-1" id="M94-VS-svR"/>
+                <outlet property="delegate" destination="-1" id="3Ig-7y-P14"/>
+            </connections>
+        </pinchGestureRecognizer>
     </objects>
     <resources>
         <image name="chevron-up-icon" width="16" height="10"/>
