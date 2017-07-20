@@ -334,6 +334,11 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     // Add photo output
     AVCapturePhotoOutput *thisPhotoOutput = [[AVCapturePhotoOutput alloc] init];
     if ([self.captureSession canAddOutput:thisPhotoOutput]) {
+        
+        // Remove any existing photoOutputs first
+        if (self.photoOutput != nil) {
+            [self.captureSession removeOutput:self.photoOutput];
+        }
         [self.captureSession addOutput:thisPhotoOutput];
         self.photoOutput = thisPhotoOutput;
         
@@ -901,7 +906,6 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         // Capture a JPEG photo with flash set to auto and high resolution photo enabled.
         AVCapturePhotoSettings *photoSettings = [AVCapturePhotoSettings photoSettings];
         
-        photoSettings.flashMode = AVCaptureFlashModeAuto;
         photoSettings.highResolutionPhotoEnabled = YES;
         if ( photoSettings.availablePreviewPhotoPixelFormatTypes.count > 0 ) {
             photoSettings.previewPhotoFormat = @{ (NSString *)kCVPixelBufferPixelFormatTypeKey : photoSettings.availablePreviewPhotoPixelFormatTypes.firstObject };
@@ -1112,6 +1116,8 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
             // Check for permission to acceess the camera roll
             [PHPhotoLibrary requestAuthorization:^( PHAuthorizationStatus status ) {
                 if (status == PHAuthorizationStatusAuthorized) {
+                    
+                    NSLog(@"Trying to save a photo to the camera roll");
                     
                     // Add the photo to the camera roll
                     [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{

@@ -549,7 +549,7 @@
 }
 
 // This method sets the aux mode label
--(void)setAuxModeLabel:(NSString *)name {
+-(void)setAuxModeLabelText:(NSString *)name {
     if (self.auxModeLabel != nil) {
         [self.auxModeLabel setText:name];
     }

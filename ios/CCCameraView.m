@@ -216,7 +216,7 @@
 
 -(void)setAuxModeCaption:(NSString *)val {
     self.propAuxModeCaption = val;
-    [self.cameraLayout setAuxModeLabel:self.propAuxModeCaption];
+    [self.cameraLayout setAuxModeLabelText:self.propAuxModeCaption];
 }
 
 @end

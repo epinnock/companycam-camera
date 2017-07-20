@@ -12,7 +12,7 @@
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="CCCameraLayout">
             <connections>
                 <outlet property="auxModeIndicator" destination="N4N-Zw-E2X" id="B4k-kX-dba"/>
-                <outlet property="auxModeLabel" destination="lZ5-Yu-1vS" id="XT4-wN-2rH"/>
+                <outlet property="auxModeLabel" destination="lZ5-Yu-1vS" id="cwQ-c5-06e"/>
                 <outlet property="auxModeSubview" destination="0Ap-GT-HJc" id="uWd-R2-gPY"/>
                 <outlet property="bottomSubview" destination="ad1-NS-Wzl" id="5nk-qb-NH6"/>
                 <outlet property="cameraIndicator" destination="G1Y-iE-tdU" id="GOB-4i-6u3"/>

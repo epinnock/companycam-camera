@@ -115,7 +115,6 @@
         case UIImageOrientationUp:
         case UIImageOrientationUpMirrored:
             transform = CGAffineTransformTranslate(transform, -(fabs(self.size.height - self.size.width))/2, (fabs(self.size.height - self.size.width))/2);
-            transform = CGAffineTransformScale(transform, 0.9, 0.9);
             break;
     }
     

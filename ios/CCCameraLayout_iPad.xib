@@ -31,6 +31,7 @@
                 <outlet property="focusIndicatorView" destination="2Sn-ur-RY3" id="twg-pZ-lmX"/>
                 <outlet property="highButton" destination="DhC-kP-MxI" id="eD9-hS-y8q"/>
                 <outlet property="normalButton" destination="Wly-pF-HPf" id="ZlC-fy-hLu"/>
+                <outlet property="pinchRecognizer" destination="cco-jA-HBy" id="Rbk-xL-hNd"/>
                 <outlet property="placeLabelRightConstraint" destination="ovE-73-moQ" id="RUP-eW-kTk"/>
                 <outlet property="placeLabelTopConstraint" destination="FEh-8P-nBl" id="jPK-iS-vC0"/>
                 <outlet property="placeLabelView" destination="xdR-F2-PNT" id="nF2-68-nAB"/>
@@ -468,11 +469,13 @@
                 <view alpha="0.0" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gpI-4n-Dci">
                     <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <gestureRecognizers/>
                 </view>
             </subviews>
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
             <constraints>
                 <constraint firstItem="2Sn-ur-RY3" firstAttribute="leading" secondItem="bom-HH-iD6" secondAttribute="leading" id="5yw-VL-oEC"/>
+                <constraint firstItem="gpI-4n-Dci" firstAttribute="top" secondItem="bom-HH-iD6" secondAttribute="top" id="90V-tE-rxk"/>
                 <constraint firstItem="aLW-gt-wLM" firstAttribute="top" secondItem="bom-HH-iD6" secondAttribute="top" constant="-150" id="Gqo-4L-MfQ"/>
                 <constraint firstItem="qwC-60-LfP" firstAttribute="top" secondItem="cxQ-pT-Aec" secondAttribute="bottom" id="Les-m4-z8P"/>
                 <constraint firstItem="iRg-DG-u72" firstAttribute="top" secondItem="bom-HH-iD6" secondAttribute="top" id="OCZ-fe-qF3"/>
@@ -485,11 +488,16 @@
                 <constraint firstItem="2Sn-ur-RY3" firstAttribute="top" secondItem="bom-HH-iD6" secondAttribute="top" id="itf-pO-ETk"/>
                 <constraint firstItem="cxQ-pT-Aec" firstAttribute="leading" secondItem="bom-HH-iD6" secondAttribute="leading" id="jgW-4G-zJi"/>
                 <constraint firstAttribute="trailing" secondItem="aLW-gt-wLM" secondAttribute="trailing" id="lHn-k6-7vC"/>
-                <constraint firstItem="gpI-4n-Dci" firstAttribute="top" secondItem="aLW-gt-wLM" secondAttribute="bottom" id="sTJ-pY-IgX"/>
                 <constraint firstItem="gpI-4n-Dci" firstAttribute="leading" secondItem="bom-HH-iD6" secondAttribute="leading" id="w2I-hl-i33"/>
             </constraints>
             <point key="canvasLocation" x="101" y="-67"/>
         </view>
+        <pinchGestureRecognizer id="cco-jA-HBy">
+            <connections>
+                <action selector="handleZoom:" destination="-1" id="IgU-Gg-w2c"/>
+                <outlet property="delegate" destination="-1" id="jLU-B1-u5e"/>
+            </connections>
+        </pinchGestureRecognizer>
     </objects>
     <resources>
         <image name="chevron-up-icon" width="16" height="10"/>
