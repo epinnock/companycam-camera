@@ -12,7 +12,7 @@
 #import <CoreLocation/CoreLocation.h>
 #import <React/RCTBridge.h>
 #import "CCCameraModule.h"
-#import "RCTUIManager.h"
+#import <React/RCTUIManager.h>
 #import "ResizingSubview.h"
 #import "CCCameraLayoutDelegate.h"
 #import "CCCameraDelegate.h"
