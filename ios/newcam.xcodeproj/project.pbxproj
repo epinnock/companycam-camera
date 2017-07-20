@@ -7,319 +7,152 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302AC1ABCB8CE00DB3ED1 /* libRCTActionSheet.a */; };
-		00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302BA1ABCB90400DB3ED1 /* libRCTGeolocation.a */; };
-		00C302E81ABCBA2D00DB3ED1 /* libRCTImage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302C01ABCB91800DB3ED1 /* libRCTImage.a */; };
-		00C302E91ABCBA2D00DB3ED1 /* libRCTNetwork.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302DC1ABCB9D200DB3ED1 /* libRCTNetwork.a */; };
-		00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302E41ABCB9EE00DB3ED1 /* libRCTVibration.a */; };
-		00E356F31AD99517003FC87E /* newcamTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* newcamTests.m */; };
-		133E29F31AD74F7200F7D852 /* libRCTLinking.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 78C398B91ACF4ADC00677621 /* libRCTLinking.a */; };
-		139105C61AF99C1200B5F7CC /* libRCTSettings.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 139105C11AF99BAD00B5F7CC /* libRCTSettings.a */; };
-		139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 139FDEF41B06529B00C62182 /* libRCTWebSocket.a */; };
-		13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB01A68108700A75B9A /* AppDelegate.m */; };
-		13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB11A68108700A75B9A /* LaunchScreen.xib */; };
-		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
-		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
-		140ED2AC1D01E1AD002B40FF /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
-		146834051AC3E58100842450 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 146834041AC3E56700842450 /* libReact.a */; };
-		5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
-		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
+		DB0BCA011F044135004B8447 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB2FF1E81F0413190005A9BE /* AssetsLibrary.framework */; };
+		DB0BCA021F044141004B8447 /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB0BC9FE1F0440F5004B8447 /* opencv2.framework */; };
+		DB2FF1E21F0379CB0005A9BE /* docscan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DB2FF1DE1F0379CB0005A9BE /* docscan.cpp */; };
+		DB2FF1E31F0379CB0005A9BE /* geometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DB2FF1E01F0379CB0005A9BE /* geometry.cpp */; };
+		DB3DAD311EE67AAE005B2885 /* GradientBackgroundView.m in Sources */ = {isa = PBXBuildFile; fileRef = DB3DAD301EE67AAE005B2885 /* GradientBackgroundView.m */; };
+		DB4C425F1F1E9CFE002151D2 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB4C425E1F1E9CFE002151D2 /* Photos.framework */; };
+		DB54DE6A1EC3AC62004AEF31 /* CCCamera.h in Sources */ = {isa = PBXBuildFile; fileRef = DB54DE421EC3A667004AEF31 /* CCCamera.h */; };
+		DB54DE6B1EC3AC62004AEF31 /* CCCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = DB54DE431EC3A667004AEF31 /* CCCamera.m */; };
+		DB54DE6C1EC3AC62004AEF31 /* CCCameraManager.h in Sources */ = {isa = PBXBuildFile; fileRef = DB54DE3E1EC3A56F004AEF31 /* CCCameraManager.h */; };
+		DB54DE6D1EC3AC62004AEF31 /* CCCameraManager.m in Sources */ = {isa = PBXBuildFile; fileRef = DB54DE3F1EC3A56F004AEF31 /* CCCameraManager.m */; };
+		DB54DE6E1EC3AC62004AEF31 /* CCCameraView.h in Sources */ = {isa = PBXBuildFile; fileRef = DB54DE461EC3A6B6004AEF31 /* CCCameraView.h */; };
+		DB54DE6F1EC3AC62004AEF31 /* CCCameraView.m in Sources */ = {isa = PBXBuildFile; fileRef = DB54DE471EC3A6B6004AEF31 /* CCCameraView.m */; };
+		DB58BF471F11C8E8003D503B /* StorageUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = DB58BF461F11C8E8003D503B /* StorageUtility.m */; };
+		DB58BF4D1F11D5D5003D503B /* UIImage+CCHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = DB58BF4C1F11D5D5003D503B /* UIImage+CCHelper.m */; };
+		DB58BF511F11DC72003D503B /* FocusIndicatorView.m in Sources */ = {isa = PBXBuildFile; fileRef = DB58BF501F11DC72003D503B /* FocusIndicatorView.m */; };
+		DB58BF541F153577003D503B /* NSData+CCImageExif.m in Sources */ = {isa = PBXBuildFile; fileRef = DB58BF531F153577003D503B /* NSData+CCImageExif.m */; };
+		DB58BF5A1F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.m in Sources */ = {isa = PBXBuildFile; fileRef = DB58BF591F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.m */; };
+		DB9F69701ECD664A004D4F85 /* CCCameraModule.m in Sources */ = {isa = PBXBuildFile; fileRef = DB9F696F1ECD664A004D4F85 /* CCCameraModule.m */; };
+		DB9F698B1ECD701E004D4F85 /* CCCameraView.xib in Resources */ = {isa = PBXBuildFile; fileRef = DB9F696C1ECD390A004D4F85 /* CCCameraView.xib */; };
+		DB9F69C91ED014CE004D4F85 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		DB9F69CC1ED10567004D4F85 /* CCCameraLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = DB9F69CB1ED10567004D4F85 /* CCCameraLayout.m */; };
+		DB9F69CE1ED109CD004D4F85 /* CCCameraLayout.xib in Resources */ = {isa = PBXBuildFile; fileRef = DB9F69CD1ED109CD004D4F85 /* CCCameraLayout.xib */; };
+		DB9F69D11ED109F2004D4F85 /* ResizingSubview.m in Sources */ = {isa = PBXBuildFile; fileRef = DB9F69D01ED109F2004D4F85 /* ResizingSubview.m */; };
+		DBB4256C1EF312DD00AFD6AF /* CCCameraLayout_iPad.xib in Resources */ = {isa = PBXBuildFile; fileRef = DBE9D01B1EF2490100E2FFE2 /* CCCameraLayout_iPad.xib */; };
+		DBC9692A1EDFA9F300578CE2 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DBC969291EDFA9F300578CE2 /* AVFoundation.framework */; };
+		DBC9692D1EDFD73200578CE2 /* CCCameraPreviewView.m in Sources */ = {isa = PBXBuildFile; fileRef = DBC9692C1EDFD73200578CE2 /* CCCameraPreviewView.m */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		00C302AB1ABCB8CE00DB3ED1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 134814201AA4EA6300B7C361;
-			remoteInfo = RCTActionSheet;
-		};
-		00C302B91ABCB90400DB3ED1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 00C302B51ABCB90400DB3ED1 /* RCTGeolocation.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 134814201AA4EA6300B7C361;
-			remoteInfo = RCTGeolocation;
-		};
-		00C302BF1ABCB91800DB3ED1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 00C302BB1ABCB91800DB3ED1 /* RCTImage.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 58B5115D1A9E6B3D00147676;
-			remoteInfo = RCTImage;
-		};
-		00C302DB1ABCB9D200DB3ED1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 00C302D31ABCB9D200DB3ED1 /* RCTNetwork.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 58B511DB1A9E6C8500147676;
-			remoteInfo = RCTNetwork;
-		};
-		00C302E31ABCB9EE00DB3ED1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 00C302DF1ABCB9EE00DB3ED1 /* RCTVibration.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 832C81801AAF6DEF007FA2F7;
-			remoteInfo = RCTVibration;
-		};
-		00E356F41AD99517003FC87E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 83CBB9F71A601CBA00E9B192 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 13B07F861A680F5B00A75B9A;
-			remoteInfo = newcam;
-		};
-		139105C01AF99BAD00B5F7CC /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 139105B61AF99BAD00B5F7CC /* RCTSettings.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 134814201AA4EA6300B7C361;
-			remoteInfo = RCTSettings;
-		};
-		139FDEF31B06529B00C62182 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 139FDEE61B06529A00C62182 /* RCTWebSocket.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 3C86DF461ADF2C930047B81A;
-			remoteInfo = RCTWebSocket;
-		};
-		146834031AC3E56700842450 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 146833FF1AC3E56700842450 /* React.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 83CBBA2E1A601D0E00E9B192;
-			remoteInfo = React;
-		};
-		5E9157321DD0AC6500FF2AA8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 134814201AA4EA6300B7C361;
-			remoteInfo = RCTAnimation;
-		};
-		5E9157341DD0AC6500FF2AA8 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 2D2A28201D9B03D100D4039D;
-			remoteInfo = "RCTAnimation-tvOS";
-		};
-		78C398B81ACF4ADC00677621 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 134814201AA4EA6300B7C361;
-			remoteInfo = RCTLinking;
-		};
-		832341B41AAA6A8300B99B32 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 58B5119B1A9E6C1200147676;
-			remoteInfo = RCTText;
-		};
-/* End PBXContainerItemProxy section */
-
-/* Begin PBXFileReference section */
-		008F07F21AC5B25A0029DE68 /* main.jsbundle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = main.jsbundle; sourceTree = "<group>"; };
-		00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTActionSheet.xcodeproj; path = "../node_modules/react-native/Libraries/ActionSheetIOS/RCTActionSheet.xcodeproj"; sourceTree = "<group>"; };
-		00C302B51ABCB90400DB3ED1 /* RCTGeolocation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTGeolocation.xcodeproj; path = "../node_modules/react-native/Libraries/Geolocation/RCTGeolocation.xcodeproj"; sourceTree = "<group>"; };
-		00C302BB1ABCB91800DB3ED1 /* RCTImage.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTImage.xcodeproj; path = "../node_modules/react-native/Libraries/Image/RCTImage.xcodeproj"; sourceTree = "<group>"; };
-		00C302D31ABCB9D200DB3ED1 /* RCTNetwork.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTNetwork.xcodeproj; path = "../node_modules/react-native/Libraries/Network/RCTNetwork.xcodeproj"; sourceTree = "<group>"; };
-		00C302DF1ABCB9EE00DB3ED1 /* RCTVibration.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTVibration.xcodeproj; path = "../node_modules/react-native/Libraries/Vibration/RCTVibration.xcodeproj"; sourceTree = "<group>"; };
-		00E356EE1AD99517003FC87E /* newcamTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = newcamTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		00E356F11AD99517003FC87E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		00E356F21AD99517003FC87E /* newcamTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = newcamTests.m; sourceTree = "<group>"; };
-		139105B61AF99BAD00B5F7CC /* RCTSettings.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTSettings.xcodeproj; path = "../node_modules/react-native/Libraries/Settings/RCTSettings.xcodeproj"; sourceTree = "<group>"; };
-		139FDEE61B06529A00C62182 /* RCTWebSocket.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTWebSocket.xcodeproj; path = "../node_modules/react-native/Libraries/WebSocket/RCTWebSocket.xcodeproj"; sourceTree = "<group>"; };
-		13B07F961A680F5B00A75B9A /* newcam.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = newcam.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		13B07FAF1A68108700A75B9A /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AppDelegate.h; path = newcam/AppDelegate.h; sourceTree = "<group>"; };
-		13B07FB01A68108700A75B9A /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = AppDelegate.m; path = newcam/AppDelegate.m; sourceTree = "<group>"; };
-		13B07FB21A68108700A75B9A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
-		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = newcam/Images.xcassets; sourceTree = "<group>"; };
-		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = newcam/Info.plist; sourceTree = "<group>"; };
-		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = newcam/main.m; sourceTree = "<group>"; };
-		146833FF1AC3E56700842450 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "../node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
-		5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTAnimation.xcodeproj; path = "../node_modules/react-native/Libraries/NativeAnimation/RCTAnimation.xcodeproj"; sourceTree = "<group>"; };
-		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
-		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
-/* End PBXFileReference section */
-
-/* Begin PBXFrameworksBuildPhase section */
-		00E356EB1AD99517003FC87E /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
+/* Begin PBXCopyFilesBuildPhase section */
+		DB54DE4C1EC3A9FC004AEF31 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
 			files = (
-				140ED2AC1D01E1AD002B40FF /* libReact.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		13B07F8C1A680F5B00A75B9A /* Frameworks */ = {
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = newcam/Images.xcassets; sourceTree = "<group>"; };
+		DB0BC9FE1F0440F5004B8447 /* opencv2.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = opencv2.framework; sourceTree = "<group>"; };
+		DB2FF1DE1F0379CB0005A9BE /* docscan.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = docscan.cpp; sourceTree = "<group>"; };
+		DB2FF1DF1F0379CB0005A9BE /* docscan.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = docscan.hpp; sourceTree = "<group>"; };
+		DB2FF1E01F0379CB0005A9BE /* geometry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = geometry.cpp; sourceTree = "<group>"; };
+		DB2FF1E11F0379CB0005A9BE /* geometry.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = geometry.hpp; sourceTree = "<group>"; };
+		DB2FF1E81F0413190005A9BE /* AssetsLibrary.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AssetsLibrary.framework; path = System/Library/Frameworks/AssetsLibrary.framework; sourceTree = SDKROOT; };
+		DB2FF1EE1F0433530005A9BE /* PrefixHeader.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PrefixHeader.pch; sourceTree = "<group>"; };
+		DB3DAD2F1EE67AAE005B2885 /* GradientBackgroundView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = GradientBackgroundView.h; sourceTree = "<group>"; tabWidth = 4; };
+		DB3DAD301EE67AAE005B2885 /* GradientBackgroundView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = GradientBackgroundView.m; sourceTree = "<group>"; tabWidth = 4; };
+		DB4C425E1F1E9CFE002151D2 /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = System/Library/Frameworks/Photos.framework; sourceTree = SDKROOT; };
+		DB54DE3E1EC3A56F004AEF31 /* CCCameraManager.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = CCCameraManager.h; sourceTree = "<group>"; };
+		DB54DE3F1EC3A56F004AEF31 /* CCCameraManager.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = CCCameraManager.m; sourceTree = "<group>"; };
+		DB54DE421EC3A667004AEF31 /* CCCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = CCCamera.h; sourceTree = "<group>"; tabWidth = 4; };
+		DB54DE431EC3A667004AEF31 /* CCCamera.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = CCCamera.m; sourceTree = "<group>"; tabWidth = 4; };
+		DB54DE461EC3A6B6004AEF31 /* CCCameraView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = CCCameraView.h; sourceTree = "<group>"; tabWidth = 2; };
+		DB54DE471EC3A6B6004AEF31 /* CCCameraView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = CCCameraView.m; sourceTree = "<group>"; tabWidth = 2; };
+		DB54DE4E1EC3A9FC004AEF31 /* libCCCamera.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libCCCamera.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		DB58BF451F11C8E8003D503B /* StorageUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StorageUtility.h; sourceTree = "<group>"; };
+		DB58BF461F11C8E8003D503B /* StorageUtility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StorageUtility.m; sourceTree = "<group>"; };
+		DB58BF4B1F11D5D5003D503B /* UIImage+CCHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+CCHelper.h"; sourceTree = "<group>"; };
+		DB58BF4C1F11D5D5003D503B /* UIImage+CCHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+CCHelper.m"; sourceTree = "<group>"; tabWidth = 4; };
+		DB58BF4F1F11DC72003D503B /* FocusIndicatorView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = FocusIndicatorView.h; sourceTree = "<group>"; tabWidth = 4; };
+		DB58BF501F11DC72003D503B /* FocusIndicatorView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = FocusIndicatorView.m; sourceTree = "<group>"; tabWidth = 4; };
+		DB58BF521F153577003D503B /* NSData+CCImageExif.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+CCImageExif.h"; sourceTree = "<group>"; };
+		DB58BF531F153577003D503B /* NSData+CCImageExif.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+CCImageExif.m"; sourceTree = "<group>"; };
+		DB58BF581F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableDictionary+CCImageMetadata.h"; sourceTree = "<group>"; };
+		DB58BF591F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableDictionary+CCImageMetadata.m"; sourceTree = "<group>"; };
+		DB58BF631F1D5E27003D503B /* JPSVolumeButtonHandler */ = {isa = PBXFileReference; lastKnownFileType = folder; path = JPSVolumeButtonHandler; sourceTree = "<group>"; };
+		DB9F696C1ECD390A004D4F85 /* CCCameraView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CCCameraView.xib; sourceTree = "<group>"; };
+		DB9F696E1ECD664A004D4F85 /* CCCameraModule.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = CCCameraModule.h; sourceTree = "<group>"; tabWidth = 4; };
+		DB9F696F1ECD664A004D4F85 /* CCCameraModule.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = CCCameraModule.m; sourceTree = "<group>"; tabWidth = 4; };
+		DB9F69851ECD6FC9004D4F85 /* CCCameraResources.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CCCameraResources.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		DB9F69871ECD6FC9004D4F85 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DB9F69CA1ED10567004D4F85 /* CCCameraLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = CCCameraLayout.h; sourceTree = "<group>"; tabWidth = 4; };
+		DB9F69CB1ED10567004D4F85 /* CCCameraLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = CCCameraLayout.m; sourceTree = "<group>"; tabWidth = 4; };
+		DB9F69CD1ED109CD004D4F85 /* CCCameraLayout.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CCCameraLayout.xib; sourceTree = "<group>"; };
+		DB9F69CF1ED109F2004D4F85 /* ResizingSubview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ResizingSubview.h; sourceTree = "<group>"; };
+		DB9F69D01ED109F2004D4F85 /* ResizingSubview.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = ResizingSubview.m; sourceTree = "<group>"; tabWidth = 4; };
+		DB9F69DE1ED15728004D4F85 /* CCCameraLayoutDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCCameraLayoutDelegate.h; sourceTree = "<group>"; };
+		DBC969271EDE078C00578CE2 /* CCCameraDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = CCCameraDelegate.h; sourceTree = "<group>"; tabWidth = 4; };
+		DBC969291EDFA9F300578CE2 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		DBC9692B1EDFD73200578CE2 /* CCCameraPreviewView.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = CCCameraPreviewView.h; sourceTree = "<group>"; tabWidth = 4; };
+		DBC9692C1EDFD73200578CE2 /* CCCameraPreviewView.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = CCCameraPreviewView.m; sourceTree = "<group>"; tabWidth = 4; };
+		DBE9D01B1EF2490100E2FFE2 /* CCCameraLayout_iPad.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CCCameraLayout_iPad.xib; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		DB54DE4B1EC3A9FC004AEF31 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */,
-				146834051AC3E58100842450 /* libReact.a in Frameworks */,
-				00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */,
-				00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */,
-				00C302E81ABCBA2D00DB3ED1 /* libRCTImage.a in Frameworks */,
-				133E29F31AD74F7200F7D852 /* libRCTLinking.a in Frameworks */,
-				00C302E91ABCBA2D00DB3ED1 /* libRCTNetwork.a in Frameworks */,
-				139105C61AF99C1200B5F7CC /* libRCTSettings.a in Frameworks */,
-				832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */,
-				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
-				139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */,
+				DB4C425F1F1E9CFE002151D2 /* Photos.framework in Frameworks */,
+				DB0BCA021F044141004B8447 /* opencv2.framework in Frameworks */,
+				DB0BCA011F044135004B8447 /* AssetsLibrary.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DB9F69821ECD6FC9004D4F85 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DBC9692A1EDFA9F300578CE2 /* AVFoundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		00C302A81ABCB8CE00DB3ED1 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				00C302AC1ABCB8CE00DB3ED1 /* libRCTActionSheet.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		00C302B61ABCB90400DB3ED1 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				00C302BA1ABCB90400DB3ED1 /* libRCTGeolocation.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		00C302BC1ABCB91800DB3ED1 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				00C302C01ABCB91800DB3ED1 /* libRCTImage.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		00C302D41ABCB9D200DB3ED1 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				00C302DC1ABCB9D200DB3ED1 /* libRCTNetwork.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		00C302E01ABCB9EE00DB3ED1 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				00C302E41ABCB9EE00DB3ED1 /* libRCTVibration.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		00E356EF1AD99517003FC87E /* newcamTests */ = {
-			isa = PBXGroup;
-			children = (
-				00E356F21AD99517003FC87E /* newcamTests.m */,
-				00E356F01AD99517003FC87E /* Supporting Files */,
-			);
-			path = newcamTests;
-			sourceTree = "<group>";
-		};
-		00E356F01AD99517003FC87E /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				00E356F11AD99517003FC87E /* Info.plist */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		139105B71AF99BAD00B5F7CC /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				139105C11AF99BAD00B5F7CC /* libRCTSettings.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		139FDEE71B06529A00C62182 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				139FDEF41B06529B00C62182 /* libRCTWebSocket.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
 		13B07FAE1A68108700A75B9A /* newcam */ = {
 			isa = PBXGroup;
 			children = (
-				008F07F21AC5B25A0029DE68 /* main.jsbundle */,
-				13B07FAF1A68108700A75B9A /* AppDelegate.h */,
-				13B07FB01A68108700A75B9A /* AppDelegate.m */,
+				DB54DE411EC3A5C3004AEF31 /* cameras */,
+				DB2FF1DC1F0376070005A9BE /* imageprocessing */,
+				DB9F69BF1ECDFAB4004D4F85 /* utils */,
+				DB54DE451EC3A693004AEF31 /* views */,
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
-				13B07FB61A68108700A75B9A /* Info.plist */,
-				13B07FB11A68108700A75B9A /* LaunchScreen.xib */,
-				13B07FB71A68108700A75B9A /* main.m */,
+				DB54DE3E1EC3A56F004AEF31 /* CCCameraManager.h */,
+				DB54DE3F1EC3A56F004AEF31 /* CCCameraManager.m */,
+				DB54DE461EC3A6B6004AEF31 /* CCCameraView.h */,
+				DB54DE471EC3A6B6004AEF31 /* CCCameraView.m */,
+				DB9F696E1ECD664A004D4F85 /* CCCameraModule.h */,
+				DB9F696F1ECD664A004D4F85 /* CCCameraModule.m */,
 			);
 			name = newcam;
-			sourceTree = "<group>";
-		};
-		146834001AC3E56700842450 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				146834041AC3E56700842450 /* libReact.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		5E91572E1DD0AC6500FF2AA8 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */,
-				5E9157351DD0AC6500FF2AA8 /* libRCTAnimation-tvOS.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		78C398B11ACF4ADC00677621 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				78C398B91ACF4ADC00677621 /* libRCTLinking.a */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		832341AE1AAA6A7D00B99B32 /* Libraries */ = {
 			isa = PBXGroup;
 			children = (
-				5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */,
-				146833FF1AC3E56700842450 /* React.xcodeproj */,
-				00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */,
-				00C302B51ABCB90400DB3ED1 /* RCTGeolocation.xcodeproj */,
-				00C302BB1ABCB91800DB3ED1 /* RCTImage.xcodeproj */,
-				78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */,
-				00C302D31ABCB9D200DB3ED1 /* RCTNetwork.xcodeproj */,
-				139105B61AF99BAD00B5F7CC /* RCTSettings.xcodeproj */,
-				832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */,
-				00C302DF1ABCB9EE00DB3ED1 /* RCTVibration.xcodeproj */,
-				139FDEE61B06529A00C62182 /* RCTWebSocket.xcodeproj */,
+				DB58BF631F1D5E27003D503B /* JPSVolumeButtonHandler */,
 			);
 			name = Libraries;
-			sourceTree = "<group>";
-		};
-		832341B11AAA6A8300B99B32 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				832341B51AAA6A8300B99B32 /* libRCTText.a */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
+				DB2FF1EE1F0433530005A9BE /* PrefixHeader.pch */,
+				DB2FF1DD1F03796A0005A9BE /* cpp */,
 				13B07FAE1A68108700A75B9A /* newcam */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
-				00E356EF1AD99517003FC87E /* newcamTests */,
+				DB9F69861ECD6FC9004D4F85 /* CCCameraResources */,
 				83CBBA001A601CBA00E9B192 /* Products */,
+				DBC969281EDFA9F200578CE2 /* Frameworks */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -328,50 +161,147 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* newcam.app */,
-				00E356EE1AD99517003FC87E /* newcamTests.xctest */,
+				DB54DE4E1EC3A9FC004AEF31 /* libCCCamera.a */,
+				DB9F69851ECD6FC9004D4F85 /* CCCameraResources.bundle */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		DB2FF1DC1F0376070005A9BE /* imageprocessing */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = imageprocessing;
+			sourceTree = "<group>";
+		};
+		DB2FF1DD1F03796A0005A9BE /* cpp */ = {
+			isa = PBXGroup;
+			children = (
+				DB2FF1DE1F0379CB0005A9BE /* docscan.cpp */,
+				DB2FF1DF1F0379CB0005A9BE /* docscan.hpp */,
+				DB2FF1E01F0379CB0005A9BE /* geometry.cpp */,
+				DB2FF1E11F0379CB0005A9BE /* geometry.hpp */,
+			);
+			name = cpp;
+			sourceTree = "<group>";
+		};
+		DB54DE411EC3A5C3004AEF31 /* cameras */ = {
+			isa = PBXGroup;
+			children = (
+				DB54DE421EC3A667004AEF31 /* CCCamera.h */,
+				DB54DE431EC3A667004AEF31 /* CCCamera.m */,
+			);
+			name = cameras;
+			sourceTree = "<group>";
+		};
+		DB54DE451EC3A693004AEF31 /* views */ = {
+			isa = PBXGroup;
+			children = (
+				DB9F696B1ECD385E004D4F85 /* nibs */,
+				DB9F69CA1ED10567004D4F85 /* CCCameraLayout.h */,
+				DB9F69CB1ED10567004D4F85 /* CCCameraLayout.m */,
+				DB9F69CF1ED109F2004D4F85 /* ResizingSubview.h */,
+				DB9F69D01ED109F2004D4F85 /* ResizingSubview.m */,
+				DBC9692B1EDFD73200578CE2 /* CCCameraPreviewView.h */,
+				DBC9692C1EDFD73200578CE2 /* CCCameraPreviewView.m */,
+			);
+			name = views;
+			sourceTree = "<group>";
+		};
+		DB58BF4E1F11DC42003D503B /* views */ = {
+			isa = PBXGroup;
+			children = (
+				DB3DAD2F1EE67AAE005B2885 /* GradientBackgroundView.h */,
+				DB3DAD301EE67AAE005B2885 /* GradientBackgroundView.m */,
+				DB58BF4F1F11DC72003D503B /* FocusIndicatorView.h */,
+				DB58BF501F11DC72003D503B /* FocusIndicatorView.m */,
+			);
+			name = views;
+			sourceTree = "<group>";
+		};
+		DB9F696B1ECD385E004D4F85 /* nibs */ = {
+			isa = PBXGroup;
+			children = (
+				DB9F696C1ECD390A004D4F85 /* CCCameraView.xib */,
+				DB9F69CD1ED109CD004D4F85 /* CCCameraLayout.xib */,
+				DBE9D01B1EF2490100E2FFE2 /* CCCameraLayout_iPad.xib */,
+			);
+			name = nibs;
+			sourceTree = "<group>";
+		};
+		DB9F69861ECD6FC9004D4F85 /* CCCameraResources */ = {
+			isa = PBXGroup;
+			children = (
+				DB9F69871ECD6FC9004D4F85 /* Info.plist */,
+			);
+			path = CCCameraResources;
+			sourceTree = "<group>";
+		};
+		DB9F69BF1ECDFAB4004D4F85 /* utils */ = {
+			isa = PBXGroup;
+			children = (
+				DB58BF4E1F11DC42003D503B /* views */,
+				DB9F69DE1ED15728004D4F85 /* CCCameraLayoutDelegate.h */,
+				DBC969271EDE078C00578CE2 /* CCCameraDelegate.h */,
+				DB58BF451F11C8E8003D503B /* StorageUtility.h */,
+				DB58BF461F11C8E8003D503B /* StorageUtility.m */,
+				DB58BF4B1F11D5D5003D503B /* UIImage+CCHelper.h */,
+				DB58BF4C1F11D5D5003D503B /* UIImage+CCHelper.m */,
+				DB58BF521F153577003D503B /* NSData+CCImageExif.h */,
+				DB58BF531F153577003D503B /* NSData+CCImageExif.m */,
+				DB58BF581F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.h */,
+				DB58BF591F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.m */,
+			);
+			name = utils;
+			sourceTree = "<group>";
+		};
+		DBC969281EDFA9F200578CE2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				DB4C425E1F1E9CFE002151D2 /* Photos.framework */,
+				DB0BC9FE1F0440F5004B8447 /* opencv2.framework */,
+				DB2FF1E81F0413190005A9BE /* AssetsLibrary.framework */,
+				DBC969291EDFA9F300578CE2 /* AVFoundation.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		00E356ED1AD99517003FC87E /* newcamTests */ = {
+		DB54DE4D1EC3A9FC004AEF31 /* CCCamera */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "newcamTests" */;
+			buildConfigurationList = DB54DE541EC3A9FC004AEF31 /* Build configuration list for PBXNativeTarget "CCCamera" */;
 			buildPhases = (
-				00E356EA1AD99517003FC87E /* Sources */,
-				00E356EB1AD99517003FC87E /* Frameworks */,
-				00E356EC1AD99517003FC87E /* Resources */,
+				DB54DE4A1EC3A9FC004AEF31 /* Sources */,
+				DB54DE4B1EC3A9FC004AEF31 /* Frameworks */,
+				DB54DE4C1EC3A9FC004AEF31 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				00E356F51AD99517003FC87E /* PBXTargetDependency */,
 			);
-			name = newcamTests;
-			productName = newcamTests;
-			productReference = 00E356EE1AD99517003FC87E /* newcamTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
+			name = CCCamera;
+			productName = CCCamera;
+			productReference = DB54DE4E1EC3A9FC004AEF31 /* libCCCamera.a */;
+			productType = "com.apple.product-type.library.static";
 		};
-		13B07F861A680F5B00A75B9A /* newcam */ = {
+		DB9F69841ECD6FC9004D4F85 /* CCCameraResources */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "newcam" */;
+			buildConfigurationList = DB9F69881ECD6FC9004D4F85 /* Build configuration list for PBXNativeTarget "CCCameraResources" */;
 			buildPhases = (
-				13B07F871A680F5B00A75B9A /* Sources */,
-				13B07F8C1A680F5B00A75B9A /* Frameworks */,
-				13B07F8E1A680F5B00A75B9A /* Resources */,
-				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
+				DB9F69811ECD6FC9004D4F85 /* Sources */,
+				DB9F69821ECD6FC9004D4F85 /* Frameworks */,
+				DB9F69831ECD6FC9004D4F85 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = newcam;
-			productName = "Hello World";
-			productReference = 13B07F961A680F5B00A75B9A /* newcam.app */;
-			productType = "com.apple.product-type.application";
+			name = CCCameraResources;
+			productName = CCCameraResources;
+			productReference = DB9F69851ECD6FC9004D4F85 /* CCCameraResources.bundle */;
+			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
 
@@ -382,9 +312,14 @@
 				LastUpgradeCheck = 0610;
 				ORGANIZATIONNAME = Facebook;
 				TargetAttributes = {
-					00E356ED1AD99517003FC87E = {
-						CreatedOnToolsVersion = 6.2;
-						TestTargetID = 13B07F861A680F5B00A75B9A;
+					DB54DE4D1EC3A9FC004AEF31 = {
+						CreatedOnToolsVersion = 8.1;
+						DevelopmentTeam = UL86D3FX2G;
+						ProvisioningStyle = Automatic;
+					};
+					DB9F69841ECD6FC9004D4F85 = {
+						CreatedOnToolsVersion = 8.1;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -399,288 +334,64 @@
 			mainGroup = 83CBB9F61A601CBA00E9B192;
 			productRefGroup = 83CBBA001A601CBA00E9B192 /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = 00C302A81ABCB8CE00DB3ED1 /* Products */;
-					ProjectRef = 00C302A71ABCB8CE00DB3ED1 /* RCTActionSheet.xcodeproj */;
-				},
-				{
-					ProductGroup = 5E91572E1DD0AC6500FF2AA8 /* Products */;
-					ProjectRef = 5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */;
-				},
-				{
-					ProductGroup = 00C302B61ABCB90400DB3ED1 /* Products */;
-					ProjectRef = 00C302B51ABCB90400DB3ED1 /* RCTGeolocation.xcodeproj */;
-				},
-				{
-					ProductGroup = 00C302BC1ABCB91800DB3ED1 /* Products */;
-					ProjectRef = 00C302BB1ABCB91800DB3ED1 /* RCTImage.xcodeproj */;
-				},
-				{
-					ProductGroup = 78C398B11ACF4ADC00677621 /* Products */;
-					ProjectRef = 78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */;
-				},
-				{
-					ProductGroup = 00C302D41ABCB9D200DB3ED1 /* Products */;
-					ProjectRef = 00C302D31ABCB9D200DB3ED1 /* RCTNetwork.xcodeproj */;
-				},
-				{
-					ProductGroup = 139105B71AF99BAD00B5F7CC /* Products */;
-					ProjectRef = 139105B61AF99BAD00B5F7CC /* RCTSettings.xcodeproj */;
-				},
-				{
-					ProductGroup = 832341B11AAA6A8300B99B32 /* Products */;
-					ProjectRef = 832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */;
-				},
-				{
-					ProductGroup = 00C302E01ABCB9EE00DB3ED1 /* Products */;
-					ProjectRef = 00C302DF1ABCB9EE00DB3ED1 /* RCTVibration.xcodeproj */;
-				},
-				{
-					ProductGroup = 139FDEE71B06529A00C62182 /* Products */;
-					ProjectRef = 139FDEE61B06529A00C62182 /* RCTWebSocket.xcodeproj */;
-				},
-				{
-					ProductGroup = 146834001AC3E56700842450 /* Products */;
-					ProjectRef = 146833FF1AC3E56700842450 /* React.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
-				13B07F861A680F5B00A75B9A /* newcam */,
-				00E356ED1AD99517003FC87E /* newcamTests */,
+				DB54DE4D1EC3A9FC004AEF31 /* CCCamera */,
+				DB9F69841ECD6FC9004D4F85 /* CCCameraResources */,
 			);
 		};
 /* End PBXProject section */
 
-/* Begin PBXReferenceProxy section */
-		00C302AC1ABCB8CE00DB3ED1 /* libRCTActionSheet.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRCTActionSheet.a;
-			remoteRef = 00C302AB1ABCB8CE00DB3ED1 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		00C302BA1ABCB90400DB3ED1 /* libRCTGeolocation.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRCTGeolocation.a;
-			remoteRef = 00C302B91ABCB90400DB3ED1 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		00C302C01ABCB91800DB3ED1 /* libRCTImage.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRCTImage.a;
-			remoteRef = 00C302BF1ABCB91800DB3ED1 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		00C302DC1ABCB9D200DB3ED1 /* libRCTNetwork.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRCTNetwork.a;
-			remoteRef = 00C302DB1ABCB9D200DB3ED1 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		00C302E41ABCB9EE00DB3ED1 /* libRCTVibration.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRCTVibration.a;
-			remoteRef = 00C302E31ABCB9EE00DB3ED1 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		139105C11AF99BAD00B5F7CC /* libRCTSettings.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRCTSettings.a;
-			remoteRef = 139105C01AF99BAD00B5F7CC /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		139FDEF41B06529B00C62182 /* libRCTWebSocket.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRCTWebSocket.a;
-			remoteRef = 139FDEF31B06529B00C62182 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		146834041AC3E56700842450 /* libReact.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libReact.a;
-			remoteRef = 146834031AC3E56700842450 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRCTAnimation.a;
-			remoteRef = 5E9157321DD0AC6500FF2AA8 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		5E9157351DD0AC6500FF2AA8 /* libRCTAnimation-tvOS.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = "libRCTAnimation-tvOS.a";
-			remoteRef = 5E9157341DD0AC6500FF2AA8 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		78C398B91ACF4ADC00677621 /* libRCTLinking.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRCTLinking.a;
-			remoteRef = 78C398B81ACF4ADC00677621 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		832341B51AAA6A8300B99B32 /* libRCTText.a */ = {
-			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libRCTText.a;
-			remoteRef = 832341B41AAA6A8300B99B32 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
-
 /* Begin PBXResourcesBuildPhase section */
-		00E356EC1AD99517003FC87E /* Resources */ = {
+		DB9F69831ECD6FC9004D4F85 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		13B07F8E1A680F5B00A75B9A /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
-				13B07FBD1A68108700A75B9A /* LaunchScreen.xib in Resources */,
+				DB9F69C91ED014CE004D4F85 /* Images.xcassets in Resources */,
+				DB9F69CE1ED109CD004D4F85 /* CCCameraLayout.xib in Resources */,
+				DBB4256C1EF312DD00AFD6AF /* CCCameraLayout_iPad.xib in Resources */,
+				DB9F698B1ECD701E004D4F85 /* CCCameraView.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Bundle React Native code and images";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "export NODE_BINARY=node\n../node_modules/react-native/packager/react-native-xcode.sh";
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
-		00E356EA1AD99517003FC87E /* Sources */ = {
+		DB54DE4A1EC3A9FC004AEF31 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				00E356F31AD99517003FC87E /* newcamTests.m in Sources */,
+				DB58BF4D1F11D5D5003D503B /* UIImage+CCHelper.m in Sources */,
+				DB3DAD311EE67AAE005B2885 /* GradientBackgroundView.m in Sources */,
+				DB9F69CC1ED10567004D4F85 /* CCCameraLayout.m in Sources */,
+				DB54DE6A1EC3AC62004AEF31 /* CCCamera.h in Sources */,
+				DB58BF5A1F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.m in Sources */,
+				DB54DE6B1EC3AC62004AEF31 /* CCCamera.m in Sources */,
+				DB58BF471F11C8E8003D503B /* StorageUtility.m in Sources */,
+				DB9F69701ECD664A004D4F85 /* CCCameraModule.m in Sources */,
+				DB58BF511F11DC72003D503B /* FocusIndicatorView.m in Sources */,
+				DB58BF541F153577003D503B /* NSData+CCImageExif.m in Sources */,
+				DB2FF1E31F0379CB0005A9BE /* geometry.cpp in Sources */,
+				DB9F69D11ED109F2004D4F85 /* ResizingSubview.m in Sources */,
+				DB54DE6C1EC3AC62004AEF31 /* CCCameraManager.h in Sources */,
+				DB2FF1E21F0379CB0005A9BE /* docscan.cpp in Sources */,
+				DB54DE6D1EC3AC62004AEF31 /* CCCameraManager.m in Sources */,
+				DB54DE6E1EC3AC62004AEF31 /* CCCameraView.h in Sources */,
+				DBC9692D1EDFD73200578CE2 /* CCCameraPreviewView.m in Sources */,
+				DB54DE6F1EC3AC62004AEF31 /* CCCameraView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		13B07F871A680F5B00A75B9A /* Sources */ = {
+		DB9F69811ECD6FC9004D4F85 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				13B07FBC1A68108700A75B9A /* AppDelegate.m in Sources */,
-				13B07FC11A68108700A75B9A /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
-/* Begin PBXTargetDependency section */
-		00E356F51AD99517003FC87E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 13B07F861A680F5B00A75B9A /* newcam */;
-			targetProxy = 00E356F41AD99517003FC87E /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
-
-/* Begin PBXVariantGroup section */
-		13B07FB11A68108700A75B9A /* LaunchScreen.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				13B07FB21A68108700A75B9A /* Base */,
-			);
-			name = LaunchScreen.xib;
-			path = newcam;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
-
 /* Begin XCBuildConfiguration section */
-		00E356F61AD99517003FC87E /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = newcamTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/newcam.app/newcam";
-			};
-			name = Debug;
-		};
-		00E356F71AD99517003FC87E /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				COPY_PHASE_STRIP = NO;
-				INFOPLIST_FILE = newcamTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/newcam.app/newcam";
-			};
-			name = Release;
-		};
-		13B07F941A680F5B00A75B9A /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CURRENT_PROJECT_VERSION = 1;
-				DEAD_CODE_STRIPPING = NO;
-				INFOPLIST_FILE = newcam/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-ObjC",
-					"-lc++",
-				);
-				PRODUCT_NAME = newcam;
-				VERSIONING_SYSTEM = "apple-generic";
-			};
-			name = Debug;
-		};
-		13B07F951A680F5B00A75B9A /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CURRENT_PROJECT_VERSION = 1;
-				INFOPLIST_FILE = newcam/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					"-ObjC",
-					"-lc++",
-				);
-				PRODUCT_NAME = newcam;
-				VERSIONING_SYSTEM = "apple-generic";
-			};
-			name = Release;
-		};
 		83CBBA201A601CBA00E9B192 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -767,32 +478,142 @@
 			};
 			name = Release;
 		};
+		DB54DE551EC3A9FC004AEF31 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = UL86D3FX2G;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)";
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(PROJECT_DIR)/PrefixHeader.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.1;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-static",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		DB54DE561EC3A9FC004AEF31 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = UL86D3FX2G;
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)";
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(PROJECT_DIR)/PrefixHeader.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 10.1;
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-static",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		DB9F69891ECD6FC9004D4F85 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)";
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = CCCameraResources/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				PRODUCT_BUNDLE_IDENTIFIER = com.companycam.CCCameraResources;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Debug;
+		};
+		DB9F698A1ECD6FC9004D4F85 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)";
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = NO;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = CCCameraResources/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				PRODUCT_BUNDLE_IDENTIFIER = com.companycam.CCCameraResources;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		00E357021AD99517003FC87E /* Build configuration list for PBXNativeTarget "newcamTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				00E356F61AD99517003FC87E /* Debug */,
-				00E356F71AD99517003FC87E /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "newcam" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				13B07F941A680F5B00A75B9A /* Debug */,
-				13B07F951A680F5B00A75B9A /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		83CBB9FA1A601CBA00E9B192 /* Build configuration list for PBXProject "newcam" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				83CBBA201A601CBA00E9B192 /* Debug */,
 				83CBBA211A601CBA00E9B192 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DB54DE541EC3A9FC004AEF31 /* Build configuration list for PBXNativeTarget "CCCamera" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DB54DE551EC3A9FC004AEF31 /* Debug */,
+				DB54DE561EC3A9FC004AEF31 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		DB9F69881ECD6FC9004D4F85 /* Build configuration list for PBXNativeTarget "CCCameraResources" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DB9F69891ECD6FC9004D4F85 /* Debug */,
+				DB9F698A1ECD6FC9004D4F85 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
