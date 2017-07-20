@@ -10,7 +10,7 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 #import <CoreLocation/CoreLocation.h>
-#import "RCTBridge.h"
+#import <React/RCTBridge.h>
 #import "CCCameraModule.h"
 #import "RCTUIManager.h"
 #import "ResizingSubview.h"
@@ -23,22 +23,22 @@
 @class CCCamera;
 
 @interface CCCameraView : ResizingSubview {
-  
+
 		CCCameraManager *manager;
 		RCTBridge *bridge;
-    
+
     // The camera object implements the camera-related behavior
     CCCamera *camera;
-    
+
     // This is the subview that makes up the entire content of a CCCameraView
     id<CCCameraLayoutDelegate> cameraLayout;
-    
+
     // The CCCameraPreviewView contains the camera preview
     IBOutlet CCCameraPreviewView *previewView;
-    
+
     // The volumeButtonHandler is used to snap a photo using the volume button
     JPSVolumeButtonHandler *volumeButtonHandler;
-    
+
     // Component prop values
     NSString *placeName;
     NSString *placeAddress;
@@ -97,4 +97,3 @@
 -(void)setAuxModeCaption:(NSString *)val;
 
 @end
-

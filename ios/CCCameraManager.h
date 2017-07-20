@@ -6,13 +6,13 @@
 //  Copyright © 2017 Facebook. All rights reserved.
 //
 
-#import "RCTViewManager.h"
+#import <React/RCTViewManager.h>
 #import "CCCameraView.h"
 #import "CCCamera.h"
 #import "CCCameraLayout.h"
 
 @interface CCCameraManager : RCTViewManager {
-    
+
 }
 
 @property (nonatomic, retain) CCCameraView *latestView;
