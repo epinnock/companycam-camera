@@ -17,7 +17,7 @@
 #import "NSData+CCImageExif.h"
 #import "NSMutableDictionary+CCImageMetadata.h"
 
-@interface CCCamera : NSObject <CCCameraDelegate, AVCapturePhotoCaptureDelegate> {
+@interface CCCamera : NSObject <CCCameraDelegate> {
     
     // The session queue is used to handle the camera-related functionality that occurs on background threads without blocking the UI
     dispatch_queue_t captureSessionQueue;
@@ -35,7 +35,7 @@
     AVCaptureDeviceInput *deviceInput;
     
     // The photoOutput is used to record the output from the current camera
-    AVCapturePhotoOutput *photoOutput;
+    AVCaptureStillImageOutput *photoOutput;
     
     // The photoData is used to store the NSData from the photo output
     NSData *photoData;
@@ -50,7 +50,7 @@
 @property (nonatomic) AVCaptureDevice *camera;
 @property (nonatomic) AVCaptureDevicePosition cameraType;
 @property (nonatomic) AVCaptureDeviceInput *deviceInput;
-@property (nonatomic) AVCapturePhotoOutput *photoOutput;
+@property (nonatomic) AVCaptureStillImageOutput *photoOutput;
 @property (nonatomic) NSData *photoData;
 @property (nonatomic) double currentScaleNumber;
 @property (nonatomic) double startingScaleNumber;

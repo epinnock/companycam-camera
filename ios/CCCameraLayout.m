@@ -57,6 +57,7 @@
 @synthesize focusIndicatorTimer;
 @synthesize focusIndicatorTopConstraint;
 @synthesize focusIndicatorLeftConstraint;
+@synthesize loadingView;
 @synthesize screenFlashView;
 @synthesize pinchRecognizer;
 @synthesize CCCameraBundle;
@@ -68,6 +69,7 @@
         
         // Load the nib for this view
         self.CCCameraBundle = [NSBundle bundleWithURL:[[NSBundle mainBundle] URLForResource:@"CCCameraResources" withExtension:@"bundle"]];
+        
         if (iPad) {
             [self.CCCameraBundle loadNibNamed:@"CCCameraLayout_iPad" owner:self options:nil];
         }
@@ -93,6 +95,7 @@
         
         // Load the nib for this view
         self.CCCameraBundle = [NSBundle bundleWithURL:[[NSBundle mainBundle] URLForResource:@"CCCameraResources" withExtension:@"bundle"]];
+        
         if (iPad) {
             [self.CCCameraBundle loadNibNamed:@"CCCameraLayout_iPad" owner:self options:nil];
         }
@@ -121,6 +124,9 @@
 // This method does some initial setup of the view
 -(void)initView {
     
+    // Make sure all the buttons are enabled by default
+    [self enableButtons];
+    
     // Initialize the motionManager
     [self initializeMotionManager];
     
@@ -130,18 +136,21 @@
     // Add the pinchRecognizer
     [self addGestureRecognizer:self.pinchRecognizer];
     
-    // Register to receive a notification when the CCCameraModule is made active
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(onSetActive:)
-                                                 name:@"CCCameraModuleActiveNotification"
-                                               object:nil];
+    // Hide the loadingView
+    [self hideLoadingView];
     
-    // Register to receive a notification when the CCCameraModule is made inactive
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(onSetInactive:)
-                                                 name:@"CCCameraModuleInactiveNotification"
-                                               object:nil];
+    //    // Register to receive a notification when the CCCameraModule is made active
+    //    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    //    [[NSNotificationCenter defaultCenter] addObserver:self
+    //                                             selector:@selector(onSetActive:)
+    //                                                 name:@"CCCameraModuleActiveNotification"
+    //                                               object:nil];
+    //
+    //    // Register to receive a notification when the CCCameraModule is made inactive
+    //    [[NSNotificationCenter defaultCenter] addObserver:self
+    //                                             selector:@selector(onSetInactive:)
+    //                                                 name:@"CCCameraModuleInactiveNotification"
+    //                                               object:nil];
 }
 
 // This method responds to the CCCameraModuleActiveNotification
@@ -170,16 +179,16 @@
     self.lastOrientation = UIDeviceOrientationPortrait;
     if ([self.motionManager isAccelerometerAvailable]) {
         [self.motionManager startAccelerometerUpdatesToQueue:[NSOperationQueue currentQueue]
-                                             withHandler:^(CMAccelerometerData  *accelerometerData, NSError *error) {
-                                                 if (!error) {
-                                                     
-                                                     // Handle the acceleration data
-                                                     [self outputAccelertionData:accelerometerData.acceleration];
-                                                 }
-                                                 else{
-                                                     NSLog(@"%@", error);
-                                                 }
-                                             }];
+                                                 withHandler:^(CMAccelerometerData  *accelerometerData, NSError *error) {
+                                                     if (!error) {
+                                                         
+                                                         // Handle the acceleration data
+                                                         [self outputAccelertionData:accelerometerData.acceleration];
+                                                     }
+                                                     else{
+                                                         NSLog(@"%@", error);
+                                                     }
+                                                 }];
         
     }
     
@@ -277,15 +286,16 @@
         // Set the layout constraints for this orientation
         [self setLayoutConstraintsForOrientation:self.lastOrientation];
         
-        // Rotate the placeLabelView, the scannerMessageLabel, the resolutionSubview, and the bottomSubview for iPads
+        // Rotate the placeLabelView, the scannerMessageLabel, the resolutionSubview, the loadingView, and the bottomSubview for iPads
         if (iPad) {
             [self animateRotation:self.placeLabelView angle:rotationValue duration:0.0];
             [self animateRotation:self.scannerMessageLabel angle:rotationValue duration:0.0];
             [self animateRotation:self.resolutionSubview angle:rotationValue duration:0.0];
+            [self animateRotation:self.loadingView angle:rotationValue duration:0.0];
             [self animateRotation:self.bottomSubview angle:rotationValue duration:0.0];
         }
         
-        // Rotate the buttons, the placeLabelView, the scannerMessageLabel, and the resolutionSubview for iPhones
+        // Rotate the buttons, the placeLabelView, the scannerMessageLabel, the loadingView, and the resolutionSubview for iPhones
         else {
             [self animateRotation:self.closeButton angle:rotationValue duration:0.2];
             [self animateRotation:self.placeLabelView angle:rotationValue duration:0.0];
@@ -293,6 +303,7 @@
             [self animateRotation:self.toggleResolution angle:rotationValue duration:0.2];
             [self animateRotation:self.toggleFlash angle:rotationValue duration:0.2];
             [self animateRotation:self.toggleCamera angle:rotationValue duration:0.2];
+            [self animateRotation:self.loadingView angle:rotationValue duration:0.2];
             [self animateRotation:self.resolutionSubview angle:rotationValue duration:0.2];
         }
     });
@@ -487,7 +498,7 @@
 }
 
 -(IBAction)fastCamSubviewClick:(id)sender {
-        
+    
     // Set the camera mode
     [self setCameraMode:@"fastcam"];
 }
@@ -908,6 +919,26 @@
     [self.focusIndicatorView setHidden:YES];
 }
 
+// This method shows the loading view
+-(void)showLoadingView {
+    [self.loadingView setHidden:NO];
+}
+
+// This method hides the loading view
+-(void)hideLoadingView {
+    [self.loadingView setHidden:YES];
+}
+
+// This method enables all the buttons
+-(void)enableButtons {
+    [self setUserInteractionEnabled:YES];
+}
+
+// This method disables all the buttons
+-(void)disableButtons {
+    [self setUserInteractionEnabled:NO];
+}
+
 // This method returns the current orientation of the layout
 -(UIDeviceOrientation)getCurrentOrientation {
     return self.lastOrientation;
@@ -979,7 +1010,7 @@
                          
                          // Rotate the view to the given angle
                          thisView.transform = CGAffineTransformRotate(thisView.transform, angle - currentAngle);
-                    
+                         
                      }
                      completion:^(BOOL finished) {
                      }];

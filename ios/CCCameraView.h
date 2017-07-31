@@ -47,6 +47,8 @@
     double propExifLocationLongitude;
     long propExifLocationTimestamp;
     NSString *propAuxModeCaption;
+
+    BOOL isActive;
 }
 
 @property (nonatomic, retain) CCCameraManager *manager;
@@ -62,6 +64,7 @@
 @property (nonatomic, assign) double propExifLocationLongitude;
 @property (nonatomic, assign) long propExifLocationTimestamp;
 @property (nonatomic, retain) NSString *propAuxModeCaption;
+@property (nonatomic, assign) BOOL isActive;
 
 @property (nonatomic, copy) RCTDirectEventBlock onClose;
 @property (nonatomic, copy) RCTDirectEventBlock onPhotoTaken;
@@ -69,6 +72,7 @@
 @property (nonatomic, copy) RCTDirectEventBlock onAuxModeClicked;
 
 -(id)initWithManager:(CCCameraManager*)_manager bridge:(RCTBridge *)_bridge;
+-(void)setupView;
 -(void)setCamera:(CCCamera *)thisCamera;
 -(void)finishWithResult:(NSString *)button;
 

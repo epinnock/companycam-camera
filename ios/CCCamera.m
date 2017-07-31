@@ -43,32 +43,8 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     CCCameraModeScanner
 };
 
-// The AVCaptureDeviceDiscoverySession class is used to find the available cameras on this device
-@interface AVCaptureDeviceDiscoverySession (Utilities)
--(NSInteger)uniqueDevicePositionsCount;
-@end
-
-@implementation AVCaptureDeviceDiscoverySession (Utilities)
-
-// This method returns the number of unique camera postions that are available on this device
-- (NSInteger)uniqueDevicePositionsCount {
-    
-    // Create an array of camera device positions
-    NSMutableArray<NSNumber *> *uniqueDevicePositions = [NSMutableArray array];
-    
-    for (AVCaptureDevice *device in self.devices) {
-        if (![uniqueDevicePositions containsObject:@(device.position)]) {
-            [uniqueDevicePositions addObject:@(device.position)];
-        }
-    }
-    
-    return uniqueDevicePositions.count;
-}
-
-@end
-
 @interface CCCamera()
-    
+
 // The flashMode string defines the flash mode to use
 // "auto" = auto flash
 // "on" = flash on
@@ -91,9 +67,6 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
 // The setupResult describes the state of the camera setup and whether or not it was successful
 @property (nonatomic) CCCameraSetupResult setupResult;
 
-// The cameraDeviceDiscoverySession contains an array of the available cameras
-@property (nonatomic) AVCaptureDeviceDiscoverySession *cameraDeviceDiscoverySession;
-
 @end
 
 @implementation CCCamera
@@ -102,7 +75,6 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
 @synthesize resolutionMode;
 @synthesize cameraMode;
 @synthesize setupResult;
-@synthesize cameraDeviceDiscoverySession;
 @synthesize captureSessionQueue;
 @synthesize captureSession;
 @synthesize camera;
@@ -131,31 +103,13 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         
         // Set the default camera type to be back-facing
         self.cameraType = AVCaptureDevicePositionBack;
-
-        /*// Choose the back dual camera if available, otherwise default to a wide angle camera.
-        AVCaptureDevice *videoDevice = [AVCaptureDevice defaultDeviceWithDeviceType:AVCaptureDeviceTypeBuiltInDuoCamera mediaType:AVMediaTypeVideo position:AVCaptureDevicePositionBack];
-        if (!videoDevice) {
-            
-            // If the back dual camera is not available, default to the back wide angle camera.
-            videoDevice = [AVCaptureDevice defaultDeviceWithDeviceType:AVCaptureDeviceTypeBuiltInWideAngleCamera mediaType:AVMediaTypeVideo position:AVCaptureDevicePositionBack];
-            
-            // In some cases where users break their phones, the back wide angle camera is not available. In this case, we should default to the front wide angle camera.
-            if (! videoDevice) {
-                videoDevice = [AVCaptureDevice defaultDeviceWithDeviceType:AVCaptureDeviceTypeBuiltInWideAngleCamera mediaType:AVMediaTypeVideo position:AVCaptureDevicePositionFront];
-            }
-        }
         
-        // Set the reference to the camera
-        self.camera = videoDevice;
-        NSError *error;
-        [self.camera lockForConfiguration:&error];
-        [self.camera setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
-        [self.camera setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
-        [self.camera unlockForConfiguration];
-        
-        // Add observers for the focus and exposure
-        [self.camera addObserver:self forKeyPath:@"adjustingFocus" options:0 context:nil];
-        [self.camera addObserver:self forKeyPath:@"adjustingExposure" options:0 context:nil];*/
+        // Uncomment this section if you'd like to add listeners for the completion of the auto focus or auto exposure routines
+        ///////////////////////////////////////////
+        //// Add observers for the focus and exposure
+        //[self.camera addObserver:self forKeyPath:@"adjustingFocus" options:0 context:nil];
+        //[self.camera addObserver:self forKeyPath:@"adjustingExposure" options:0 context:nil];
+        ///////////////////////////////////////////
         
         // Get the saved settings from the NSUserDefaults.  Restrict the possible flash modes to "torch" and "off".
         self.flashMode = [[[NSUserDefaults standardUserDefaults] objectForKey:PREFS_FLASH_MODE] intValue];
@@ -193,6 +147,9 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     
     // Stop the capture session
     [self.captureSession stopRunning];
+    
+    // Remove any observers
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
 #pragma mark Session management methods
@@ -202,10 +159,6 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     
     // Create the captureSession
     self.captureSession = [[AVCaptureSession alloc] init];
-    
-    // Create the device discovery session.
-    NSArray<AVCaptureDeviceType> *deviceTypes = @[AVCaptureDeviceTypeBuiltInWideAngleCamera, AVCaptureDeviceTypeBuiltInDuoCamera];
-    self.cameraDeviceDiscoverySession = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:deviceTypes mediaType:AVMediaTypeVideo position:AVCaptureDevicePositionUnspecified];
     
     // Initialize the queue for the captureSession
     self.captureSessionQueue = dispatch_queue_create( "session queue", DISPATCH_QUEUE_SERIAL );
@@ -332,7 +285,7 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     }
     
     // Add photo output
-    AVCapturePhotoOutput *thisPhotoOutput = [[AVCapturePhotoOutput alloc] init];
+    AVCaptureStillImageOutput *thisPhotoOutput = [[AVCaptureStillImageOutput alloc] init];
     if ([self.captureSession canAddOutput:thisPhotoOutput]) {
         
         // Remove any existing photoOutputs first
@@ -341,9 +294,6 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         }
         [self.captureSession addOutput:thisPhotoOutput];
         self.photoOutput = thisPhotoOutput;
-        
-        // Enable high resolution photo capture
-        self.photoOutput.highResolutionCaptureEnabled = YES;
     }
     else {
         NSLog( @"Could not add photo output to the session" );
@@ -487,7 +437,7 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
                     [self.camera setTorchMode:AVCaptureTorchModeOff];
                     break;
             }
-
+            
             [self.camera  unlockForConfiguration];
         }
     }
@@ -526,41 +476,29 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         // account for phone locked to portrait
         screenRatio = fminf(screenHeight, screenWidth) / fmaxf(screenHeight, screenWidth);
         imageRatio = imageSize.height / imageSize.width;
-      
+        
         CGFloat cropHeight = (screenRatio / imageRatio) * imageSize.height;
         CGFloat yOffset = (imageSize.height - cropHeight) / 2.f;
         CGRect cropRect = CGRectMake(0, yOffset, imageSize.width, cropHeight);
         
-//        CGFloat cropHeight = (screenRatio / imageRatio) * imageSize.width;
-//        CGFloat yOffset = (imageSize.width - cropHeight) / 2.f;
-//        CGRect cropRect = CGRectMake(0, yOffset, imageSize.height, cropHeight);
-        
         NSLog([NSString stringWithFormat:@"The cropRect is %0.f by %0.f", cropRect.size.width, cropRect.size.height]);
-
+        
         image = [image croppedImage:cropRect];
-        CGFloat croppedImageHeight = image.size.height;
-        CGFloat cropeedImageWidth = image.size.width;
     }
     
     // Get the max dimension for the current resolution setting
     CGFloat maxDimension = [self getDesiredMinimumHeightForResolution:self.resolutionMode];
     
     //Resize to max dimension on one side keeping aspect ratio
-    if (UIDeviceOrientationIsPortrait(currentOrientation))
-    {
+    if (UIDeviceOrientationIsPortrait(currentOrientation)) {
         CGFloat newImageRatio = image.size.width / image.size.height;
         image = [image scaledToSize:CGSizeMake(floorf(newImageRatio * maxDimension), maxDimension)];
     }
-    else
-    {
-        CGFloat newImageHeight = image.size.height;
-        CGFloat newImageWidth = image.size.width;
+    else {
         CGFloat newImageRatio = image.size.height / image.size.width;
         image = [image scaledToSize:CGSizeMake(maxDimension, floorf(newImageRatio * maxDimension))];
     }
     
-    CGFloat returnedImageHeight = image.size.height;
-    CGFloat returnedImageWidth = image.size.width;
     return image;
 }
 
@@ -636,41 +574,18 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     
     dispatch_async( self.captureSessionQueue, ^{
         
-        AVCaptureDeviceType preferredDeviceType;
-        
-        switch (self.cameraType) {
-            case AVCaptureDevicePositionUnspecified:
-            case AVCaptureDevicePositionFront:
-                preferredDeviceType = AVCaptureDeviceTypeBuiltInWideAngleCamera;
-                break;
-            case AVCaptureDevicePositionBack:
-                preferredDeviceType = AVCaptureDeviceTypeBuiltInDuoCamera;
-                break;
-        }
-        
-        NSArray<AVCaptureDevice *> *devices = self.cameraDeviceDiscoverySession.devices;
+        NSArray<AVCaptureDevice *> *devices = [AVCaptureDevice devices];
         AVCaptureDevice *newVideoDevice = nil;
         
-        // First, look for a device with both the preferred position and device type.
+        // Look for a device with the preferred position
         for (AVCaptureDevice *device in devices) {
-            if (device.position == self.cameraType && [device.deviceType isEqualToString:preferredDeviceType] ) {
+            if (device.position == self.cameraType) {
                 newVideoDevice = device;
                 break;
             }
         }
         
-        // Otherwise, look for a device with only the preferred position.
-        if (!newVideoDevice) {
-            for (AVCaptureDevice *device in devices) {
-                if (device.position == self.cameraType) {
-                    newVideoDevice = device;
-                    break;
-                }
-            }
-        }
-        
         if (newVideoDevice) {
-            AVCaptureDeviceInput *videoDeviceInput = [AVCaptureDeviceInput deviceInputWithDevice:newVideoDevice error:NULL];
             
             // Set the reference to the camera
             self.camera = newVideoDevice;
@@ -687,9 +602,12 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
             // Remove the existing device input first if there is one, since using the front and back camera simultaneously is not supported.
             [self releaseCamera];
             
+            // Uncomment this section to add listeners for the completion of the auto focus and auto exposure routines
+            ///////////////////////////////////////////
             // Add observers for the focus and exposure
-//            [self.camera addObserver:self forKeyPath:@"adjustingFocus" options:0 context:nil];
-//            [self.camera addObserver:self forKeyPath:@"adjustingExposure" options:0 context:nil];
+            //[self.camera addObserver:self forKeyPath:@"adjustingFocus" options:0 context:nil];
+            //[self.camera addObserver:self forKeyPath:@"adjustingExposure" options:0 context:nil];
+            ///////////////////////////////////////////
             
             // Add the new input to the capture session
             [self configureSession];
@@ -712,13 +630,17 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         [self.captureSession removeInput:self.deviceInput];
         [self.captureSession commitConfiguration];
         
-        // Remove the observers for the focus and exposure if necessary
-//        @try {
-//            [self.camera removeObserver:self forKeyPath:@"adjustingFocus" context:nil];
-//            [self.camera removeObserver:self forKeyPath:@"adjustingExposure" context:nil];
-//        }
-//        @catch(id exception) {
-//        }
+        // Uncomment this section if you'd like to add listeners for the completion of the auto focus or auto exposure routines
+        ///////////////////////////////////////////
+        /*
+         // Remove the observers for the focus and exposure if necessary
+         @try {
+         [self.camera removeObserver:self forKeyPath:@"adjustingFocus" context:nil];
+         [self.camera removeObserver:self forKeyPath:@"adjustingExposure" context:nil];
+         }
+         @catch(id exception) {
+         }*/
+        ////////////////////////////////////////////
     }
 }
 
@@ -731,15 +653,10 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
 // This method returns a boolean that describes whether or not the device has an available front-facing camera
 -(BOOL)hasFrontCamera {
     
-    if (self.cameraDeviceDiscoverySession == nil || self.cameraDeviceDiscoverySession.devices == nil) {
-        return NO;
-    }
-    else {
-        NSArray<AVCaptureDevice *> *devices = self.cameraDeviceDiscoverySession.devices;
-        for (AVCaptureDevice *device in devices) {
-            if (device.position == AVCaptureDevicePositionFront) {
-                return YES;
-            }
+    NSArray<AVCaptureDevice *> *devices = [AVCaptureDevice devices];
+    for (AVCaptureDevice *device in devices) {
+        if (device.position == AVCaptureDevicePositionFront) {
+            return YES;
         }
     }
     
@@ -750,15 +667,10 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
 // This method returns a boolean that describes whether or not the device has an available rear-facing camera
 -(BOOL)hasRearCamera {
     
-    if (self.cameraDeviceDiscoverySession == nil || self.cameraDeviceDiscoverySession.devices == nil) {
-        return NO;
-    }
-    else {
-        NSArray<AVCaptureDevice *> *devices = self.cameraDeviceDiscoverySession.devices;
-        for (AVCaptureDevice *device in devices) {
-            if (device.position == AVCaptureDevicePositionBack) {
-                return YES;
-            }
+    NSArray<AVCaptureDevice *> *devices = [AVCaptureDevice devices];
+    for (AVCaptureDevice *device in devices) {
+        if (device.position == AVCaptureDevicePositionBack) {
+            return YES;
         }
     }
     
@@ -793,69 +705,6 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     
     // Initialize the camera again
     [self startCamera];
-    
-    /*dispatch_async( self.captureSessionQueue, ^{
-        AVCaptureDevicePosition currentPosition = self.camera.position;
-        
-        AVCaptureDevicePosition preferredPosition;
-        AVCaptureDeviceType preferredDeviceType;
-        
-        switch ( currentPosition )
-        {
-            case AVCaptureDevicePositionUnspecified:
-            case AVCaptureDevicePositionFront:
-                preferredPosition = AVCaptureDevicePositionBack;
-                preferredDeviceType = AVCaptureDeviceTypeBuiltInDuoCamera;
-                break;
-            case AVCaptureDevicePositionBack:
-                preferredPosition = AVCaptureDevicePositionFront;
-                preferredDeviceType = AVCaptureDeviceTypeBuiltInWideAngleCamera;
-                break;
-        }
-        
-        NSArray<AVCaptureDevice *> *devices = self.cameraDeviceDiscoverySession.devices;
-        AVCaptureDevice *newVideoDevice = nil;
-        
-        // First, look for a device with both the preferred position and device type.
-        for ( AVCaptureDevice *device in devices ) {
-            if ( device.position == preferredPosition && [device.deviceType isEqualToString:preferredDeviceType] ) {
-                newVideoDevice = device;
-                break;
-            }
-        }
-        
-        // Otherwise, look for a device with only the preferred position.
-        if ( ! newVideoDevice ) {
-            for ( AVCaptureDevice *device in devices ) {
-                if ( device.position == preferredPosition ) {
-                    newVideoDevice = device;
-                    break;
-                }
-            }
-        }
-        
-        if ( newVideoDevice ) {
-            AVCaptureDeviceInput *videoDeviceInput = [AVCaptureDeviceInput deviceInputWithDevice:newVideoDevice error:NULL];
-            
-            // Set the reference to the camera
-            self.camera = newVideoDevice;
-            
-            // Remove the existing device input first, since using the front and back camera simultaneously is not supported.
-            [self releaseCamera];
-            
-            [self.captureSession beginConfiguration];
-            
-            if ( [self.captureSession canAddInput:videoDeviceInput] ) {
-                [self.captureSession addInput:videoDeviceInput];
-                self.deviceInput = videoDeviceInput;
-            }
-            else {
-                [self.captureSession addInput:self.deviceInput];
-            }
-            
-            [self.captureSession commitConfiguration];
-        }
-    } );*/
 }
 
 // This method returns a boolean that describes whether or not the current camera has flash capability
@@ -889,6 +738,15 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     CCCameraView *latestView = [CCCameraManager getLatestView];
     [latestView.cameraLayout animateScreenFlash];
     
+    // Show the loading view and disable all the buttons while the photo is processing
+    if (self.cameraMode == CCCameraModeCamera) {
+        [latestView.cameraLayout showLoadingView];
+        [latestView.cameraLayout disableButtons];
+        
+        // Pause the camera preview while the photo is processing
+        [latestView.previewView.previewLayer.connection setEnabled:NO];
+    }
+    
     /*
      Retrieve the video preview layer's video orientation on the main queue before
      entering the session queue. We do this to ensure UI elements are accessed on
@@ -903,55 +761,92 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         AVCaptureConnection *photoOutputConnection = [self.photoOutput connectionWithMediaType:AVMediaTypeVideo];
         photoOutputConnection.videoOrientation = videoPreviewLayerVideoOrientation;
         
-        // Capture a JPEG photo with flash set to auto and high resolution photo enabled.
-        AVCapturePhotoSettings *photoSettings = [AVCapturePhotoSettings photoSettings];
-        
-        photoSettings.highResolutionPhotoEnabled = YES;
-        if ( photoSettings.availablePreviewPhotoPixelFormatTypes.count > 0 ) {
-            photoSettings.previewPhotoFormat = @{ (NSString *)kCVPixelBufferPixelFormatTypeKey : photoSettings.availablePreviewPhotoPixelFormatTypes.firstObject };
-        }
-        
-        /*// Use a separate object for the photo capture delegate to isolate each capture life cycle.
-        AVCamPhotoCaptureDelegate *photoCaptureDelegate = [[AVCamPhotoCaptureDelegate alloc] initWithRequestedPhotoSettings:photoSettings willCapturePhotoAnimation:^{
-            dispatch_async( dispatch_get_main_queue(), ^{
-                self.previewView.videoPreviewLayer.opacity = 0.0;
-                [UIView animateWithDuration:0.25 animations:^{
-                    self.previewView.videoPreviewLayer.opacity = 1.0;
-                }];
-            } );
-        } capturingLivePhoto:^( BOOL capturing ) {
+        [self.photoOutput captureStillImageAsynchronouslyFromConnection:[self.photoOutput connectionWithMediaType:AVMediaTypeVideo] completionHandler:^(CMSampleBufferRef imageDataSampleBuffer, NSError *error) {
             
-            dispatch_async( self.sessionQueue, ^{
-                if ( capturing ) {
-                    self.inProgressLivePhotoCapturesCount++;
-                }
-                else {
-                    self.inProgressLivePhotoCapturesCount--;
-                }
+            if (imageDataSampleBuffer) {
                 
-                NSInteger inProgressLivePhotoCapturesCount = self.inProgressLivePhotoCapturesCount;
-                dispatch_async( dispatch_get_main_queue(), ^{
-                    if ( inProgressLivePhotoCapturesCount > 0 ) {
-                        self.capturingLivePhotoLabel.hidden = NO;
+                self.photoData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
+                
+                // If the photoData wasn't nil, then save the image to the file system
+                if (self.photoData != nil) {
+                    
+                    // Get a reference to the CCCameraView
+                    CCCameraView *thisCameraView = [CCCameraManager getLatestView];
+                    
+//                    // If this is the normal camera mode, then pause the preview when a photo is taken
+//                    if (self.cameraMode == CCCameraModeCamera) {
+//                        [latestView.previewView.previewLayer.connection setEnabled:NO];
+//                    }
+                    
+                    // Create a UIImage from the photoData and rotate it to the proper orientation
+                    UIImage *originalImage = [UIImage imageWithData:self.photoData scale:1.0f];
+                    UIImage *rotatedImage = [originalImage rotateForImageOrientation:[self getCurrentImageOrientation]];
+                    
+                    // Crop the image to the size of the CCCameraView
+                    UIImage *croppedImage = [self resizeImage:rotatedImage];
+                    
+                    // Set the additional pieces of metadata
+                    NSMutableDictionary *mutableMetadata = [[self.photoData exifDataForImage] mutableCopy];
+                    NSDate *now = [NSDate date];
+                    [mutableMetadata setDateDigitized:now];
+                    [mutableMetadata setDateOriginal:now];
+                    [mutableMetadata setImageOrientation:[self getCurrentImageOrientation]];
+                    [mutableMetadata setLocation:[thisCameraView getExifLocation]];
+                    
+                    // Get the data for the rotated image
+                    NSData *jpeg = UIImageJPEGRepresentation(croppedImage, 0.6f);
+                    
+                    // Write the rotated image data to the file system
+                    NSString *filePath = [StorageUtility writeDataToFile:jpeg];
+                    
+                    // If saveToPhone is set, then save the image to the device in addition to sending it to the server.
+                    BOOL saveToPhone = [[NSUserDefaults standardUserDefaults] boolForKey:@"SaveToPhone"];
+                    if (saveToPhone) {
+                        
+                        // Check for permission to acceess the camera roll
+                        [PHPhotoLibrary requestAuthorization:^( PHAuthorizationStatus status ) {
+                            if (status == PHAuthorizationStatusAuthorized) {
+                                
+                                NSLog(@"Trying to save a photo to the camera roll");
+                                
+                                // Add the photo to the camera roll
+                                [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                                    PHAssetCreationRequest *creationRequest = [PHAssetCreationRequest creationRequestForAsset];
+                                    [creationRequest addResourceWithType:PHAssetResourceTypePhoto data:UIImageJPEGRepresentation(croppedImage, 0.7f) options:nil];
+                                } completionHandler:^( BOOL success, NSError * _Nullable error ) {
+                                    if (!success) {
+                                        NSLog(@"Error occurred while saving photo to photo library: %@", error);
+                                    }
+                                }];
+                            }
+                            else {
+                                NSLog( @"Not authorized to save photo" );
+                            }
+                        }];
                     }
-                    else if ( inProgressLivePhotoCapturesCount == 0 ) {
-                        self.capturingLivePhotoLabel.hidden = YES;
+                    
+                    // Execute the proper callback depending on the current camera mode
+                    if (self.cameraMode != CCCameraModeFastCam) {
+                        [thisCameraView doPhotoTaken:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage)];
+                        
+                        // Hide the loading view and enable the buttons again
+                        [latestView.cameraLayout hideLoadingView];
+                        [latestView.cameraLayout enableButtons];
                     }
                     else {
-                        NSLog( @"Error: In progress live photo capture count is less than 0" );
+                        [thisCameraView doPhotoAccepted:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage)];
                     }
-                } );
-            } );
-        } completed:^( AVCamPhotoCaptureDelegate *photoCaptureDelegate ) {
-            // When the capture is complete, remove a reference to the photo capture delegate so it can be deallocated.
-            dispatch_async( self.sessionQueue, ^{
-                self.inProgressPhotoCaptureDelegates[@(photoCaptureDelegate.requestedPhotoSettings.uniqueID)] = nil;
-            } );
+                }
+            }
+            else {
+                
+                // Hide the loading view
+                [latestView.cameraLayout hideLoadingView];
+                
+                // TODO: Present an error message?
+            }
         }];
         
-        
-        self.inProgressPhotoCaptureDelegates[@(photoCaptureDelegate.requestedPhotoSettings.uniqueID)] = photoCaptureDelegate;*/
-        [self.photoOutput capturePhotoWithSettings:photoSettings delegate:self];
     } );
 }
 
@@ -984,15 +879,6 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     else if (currentScaleNumber > MAX_PINCH_SCALE_NUM) {
         currentScaleNumber = MAX_PINCH_SCALE_NUM;
     }
-    
-//    if ( [self.delegate respondsToSelector:@selector(cameraCaptureScale:)] )
-//        [self.delegate cameraCaptureScale:_scaleNum];
-    
-//    // Set the scale for the previewLayer
-//    [CATransaction begin];
-//    [CATransaction setAnimationDuration:.025];
-//    [latestView.previewView.previewLayer setAffineTransform:CGAffineTransformMakeScale(currentScaleNumber, currentScaleNumber)];
-//    [CATransaction commit];
     
     NSError *error = nil;
     if ([self.camera lockForConfiguration:&error]) {
@@ -1054,133 +940,6 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         // Show the focusIndicatorView
         [latestView.cameraLayout showAutoFocusIndicator:thisTouchPoint :YES];
     }
-}
-
-#pragma mark AVCapturePhotoCaptureDelegate methods
-
--(void)captureOutput:(AVCapturePhotoOutput *)captureOutput didFinishProcessingPhotoSampleBuffer:(CMSampleBufferRef)photoSampleBuffer previewPhotoSampleBuffer:(CMSampleBufferRef)previewPhotoSampleBuffer resolvedSettings:(AVCaptureResolvedPhotoSettings *)resolvedSettings bracketSettings:(AVCaptureBracketedStillImageSettings *)bracketSettings error:(NSError *)error {
-    
-    NSLog(@"didFinishProcessingPhotoSampleBuffer was called");
-    
-    // If there was an error, then simply return
-    if (error != nil) {
-        NSLog( @"Error capturing photo: %@", error );
-        return;
-    }
-    
-    // Otherwise, save the photo data
-    self.photoData = [AVCapturePhotoOutput JPEGPhotoDataRepresentationForJPEGSampleBuffer:photoSampleBuffer previewPhotoSampleBuffer:previewPhotoSampleBuffer];
-}
-
--(void)captureOutput:(AVCapturePhotoOutput *)captureOutput didFinishCaptureForResolvedSettings:(AVCaptureResolvedPhotoSettings *)resolvedSettings error:(NSError *)error {
-    
-    if (error != nil) {
-        NSLog(@"A photo wasn't captured!");
-        return;
-    }
-    else {
-        NSLog(@"A photo was captured!");
-    }
-    
-    // If the photoData wasn't nil, then save the image to the file system
-    if (self.photoData != nil) {
-        
-        // Get a reference to the CCCameraView
-        CCCameraView *thisCameraView = [CCCameraManager getLatestView];
-        
-        // Create a UIImage from the photoData and rotate it to the proper orientation
-        UIImage *originalImage = [UIImage imageWithData:self.photoData scale:1.0f];
-        UIImage *rotatedImage = [originalImage rotateForImageOrientation:[self getCurrentImageOrientation]];
-        
-        // Crop the image to the size of the CCCameraView
-        UIImage *croppedImage = [self resizeImage:rotatedImage];
-        
-        // Set the additional pieces of metadata
-        NSMutableDictionary *mutableMetadata = [[self.photoData exifDataForImage] mutableCopy];
-        NSDate *now = [NSDate date];
-        [mutableMetadata setDateDigitized:now];
-        [mutableMetadata setDateOriginal:now];
-        [mutableMetadata setImageOrientation:[self getCurrentImageOrientation]];
-        [mutableMetadata setLocation:[thisCameraView getExifLocation]];
-        
-        // Get the data for the rotated image
-        NSData *jpeg = UIImageJPEGRepresentation(croppedImage, 0.6f);
-        
-        // Write the rotated image data to the file system
-        NSString *filePath = [StorageUtility writeDataToFile:jpeg];
-        
-        // If saveToPhone is set, then save the image to the device in addition to sending it to the server.
-        BOOL saveToPhone = [[NSUserDefaults standardUserDefaults] boolForKey:@"SaveToPhone"];
-        if (saveToPhone) {
-            
-            // Check for permission to acceess the camera roll
-            [PHPhotoLibrary requestAuthorization:^( PHAuthorizationStatus status ) {
-                if (status == PHAuthorizationStatusAuthorized) {
-                    
-                    NSLog(@"Trying to save a photo to the camera roll");
-                    
-                    // Add the photo to the camera roll
-                    [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-                        PHAssetCreationRequest *creationRequest = [PHAssetCreationRequest creationRequestForAsset];
-                        [creationRequest addResourceWithType:PHAssetResourceTypePhoto data:UIImageJPEGRepresentation(croppedImage, 0.7f) options:nil];
-                    } completionHandler:^( BOOL success, NSError * _Nullable error ) {
-                        if (!success) {
-                            NSLog(@"Error occurred while saving photo to photo library: %@", error);
-                        }
-                    }];
-                }
-                else {
-                    NSLog( @"Not authorized to save photo" );
-                }
-            }];
-        }
-        
-        // Execute the proper callback depending on the current camera mode
-        if (self.cameraMode != CCCameraModeFastCam) {
-            [thisCameraView doPhotoTaken:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage)];
-        }
-        else {
-            [thisCameraView doPhotoAccepted:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage)];
-        }
-    }
-    
-    
-    /*if ( error != nil ) {
-        NSLog( @"Error capturing photo: %@", error );
-        [self didFinish];
-        return;
-    }
-    
-    if ( self.photoData == nil ) {
-        NSLog( @"No photo data resource" );
-        [self didFinish];
-        return;
-    }
-    
-    [PHPhotoLibrary requestAuthorization:^( PHAuthorizationStatus status ) {
-        if ( status == PHAuthorizationStatusAuthorized ) {
-            [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-                PHAssetCreationRequest *creationRequest = [PHAssetCreationRequest creationRequestForAsset];
-                [creationRequest addResourceWithType:PHAssetResourceTypePhoto data:self.photoData options:nil];
-                
-                if ( self.livePhotoCompanionMovieURL ) {
-                    PHAssetResourceCreationOptions *livePhotoCompanionMovieResourceOptions = [[PHAssetResourceCreationOptions alloc] init];
-                    livePhotoCompanionMovieResourceOptions.shouldMoveFile = YES;
-                    [creationRequest addResourceWithType:PHAssetResourceTypePairedVideo fileURL:self.livePhotoCompanionMovieURL options:livePhotoCompanionMovieResourceOptions];
-                }
-            } completionHandler:^( BOOL success, NSError * _Nullable error ) {
-                if ( ! success ) {
-                    NSLog( @"Error occurred while saving photo to photo library: %@", error );
-                }
-                
-                [self didFinish];
-            }];
-        }
-        else {
-            NSLog( @"Not authorized to save photo" );
-            [self didFinish];
-        }
-    }];*/
 }
 
 #pragma mark Persistent settings

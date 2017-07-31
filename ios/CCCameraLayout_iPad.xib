@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11542" systemVersion="15G31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11542" systemVersion="16A323" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="ipad9_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -30,6 +30,7 @@
                 <outlet property="focusIndicatorTopConstraint" destination="itf-pO-ETk" id="et4-U7-3S9"/>
                 <outlet property="focusIndicatorView" destination="2Sn-ur-RY3" id="twg-pZ-lmX"/>
                 <outlet property="highButton" destination="DhC-kP-MxI" id="eD9-hS-y8q"/>
+                <outlet property="loadingView" destination="Z9y-UR-rBf" id="yos-J0-UWo"/>
                 <outlet property="normalButton" destination="Wly-pF-HPf" id="ZlC-fy-hLu"/>
                 <outlet property="pinchRecognizer" destination="cco-jA-HBy" id="Rbk-xL-hNd"/>
                 <outlet property="placeLabelRightConstraint" destination="ovE-73-moQ" id="RUP-eW-kTk"/>
@@ -466,6 +467,30 @@
                         <constraint firstAttribute="width" constant="80" id="Ymf-He-u6P"/>
                     </constraints>
                 </view>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Z9y-UR-rBf">
+                    <rect key="frame" x="264" y="467" width="240" height="90"/>
+                    <subviews>
+                        <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="dyF-Qu-C9i">
+                            <rect key="frame" x="101.5" y="10" width="37" height="37"/>
+                        </activityIndicatorView>
+                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Processing your photo..." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4dO-ov-6p2">
+                            <rect key="frame" x="0.0" y="53" width="240" height="21"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                            <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            <nil key="highlightedColor"/>
+                        </label>
+                    </subviews>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstItem="4dO-ov-6p2" firstAttribute="top" secondItem="dyF-Qu-C9i" secondAttribute="bottom" constant="6" id="7QW-BJ-cpP"/>
+                        <constraint firstAttribute="width" constant="240" id="Fqo-T9-p8z"/>
+                        <constraint firstAttribute="trailing" secondItem="4dO-ov-6p2" secondAttribute="trailing" id="LKM-ih-beh"/>
+                        <constraint firstItem="dyF-Qu-C9i" firstAttribute="top" secondItem="Z9y-UR-rBf" secondAttribute="top" constant="10" id="SYk-iZ-2Ka"/>
+                        <constraint firstItem="4dO-ov-6p2" firstAttribute="leading" secondItem="Z9y-UR-rBf" secondAttribute="leading" id="WWH-0a-9xV"/>
+                        <constraint firstItem="dyF-Qu-C9i" firstAttribute="centerX" secondItem="Z9y-UR-rBf" secondAttribute="centerX" id="p2j-cn-HmN"/>
+                        <constraint firstAttribute="height" constant="90" id="rhq-JY-Sfo"/>
+                    </constraints>
+                </view>
                 <view alpha="0.0" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gpI-4n-Dci">
                     <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
                     <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -476,11 +501,13 @@
             <constraints>
                 <constraint firstItem="2Sn-ur-RY3" firstAttribute="leading" secondItem="bom-HH-iD6" secondAttribute="leading" id="5yw-VL-oEC"/>
                 <constraint firstItem="gpI-4n-Dci" firstAttribute="top" secondItem="bom-HH-iD6" secondAttribute="top" id="90V-tE-rxk"/>
+                <constraint firstItem="Z9y-UR-rBf" firstAttribute="centerY" secondItem="bom-HH-iD6" secondAttribute="centerY" id="Esr-dw-d1C"/>
                 <constraint firstItem="aLW-gt-wLM" firstAttribute="top" secondItem="bom-HH-iD6" secondAttribute="top" constant="-150" id="Gqo-4L-MfQ"/>
                 <constraint firstItem="qwC-60-LfP" firstAttribute="top" secondItem="cxQ-pT-Aec" secondAttribute="bottom" id="Les-m4-z8P"/>
                 <constraint firstItem="iRg-DG-u72" firstAttribute="top" secondItem="bom-HH-iD6" secondAttribute="top" id="OCZ-fe-qF3"/>
                 <constraint firstAttribute="trailing" secondItem="gpI-4n-Dci" secondAttribute="trailing" id="PHf-lP-1g2"/>
                 <constraint firstItem="cxQ-pT-Aec" firstAttribute="top" secondItem="bom-HH-iD6" secondAttribute="top" id="RQT-Gy-Ut0"/>
+                <constraint firstItem="Z9y-UR-rBf" firstAttribute="centerX" secondItem="bom-HH-iD6" secondAttribute="centerX" id="UFo-gQ-7bc"/>
                 <constraint firstAttribute="bottom" secondItem="gpI-4n-Dci" secondAttribute="bottom" id="d04-BS-XSl"/>
                 <constraint firstItem="qwC-60-LfP" firstAttribute="centerX" secondItem="xdR-F2-PNT" secondAttribute="centerX" id="dY1-Kp-C9q"/>
                 <constraint firstAttribute="trailing" secondItem="iRg-DG-u72" secondAttribute="trailing" id="eqQ-xk-jtd"/>

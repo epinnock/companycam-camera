@@ -66,6 +66,22 @@
 @optional
 -(void)hideAutoFocusIndicator;
 
+// This method shows the loading view
+@optional
+-(void)showLoadingView;
+
+// This method hides the loading view
+@optional
+-(void)hideLoadingView;
+
+// This method enables all the buttons
+@optional
+-(void)enableButtons;
+
+// This method disables all the buttons
+@optional
+-(void)disableButtons;
+
 // This method returns the current orientation of the layout
 @optional
 -(UIDeviceOrientation)getCurrentOrientation;

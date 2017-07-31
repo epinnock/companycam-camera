@@ -95,6 +95,9 @@
     IBOutlet NSLayoutConstraint *focusIndicatorTopConstraint;
     IBOutlet NSLayoutConstraint *focusIndicatorLeftConstraint;
     
+    // The loading view is used to present feedback to the user that a photo was taken
+    IBOutlet UIView *loadingView;
+    
     // The screenFlashView is used to provide a flash effect when the user snaps a photo
     IBOutlet UIView *screenFlashView;
     
@@ -152,6 +155,7 @@
 @property (nonatomic, retain) NSTimer *focusIndicatorTimer;
 @property (nonatomic, retain) IBOutlet NSLayoutConstraint *focusIndicatorTopConstraint;
 @property (nonatomic, retain) IBOutlet NSLayoutConstraint *focusIndicatorLeftConstraint;
+@property (nonatomic, retain) IBOutlet UIView *loadingView;
 @property (nonatomic, retain) IBOutlet UIView *screenFlashView;
 @property (nonatomic, retain) IBOutlet UIPinchGestureRecognizer *pinchRecognizer;
 @property (nonatomic, retain) NSBundle *CCCameraBundle;

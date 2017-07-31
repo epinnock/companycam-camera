@@ -25,6 +25,9 @@ RCT_EXPORT_MODULE(CompanyCamCamera)
     if (latestView == nil) {
         latestView = [[CCCameraView alloc] initWithManager:self bridge:self.bridge];
     }
+    else {
+        [latestView setupView];
+    }
     
     // Create the CCCamera object
     latestView.camera = [[CCCamera alloc] init];

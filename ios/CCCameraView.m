@@ -23,17 +23,19 @@
 @synthesize propExifLocationLongitude;
 @synthesize propExifLocationTimestamp;
 @synthesize propAuxModeCaption;
+@synthesize isActive;
 
 #pragma mark Initialization methods
 
 -(id)initWithManager:(CCCameraManager*)_manager bridge:(RCTBridge *)_bridge {
-  
+    
     if (self = [super init]) {
         self.manager = _manager;
         self.bridge = _bridge;
         
         // Load the nib for this view
         NSBundle *bundle = [NSBundle bundleWithURL:[[NSBundle mainBundle] URLForResource:@"CCCameraResources" withExtension:@"bundle"]];
+        
         [bundle loadNibNamed:@"CCCameraView" owner:self options:nil];
         [self addSubview:self.view];
         
@@ -50,38 +52,54 @@
             // Volume Down Button Pressed
         }];
         
-        // Start the volumeButtonHandler
-        [self.volumeButtonHandler startHandler:YES];
+        // Setup the view
+        [self setupView];
         
-        // Register to receive a notification when the CCCameraModule is made active
-        [[NSNotificationCenter defaultCenter] removeObserver:self];
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(onSetActive:)
-                                                     name:@"CCCameraModuleActiveNotification"
-                                                   object:nil];
-        
-        // Register to receive a notification when the CCCameraModule is made inactive
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(onSetInactive:)
-                                                     name:@"CCCameraModuleInactiveNotification"
-                                                   object:nil];
-        
-        // Register to receive notifications when the app is sent to the background or enters the foreground
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSetActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSetInactive:) name:UIApplicationDidEnterBackgroundNotification object:nil];
-
-
         NSLog(@"A CCCameraView was just created!");
     }
     
     return self;
 }
 
+// This method sets up the view
+-(void)setupView {
+    
+    // Start the volumeButtonHandler
+    [self.volumeButtonHandler startHandler:YES];
+    
+    // Register to receive a notification when the CCCameraModule is made active
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(onSetActive:)
+                                                 name:@"CCCameraModuleActiveNotification"
+                                               object:nil];
+    
+    // Register to receive a notification when the CCCameraModule is made inactive
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(onSetInactive:)
+                                                 name:@"CCCameraModuleInactiveNotification"
+                                               object:nil];
+    
+    // Register to receive notifications when the app is sent to the background or enters the foreground
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSetActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSetInactive:) name:UIApplicationDidEnterBackgroundNotification object:nil];
+    
+    self.isActive = YES;
+}
+
 // This method can be used to do any necessary cleanup before closing the view
 -(void)finishWithResult:(NSString *)button {
     
-    // Remove any notification listeners
-    //[[NSNotificationCenter defaultCenter] removeObserver:self];
+    // Remove any notification listeners if the camera view is being closed
+    if ([button isEqualToString:@"close"]) {
+        [[NSNotificationCenter defaultCenter] removeObserver:self];
+        [[NSNotificationCenter defaultCenter] removeObserver:self.camera];
+        
+        // Stop the volumeButtonHandler
+        [self.volumeButtonHandler stopHandler];
+    }
+    
+    self.isActive = NO;
     
     [self propOnClose:@"" :button];
 }
@@ -91,13 +109,20 @@
     
     // Start the volumeButtonHandler
     [self.volumeButtonHandler startHandler:YES];
+    
+    self.isActive = YES;
 }
 
 // This method responds to the CCCameraModuleInactiveNotification
 -(void)onSetInactive:(NSNotification *)notification {
     
     // Stop the volumeButtonHandler
-    [self.volumeButtonHandler stopHandler];
+    //[self.volumeButtonHandler stopHandler];
+    
+    // Remove any observers
+    //[[NSNotificationCenter defaultCenter] removeObserver:self];
+    
+    self.isActive = NO;
 }
 
 #pragma mark Component props - functions
@@ -107,9 +132,9 @@
     
     // Invoke onClose prop
     id event = @{
-        @"errmsg": errmsg,
-        @"button": button
-    };
+                 @"errmsg": errmsg,
+                 @"button": button
+                 };
     
     if (self.onClose) {
         self.onClose(event);
@@ -135,9 +160,9 @@
     
     // Create a CCCameraEvent object
     /*CCCameraEvent *thisEvent = [[CCCameraEvent alloc] init];
-    thisEvent.eventName = eventName;
-    
-    [self.bridge.eventDispatcher sendEvent:<#(id<RCTEvent>)#>]*/
+     thisEvent.eventName = eventName;
+     
+     [self.bridge.eventDispatcher sendEvent:<#(id<RCTEvent>)#>]*/
     
 }
 
@@ -150,10 +175,10 @@
     
     // Invoke the onPhotoTaken prop
     id event = @{
-        @"filename": imgFile,
-        @"imgWidth": [NSNumber numberWithInt:imgWidth],
-        @"imgHeight": [NSNumber numberWithInt:imgHeight]
-    };
+                 @"filename": imgFile,
+                 @"imgWidth": [NSNumber numberWithInt:imgWidth],
+                 @"imgHeight": [NSNumber numberWithInt:imgHeight]
+                 };
     if (self.onPhotoTaken) {
         self.onPhotoTaken(event);
         [self finishWithResult:@"capture"];
