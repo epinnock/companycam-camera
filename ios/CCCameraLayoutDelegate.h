@@ -86,4 +86,9 @@
 @optional
 -(UIDeviceOrientation)getCurrentOrientation;
 
+// This method passes the necessary parameters to the layout object to initialize the imageProcessorView
+@optional
+-(void)initImageProcessor:(int)previewWidth :(int)previewHeight :(int)maxOutputDimension;
+
+
 @end

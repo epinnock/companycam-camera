@@ -59,6 +59,7 @@
 @synthesize focusIndicatorLeftConstraint;
 @synthesize loadingView;
 @synthesize screenFlashView;
+@synthesize imageProcessorView;
 @synthesize pinchRecognizer;
 @synthesize CCCameraBundle;
 
@@ -942,6 +943,13 @@
 // This method returns the current orientation of the layout
 -(UIDeviceOrientation)getCurrentOrientation {
     return self.lastOrientation;
+}
+
+// This method passes the necessary parameters to the layout object to initialize the imageProcessorView
+-(void)initImageProcessor:(int)previewWidth :(int)previewHeight :(int)maxOutputDimension {
+    
+    // Set the image parameters for the imageProcessorView
+    [self.imageProcessorView setImageParams:previewWidth :previewWidth :self.frame.size.width :self.frame.size.height :maxOutputDimension];
 }
 
 // This method updates the radius for the focusIndicatorView

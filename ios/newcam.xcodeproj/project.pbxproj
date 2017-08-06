@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		DB0BCA011F044135004B8447 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB2FF1E81F0413190005A9BE /* AssetsLibrary.framework */; };
-		DB0BCA021F044141004B8447 /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB0BC9FE1F0440F5004B8447 /* opencv2.framework */; };
 		DB2FF1E21F0379CB0005A9BE /* docscan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DB2FF1DE1F0379CB0005A9BE /* docscan.cpp */; };
 		DB2FF1E31F0379CB0005A9BE /* geometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DB2FF1E01F0379CB0005A9BE /* geometry.cpp */; };
 		DB3DAD311EE67AAE005B2885 /* GradientBackgroundView.m in Sources */ = {isa = PBXBuildFile; fileRef = DB3DAD301EE67AAE005B2885 /* GradientBackgroundView.m */; };
@@ -24,6 +23,8 @@
 		DB58BF511F11DC72003D503B /* FocusIndicatorView.m in Sources */ = {isa = PBXBuildFile; fileRef = DB58BF501F11DC72003D503B /* FocusIndicatorView.m */; };
 		DB58BF541F153577003D503B /* NSData+CCImageExif.m in Sources */ = {isa = PBXBuildFile; fileRef = DB58BF531F153577003D503B /* NSData+CCImageExif.m */; };
 		DB58BF5A1F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.m in Sources */ = {isa = PBXBuildFile; fileRef = DB58BF591F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.m */; };
+		DB7EAB471F30EA1900D8FC9D /* opencv2.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB0BC9FE1F0440F5004B8447 /* opencv2.framework */; };
+		DB8F58D01F2FD116008119EA /* DocScanOpenCV.mm in Sources */ = {isa = PBXBuildFile; fileRef = DB8F58CF1F2FD116008119EA /* DocScanOpenCV.mm */; };
 		DB9F69701ECD664A004D4F85 /* CCCameraModule.m in Sources */ = {isa = PBXBuildFile; fileRef = DB9F696F1ECD664A004D4F85 /* CCCameraModule.m */; };
 		DB9F698B1ECD701E004D4F85 /* CCCameraView.xib in Resources */ = {isa = PBXBuildFile; fileRef = DB9F696C1ECD390A004D4F85 /* CCCameraView.xib */; };
 		DB9F69C91ED014CE004D4F85 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
@@ -77,6 +78,10 @@
 		DB58BF581F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMutableDictionary+CCImageMetadata.h"; sourceTree = "<group>"; };
 		DB58BF591F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMutableDictionary+CCImageMetadata.m"; sourceTree = "<group>"; };
 		DB58BF631F1D5E27003D503B /* JPSVolumeButtonHandler */ = {isa = PBXFileReference; lastKnownFileType = folder; path = JPSVolumeButtonHandler; sourceTree = "<group>"; };
+		DB7EAB491F30F01100D8FC9D /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
+		DB8F58CD1F2FD01B008119EA /* CCCameraImageProcessor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCCameraImageProcessor.h; sourceTree = "<group>"; };
+		DB8F58CE1F2FD116008119EA /* DocScanOpenCV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DocScanOpenCV.h; sourceTree = "<group>"; };
+		DB8F58CF1F2FD116008119EA /* DocScanOpenCV.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.objc; fileEncoding = 4; indentWidth = 4; path = DocScanOpenCV.mm; sourceTree = "<group>"; tabWidth = 4; };
 		DB9F696C1ECD390A004D4F85 /* CCCameraView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CCCameraView.xib; sourceTree = "<group>"; };
 		DB9F696E1ECD664A004D4F85 /* CCCameraModule.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = CCCameraModule.h; sourceTree = "<group>"; tabWidth = 4; };
 		DB9F696F1ECD664A004D4F85 /* CCCameraModule.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = CCCameraModule.m; sourceTree = "<group>"; tabWidth = 4; };
@@ -100,8 +105,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DB7EAB471F30EA1900D8FC9D /* opencv2.framework in Frameworks */,
 				DB4C425F1F1E9CFE002151D2 /* Photos.framework in Frameworks */,
-				DB0BCA021F044141004B8447 /* opencv2.framework in Frameworks */,
 				DB0BCA011F044135004B8447 /* AssetsLibrary.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -170,6 +175,9 @@
 		DB2FF1DC1F0376070005A9BE /* imageprocessing */ = {
 			isa = PBXGroup;
 			children = (
+				DB8F58CD1F2FD01B008119EA /* CCCameraImageProcessor.h */,
+				DB8F58CE1F2FD116008119EA /* DocScanOpenCV.h */,
+				DB8F58CF1F2FD116008119EA /* DocScanOpenCV.mm */,
 			);
 			name = imageprocessing;
 			sourceTree = "<group>";
@@ -258,6 +266,7 @@
 		DBC969281EDFA9F200578CE2 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				DB7EAB491F30F01100D8FC9D /* libc++.tbd */,
 				DB4C425E1F1E9CFE002151D2 /* Photos.framework */,
 				DB0BC9FE1F0440F5004B8447 /* opencv2.framework */,
 				DB2FF1E81F0413190005A9BE /* AssetsLibrary.framework */,
@@ -361,6 +370,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DB8F58D01F2FD116008119EA /* DocScanOpenCV.mm in Sources */,
 				DB58BF4D1F11D5D5003D503B /* UIImage+CCHelper.m in Sources */,
 				DB3DAD311EE67AAE005B2885 /* GradientBackgroundView.m in Sources */,
 				DB9F69CC1ED10567004D4F85 /* CCCameraLayout.m in Sources */,
@@ -483,6 +493,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
@@ -495,7 +506,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "$(PROJECT_DIR)/PrefixHeader.pch";
 				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
-				ONLY_ACTIVE_ARCH = YES;
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-static",
@@ -510,6 +521,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
@@ -537,6 +549,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
@@ -552,6 +565,7 @@
 				INFOPLIST_FILE = CCCameraResources/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.companycam.CCCameraResources;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -565,6 +579,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
 				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_INFINITE_RECURSION = YES;
@@ -580,6 +595,7 @@
 				INFOPLIST_FILE = CCCameraResources/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.companycam.CCCameraResources;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;

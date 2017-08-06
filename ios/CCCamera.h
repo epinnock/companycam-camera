@@ -17,7 +17,7 @@
 #import "NSData+CCImageExif.h"
 #import "NSMutableDictionary+CCImageMetadata.h"
 
-@interface CCCamera : NSObject <CCCameraDelegate> {
+@interface CCCamera : NSObject <CCCameraDelegate, AVCaptureVideoDataOutputSampleBufferDelegate> {
     
     // The session queue is used to handle the camera-related functionality that occurs on background threads without blocking the UI
     dispatch_queue_t captureSessionQueue;
@@ -40,6 +40,12 @@
     // The photoData is used to store the NSData from the photo output
     NSData *photoData;
     
+    // The videoOutput is used to provide the preview frames for the scanner mode
+    AVCaptureVideoDataOutput *videoOutput;
+    
+    // The ipDidAllocate flag describes whether or not the image processor has already been initialized for the scanner mode
+    BOOL ipDidAllocate;
+    
     // The currentScaleNumber and startingScaleNumber are used to handle pinch/zoom gestures
     double currentScaleNumber;
     double startingScaleNumber;
@@ -52,6 +58,8 @@
 @property (nonatomic) AVCaptureDeviceInput *deviceInput;
 @property (nonatomic) AVCaptureStillImageOutput *photoOutput;
 @property (nonatomic) NSData *photoData;
+@property (nonatomic) AVCaptureVideoDataOutput *videoOutput;
+@property (nonatomic) BOOL ipDidAllocate;
 @property (nonatomic) double currentScaleNumber;
 @property (nonatomic) double startingScaleNumber;
 

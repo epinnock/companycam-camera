@@ -97,6 +97,10 @@
         
         // Stop the volumeButtonHandler
         [self.volumeButtonHandler stopHandler];
+        
+        // Release the camera
+        id<CCCameraDelegate> cameraDelegate = (id<CCCameraDelegate>)self.camera;
+        [cameraDelegate releaseCamera];
     }
     
     self.isActive = NO;

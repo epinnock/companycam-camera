@@ -11,6 +11,8 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #import "CCCamera.h"
+#import <opencv2/core/core.hpp>
+#import <opencv2/videoio/cap_ios.h>
 
 // These strings are used to save and retrieve persistent settings to the NSUserDefaults
 #define PREFS_FLASH_MODE @"PREFS_FLASH_MODE"
@@ -20,6 +22,9 @@
 // Define some constants for pinch & zoom
 #define MAX_PINCH_SCALE_NUM   3.f
 #define MIN_PINCH_SCALE_NUM   1.f
+
+// Define a constant for the maximum image processing size for the scanner mode
+#define MAX_DIM_PROCESSING_OUTPUT 1024
 
 typedef NS_ENUM( NSInteger, CCCameraSetupResult ) {
     CCCameraSetupResultSuccess,
@@ -43,7 +48,7 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     CCCameraModeScanner
 };
 
-@interface CCCamera()
+@interface CCCamera() <CvVideoCameraDelegate>
 
 // The flashMode string defines the flash mode to use
 // "auto" = auto flash
@@ -82,6 +87,8 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
 @synthesize deviceInput;
 @synthesize photoOutput;
 @synthesize photoData;
+@synthesize videoOutput;
+@synthesize ipDidAllocate;
 @synthesize currentScaleNumber;
 @synthesize startingScaleNumber;
 
@@ -297,6 +304,29 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     }
     else {
         NSLog( @"Could not add photo output to the session" );
+        self.setupResult = CCCameraSetupResultSessionConfigurationFailed;
+        [self.captureSession commitConfiguration];
+        return;
+    }
+    
+    // Add a video output for capturing the preview frames
+    AVCaptureVideoDataOutput *thisVideoOutput = [[AVCaptureVideoDataOutput alloc] init];
+    if ([self.captureSession canAddOutput:thisVideoOutput]) {
+        
+        // Remove any existing videoOutputs first
+        if (self.videoOutput != nil) {
+            [self.captureSession removeOutput:self.videoOutput];
+        }
+        [self.captureSession addOutput:thisVideoOutput];
+        self.videoOutput = thisVideoOutput;
+        
+        // Set the AVCaptureVideoDataOutputSampleBufferDelegate for the videoOutput if the camera is in scanner mode
+        if (self.cameraMode == CCCameraModeScanner) {
+            [self.videoOutput setSampleBufferDelegate:self queue:self.captureSessionQueue];
+        }
+    }
+    else {
+        NSLog( @"Could not add video output to the session" );
         self.setupResult = CCCameraSetupResultSessionConfigurationFailed;
         [self.captureSession commitConfiguration];
         return;
@@ -625,9 +655,19 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
 // This method releases the camera
 -(void)releaseCamera {
     
-    if (self.captureSession != nil && self.deviceInput != nil) {
+    if (self.captureSession != nil) {
         [self.captureSession beginConfiguration];
-        [self.captureSession removeInput:self.deviceInput];
+        if (self.deviceInput != nil) {
+            [self.captureSession removeInput:self.deviceInput];
+        }
+        if (self.photoOutput != nil) {
+            [self.captureSession removeOutput:self.photoOutput];
+            self.photoOutput = nil;
+        }
+        if (self.videoOutput != nil) {
+            [self.captureSession removeOutput:self.videoOutput];
+            self.videoOutput = nil;
+        }
         [self.captureSession commitConfiguration];
         
         // Uncomment this section if you'd like to add listeners for the completion of the auto focus or auto exposure routines
@@ -894,6 +934,20 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     }
 }
 
+#pragma mark AVCaptureVideoDataOutputSampleBufferDelegate methods
+
+- (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
+    NSLog(@"Got a preview frame!");
+}
+
+#pragma mark CvVideoCameraDelegate methods
+
+#ifdef __cplusplus
+- (void)processImage:(cv::Mat&)image; {
+    // Do some OpenCV stuff with the image
+}
+#endif
+
 #pragma mark Touch event handling
 
 // This method handles auto focus events
@@ -969,6 +1023,16 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     self.cameraMode = [self getCameraModeFromString:thisCameraMode];
     [[NSUserDefaults standardUserDefaults] removeObjectForKey:PREFS_CAMERA_MODE];
     [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithInt:self.cameraMode] forKey:PREFS_CAMERA_MODE];
+    
+    // Set the AVCaptureVideoDataOutputSampleBufferDelegate for the videoOutput if the camera is in scanner mode.
+    if (self.cameraMode == CCCameraModeScanner) {
+        [self.videoOutput setSampleBufferDelegate:self queue:self.captureSessionQueue];
+    }
+    
+    // Otherwise, remove the AVCaptureVideoDataOutputSampleBufferDelegate
+    else {
+        [self.videoOutput setSampleBufferDelegate:nil queue:nil];
+    }
 }
 
 #pragma mark -

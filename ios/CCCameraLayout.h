@@ -14,6 +14,7 @@
 #import "CCCameraLayoutDelegate.h"
 #import "CCCamera.h"
 #import "FocusIndicatorView.h"
+#import "DocScanOpenCV.h"
 
 // Define some constant colors
 #define sunYellowColor [UIColor colorWithRed:253.0/255.0 green:216.0/255.0 blue:53.0/255.0 alpha:1.0]
@@ -101,6 +102,9 @@
     // The screenFlashView is used to provide a flash effect when the user snaps a photo
     IBOutlet UIView *screenFlashView;
     
+    // The imageProcessorView is used to display image processing feedback while in scanner mode
+    IBOutlet DocScanOpenCV *imageProcessorView;
+    
     // The pinch gesture recognizer is used to handle the pinch to zoom action
     IBOutlet UIPinchGestureRecognizer *pinchRecognizer;
     
@@ -157,6 +161,7 @@
 @property (nonatomic, retain) IBOutlet NSLayoutConstraint *focusIndicatorLeftConstraint;
 @property (nonatomic, retain) IBOutlet UIView *loadingView;
 @property (nonatomic, retain) IBOutlet UIView *screenFlashView;
+@property (nonatomic, retain) IBOutlet DocScanOpenCV *imageProcessorView;
 @property (nonatomic, retain) IBOutlet UIPinchGestureRecognizer *pinchRecognizer;
 @property (nonatomic, retain) NSBundle *CCCameraBundle;
 
