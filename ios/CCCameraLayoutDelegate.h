@@ -90,5 +90,17 @@
 @optional
 -(void)initImageProcessor:(int)previewWidth :(int)previewHeight :(int)maxOutputDimension;
 
+// This method passes an image to the image processor
+@optional
+-(BOOL)setPreviewBytes:(UIImage *)image;
+
+// This method requests the image output from the image processor
+@optional
+-(UIImage *)getOutputImage;
+
+// This method requests the image data from the image processor
+@required
+-(NSData *)getOutputData;
+
 
 @end

@@ -30,6 +30,7 @@
                 <outlet property="focusIndicatorTopConstraint" destination="itf-pO-ETk" id="et4-U7-3S9"/>
                 <outlet property="focusIndicatorView" destination="2Sn-ur-RY3" id="twg-pZ-lmX"/>
                 <outlet property="highButton" destination="DhC-kP-MxI" id="eD9-hS-y8q"/>
+                <outlet property="imageProcessorView" destination="NGk-gZ-haD" id="PUI-Wd-yvI"/>
                 <outlet property="loadingView" destination="Z9y-UR-rBf" id="yos-J0-UWo"/>
                 <outlet property="normalButton" destination="Wly-pF-HPf" id="ZlC-fy-hLu"/>
                 <outlet property="pinchRecognizer" destination="cco-jA-HBy" id="Rbk-xL-hNd"/>
@@ -64,6 +65,10 @@
             <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="NGk-gZ-haD" customClass="DocScanOpenCV">
+                    <rect key="frame" x="0.0" y="0.0" width="768" height="1024"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                </view>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="cxQ-pT-Aec">
                     <rect key="frame" x="0.0" y="0.0" width="768" height="60"/>
                     <subviews>
@@ -471,7 +476,7 @@
                     <rect key="frame" x="264" y="467" width="240" height="90"/>
                     <subviews>
                         <activityIndicatorView opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" animating="YES" style="whiteLarge" translatesAutoresizingMaskIntoConstraints="NO" id="dyF-Qu-C9i">
-                            <rect key="frame" x="101.5" y="10" width="37" height="37"/>
+                            <rect key="frame" x="102" y="10" width="37" height="37"/>
                         </activityIndicatorView>
                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Processing your photo..." textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="4dO-ov-6p2">
                             <rect key="frame" x="0.0" y="53" width="240" height="21"/>
@@ -500,10 +505,12 @@
             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
             <constraints>
                 <constraint firstItem="2Sn-ur-RY3" firstAttribute="leading" secondItem="bom-HH-iD6" secondAttribute="leading" id="5yw-VL-oEC"/>
+                <constraint firstAttribute="trailing" secondItem="NGk-gZ-haD" secondAttribute="trailing" id="8qi-w2-ZBS"/>
                 <constraint firstItem="gpI-4n-Dci" firstAttribute="top" secondItem="bom-HH-iD6" secondAttribute="top" id="90V-tE-rxk"/>
                 <constraint firstItem="Z9y-UR-rBf" firstAttribute="centerY" secondItem="bom-HH-iD6" secondAttribute="centerY" id="Esr-dw-d1C"/>
                 <constraint firstItem="aLW-gt-wLM" firstAttribute="top" secondItem="bom-HH-iD6" secondAttribute="top" constant="-150" id="Gqo-4L-MfQ"/>
                 <constraint firstItem="qwC-60-LfP" firstAttribute="top" secondItem="cxQ-pT-Aec" secondAttribute="bottom" id="Les-m4-z8P"/>
+                <constraint firstItem="NGk-gZ-haD" firstAttribute="top" secondItem="bom-HH-iD6" secondAttribute="top" id="Lmh-lx-BpR"/>
                 <constraint firstItem="iRg-DG-u72" firstAttribute="top" secondItem="bom-HH-iD6" secondAttribute="top" id="OCZ-fe-qF3"/>
                 <constraint firstAttribute="trailing" secondItem="gpI-4n-Dci" secondAttribute="trailing" id="PHf-lP-1g2"/>
                 <constraint firstItem="cxQ-pT-Aec" firstAttribute="top" secondItem="bom-HH-iD6" secondAttribute="top" id="RQT-Gy-Ut0"/>
@@ -516,6 +523,8 @@
                 <constraint firstItem="cxQ-pT-Aec" firstAttribute="leading" secondItem="bom-HH-iD6" secondAttribute="leading" id="jgW-4G-zJi"/>
                 <constraint firstAttribute="trailing" secondItem="aLW-gt-wLM" secondAttribute="trailing" id="lHn-k6-7vC"/>
                 <constraint firstItem="gpI-4n-Dci" firstAttribute="leading" secondItem="bom-HH-iD6" secondAttribute="leading" id="w2I-hl-i33"/>
+                <constraint firstAttribute="bottom" secondItem="NGk-gZ-haD" secondAttribute="bottom" id="xM1-kC-NHi"/>
+                <constraint firstItem="NGk-gZ-haD" firstAttribute="leading" secondItem="bom-HH-iD6" secondAttribute="leading" id="yXL-JE-E7I"/>
             </constraints>
             <point key="canvasLocation" x="101" y="-67"/>
         </view>

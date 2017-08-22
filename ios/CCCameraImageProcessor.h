@@ -13,12 +13,17 @@
 @required
 -(void)setImageParams:(int)widthOrig :(int)heightOrig :(int)widthContainer :(int)heightContainer :(int)MAX_OUTPUT_DIM;
 
-// TODO: setPreviewBytes
+@required
+-(BOOL)setPreviewBytes:(UIImage *)image;
 
 @required
 -(void)clearVisiblePreview;
 
-// TODO: getOutputImage
+@required
+-(UIImage *)getOutputImage;
+
+@required
+-(NSData *)getOutputData;
 
 
 @end

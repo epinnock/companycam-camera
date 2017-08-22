@@ -65,6 +65,7 @@
 
 -(void)setupSession;
 -(void)configureSession;
+-(void)processPhotoData;
 -(NSString *)getFlashModeString;
 -(NSString *)getResolutionModeString;
 -(NSString *)getCameraModeString;

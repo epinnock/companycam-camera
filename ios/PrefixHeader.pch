@@ -10,7 +10,7 @@
 #define PrefixHeader_pch
 
 #ifdef __cplusplus
-//#import <opencv2/opencv.hpp>
+  #import <opencv2/opencv.hpp>
 #endif
 
 // Include any system framework and library headers here that should be included in all compilation units.

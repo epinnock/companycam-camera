@@ -949,7 +949,22 @@
 -(void)initImageProcessor:(int)previewWidth :(int)previewHeight :(int)maxOutputDimension {
     
     // Set the image parameters for the imageProcessorView
-    [self.imageProcessorView setImageParams:previewWidth :previewWidth :self.frame.size.width :self.frame.size.height :maxOutputDimension];
+    [self.imageProcessorView setImageParams:previewWidth :previewHeight :self.frame.size.width :self.frame.size.height :maxOutputDimension];
+}
+
+// This method passes an image to the image processor
+-(BOOL)setPreviewBytes:(UIImage *)image {
+    return [self.imageProcessorView setPreviewBytes:image];
+}
+
+// This method requests the image output from the image processor
+-(UIImage *)getOutputImage {
+    return [self.imageProcessorView getOutputImage];
+}
+
+// This method requests the image data from the image processor
+-(NSData *)getOutputData {
+    return [self.imageProcessorView getOutputData];
 }
 
 // This method updates the radius for the focusIndicatorView
