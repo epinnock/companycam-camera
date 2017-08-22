@@ -14,7 +14,6 @@ buildscript {
 
 allprojects {
     repositories {
-        maven { url 'http://maven.apptimize.com/artifactory/repo' } // Apptimize
         mavenLocal()
         jcenter()
         maven {

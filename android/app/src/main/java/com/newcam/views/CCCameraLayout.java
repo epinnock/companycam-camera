@@ -17,7 +17,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.apptimize.Apptimize;
 import com.newcam.CCCameraManager;
 import com.newcam.CCCameraView;
 import com.newcam.R;
