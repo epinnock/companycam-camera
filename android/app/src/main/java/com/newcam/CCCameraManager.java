@@ -1,8 +1,11 @@
 package com.newcam;
 
+import android.view.View;
+
+import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.common.MapBuilder;
-import com.facebook.react.uimanager.SimpleViewManager;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
 
 import java.util.Map;
@@ -13,7 +16,7 @@ import javax.annotation.Nullable;
  * Created by dan on 12/16/16.
  */
 
-public class CCCameraManager extends SimpleViewManager<CCCameraView> {
+public class CCCameraManager extends ViewGroupManager<CCCameraView> {
 
     public static final String REACT_CLASS = "CompanyCamCamera";
 
@@ -82,5 +85,15 @@ public class CCCameraManager extends SimpleViewManager<CCCameraView> {
             "onAuxModeClicked",
             MapBuilder.of("registrationName", "onAuxModeClicked")
         );
+    }
+
+    @Override
+    public void addView(CCCameraView parent, View child, int index) {
+      parent.addView(child, index);
+    }
+
+    @Override
+    public void removeViewAt(CCCameraView parent, int index) {
+      parent.removeViewAt(index);
     }
 }

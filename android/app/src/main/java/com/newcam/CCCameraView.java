@@ -21,6 +21,7 @@ import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.newcam.cameras.CCCamera;
 import com.newcam.cameras.CCCamera1;
@@ -210,6 +211,11 @@ public class CCCameraView extends RelativeLayout {
         // Since React Native overrides onLayout in its ViewGroups, a layout pass never
         // happens after a call to requestLayout, so we simulate one here.
         post(measureAndLayout);
+    }
+
+    @Override
+    public void addView(View child, int index) {
+      this.addView(child, index);
     }
 
     //component props: functions
