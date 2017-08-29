@@ -74,6 +74,14 @@
 @optional
 -(void)hideLoadingView;
 
+// This method shows the camera layout
+@optional
+-(void)showCameraLayout;
+
+// This method hides the camera layout
+@optional
+-(void)hideCameraLayout;
+
 // This method enables all the buttons
 @optional
 -(void)enableButtons;

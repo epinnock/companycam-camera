@@ -21,20 +21,20 @@ static CCCameraView *latestView;
 RCT_EXPORT_MODULE(CompanyCamCamera)
 
 -(UIView *)view {
-    
+
     if (latestView == nil) {
         latestView = [[CCCameraView alloc] initWithManager:self bridge:self.bridge];
     }
     else {
         [latestView setupView];
     }
-    
+
     // Create the CCCamera object
     latestView.camera = [[CCCamera alloc] init];
-    
+
     // Set the layout object's reference to the camera
     [latestView.cameraLayout setCameraObject:latestView.camera];
-    
+
     return latestView;
 }
 
@@ -77,6 +77,11 @@ RCT_CUSTOM_VIEW_PROPERTY(exifLocTimestamp, double, CCCameraView) {
 RCT_CUSTOM_VIEW_PROPERTY(auxModeCaption, NSString, CCCameraView) {
     NSString *auxModeCaption = [RCTConvert NSString:json];
     [latestView setAuxModeCaption:auxModeCaption];
+}
+
+RCT_CUSTOM_VIEW_PROPERTY(showCameraUI, BOOL, CCCameraView) {
+    BOOL showCameraUI = [RCTConvert BOOL:json];
+    [latestView setShowCameraUI:showCameraUI];
 }
 
 RCT_EXPORT_VIEW_PROPERTY(onClose, RCTDirectEventBlock)

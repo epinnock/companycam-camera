@@ -64,51 +64,51 @@
 @synthesize CCCameraBundle;
 
 -(id)initWithCoder:(NSCoder *)aDecoder {
-    
+
     self = [super initWithCoder:aDecoder];
     if (self) {
-        
+
         // Load the nib for this view
         self.CCCameraBundle = [NSBundle bundleWithURL:[[NSBundle mainBundle] URLForResource:@"CCCameraResources" withExtension:@"bundle"]];
-        
+
         if (iPad) {
             [self.CCCameraBundle loadNibNamed:@"CCCameraLayout_iPad" owner:self options:nil];
         }
         else {
             [self.CCCameraBundle loadNibNamed:@"CCCameraLayout" owner:self options:nil];
         }
-        
+
         [self addSubview:self.view];
-        
+
         // Setup the view
         [self initView];
-        
+
         NSLog(@"A CCCameraLayout was just created in initWithCoder!");
     }
-    
+
     return self;
 }
 
 -(id)initWithFrame:(CGRect)frame {
-    
+
     self = [super initWithFrame:frame];
     if (self) {
-        
+
         // Load the nib for this view
         self.CCCameraBundle = [NSBundle bundleWithURL:[[NSBundle mainBundle] URLForResource:@"CCCameraResources" withExtension:@"bundle"]];
-        
+
         if (iPad) {
             [self.CCCameraBundle loadNibNamed:@"CCCameraLayout_iPad" owner:self options:nil];
         }
         else {
             [self.CCCameraBundle loadNibNamed:@"CCCameraLayout" owner:self options:nil];
         }
-        
+
         [self addSubview:self.view];
-        
+
         // Setup the view
         [self initView];
-        
+
         NSLog(@"A CCCameraLayout was just created in initWithFrame!");
     }
     return self;
@@ -117,29 +117,44 @@
 // Override layoutSubview to get the initial interface sized correctly
 -(void)layoutSubviews {
     [super layoutSubviews];
-    
+
     // Set the layout constraints for the default orientation
     [self setLayoutConstraintsForOrientation:UIDeviceOrientationPortrait];
 }
 
+
+#pragma mark React lifecycle methods
+
+- (void)insertReactSubview:(UIView *)view atIndex:(NSInteger)atIndex
+{
+  [self insertSubview:view atIndex:atIndex + 1];
+  return;
+}
+
+- (void)removeReactSubview:(UIView *)subview
+{
+  [subview removeFromSuperview];
+  return;
+}
+
 // This method does some initial setup of the view
 -(void)initView {
-    
+
     // Make sure all the buttons are enabled by default
     [self enableButtons];
-    
+
     // Initialize the motionManager
     [self initializeMotionManager];
-    
+
     // Set the multipleTouchEnabled property to enable multiple touches
     self.multipleTouchEnabled = YES;
-    
+
     // Add the pinchRecognizer
     [self addGestureRecognizer:self.pinchRecognizer];
-    
+
     // Hide the loadingView
     [self hideLoadingView];
-    
+
     //    // Register to receive a notification when the CCCameraModule is made active
     //    [[NSNotificationCenter defaultCenter] removeObserver:self];
     //    [[NSNotificationCenter defaultCenter] addObserver:self
@@ -156,14 +171,14 @@
 
 // This method responds to the CCCameraModuleActiveNotification
 -(void)onSetActive:(NSNotification *)notification {
-    
+
     // Initialize the motionManager
     //[self initializeMotionManager];
 }
 
 // This method responds to the CCCameraModuleInactiveNotification
 -(void)onSetInactive:(NSNotification *)notification {
-    
+
     // Stop the motionManager updates
     //[self.motionManager stopAccelerometerUpdates];
 }
@@ -172,17 +187,17 @@
 
 // This method initializes the motionManager object
 -(void)initializeMotionManager {
-    
+
     self.motionManager = [[CMMotionManager alloc] init];
     self.motionManager.accelerometerUpdateInterval = .2;
-    
+
     // If the accelerometer is available, then start getting updates.
     self.lastOrientation = UIDeviceOrientationPortrait;
     if ([self.motionManager isAccelerometerAvailable]) {
         [self.motionManager startAccelerometerUpdatesToQueue:[NSOperationQueue currentQueue]
                                                  withHandler:^(CMAccelerometerData  *accelerometerData, NSError *error) {
                                                      if (!error) {
-                                                         
+
                                                          // Handle the acceleration data
                                                          [self outputAccelertionData:accelerometerData.acceleration];
                                                      }
@@ -190,9 +205,9 @@
                                                          NSLog(@"%@", error);
                                                      }
                                                  }];
-        
+
     }
-    
+
     // If the accelerometer isn't available, then set a default value for the lastOrientation
     else {
         self.lastOrientation = UIDeviceOrientationPortrait;
@@ -201,9 +216,9 @@
 
 // This method processes acceleration data from the motionManager
 -(void)outputAccelertionData:(CMAcceleration)acceleration {
-    
+
     UIDeviceOrientation orientationNew;
-    
+
     // Determine the device orientation based on the accelerometer data
     if (acceleration.x >= 0.75) {
         orientationNew = UIDeviceOrientationLandscapeRight;
@@ -221,7 +236,7 @@
         // Consider same as last time
         return;
     }
-    
+
     // Update the UI if the device orientation has changed
     if (orientationNew != self.lastOrientation) {
         self.lastOrientation = orientationNew;
@@ -231,16 +246,16 @@
 
 // This buttons sets the constraints on the UI elements after the device orientation has changed
 -(void)onOrientationChanged:(UIDeviceOrientation)orientation {
-    
+
     // Change the rotation of the interface elements to match the given orientation
-    
+
     // Hide the resolution layout if it's showing
     double animationDelay = 0.0;
     if (self.resolutionLayoutVisible) {
-        
+
         // Set the animation delay so that the button rotations don't start until the resolutionSubview is hidden
         animationDelay = 0.2;
-        
+
         // Since the device has been rotated, use the animation based on the previous orientation to hide the resolution layout
         if (UIDeviceOrientationIsLandscape(self.lastOrientation)) {
             [self hideResolutionLayoutForOrientation:UIDeviceOrientationPortrait];
@@ -249,16 +264,16 @@
             [self hideResolutionLayoutForOrientation:UIDeviceOrientationLandscapeRight];
         }
     }
-    
+
     // Set the orientations for the UI elements.  If the resolutionSubview was visible, then wait for the animation that hides it to complete before rotating the UI elements
     dispatch_time_t delayTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(animationDelay * NSEC_PER_SEC));
     dispatch_after(delayTime, dispatch_get_main_queue(), ^(void){
-        
+
         double rotationValue;
-        
+
         // Landscape orientation
         if (UIDeviceOrientationIsLandscape(self.lastOrientation)) {
-            
+
             // Set the rotation value to rotate the icons from portrait to landscape
             if (self.lastOrientation == UIDeviceOrientationLandscapeLeft) {
                 rotationValue = M_PI/2;
@@ -266,27 +281,27 @@
             else {
                 rotationValue = -M_PI/2;
             }
-            
+
             // Set the images for the toggleResolution and closeButton
             [self.toggleResolution setImage:[self getCCImageNamed:@"icon-close-new.png"] forState:UIControlStateNormal];
             [self setResolutionImage:[self.camera getResolutionModeString]];
         }
-        
+
         // Portrait orientation
         else  {
-            
+
             // Set the rotation value to rotate the icons from landscape to portrait
             //rotationValue = -M_PI/2;
             rotationValue = 0;
-            
+
             // Set the images for the toggleResolution and closeButton
             [self setResolutionImage:[self.camera getResolutionModeString]];
             [self.closeButton setImage:[self getCCImageNamed:@"icon-close-new.png"] forState:UIControlStateNormal];
         }
-        
+
         // Set the layout constraints for this orientation
         [self setLayoutConstraintsForOrientation:self.lastOrientation];
-        
+
         // Rotate the placeLabelView, the scannerMessageLabel, the resolutionSubview, the loadingView, and the bottomSubview for iPads
         if (iPad) {
             [self animateRotation:self.placeLabelView angle:rotationValue duration:0.0];
@@ -295,7 +310,7 @@
             [self animateRotation:self.loadingView angle:rotationValue duration:0.0];
             [self animateRotation:self.bottomSubview angle:rotationValue duration:0.0];
         }
-        
+
         // Rotate the buttons, the placeLabelView, the scannerMessageLabel, the loadingView, and the resolutionSubview for iPhones
         else {
             [self animateRotation:self.closeButton angle:rotationValue duration:0.2];
@@ -312,15 +327,15 @@
 
 // This method sets the values for all the variable layout constraints
 -(void)setLayoutConstraintsForOrientation:(UIDeviceOrientation)orientation {
-    
+
     // Landscape orientation
     if (UIDeviceOrientationIsLandscape(orientation)) {
-        
+
         // Set the constraints for the placeLabelView.  The width of the placeLabelView is a function of the width of the resolution and close buttons and their margins all of which are defined in CCCameraLayout.xib.
         int buttonWidth = 40;
         int buttonMargin = 10;
         if (iPad) {
-            
+
             // On iPads the place label spans the entire top of the screen, so set buttonWidth and buttonMargin to 0
             buttonWidth = 0;
             buttonMargin = 0;
@@ -335,7 +350,7 @@
         else {
             self.placeLabelRightConstraint.constant = -(buttonWidth + buttonMargin - 10 - placeLabelHeight/2.0 + placeLabelWidth/2.0);
         }
-        
+
         // Set the constraints for the scannerMessageLabel
         int topSubviewHeight = self.topSubview.frame.size.height;
         int scannerHeight = self.scannerMessageLabel.frame.size.height;
@@ -346,8 +361,8 @@
         else {
             self.scannerCenterConstraint.constant = -(topSubviewHeight + scannerHeight)/2.0;
         }
-        
-        
+
+
         // Set the constraints for the resolutionLayout
         self.resolutionTopConstraint.constant = (self.frame.size.height - RESOLUTION_ANIMATION_DIST)/2.0;;
         self.resolutionWidthConstraint.constant = self.frame.size.height;
@@ -357,7 +372,7 @@
         else {
             self.resolutionRightConstraint.constant = -(self.frame.size.height + RESOLUTION_ANIMATION_DIST)/2.0;
         }
-        
+
         // Set the constraints for the bottomSubview on iPads
         if (iPad) {
             if (orientation == UIDeviceOrientationLandscapeRight) {
@@ -370,15 +385,15 @@
             self.buttonViewRightConstraint.constant = self.frame.size.width/2.0 - self.bottomSubview.frame.size.width/2.0;
         }
     }
-    
+
     // Portrait orientation
     else {
-        
+
         // Set the constraints for the placeLabelView.  The width of the placeLabelView is a function of the width of the resolution and close buttons and their margins all of which are defined in CCCameraLayout.xib.
         int buttonWidth = 40;
         int buttonMargin = 10;
         if (iPad) {
-            
+
             // On iPads the place label spans the entire top of the screen, so set buttonWidth and buttonMargin to 0
             buttonWidth = 0;
             buttonMargin = 0;
@@ -386,16 +401,16 @@
         self.placeLabelTopConstraint.constant = 10;
         self.placeLabelWidthConstraint.constant = self.frame.size.width - 2*buttonWidth - 2*buttonMargin;
         self.placeLabelRightConstraint.constant = 0;
-        
+
         // Set the constraints for the scannerMessageLabel
         self.scannerTopConstraint.constant = 0.0;
         self.scannerCenterConstraint.constant = 0.0;
-        
+
         // Set the constraints for the resolutionLayout
         self.resolutionTopConstraint.constant = -RESOLUTION_ANIMATION_DIST;
         self.resolutionWidthConstraint.constant = self.frame.size.width;
         self.resolutionRightConstraint.constant = 0;
-        
+
         // Set the constraints for the bottomSubview on iPads
         if (iPad) {
             self.buttonViewTopConstraint.constant = 0;
@@ -408,43 +423,43 @@
 #pragma mark Button click actions
 
 -(IBAction)closeButtonClick:(id)sender {
-    
+
     // The action for the close button depends on the orientation of the device because the close button and resolution button are
     // reversed in portrait and landscape in the phone layout
     if (UIDeviceOrientationIsPortrait(self.lastOrientation) || iPad) {
-        
+
         // This is the close button action
         // Dismiss the view
         [[CCCameraManager getLatestView] finishWithResult:@"close"];
     }
     else {
-        
+
         // This is the resolution button action
         [self showResolutionLayout];
     }
 }
 
 -(IBAction)resolutionButtonClick:(id)sender {
-    
+
     // Resolution dismiss button
     if (sender == self.resolutionDismissButton) {
-        
+
         // Hide the resolution subview
         [self hideResolutionLayout];
     }
-    
+
     // Resolution button
     else if (sender == self.toggleResolution) {
-        
+
         // The action for the resolution button depends on the orientation of the device because the close button and resolution button are
         // reversed in portrait and landscape in the phone layout
         if (UIDeviceOrientationIsPortrait(self.lastOrientation) || iPad) {
-            
+
             // This is the resolution button action
             [self showResolutionLayout];
         }
         else {
-            
+
             // This is the close button action
             // Dismiss the view
             [[CCCameraManager getLatestView] finishWithResult:@"close"];
@@ -453,78 +468,78 @@
 }
 
 -(IBAction)normalButtonClick:(id)sender {
-    
+
     // Set the resolution image and set the resolution of the camera
     [self setResolutionImage:@"normal"];
     [self.camera setResolution:@"normal"];
 }
 
 -(IBAction)highButtonClick:(id)sender {
-    
+
     // Set the resolution image and set the resolution of the camera
     [self setResolutionImage:@"high"];
     [self.camera setResolution:@"high"];
 }
 
 -(IBAction)superButtonClick:(id)sender {
-    
+
     // Set the resolution image and set the resolution of the camera
     [self setResolutionImage:@"super"];
     [self.camera setResolution:@"super"];
 }
 
 -(IBAction)flashButtonClick:(id)sender {
-    
+
     // Set the flash mode for the camera and set the flash image
     [camera toggleFlash];
     [self setFlashModeImage:[camera getFlashModeString]];
 }
 
 -(IBAction)captureButtonClick:(id)sender {
-    
+
     if (self.camera != nil) {
         [self.camera takePicture];
     }
 }
 
 -(IBAction)cameraButtonClick:(id)sender {
-    
+
     // Set the reference to the camera if necessary
     if (self.camera == nil) {
         self.camera = [[CCCameraManager getLatestView] camera];
     }
-    
+
     // Toggle the camera between rear- and forward-facing
     [self.camera toggleCamera];
 }
 
 -(IBAction)fastCamSubviewClick:(id)sender {
-    
+
     // Set the camera mode
     [self setCameraMode:@"fastcam"];
 }
 
 -(IBAction)cameraSubviewClick:(id)sender {
-    
+
     // Set the camera mode
     [self setCameraMode:@"camera"];
 }
 
 -(IBAction)scannerSubviewClick:(id)sender {
-    
+
     // Set the camera mode
     [self setCameraMode:@"scanner"];
 }
 
 -(IBAction)auxModeSubviewClick:(id)sender {
-    
+
     // Check if the onAuxModeClicked callback is defined in the CCCameraView
     CCCameraView *latestView = [CCCameraManager getLatestView];
     if (latestView.onAuxModeClicked) {
         [latestView propOnAuxModeClicked];
     }
     else {
-        
+
         // Set the camera mode
         [self setCameraMode:@"aux"];
     }
@@ -535,22 +550,22 @@
 // This method sets the reference to the CCCamera object
 -(void)setCameraObject:(CCCamera *)_camera; {
     self.camera = _camera;
-    
+
     // Set the visibility of the flash button
     [self setFlashButtonVisibility];
-    
+
     // Set the flash mode image
     [self setFlashModeImage:[self.camera getFlashModeString]];
-    
+
     // Set the resolution mode image
     [self setResolutionImage:[self.camera getResolutionModeString]];
-    
+
     // Set the visibility of the camera button
     [self setCameraButtonVisibility];
-    
+
     // Set the camera layout state
     [self setCameraMode:[self.camera getCameraModeString]];
-    
+
 }
 
 // This method sets the place name label
@@ -569,13 +584,13 @@
 
 // This method sets the visibility of the flash button
 -(void)setFlashButtonVisibility {
-    
+
     // If this isn't being called from the main thread, switch it to the main thread
     if ([NSThread currentThread] != [NSThread mainThread]) {
         [self performSelector:@selector(setFlashButtonVisibility) onThread:[NSThread mainThread] withObject:nil waitUntilDone:NO];
         return;
     }
-    
+
     // Hide the flash button if the selected camera doesn't support flash
     if ([self.camera hasFlash]) {
         self.toggleFlash.alpha = 1.0;
@@ -588,7 +603,7 @@
 
 // This method sets the flash mode and updates the flash button appropriately
 -(void)setFlashModeImage:(NSString *)flashMode {
-    
+
     if ([flashMode isEqualToString:@"auto"]) {
         [toggleFlash setImage:[self getCCImageNamed:@"flashlight-off.png"] forState:UIControlStateNormal];
     }
@@ -601,68 +616,68 @@
     else {
         [toggleFlash setImage:[self getCCImageNamed:@"flashlight-off.png"] forState:UIControlStateNormal];
     }
-    
+
     // Persist the flash mode
     [self.camera persistFlashMode:flashMode];
 }
 
 // This method sets the appropriate images resources for all the buttons in the resolution subview and records the resolution mode.
 -(void)setResolutionImage:(NSString *)resolutionMode {
-    
+
     // Determine whether the toggleResolution button or the closeButton is currently controlling the resolution selection based on the
     // device orientation.  If this device is an iPad, then the buttons are never reversed.
     UIButton *resolutionButton = self.toggleResolution;
     if (UIDeviceOrientationIsLandscape(self.lastOrientation) && !(iPad)) {
         resolutionButton = self.closeButton;
     }
-    
+
     if ([resolutionMode isEqualToString:@"super"]) {
-        
+
         // Set the button images
         [resolutionButton setImage:[self getCCImageNamed:@"super-fine-size-icon.png"] forState:UIControlStateNormal];
         [self.normalButton setImage:[self getCCImageNamed:@"normal-icon.png"] forState:UIControlStateNormal];
         [self.highButton setImage:[self getCCImageNamed:@"high-icon.png"] forState:UIControlStateNormal];
         [self.superButton setImage:[self getCCImageNamed:@"super-fine-on-icon.png"] forState:UIControlStateNormal];
-        
+
         // Set the resolution text label
         [self.resolutionLabel setText:@"Best for capturing great details.  Largest file size.  Uses the most data."];
     }
     else if ([resolutionMode isEqualToString:@"high"]) {
-        
+
         // Set the button images
         [resolutionButton setImage:[self getCCImageNamed:@"high-size-icon.png"] forState:UIControlStateNormal];
         [self.normalButton setImage:[self getCCImageNamed:@"normal-icon.png"] forState:UIControlStateNormal];
         [self.highButton setImage:[self getCCImageNamed:@"high-on-icon.png"] forState:UIControlStateNormal];
         [self.superButton setImage:[self getCCImageNamed:@"super-fine-icon.png"] forState:UIControlStateNormal];
-        
+
         // Set the resolution text label
         [self.resolutionLabel setText:@"Best for balancing image quality and file size.  Uses more data."];
     }
     else {
-        
+
         // Set the button images
         [resolutionButton setImage:[self getCCImageNamed:@"normal-size-icon.png"] forState:UIControlStateNormal];
         [self.normalButton setImage:[self getCCImageNamed:@"normal-on-icon.png"] forState:UIControlStateNormal];
         [self.highButton setImage:[self getCCImageNamed:@"high-icon.png"] forState:UIControlStateNormal];
         [self.superButton setImage:[self getCCImageNamed:@"super-fine-icon.png"] forState:UIControlStateNormal];
-        
+
         // Set the resolution text label
         [self.resolutionLabel setText:@"Best for everyday use.  Smallest file size.  Uses the least data."];
     }
-    
+
     // Persist the resolution mode
     [self.camera persistResolutionMode:resolutionMode];
 }
 
 // This method sets the camera button visibility
 -(void)setCameraButtonVisibility {
-    
+
     // If this isn't being called from the main thread, switch it to the main thread
     if ([NSThread currentThread] != [NSThread mainThread]) {
         [self performSelector:@selector(setCameraButtonVisibility) onThread:[NSThread mainThread] withObject:nil waitUntilDone:NO];
         return;
     }
-    
+
     // Show the camera button only if the device has both a rear- and forward-facing camera
     if ([self.camera hasRearCamera] && [self.camera hasFrontCamera]) {
         self.toggleCamera.alpha = 1.0;
@@ -675,7 +690,7 @@
 
 // This method sets the camera mode layout features
 -(void)setCameraMode:(NSString *)cameraMode {
-    
+
     // FastCam mode
     if ([cameraMode isEqualToString:@"fastcam"]) {
         [scannerMessageLabel setHidden:YES];
@@ -694,7 +709,7 @@
         [auxModeLabel setTextColor:[UIColor whiteColor]];
         [auxModeLabel setAlpha:0.6f];
     }
-    
+
     // Camera mode
     else if ([cameraMode isEqualToString:@"camera"]) {
         [scannerMessageLabel setHidden:YES];
@@ -713,7 +728,7 @@
         [auxModeLabel setTextColor:[UIColor whiteColor]];
         [auxModeLabel setAlpha:0.6f];
     }
-    
+
     // Scanner mode
     else if ([cameraMode isEqualToString:@"scanner"]) {
         [scannerMessageLabel setHidden:NO];
@@ -732,7 +747,7 @@
         [auxModeLabel setTextColor:[UIColor whiteColor]];
         [auxModeLabel setAlpha:0.6f];
     }
-    
+
     // Aux mode
     else if ([cameraMode isEqualToString:@"aux"]) {
         [scannerMessageLabel setHidden:YES];
@@ -751,24 +766,24 @@
         [auxModeLabel setTextColor:sunYellowColor];
         [auxModeLabel setAlpha:1.0f];
     }
-    
+
     // Persist the camera mode
     [self.camera persistCameraMode:cameraMode];
 }
 
 // This method shows the resolution layout
 -(void)showResolutionLayout {
-    
+
     // Show the resolution subview with an amination
     [UIView animateWithDuration:0.2
                      animations:^{
-                         
+
                          // Change the opacity of the resolutionSubview
                          resolutionSubview.alpha = 1.0;
-                         
+
                          // Set the appropriate constraints based on the device orientation
                          if (UIDeviceOrientationIsLandscape(self.lastOrientation)) {
-                             
+
                              // Change the resolutionRightConstraint
                              if (self.lastOrientation == UIDeviceOrientationLandscapeRight) {
                                  resolutionRightConstraint.constant = self.frame.size.width - (self.frame.size.height + RESOLUTION_ANIMATION_DIST)/2.0;
@@ -776,7 +791,7 @@
                              else {
                                  resolutionRightConstraint.constant = -(self.frame.size.height - RESOLUTION_ANIMATION_DIST)/2.0;
                              }
-                             
+
                              // Change the opactity of the top and bottom subviews and the buttons inside them
                              topSubview.alpha = 0.0;
                              placeLabelView.alpha = 0.0;
@@ -789,10 +804,10 @@
                              toggleCamera.alpha = 0.0;
                          }
                          else {
-                             
+
                              // Change the resolutionTopConstraint
                              resolutionTopConstraint.constant = 0;
-                             
+
                              // Change the opactity of the top subview and the buttons inside it
                              topSubview.alpha = 0.0;
                              placeLabelView.alpha = 0.0;
@@ -800,11 +815,11 @@
                              closeButton.alpha = 0.0;
                              toggleResolution.alpha = 0.0;
                          }
-                         
+
                          [self.view layoutIfNeeded];
                      }
                      completion:^(BOOL finished) {
-                         
+
                          // Set the resolutionLayoutVisible flag
                          resolutionLayoutVisible = YES;
                      }];
@@ -812,24 +827,24 @@
 
 // This method hides the resolution layout
 -(void)hideResolutionLayout {
-    
+
     // Hide the resolution subview with an amination using the current orientation
     [self hideResolutionLayoutForOrientation:self.lastOrientation];
 }
 
 // This method hides the resolution layout for the given device orientation
 -(void)hideResolutionLayoutForOrientation:(UIDeviceOrientation)thisOrientation {
-    
+
     // Hide the resolution subview with an amination
     [UIView animateWithDuration:0.2
                      animations:^{
-                         
+
                          // Change the opacity of the resolutionSubview
                          resolutionSubview.alpha = 0.0;
-                         
+
                          // Set the appropriate constraints based on the device orientation
                          if (UIDeviceOrientationIsLandscape(thisOrientation)) {
-                             
+
                              // Change the resolutionRightConstraint
                              if (thisOrientation == UIDeviceOrientationLandscapeRight) {
                                  resolutionRightConstraint.constant = self.frame.size.width - (self.frame.size.height - RESOLUTION_ANIMATION_DIST)/2.0;
@@ -837,7 +852,7 @@
                              else {
                                  resolutionRightConstraint.constant = -(self.frame.size.height + RESOLUTION_ANIMATION_DIST)/2.0;
                              }
-                             
+
                              // Change the opactity of the top and bottom subviews and the buttons inside them
                              topSubview.alpha = 1.0;
                              placeLabelView.alpha = 1.0;
@@ -850,10 +865,10 @@
                              [self setCameraButtonVisibility];
                          }
                          else {
-                             
+
                              // Change the resolutionTopConstraint
                              resolutionTopConstraint.constant = -RESOLUTION_ANIMATION_DIST;
-                             
+
                              // Change the opactity of the top subview and the buttons inside it
                              topSubview.alpha = 1.0;
                              placeLabelView.alpha = 1.0;
@@ -861,11 +876,11 @@
                              closeButton.alpha = 1.0;
                              toggleResolution.alpha = 1.0;
                          }
-                         
+
                          [self.view layoutIfNeeded];
                      }
                      completion:^(BOOL finished) {
-                         
+
                          // Set the resolutionLayoutVisible flag
                          resolutionLayoutVisible = NO;
                      }];
@@ -873,9 +888,9 @@
 
 // This method animates the screen flash after capturing a photo
 -(void)animateScreenFlash {
-    
+
     /* http://stackoverflow.com/questions/12924094/simulate-a-picture-taken-screen-flash */
-    
+
     CAKeyframeAnimation *opacityAnimation = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
     NSArray *animationValues = @[ @0.8f, @0.0f ];
     NSArray *animationTimes = @[ @0.3f, @1.0f ];
@@ -887,28 +902,28 @@
     opacityAnimation.fillMode = kCAFillModeForwards;
     opacityAnimation.removedOnCompletion = YES;
     opacityAnimation.duration = 0.4;
-    
+
     [self.screenFlashView.layer addAnimation:opacityAnimation forKey:@"animation"];
 }
 
 // This method shows an auto focus indicator view at the given position while the camera is focusing and/or exposing
 -(void)showAutoFocusIndicator:(CGPoint)touchPoint :(BOOL)setRepeating {
-    
+
     // Get the width and height of the focusIndicatorView
     int width = self.focusIndicatorView.frame.size.width;
     int height = self.focusIndicatorView.frame.size.height;
-    
+
     // Set the constraints for the focusIndicatorView
     self.focusIndicatorTopConstraint.constant = touchPoint.y - height/2;
     self.focusIndicatorLeftConstraint.constant = touchPoint.x - width/2;
-    
+
     // Add an animation to the focusIndicatorView
     double animationIncrementTime = 0.03;
     self.focusIndicatorView.radius = 0.0;
-    
+
     // Start the timer
     self.focusIndicatorTimer = [NSTimer scheduledTimerWithTimeInterval:animationIncrementTime target:self selector:@selector(incrementFocusIndicatorRadius:) userInfo:nil repeats:YES];
-    
+
     // Show the focusIndicatorView
     [self.focusIndicatorView setHidden:NO];
 }
@@ -930,6 +945,16 @@
     [self.loadingView setHidden:YES];
 }
 
+// This method shows the layout view
+-(void)showCameraLayout {
+    [self setHidden:NO];
+}
+
+// This method hides the layout view
+-(void)hideCameraLayout {
+    [self setHidden:YES];
+}
+
 // This method enables all the buttons
 -(void)enableButtons {
     [self setUserInteractionEnabled:YES];
@@ -947,7 +972,7 @@
 
 // This method passes the necessary parameters to the layout object to initialize the imageProcessorView
 -(void)initImageProcessor:(int)previewWidth :(int)previewHeight :(int)maxOutputDimension {
-    
+
     // Set the image parameters for the imageProcessorView
     [self.imageProcessorView setImageParams:previewWidth :previewHeight :self.frame.size.width :self.frame.size.height :maxOutputDimension];
 }
@@ -969,7 +994,7 @@
 
 // This method updates the radius for the focusIndicatorView
 -(void)incrementFocusIndicatorRadius:(NSTimer *)timer {
-    
+
     // If the radius for the focusIndicatorView has reached 1.0, then stop the timer and hide the view again.
     if (self.focusIndicatorView.radius >= 1.0) {
         [self hideAutoFocusIndicator];
@@ -983,7 +1008,7 @@
 #pragma mark Touch event handling methods
 
 -(IBAction)handleZoom:(UIPinchGestureRecognizer *)pinchGestureRecognizer {
-    
+
     // Check if this zoom event has ended
     BOOL zoomEnded = NO;
     if ([pinchGestureRecognizer state] == UIGestureRecognizerStateEnded ||
@@ -991,13 +1016,13 @@
         [pinchGestureRecognizer state] == UIGestureRecognizerStateFailed) {
         zoomEnded = YES;
     }
-    
+
     // Pass the scale of the pinch gesture to the camera
     [self.camera handleZoom:pinchGestureRecognizer.scale :zoomEnded];
 }
 
 -(void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event {
-    
+
     // Dismiss the resolution layout if it's showing
     if (self.resolutionLayoutVisible) {
         [self hideResolutionLayout];
@@ -1005,11 +1030,11 @@
 }
 
 -(void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
-    
+
 }
 
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event {
-    
+
     // Pass the touch event to the camera object and let it handle it
     [self.camera handleTouchEvent:event];
 }
@@ -1018,22 +1043,22 @@
 
 // This method returns a UIImage with a resource from the CCCamera resource bundle
 -(UIImage *)getCCImageNamed:(NSString *)imageName {
-    
+
     return [UIImage imageNamed:imageName inBundle:self.CCCameraBundle compatibleWithTraitCollection:nil];
 }
 
 // This method animates the rotation of the given view around it's center point to the given angle (measured in radians) in the given amount of time
 -(void)animateRotation:(UIView *)thisView angle:(double)angle duration:(double)duration {
-    
+
     [UIView animateWithDuration:duration
                      animations:^{
-                         
+
                          // Get the current angle of the transform
                          double currentAngle = atan2(thisView.transform.b, thisView.transform.a);
-                         
+
                          // Rotate the view to the given angle
                          thisView.transform = CGAffineTransformRotate(thisView.transform, angle - currentAngle);
-                         
+
                      }
                      completion:^(BOOL finished) {
                      }];

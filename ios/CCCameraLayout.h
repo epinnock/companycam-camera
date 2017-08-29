@@ -181,5 +181,7 @@
 -(void)setCameraButtonVisibility;
 -(void)incrementFocusIndicatorRadius:(NSTimer *)timer;
 -(IBAction)handleZoom:(UIPinchGestureRecognizer *)pinchGestureRecognizer;
++(void)hideCameraLayout;
++(void)showCameraLayout;
 
 @end
