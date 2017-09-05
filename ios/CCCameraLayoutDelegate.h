@@ -102,5 +102,9 @@
 @required
 -(NSData *)getOutputData;
 
+// This method clears the visible preview from the image processor
+@required
+-(void)clearVisiblePreview;
+
 
 @end

@@ -210,6 +210,22 @@
 // http://docs.opencv.org/2.4/doc/tutorials/ios/image_manipulation/image_manipulation.html
 -(UIImage *)UIImageFromCVMat:(cv::Mat)cvMat {
     
+    // If the width of cvMat is less than the height, then transpose it because the subsequent UIImage operations (rotation, scaling, cropping, JPEG conversion) will fail otherwise
+    BOOL shouldPostRotate = NO;
+    if (cvMat.cols < cvMat.rows) {
+        
+        // Transpose the matrix
+        cvMat = cvMat.t();
+        
+        // Reverse the columns after the transpose so the image isn't mirrored
+        cv::Mat tempMat;
+        cv::flip(cvMat, tempMat, 1);
+        cvMat = tempMat;
+        
+        // If the matrix had to be transposed, then set the flag to post rotate the image after it's created to reset it to the original orientation
+        shouldPostRotate = YES;
+    }
+    
     NSData *data = [NSData dataWithBytes:cvMat.data length:cvMat.elemSize()*cvMat.total()];
     CGColorSpaceRef colorSpace;
     
@@ -236,12 +252,16 @@
                                         kCGRenderingIntentDefault                   //intent
                                         );
     
-    
     // Getting UIImage from CGImage
     UIImage *finalImage = [UIImage imageWithCGImage:imageRef];
     CGImageRelease(imageRef);
     CGDataProviderRelease(provider);
     CGColorSpaceRelease(colorSpace);
+    
+    // If the matrix had to be transposed, then rotate the finalImage back to it's original orientation
+    if (shouldPostRotate) {
+        finalImage = [finalImage imageRotatedByDegrees:-90.0f];
+    }
     
     return finalImage;
 }
@@ -258,36 +278,22 @@
     CGPoint point11 = CGPointMake(pRect.p11.x, pRect.p11.y);
     CGPoint point01 = CGPointMake(pRect.p01.x, pRect.p01.y);
     
-    NSLog(@"-----------------------------");
-    NSLog([NSString stringWithFormat:@"point00 = (%i, %i)", (int)point00.x, (int)point00.y]);
-    NSLog([NSString stringWithFormat:@"point10 = (%i, %i)", (int)point10.x, (int)point10.y]);
-    NSLog([NSString stringWithFormat:@"point11 = (%i, %i)", (int)point11.x, (int)point11.y]);
-    NSLog([NSString stringWithFormat:@"point01 = (%i, %i)", (int)point01.x, (int)point01.y]);
-    
     // Convert the points from the pixel reference frame to the screen reference frame
-    // The pixel reference frame is rotated 180 degrees from the orientation of the DocScanOpenCV view within the CCCameraLayout. The pixel reference frame origin is located at the top right of the screen when viewing the device in portrait and the screen reference frame origin is located at the top left.
     
     // Calculate the scale factor between the original image and the view size
-//    int dimOverlayLarge = MAX(self.widthOverlay, self.heightOverlay);
-//    int dimOverlaySmall = MIN(self.widthOverlay, self.heightOverlay);
-//    int dimOrigLarge = MAX(self.widthOrig, self.heightOrig);
-//    int dimOrigSmall = MIN(self.widthOrig, self.heightOrig);
-//    float scaleL = (float)dimOverlayLarge/(float)dimOrigLarge;
-//    float scaleS = (float)dimOverlaySmall/(float)dimOrigSmall;
-//    float scale = MAX(scaleL, scaleS);
-    
-    float scale = self.heightOrig/self.heightOverlay;
+    int dimOverlayLarge = MAX(self.widthOverlay, self.heightOverlay);
+    int dimOverlaySmall = MIN(self.widthOverlay, self.heightOverlay);
+    int dimOrigLarge = MAX(self.widthOrig, self.heightOrig);
+    int dimOrigSmall = MIN(self.widthOrig, self.heightOrig);
+    float scaleL = (float)dimOverlayLarge/(float)dimOrigLarge;
+    float scaleS = (float)dimOverlaySmall/(float)dimOrigSmall;
+    float scale = MAX(scaleL, scaleS);
     
     // First translate the points to the common center point of the screen
-    CGPoint point00_t1 = CGPointMake(point00.x - self.heightOrig/2.0, point00.y - self.widthOrig/2.0);
-    CGPoint point10_t1 = CGPointMake(point10.x - self.heightOrig/2.0, point10.y - self.widthOrig/2.0);
-    CGPoint point11_t1 = CGPointMake(point11.x - self.heightOrig/2.0, point11.y - self.widthOrig/2.0);
-    CGPoint point01_t1 = CGPointMake(point01.x - self.heightOrig/2.0, point01.y - self.widthOrig/2.0);
-    
-    NSLog([NSString stringWithFormat:@"point00_t1 = (%i, %i)", (int)point00_t1.x, (int)point00_t1.y]);
-    NSLog([NSString stringWithFormat:@"point10_t1 = (%i, %i)", (int)point10_t1.x, (int)point10_t1.y]);
-    NSLog([NSString stringWithFormat:@"point11_t1 = (%i, %i)", (int)point11_t1.x, (int)point11_t1.y]);
-    NSLog([NSString stringWithFormat:@"point01_t1 = (%i, %i)", (int)point01_t1.x, (int)point01_t1.y]);
+    CGPoint point00_t1 = CGPointMake(point00.x - self.widthOrig/2.0, point00.y - self.heightOrig/2.0);
+    CGPoint point10_t1 = CGPointMake(point10.x - self.widthOrig/2.0, point10.y - self.heightOrig/2.0);
+    CGPoint point11_t1 = CGPointMake(point11.x - self.widthOrig/2.0, point11.y - self.heightOrig/2.0);
+    CGPoint point01_t1 = CGPointMake(point01.x - self.widthOrig/2.0, point01.y - self.heightOrig/2.0);
     
     // Scale the points to match the size of the screen
     CGPoint point00_s1 = CGPointMake(scale*point00_t1.x, scale*point00_t1.y);
@@ -295,38 +301,17 @@
     CGPoint point11_s1 = CGPointMake(scale*point11_t1.x, scale*point11_t1.y);
     CGPoint point01_s1 = CGPointMake(scale*point01_t1.x, scale*point01_t1.y);
     
-    NSLog([NSString stringWithFormat:@"point00_s1 = (%i, %i)", (int)point00_s1.x, (int)point00_s1.y]);
-    NSLog([NSString stringWithFormat:@"point10_s1 = (%i, %i)", (int)point10_s1.x, (int)point10_s1.y]);
-    NSLog([NSString stringWithFormat:@"point11_s1 = (%i, %i)", (int)point11_s1.x, (int)point11_s1.y]);
-    NSLog([NSString stringWithFormat:@"point01_s1 = (%i, %i)", (int)point01_s1.x, (int)point01_s1.y]);
-    
-    // Rotate the points 180 degrees to match the orientation of the screen reference frame
-//    CGPoint point00_r1 = CGPointMake(point00_s1.x, -point00_s1.y);
-//    CGPoint point10_r1 = CGPointMake(point10_s1.x, -point10_s1.y);
-//    CGPoint point11_r1 = CGPointMake(point11_s1.x, -point11_s1.y);
-//    CGPoint point01_r1 = CGPointMake(point01_s1.x, -point01_s1.y);
-    
+    // Rotate the points 90 degrees to match the orientation of the screen reference frame
     CGPoint point00_r1 = CGPointMake(-point00_s1.y, point00_s1.x);
     CGPoint point10_r1 = CGPointMake(-point10_s1.y, point10_s1.x);
     CGPoint point11_r1 = CGPointMake(-point11_s1.y, point11_s1.x);
     CGPoint point01_r1 = CGPointMake(-point01_s1.y, point01_s1.x);
-    
-    NSLog([NSString stringWithFormat:@"point00_r1 = (%i, %i)", (int)point00_r1.x, (int)point00_r1.y]);
-    NSLog([NSString stringWithFormat:@"point10_r1 = (%i, %i)", (int)point10_r1.x, (int)point10_r1.y]);
-    NSLog([NSString stringWithFormat:@"point11_r1 = (%i, %i)", (int)point11_r1.x, (int)point11_r1.y]);
-    NSLog([NSString stringWithFormat:@"point01_r1 = (%i, %i)", (int)point01_r1.x, (int)point01_r1.y]);
     
     // Translate the points to the origin of the screen reference frame
     CGPoint point00_t2 = CGPointMake(point00_r1.x + self.widthOverlay/2.0, point00_r1.y + self.heightOverlay/2.0);
     CGPoint point10_t2 = CGPointMake(point10_r1.x + self.widthOverlay/2.0, point10_r1.y + self.heightOverlay/2.0);
     CGPoint point11_t2 = CGPointMake(point11_r1.x + self.widthOverlay/2.0, point11_r1.y + self.heightOverlay/2.0);
     CGPoint point01_t2 = CGPointMake(point01_r1.x + self.widthOverlay/2.0, point01_r1.y + self.heightOverlay/2.0);
-    
-    NSLog([NSString stringWithFormat:@"point00_t2 = (%i, %i)", (int)point00_t2.x, (int)point00_t2.y]);
-    NSLog([NSString stringWithFormat:@"point10_t2 = (%i, %i)", (int)point10_t2.x, (int)point10_t2.y]);
-    NSLog([NSString stringWithFormat:@"point11_t2 = (%i, %i)", (int)point11_t2.x, (int)point11_t2.y]);
-    NSLog([NSString stringWithFormat:@"point01_t2 = (%i, %i)", (int)point01_t2.x, (int)point01_t2.y]);
-    NSLog(@"-----------------------------");
     
     // Add the points to the perspectiveRectArray after they've been converted to screen points
     [self.perspectiveRectArray addObject:[NSValue valueWithCGPoint:point00_t2]];
