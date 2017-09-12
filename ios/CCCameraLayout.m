@@ -123,20 +123,6 @@
 }
 
 
-#pragma mark React lifecycle methods
-
-- (void)insertReactSubview:(UIView *)view atIndex:(NSInteger)atIndex
-{
-  [self insertSubview:view atIndex:atIndex + 1];
-  return;
-}
-
-- (void)removeReactSubview:(UIView *)subview
-{
-  [subview removeFromSuperview];
-  return;
-}
-
 // This method does some initial setup of the view
 -(void)initView {
 
