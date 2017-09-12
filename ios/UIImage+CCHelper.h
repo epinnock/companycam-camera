@@ -18,6 +18,7 @@
 - (UIImage *)rotateUIImage;
 - (UIImage *)rotateForImageOrientation:(UIImageOrientation)orientation;
 - (UIImage *)rotate;
+- (UIImage *)imageRotatedByDegrees:(CGFloat)degrees;
 - (UIImage *)scaledToSize:(CGSize)newSize;
 
 @end

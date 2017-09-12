@@ -978,6 +978,11 @@
     return [self.imageProcessorView getOutputData];
 }
 
+// This method clears the visible preview from the image processor
+-(void)clearVisiblePreview {
+    [self.imageProcessorView clearVisiblePreview];
+}
+
 // This method updates the radius for the focusIndicatorView
 -(void)incrementFocusIndicatorRadius:(NSTimer *)timer {
 

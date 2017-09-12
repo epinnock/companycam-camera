@@ -66,6 +66,7 @@
 -(void)setupSession;
 -(void)configureSession;
 -(void)processPhotoData;
+-(void)processPhotoData:(UIImage *)latestScanImage;
 -(NSString *)getFlashModeString;
 -(NSString *)getResolutionModeString;
 -(NSString *)getCameraModeString;

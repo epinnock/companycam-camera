@@ -314,17 +314,17 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         return;
     }
     
-//    CCCameraView *latestView = [CCCameraManager getLatestView];
-//    self.videoCamera = [[CvVideoCamera alloc] initWithParentView:latestView.previewView];
-//    self.videoCamera.defaultAVCaptureDevicePosition = AVCaptureDevicePositionBack;
-//    self.videoCamera.defaultAVCaptureSessionPreset = AVCaptureSessionPreset1280x720;
-//    self.videoCamera.defaultFPS = 30;
-//    //self.videoSource.imageWidth = 1280;
-//    //self.videoSource.imageHeight = 720;
-//    self.videoCamera.delegate = self;
-//    self.videoCamera.recordVideo = NO;
-//    self.videoCamera.grayscaleMode = NO;
-//    [self startCvVideoCamera];
+    //    CCCameraView *latestView = [CCCameraManager getLatestView];
+    //    self.videoCamera = [[CvVideoCamera alloc] initWithParentView:latestView.previewView];
+    //    self.videoCamera.defaultAVCaptureDevicePosition = AVCaptureDevicePositionBack;
+    //    self.videoCamera.defaultAVCaptureSessionPreset = AVCaptureSessionPreset1280x720;
+    //    self.videoCamera.defaultFPS = 30;
+    //    //self.videoSource.imageWidth = 1280;
+    //    //self.videoSource.imageHeight = 720;
+    //    self.videoCamera.delegate = self;
+    //    self.videoCamera.recordVideo = NO;
+    //    self.videoCamera.grayscaleMode = NO;
+    //    [self startCvVideoCamera];
     
     // Add a video output for capturing the preview frames
     AVCaptureVideoDataOutput *thisVideoOutput = [[AVCaptureVideoDataOutput alloc] init];
@@ -510,6 +510,27 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     CGFloat imageRatio;
     CGFloat screenRatio;
     
+    // If the camera is in scanner mode, then the resulting scanned image may have any aspect ratio.  Scale it's longest size to match the max dimension for the selected resolution mode.
+    if (self.cameraMode == CCCameraModeScanner) {
+        
+        // Get the max dimension for the current resolution setting
+        CGFloat maxDimension = [self getDesiredMinimumHeightForResolution:self.resolutionMode];
+        
+        if (image.size.width > image.size.height) {
+            imageRatio = image.size.height / image.size.width;
+            image = [image scaledToSize:CGSizeMake(maxDimension, floorf(imageRatio * maxDimension))];
+        }
+        else {
+            imageRatio = image.size.width / image.size.height;
+            image = [image scaledToSize:CGSizeMake(floorf(imageRatio * maxDimension), maxDimension)];
+        }
+        
+        return image;
+    }
+    
+    // Crop and scale the image for other modes besides scanner
+    
+    // Check if the device is in portrait
     if (UIDeviceOrientationIsPortrait(currentOrientation))
     {
         screenRatio = screenWidth / screenHeight;
@@ -541,7 +562,7 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     // Get the max dimension for the current resolution setting
     CGFloat maxDimension = [self getDesiredMinimumHeightForResolution:self.resolutionMode];
     
-    //Resize to max dimension on one side keeping aspect ratio
+    // Resize to max dimension on one side keeping aspect ratio
     if (UIDeviceOrientationIsPortrait(currentOrientation)) {
         CGFloat newImageRatio = image.size.width / image.size.height;
         image = [image scaledToSize:CGSizeMake(floorf(newImageRatio * maxDimension), maxDimension)];
@@ -621,16 +642,37 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
 
 // This method processes the photo data and executes the proper callback after an image is received
 -(void)processPhotoData {
+    [self processPhotoData:nil];
+}
+
+// This method processes the photo data and executes the proper callback after an image is received
+-(void)processPhotoData:(UIImage *)latestScanImage {
     
-    // If the photoData wasn't nil, then save the image to the file system
-    if (self.photoData != nil) {
+    // If the photoData wasn't nil, then save the image to the file system.  Or if the current camera mode is CCCameraModeScanner, then make sure the latestScanImage isn't nil.
+    if ((self.cameraMode == CCCameraModeScanner && latestScanImage != nil) || self.photoData != nil) {
         
         // Get a reference to the CCCameraView
         CCCameraView *latestView = [CCCameraManager getLatestView];
         
-        // Create a UIImage from the photoData and rotate it to the proper orientation
-        UIImage *originalImage = [UIImage imageWithData:self.photoData scale:1.0f];
-        UIImage *rotatedImage = [originalImage rotateForImageOrientation:[self getCurrentImageOrientation]];
+        // If the current camera mode is CCCameraModeScanner, then use process the latestScanImage
+        UIImage *originalImage;
+        if (self.cameraMode == CCCameraModeScanner) {
+            originalImage = latestScanImage;
+        }
+        
+        // Otherwise, process the photoData
+        else {
+            originalImage = [UIImage imageWithData:self.photoData scale:1.0f];
+        }
+        
+        // Rotate the original image to the proper orientation.  Using the initWithCGImage method seems to produce better results for the images returned from the image processor, whereas the rotateForImageOrientation method works better for images returned directly from the camera.
+        UIImage *rotatedImage;
+        if (self.cameraMode == CCCameraModeScanner)  {
+            rotatedImage = ([[UIImage alloc] initWithCGImage:latestScanImage.CGImage scale:1.f orientation:[self getCurrentImageOrientation]]);
+        }
+        else {
+            rotatedImage = [originalImage rotateForImageOrientation:[self getCurrentImageOrientation]];
+        }
         
         // Crop the image to the size of the CCCameraView
         UIImage *croppedImage = [self resizeImage:rotatedImage];
@@ -902,70 +944,70 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
                 // If the photoData wasn't nil, then save the image to the file system
                 [self processPhotoData];
                 
-//                if (self.photoData != nil) {
-//                    
-//                    // Get a reference to the CCCameraView
-//                    CCCameraView *thisCameraView = [CCCameraManager getLatestView];
-//                    
-//                    // Create a UIImage from the photoData and rotate it to the proper orientation
-//                    UIImage *originalImage = [UIImage imageWithData:self.photoData scale:1.0f];
-//                    UIImage *rotatedImage = [originalImage rotateForImageOrientation:[self getCurrentImageOrientation]];
-//                    
-//                    // Crop the image to the size of the CCCameraView
-//                    UIImage *croppedImage = [self resizeImage:rotatedImage];
-//                    
-//                    // Set the additional pieces of metadata
-//                    NSMutableDictionary *mutableMetadata = [[self.photoData exifDataForImage] mutableCopy];
-//                    NSDate *now = [NSDate date];
-//                    [mutableMetadata setDateDigitized:now];
-//                    [mutableMetadata setDateOriginal:now];
-//                    [mutableMetadata setImageOrientation:[self getCurrentImageOrientation]];
-//                    [mutableMetadata setLocation:[thisCameraView getExifLocation]];
-//                    
-//                    // Get the data for the rotated image
-//                    NSData *jpeg = UIImageJPEGRepresentation(croppedImage, 0.6f);
-//                    
-//                    // Write the rotated image data to the file system
-//                    NSString *filePath = [StorageUtility writeDataToFile:jpeg];
-//                    
-//                    // If saveToPhone is set, then save the image to the device in addition to sending it to the server.
-//                    BOOL saveToPhone = [[NSUserDefaults standardUserDefaults] boolForKey:@"SaveToPhone"];
-//                    if (saveToPhone) {
-//                        
-//                        // Check for permission to acceess the camera roll
-//                        [PHPhotoLibrary requestAuthorization:^( PHAuthorizationStatus status ) {
-//                            if (status == PHAuthorizationStatusAuthorized) {
-//                                
-//                                NSLog(@"Trying to save a photo to the camera roll");
-//                                
-//                                // Add the photo to the camera roll
-//                                [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-//                                    PHAssetCreationRequest *creationRequest = [PHAssetCreationRequest creationRequestForAsset];
-//                                    [creationRequest addResourceWithType:PHAssetResourceTypePhoto data:UIImageJPEGRepresentation(croppedImage, 0.7f) options:nil];
-//                                } completionHandler:^( BOOL success, NSError * _Nullable error ) {
-//                                    if (!success) {
-//                                        NSLog(@"Error occurred while saving photo to photo library: %@", error);
-//                                    }
-//                                }];
-//                            }
-//                            else {
-//                                NSLog( @"Not authorized to save photo" );
-//                            }
-//                        }];
-//                    }
-//                    
-//                    // Execute the proper callback depending on the current camera mode
-//                    if (self.cameraMode != CCCameraModeFastCam) {
-//                        [thisCameraView doPhotoTaken:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage)];
-//                        
-//                        // Hide the loading view and enable the buttons again
-//                        [latestView.cameraLayout hideLoadingView];
-//                        [latestView.cameraLayout enableButtons];
-//                    }
-//                    else {
-//                        [thisCameraView doPhotoAccepted:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage)];
-//                    }
-//                }
+                //                if (self.photoData != nil) {
+                //
+                //                    // Get a reference to the CCCameraView
+                //                    CCCameraView *thisCameraView = [CCCameraManager getLatestView];
+                //
+                //                    // Create a UIImage from the photoData and rotate it to the proper orientation
+                //                    UIImage *originalImage = [UIImage imageWithData:self.photoData scale:1.0f];
+                //                    UIImage *rotatedImage = [originalImage rotateForImageOrientation:[self getCurrentImageOrientation]];
+                //
+                //                    // Crop the image to the size of the CCCameraView
+                //                    UIImage *croppedImage = [self resizeImage:rotatedImage];
+                //
+                //                    // Set the additional pieces of metadata
+                //                    NSMutableDictionary *mutableMetadata = [[self.photoData exifDataForImage] mutableCopy];
+                //                    NSDate *now = [NSDate date];
+                //                    [mutableMetadata setDateDigitized:now];
+                //                    [mutableMetadata setDateOriginal:now];
+                //                    [mutableMetadata setImageOrientation:[self getCurrentImageOrientation]];
+                //                    [mutableMetadata setLocation:[thisCameraView getExifLocation]];
+                //
+                //                    // Get the data for the rotated image
+                //                    NSData *jpeg = UIImageJPEGRepresentation(croppedImage, 0.6f);
+                //
+                //                    // Write the rotated image data to the file system
+                //                    NSString *filePath = [StorageUtility writeDataToFile:jpeg];
+                //
+                //                    // If saveToPhone is set, then save the image to the device in addition to sending it to the server.
+                //                    BOOL saveToPhone = [[NSUserDefaults standardUserDefaults] boolForKey:@"SaveToPhone"];
+                //                    if (saveToPhone) {
+                //
+                //                        // Check for permission to acceess the camera roll
+                //                        [PHPhotoLibrary requestAuthorization:^( PHAuthorizationStatus status ) {
+                //                            if (status == PHAuthorizationStatusAuthorized) {
+                //
+                //                                NSLog(@"Trying to save a photo to the camera roll");
+                //
+                //                                // Add the photo to the camera roll
+                //                                [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
+                //                                    PHAssetCreationRequest *creationRequest = [PHAssetCreationRequest creationRequestForAsset];
+                //                                    [creationRequest addResourceWithType:PHAssetResourceTypePhoto data:UIImageJPEGRepresentation(croppedImage, 0.7f) options:nil];
+                //                                } completionHandler:^( BOOL success, NSError * _Nullable error ) {
+                //                                    if (!success) {
+                //                                        NSLog(@"Error occurred while saving photo to photo library: %@", error);
+                //                                    }
+                //                                }];
+                //                            }
+                //                            else {
+                //                                NSLog( @"Not authorized to save photo" );
+                //                            }
+                //                        }];
+                //                    }
+                //
+                //                    // Execute the proper callback depending on the current camera mode
+                //                    if (self.cameraMode != CCCameraModeFastCam) {
+                //                        [thisCameraView doPhotoTaken:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage)];
+                //
+                //                        // Hide the loading view and enable the buttons again
+                //                        [latestView.cameraLayout hideLoadingView];
+                //                        [latestView.cameraLayout enableButtons];
+                //                    }
+                //                    else {
+                //                        [thisCameraView doPhotoAccepted:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage)];
+                //                    }
+                //                }
             }
             else {
                 
@@ -1092,7 +1134,7 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         // Create an image object from the Quartz image
         UIImage *image = [UIImage imageWithCGImage:quartzImage
                                              scale:1.0f
-                                       orientation:UIImageOrientationRight];
+                                       orientation:UIImageOrientationUp];
         
         // Release the Quartz image
         CGImageRelease(quartzImage);
@@ -1110,12 +1152,10 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
             self.ipDidAllocate = NO;
             
             // Get the image output from the image processor
-            //UIImage *imageOutput = [latestView.cameraLayout getOutputImage];
+            UIImage *latestScanImage = [latestView.cameraLayout getOutputImage];
             
             // Process the output image
-            //self.photoData = UIImageJPEGRepresentation(imageOutput, 1.0);
-            self.photoData = [latestView.cameraLayout getOutputData];
-            [self processPhotoData];
+            [self processPhotoData:latestScanImage];
         }
     }
 }
@@ -1222,7 +1262,7 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     
     // Set the AVCaptureVideoDataOutputSampleBufferDelegate for the videoOutput if the camera is in scanner mode.
     if (self.cameraMode == CCCameraModeScanner) {
-        //[self.videoOutput setSampleBufferDelegate:self queue:self.captureSessionQueue];
+        [self.videoOutput setSampleBufferDelegate:self queue:self.captureSessionQueue];
     }
     
     // Otherwise, remove the AVCaptureVideoDataOutputSampleBufferDelegate
@@ -1231,6 +1271,10 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         
         // Remove the ipDidAllocate flag so that the image processor will get initialized again the next time the scanner mode is selected
         self.ipDidAllocate = NO;
+        
+        // Clear the visible preview from the image processor
+        CCCameraView *latestView = [CCCameraManager getLatestView];
+        [latestView.cameraLayout clearVisiblePreview];
     }
 }
 
