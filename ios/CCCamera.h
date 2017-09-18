@@ -1,0 +1,67 @@
+//
+//  CCCamera.h
+//  newcam
+//
+//  Created by Matt Boyd on 5/10/17.
+//  Copyright © 2017 Facebook. All rights reserved.
+//
+
+#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
+#import <AVFoundation/AVFoundation.h>
+#import <Photos/Photos.h>
+#import "CCCameraDelegate.h"
+#import "CCCameraManager.h"
+#import "UIImage+CCHelper.h"
+#import "StorageUtility.h"
+#import "NSData+CCImageExif.h"
+#import "NSMutableDictionary+CCImageMetadata.h"
+
+@interface CCCamera : NSObject <CCCameraDelegate, AVCapturePhotoCaptureDelegate> {
+    
+    // The session queue is used to handle the camera-related functionality that occurs on background threads without blocking the UI
+    dispatch_queue_t captureSessionQueue;
+    
+    // The mCaptureSession is used to display the camera preview and to capture the photo.
+    AVCaptureSession *captureSession;
+    
+    // The camera is a reference to the current camera being used
+    AVCaptureDevice *camera;
+    
+    // The cameraType is a reference to the camera type (rear- or forward-facing) currently being used
+    AVCaptureDevicePosition cameraType;
+    
+    // The deviceInput is used to capture input from the current camera
+    AVCaptureDeviceInput *deviceInput;
+    
+    // The photoOutput is used to record the output from the current camera
+    AVCapturePhotoOutput *photoOutput;
+    
+    // The photoData is used to store the NSData from the photo output
+    NSData *photoData;
+    
+    // The currentScaleNumber and startingScaleNumber are used to handle pinch/zoom gestures
+    double currentScaleNumber;
+    double startingScaleNumber;
+}
+
+@property (nonatomic) dispatch_queue_t captureSessionQueue;
+@property (nonatomic) AVCaptureSession *captureSession;
+@property (nonatomic) AVCaptureDevice *camera;
+@property (nonatomic) AVCaptureDevicePosition cameraType;
+@property (nonatomic) AVCaptureDeviceInput *deviceInput;
+@property (nonatomic) AVCapturePhotoOutput *photoOutput;
+@property (nonatomic) NSData *photoData;
+@property (nonatomic) double currentScaleNumber;
+@property (nonatomic) double startingScaleNumber;
+
+-(void)setupSession;
+-(void)configureSession;
+-(NSString *)getFlashModeString;
+-(NSString *)getResolutionModeString;
+-(NSString *)getCameraModeString;
+-(void)persistFlashMode:(NSString *)thisFlashMode;
+-(void)persistResolutionMode:(NSString *)thisResolutionMode;
+-(void)persistCameraMode:(NSString *)thisCameraMode;
+
+@end

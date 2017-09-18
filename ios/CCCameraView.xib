@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="11542" systemVersion="15G31" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+    <device id="retina5_5" orientation="portrait">
+        <adaptation id="fullscreen"/>
+    </device>
+    <dependencies>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11542"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="CCCameraView">
+            <connections>
+                <outlet property="cameraLayout" destination="Use-Mw-hMN" id="AAR-Hm-aQ4"/>
+                <outlet property="previewView" destination="sU6-Gx-S7K" id="H9G-ZO-MsE"/>
+                <outlet property="view" destination="IkR-2r-eMq" id="C5A-Q8-FkH"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="IkR-2r-eMq">
+            <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+            <subviews>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="sU6-Gx-S7K" customClass="CCCameraPreviewView">
+                    <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                </view>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Use-Mw-hMN" customClass="CCCameraLayout">
+                    <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                </view>
+            </subviews>
+            <constraints>
+                <constraint firstItem="Use-Mw-hMN" firstAttribute="top" secondItem="IkR-2r-eMq" secondAttribute="top" id="08o-W5-2u1"/>
+                <constraint firstItem="sU6-Gx-S7K" firstAttribute="top" secondItem="IkR-2r-eMq" secondAttribute="top" id="4fz-sM-shw"/>
+                <constraint firstAttribute="bottom" secondItem="sU6-Gx-S7K" secondAttribute="bottom" id="8Wj-k1-MDJ"/>
+                <constraint firstItem="Use-Mw-hMN" firstAttribute="leading" secondItem="IkR-2r-eMq" secondAttribute="leading" id="Zan-cj-yGe"/>
+                <constraint firstItem="sU6-Gx-S7K" firstAttribute="leading" secondItem="IkR-2r-eMq" secondAttribute="leading" id="bJR-sz-ucc"/>
+                <constraint firstAttribute="bottom" secondItem="Use-Mw-hMN" secondAttribute="bottom" id="iO2-U9-4S0"/>
+                <constraint firstAttribute="trailing" secondItem="sU6-Gx-S7K" secondAttribute="trailing" id="rtF-BP-Th8"/>
+                <constraint firstAttribute="trailing" secondItem="Use-Mw-hMN" secondAttribute="trailing" id="v7Q-ch-Xi2"/>
+            </constraints>
+            <point key="canvasLocation" x="61" y="45"/>
+        </view>
+    </objects>
+</document>
