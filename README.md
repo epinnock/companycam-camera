@@ -19,3 +19,7 @@ in the repositories section of android/build.gradle.
 - Commit ??
 - Add OpenCV scanner functionality to iOS camera.
 
+### v47 - Oct 2, 2017:
+- https://github.com/CompanyCam/companycam-camera/commit/d0dd6b411a41404cf62c44661c3e8cb88bb37541
+- Cloned version 40, and removed Apptimize
+- Currently on branch `v40minusApptimize`
