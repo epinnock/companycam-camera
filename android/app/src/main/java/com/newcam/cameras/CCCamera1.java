@@ -337,7 +337,9 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
     public void setCameraDisplayOrientation(int cameraId, Camera camera) {
 
         int result = this.getCameraDisplayOrientation(cameraId, camera);
+        camera.stopPreview();
         camera.setDisplayOrientation(result);
+        camera.startPreview();
     }
 
     // This method updates the flash mode in the camera parameters
