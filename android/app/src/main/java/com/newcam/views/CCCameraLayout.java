@@ -2,7 +2,6 @@ package com.newcam.views;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -34,6 +33,8 @@ import java.lang.ref.WeakReference;
 public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInterface {
 
     private static String TAG = CCCameraLayout.class.getSimpleName();
+
+    private static final String SCANNER_INSTRUCTIONS = "Hold camera steady over the document.\nYour photo will be taken automatically.";
 
     public Context mContext;
 
@@ -70,6 +71,10 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
     private LinearLayout mLabelTouchTarget;
     private LinearLayout mLabelTouchTargetLand;
 
+    // mLabelInstructions is used to display any instructions to the user
+    private TextView mInstructions;
+    private TextView mInstructionsLand;
+
     // The mBottomLayout contains the camera buttons and camera mode labels
     private LinearLayout mBottomLayout;
 
@@ -86,12 +91,18 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
     private LinearLayout mFastCamLayout;
     private ImageView mFastCamIndicator;
     private TextView mFastCamLabel;
+
     private LinearLayout mCameraLayout;
     private ImageView mCameraIndicator;
     private TextView mCameraLabel;
+
     private LinearLayout mScannerLayout;
     private ImageView mScannerIndicator;
     private TextView mScannerLabel;
+
+    private LinearLayout mAuxLayout;
+    private ImageView mAuxIndicator;
+    private TextView mAuxLabel;
 
     // These views and text labels are for the resolution selection layout
     private LinearLayout mResolutionLayout;
@@ -147,8 +158,17 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
     }
 
     public void setAuxModeCaption(String auxModeCaption){
-        if(mScannerLabel != null){
-            mScannerLabel.setText(auxModeCaption);
+        if(mAuxLabel != null){
+            mAuxLabel.setText(auxModeCaption);
+        }
+    }
+
+    private void setInstructionsText(String text){
+        if(mInstructions != null){
+            mInstructions.setText(text);
+        }
+        if(mInstructionsLand != null){
+            mInstructionsLand.setText(text);
         }
     }
 
@@ -164,6 +184,9 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         mPlaceAddress = (TextView) findViewById(R.id.place_address);
         mLabelTouchTarget = (LinearLayout) findViewById(R.id.label_touch_target);
         mLabelTouchTargetLand = (LinearLayout) findViewById(R.id.label_touch_target_land);
+        mInstructions = (TextView) findViewById(R.id.label_instructions);
+        mInstructionsLand = (TextView) findViewById(R.id.label_instructions_land);
+
         mToggleResolution = (ImageButton) findViewById(R.id.toggle_resolution);
         mToggleFlash = (ImageButton) findViewById(R.id.toggle_flash);
         mCloseButton = (ImageButton) findViewById(R.id.close_button);
@@ -171,15 +194,23 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         mCaptureButton = (ImageButton) findViewById(R.id.capture);
         mTopLayout = (LinearLayout) findViewById(R.id.top_layout);
         mBottomLayout = (LinearLayout) findViewById(R.id.bottom_layout);
+
         mFastCamLayout = (LinearLayout) findViewById(R.id.fastcam_layout);
         mFastCamLabel = (TextView) findViewById(R.id.fastcam_label);
         mFastCamIndicator = (ImageView) findViewById(R.id.fastcam_selected_icon);
+
         mCameraLayout = (LinearLayout) findViewById(R.id.camera_layout);
         mCameraLabel = (TextView) findViewById(R.id.camera_label);
         mCameraIndicator = (ImageView) findViewById(R.id.camera_selected_icon);
+
         mScannerLayout = (LinearLayout) findViewById(R.id.scanner_layout);
         mScannerLabel = (TextView) findViewById(R.id.scanner_label);
         mScannerIndicator = (ImageView) findViewById(R.id.scanner_selected_icon);
+
+        mAuxLayout = (LinearLayout) findViewById(R.id.aux_layout);
+        mAuxLabel = (TextView) findViewById(R.id.aux_label);
+        mAuxIndicator = (ImageView) findViewById(R.id.aux_selected_icon);
+
         mResolutionLayout = (LinearLayout) findViewById(R.id.resolution_layout);
         mNormalButton = (ImageButton) findViewById(R.id.normal_button);
         mHighButton = (ImageButton) findViewById(R.id.high_button);
@@ -258,7 +289,8 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
 
         // Set the place name and aux mode labels--will be updated when props are received
         mPlaceName.setText("Location");
-        mScannerLabel.setText("Aux Mode");
+        mAuxLabel.setText("Aux Mode");
+        mInstructions.setText("");
 
         // Set the button orientations for the resolution layout
         setupResolutionLayout();
@@ -414,8 +446,16 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         });
 
         // Set a listener for the scanner layout
-        final CCCameraLayout thisLayout = this;
         mScannerLayout.setOnClickListener(new SingleClickListener(CLICK_REJECTION_INTERVAL) {
+            @Override
+            public void onSingleClick(View v) {
+                setCameraMode("scanner");
+            }
+        });
+
+        // Set a listener for the aux layout
+        final CCCameraLayout thisLayout = this;
+        mAuxLayout.setOnClickListener(new SingleClickListener(CLICK_REJECTION_INTERVAL) {
             @Override
             public void onSingleClick(View v) {
                 if(thisLayout != null && thisLayout.auxModeListener != null){
@@ -764,44 +804,50 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         // FastCam mode
         if (cameraMode.equals("fastcam")) {
             mCaptureButton.setImageResource(R.drawable.fast_cam_icon);
+            mCaptureButton.setVisibility(View.VISIBLE);
+            setInstructionsText("");
+
             mFastCamIndicator.setVisibility(View.VISIBLE);
             mFastCamLabel.setTextColor(getResources().getColor(R.color.sun_yellow));
             mFastCamLabel.setAlpha(1.0f);
-            mCameraIndicator.setVisibility(View.INVISIBLE);
-            mCameraLabel.setTextColor(Color.WHITE);
-            mCameraLabel.setAlpha(0.6f);
-            mScannerIndicator.setVisibility(View.INVISIBLE);
-            mScannerLabel.setTextColor(Color.WHITE);
-            mScannerLabel.setAlpha(0.6f);
+        } else {
+            mFastCamIndicator.setVisibility(View.INVISIBLE);
+            mFastCamLabel.setTextColor(Color.WHITE);
+            mFastCamLabel.setAlpha(0.6f);
         }
 
         // Camera mode
-        else if (cameraMode.equals("camera")) {
+        if (cameraMode.equals("camera")) {
             mCaptureButton.setImageResource(R.drawable.snap_icon);
-            mFastCamIndicator.setVisibility(View.INVISIBLE);
-            mFastCamLabel.setTextColor(Color.WHITE);
-            mFastCamLabel.setAlpha(0.6f);
+            mCaptureButton.setVisibility(View.VISIBLE);
+            setInstructionsText("");
+
             mCameraIndicator.setVisibility(View.VISIBLE);
             mCameraLabel.setTextColor(getResources().getColor(R.color.sun_yellow));
             mCameraLabel.setAlpha(1.0f);
+        } else {
+            mCameraIndicator.setVisibility(View.INVISIBLE);
+            mCameraLabel.setTextColor(Color.WHITE);
+            mCameraLabel.setAlpha(0.6f);
+        }
+
+        // Scanner mode
+        if (cameraMode.equals("scanner")) {
+            mCaptureButton.setVisibility(View.INVISIBLE);
+            setInstructionsText(SCANNER_INSTRUCTIONS);
+            
+            mScannerIndicator.setVisibility(View.VISIBLE);
+            mScannerLabel.setTextColor(getResources().getColor(R.color.sun_yellow));
+            mScannerLabel.setAlpha(1.0f);
+        } else {
             mScannerIndicator.setVisibility(View.INVISIBLE);
             mScannerLabel.setTextColor(Color.WHITE);
             mScannerLabel.setAlpha(0.6f);
         }
 
-        // Scanner mode
-        else if (cameraMode.equals("scanner")) {
-            mCaptureButton.setImageResource(R.drawable.snap_icon);
-            mFastCamIndicator.setVisibility(View.INVISIBLE);
-            mFastCamLabel.setTextColor(Color.WHITE);
-            mFastCamLabel.setAlpha(0.6f);
-            mCameraIndicator.setVisibility(View.INVISIBLE);
-            mCameraLabel.setTextColor(Color.WHITE);
-            mCameraLabel.setAlpha(0.6f);
-            mScannerIndicator.setVisibility(View.VISIBLE);
-            mScannerLabel.setTextColor(getResources().getColor(R.color.sun_yellow));
-            mScannerLabel.setAlpha(1.0f);
-        }
+        mAuxIndicator.setVisibility(View.INVISIBLE);
+        mAuxLabel.setTextColor(Color.WHITE);
+        mAuxLabel.setAlpha(0.6f);
 
         // Persist the camera mode
         mCamera.persistCameraMode(cameraMode);
@@ -1042,6 +1088,9 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         mScannerLayout = mTabletButtonView.mScannerLayout;
         mScannerIndicator = mTabletButtonView.mScannerIndicator;
         mScannerLabel = mTabletButtonView.mScannerLabel;
+        mAuxLayout = mTabletButtonView.mAuxLayout;
+        mAuxIndicator = mTabletButtonView.mAuxIndicator;
+        mAuxLabel = mTabletButtonView.mAuxLabel;
 
         // Setup the listeners again
         setupListeners();
@@ -1055,7 +1104,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
             mPlaceAddress.setText(thisCameraView.placeAddress);
         }
         if (thisCameraView != null && thisCameraView.propAuxModeCaption != null) {
-            mScannerLabel.setText(thisCameraView.propAuxModeCaption);
+            mAuxLabel.setText(thisCameraView.propAuxModeCaption);
         }
         if (mCamera != null && mCamera.mCameraMode != null) {
             setCameraMode(mCamera.mCameraMode);
@@ -1098,6 +1147,9 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         mScannerLayout = mTabletButtonViewLand.mScannerLayout;
         mScannerIndicator = mTabletButtonViewLand.mScannerIndicator;
         mScannerLabel = mTabletButtonViewLand.mScannerLabel;
+        mAuxLayout = mTabletButtonViewLand.mAuxLayout;
+        mAuxIndicator = mTabletButtonViewLand.mAuxIndicator;
+        mAuxLabel = mTabletButtonViewLand.mAuxLabel;
 
         // Setup the listeners again
         setupListeners();
@@ -1111,7 +1163,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
             mPlaceAddress.setText(thisCameraView.placeAddress);
         }
         if (thisCameraView != null && thisCameraView.propAuxModeCaption != null) {
-            mScannerLabel.setText(thisCameraView.propAuxModeCaption);
+            mAuxLabel.setText(thisCameraView.propAuxModeCaption);
         }
         if (mCamera != null && mCamera.mCameraMode != null) {
             setCameraMode(mCamera.mCameraMode);

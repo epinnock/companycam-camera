@@ -1,13 +1,9 @@
 package com.newcam;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraManager;
 import android.location.Location;
 import android.support.v4.content.ContextCompat;
 import android.view.MotionEvent;
@@ -25,6 +21,8 @@ import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.newcam.cameras.CCCamera;
 import com.newcam.cameras.CCCamera1;
 import com.newcam.cameras.CCCamera2;
+import com.newcam.imageprocessing.CCCameraImageProcessor;
+import com.newcam.imageprocessing.DocScanOpenCV;
 import com.newcam.utils.AppPreferences;
 import com.newcam.utils.CameraCheck;
 import com.newcam.views.CCCameraLayout;
@@ -36,6 +34,8 @@ import java.io.File;
  */
 
 public class CCCameraView extends RelativeLayout {
+
+    public CCCameraImageProcessor ccImageProcessor;
 
     // The mCamera object implements the camera-related behavior
     public CCCamera mCamera;
@@ -90,6 +90,13 @@ public class CCCameraView extends RelativeLayout {
             RelativeLayout.LayoutParams newParams = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             this.addView(mCameraLayout, newParams);
 
+            DocScanOpenCV dso = new DocScanOpenCV(context);
+            dso.setLayoutParams(newParams);
+            dso.bringToFront();
+            this.addView(dso);
+
+            ccImageProcessor = dso;
+
             init(context);
         }else{
             System.err.println("No camera permissions");
@@ -117,7 +124,7 @@ public class CCCameraView extends RelativeLayout {
             mCamera = new CCCamera2(context, this);
         }
         else {
-            mCamera = new CCCamera1(context, this);
+            mCamera = new CCCamera1(context, this, ccImageProcessor);
         }
 
         // Set the layout object's reference to the camera
@@ -141,7 +148,10 @@ public class CCCameraView extends RelativeLayout {
 
     public Activity getActivity() {
         ThemedReactContext context = (ThemedReactContext)this.getContext();
-        return context.getCurrentActivity();
+
+        // TODO: For some reason getCurrentActivity no longer exists?
+        //return context.getCurrentActivity();
+        return null;
     }
 
     // This method returns a boolean that describes whether or not each of the necessary camera permissions has been granted.

@@ -29,12 +29,18 @@ public class TabletButtonView extends LinearLayout {
     public LinearLayout mFastCamLayout;
     public ImageView mFastCamIndicator;
     public TextView mFastCamLabel;
+
     public LinearLayout mCameraLayout;
     public ImageView mCameraIndicator;
     public TextView mCameraLabel;
+
     public LinearLayout mScannerLayout;
     public ImageView mScannerIndicator;
     public TextView mScannerLabel;
+
+    public LinearLayout mAuxLayout;
+    public ImageView mAuxIndicator;
+    public TextView mAuxLabel;
 
     public TabletButtonView(Context context) {
         super(context);
@@ -65,16 +71,22 @@ public class TabletButtonView extends LinearLayout {
             mToggleFlash = (ImageButton) findViewById(R.id.toggle_flash);
             mCloseButton = (ImageButton) findViewById(R.id.close_button);
             mToggleCamera = (ImageButton) findViewById(R.id.toggle_camera);
+
             mFastCamLayout = (LinearLayout) findViewById(R.id.fastcam_layout);
             mFastCamLabel = (TextView) findViewById(R.id.fastcam_label);
             mFastCamIndicator = (ImageView) findViewById(R.id.fastcam_selected_icon);
+
             mCameraLayout = (LinearLayout) findViewById(R.id.camera_layout);
             mCameraLabel = (TextView) findViewById(R.id.camera_label);
             mCameraIndicator = (ImageView) findViewById(R.id.camera_selected_icon);
+
             mScannerLayout = (LinearLayout) findViewById(R.id.scanner_layout);
             mScannerLabel = (TextView) findViewById(R.id.scanner_label);
             mScannerIndicator = (ImageView) findViewById(R.id.scanner_selected_icon);
 
+            mAuxLayout = (LinearLayout) findViewById(R.id.aux_layout);
+            mAuxLabel = (TextView) findViewById(R.id.aux_label);
+            mAuxIndicator = (ImageView) findViewById(R.id.aux_selected_icon);
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.newcam.cameras;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -9,7 +10,6 @@ import android.graphics.ImageFormat;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.Rect;
-import android.graphics.YuvImage;
 import android.hardware.Camera;
 import android.media.AudioManager;
 import android.util.Log;
@@ -19,18 +19,17 @@ import android.view.SurfaceHolder;
 
 import com.newcam.CCCameraView;
 import com.newcam.R;
+import com.newcam.imageprocessing.CCCameraImageProcessor;
 import com.newcam.utils.ExifUtils;
 import com.newcam.utils.PhotoUtils;
 import com.notagilx.companycam.util.LogUtil;
 import com.notagilx.companycam.util.views.CameraPreview;
 
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -76,12 +75,173 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
     // The mDefaultParams is a default set of camera parameters that can be accessed to avoid errors in the event that the call to getParameters() fails.
     private Camera.Parameters mDefaultParams;
 
-    public CCCamera1(Context context, CCCameraView cameraView) {
+    public CCCamera1(Context context, CCCameraView cameraView, final CCCameraImageProcessor ccImageProcessor) {
         super(context, cameraView);
 
-        // Start the camera preview
+        ipInitialize(ccImageProcessor);
         startCamera();
     }
+
+    //========================================================================
+    ////////////////////////////
+    // Image processing stuff //
+    ////////////////////////////
+
+    protected CCCameraImageProcessor ccImageProcessor;
+    protected static final int MAX_DIM_PROCESSING_OUTPUT = 1024;
+
+    protected boolean ipDidAllocate = false;
+    protected byte[] ipAllocatedBytes = null;
+    protected int ipAllocatedPreviewWidth;
+    protected int ipAllocatedPreviewHeight;
+
+    protected boolean ipCancelCapturing = false;
+
+
+    protected void ipDebugLog(String msg){
+        Log.d(TAG, "[image processing] " + msg);
+    }
+
+    /**
+     * Simple wrapper for getOutputImage with some logging.
+     * @return A Bitmap if there is an output image, otherwise null.
+     */
+    protected Bitmap ipInterceptPhotoCapture(){
+        ipDebugLog("[ipInterceptPhotoCapture]");
+
+        if (ccImageProcessor == null) { ipDebugLog("No ccImageProcessor!"); return null; }
+
+        Bitmap ipOutput = ccImageProcessor.getOutputImage();
+        if(ipOutput != null){
+            ipDebugLog("Image processor output found!");
+        }else{
+            ipDebugLog("Image processor output not found!");
+        }
+        return ipOutput;
+    }
+
+    /**
+     * Store a reference to the image processor and set up the auto-capture listener.
+     * Should not allocate any bitmaps or add any camera preview callbacks.
+     * @param ccImageProcessor
+     */
+    protected void ipInitialize(final CCCameraImageProcessor ccImageProcessor){
+        ipDebugLog("[ipInitialize]");
+
+        this.ccImageProcessor = ccImageProcessor;
+        if (ccImageProcessor == null) { ipDebugLog("No ccImageProcessor!"); return; }
+
+        ccImageProcessor.setListener(new CCCameraImageProcessor.ImageProcessorListener() {
+            @Override
+            public void receiveResult() {
+                ipStopCapturing();
+
+                Bitmap bPhoto = ccImageProcessor.getOutputImage();
+                if(bPhoto != null) {
+                    forceNormalPhotoCapture(bPhoto);
+                }
+            }
+        });
+    }
+
+    /**
+     * Prepares the image processor and allocates the byte array which will hold the preview image data.
+     * Does nothing if allocation already occurred with the current mPreviewWidth and mPreviewHeight.
+     * @return True if the allocation was successful, false otherwise.
+     */
+    protected boolean ipAllocate(){
+        ipDebugLog("[ipAllocate]");
+
+        if (ccImageProcessor == null) { ipDebugLog("No ccImageProcessor!"); return false; }
+        if (mCamera == null) { ipDebugLog("mCamera is null!"); return false; }
+        if (mPreviewWidth == 0 || mPreviewHeight == 0){
+            ipDebugLog("mPreviewWidth or mPreviewHeight is 0!");
+            return false;
+        }
+
+        boolean alreadyDone = (
+            ipDidAllocate &&
+            (ipAllocatedPreviewWidth == mPreviewWidth) &&
+            (ipAllocatedPreviewHeight == mPreviewHeight)
+        );
+        if(alreadyDone){
+            ipDebugLog("Already allocated with preview size (" + mPreviewWidth + ", " + mPreviewHeight + ")");
+            return true;
+        }
+
+        int containerWidth = mCameraView.getWidth();
+        int containerHeight = mCameraView.getHeight();
+        ipDebugLog("Container size: (" + containerWidth + ", " + containerHeight + ")");
+        if(containerWidth == 0 || containerHeight == 0){
+            ipDebugLog("containerWidth or containerHeight is 0!");
+            return false;
+        }
+
+        Camera.Parameters param = safeGetParameters(mCamera, "ipAllocate()");
+        int videoBufferSize = mPreviewWidth * mPreviewHeight * ImageFormat.getBitsPerPixel(param.getPreviewFormat()) / 8;
+
+        try {
+            ccImageProcessor.setImageParams(mPreviewWidth, mPreviewHeight, containerWidth, containerHeight, MAX_DIM_PROCESSING_OUTPUT);
+            ipAllocatedBytes = new byte[videoBufferSize];
+            ipDidAllocate = true;
+            ipAllocatedPreviewWidth = mPreviewWidth;
+            ipAllocatedPreviewHeight = mPreviewHeight;
+            ipDebugLog("Initialized capture buffer (" + videoBufferSize + ")");
+            return true;
+        } catch (OutOfMemoryError oome) {
+            Log.e(TAG, "OutOfMemoryError: " + oome.getMessage());
+            mCameraView.finishWithError("Out of memory: " + oome.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Uses setPreviewCallbackWithBuffer to start streaming preview frames to the image processor.
+     * Allocates before setting the callback, if necessary.
+     */
+    protected void ipStartCapturing(){
+        ipDebugLog("[ipStartCapturing]");
+
+        boolean allocationSuccessful = ipAllocate();
+        if(!allocationSuccessful){ ipDebugLog("Allocation failed!"); return; }
+
+        ipCancelCapturing = false;
+
+        final CCCamera1 _this = this;
+        mCamera.addCallbackBuffer(ipAllocatedBytes);
+        mCamera.setPreviewCallbackWithBuffer(new Camera.PreviewCallback() {
+            public void onPreviewFrame(byte[] data, Camera camera) {
+                boolean requestNextFrame = ccImageProcessor.setPreviewBytes(data, _this.getCameraDisplayOrientation());
+                if(requestNextFrame && !ipCancelCapturing && mCamera != null) {
+                    mCamera.addCallbackBuffer(data);
+                }
+            }
+        });
+    }
+
+    /**
+     * Will cause the callback set via setPreviewCallbackWithBuffer to stop requesting the next frame.
+     */
+    protected void ipStopCapturing(){
+        ipCancelCapturing = true;
+        mCamera.setPreviewCallbackWithBuffer(null);
+    }
+
+    @Override
+    public void persistCameraMode(String cameraMode) {
+        super.persistCameraMode(cameraMode);
+
+        ipDebugLog("[persistCameraMode] " + cameraMode);
+        if(cameraMode.equals("scanner")){
+            ipStartCapturing();
+        }else{
+            ipStopCapturing();
+            if(ccImageProcessor != null){
+                ccImageProcessor.clearVisiblePreview();
+            }
+        }
+    }
+    //========================================================================
 
     //////////////////////////
     // Camera setup methods //
@@ -142,13 +302,18 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
     }
 
     // This method gets the display orientation for the camera
+    public int getCameraDisplayOrientation() {
+        return getCameraDisplayOrientation(mCameraId, mCamera);
+    }
+
     public int getCameraDisplayOrientation(int cameraId, Camera camera) {
 
         android.hardware.Camera.CameraInfo info =
                 new android.hardware.Camera.CameraInfo();
         android.hardware.Camera.getCameraInfo(cameraId, info);
 
-        int rotation = mCameraView.getActivity().getWindowManager().getDefaultDisplay().getRotation();
+        Activity activity = mCameraView.getActivity();
+        int rotation = (activity == null) ? Surface.ROTATION_0 : activity.getWindowManager().getDefaultDisplay().getRotation();
         int degrees = 0;
         switch (rotation) {
             case Surface.ROTATION_0: degrees = 0; break;
@@ -351,14 +516,58 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         }
     };
 
+    protected void forceNormalPhotoCapture(Bitmap bPhoto){
+        if (bPhoto == null) {
+            return;
+        }
+
+        File photo = getPhotoPath();
+        if (photo.exists()) {
+            photo.delete();
+        }
+
+        try {
+            FileOutputStream out = new FileOutputStream(photo.getPath());
+            BufferedOutputStream bos = new BufferedOutputStream(out);
+            bPhoto.compress(Bitmap.CompressFormat.JPEG, HIGH_QUALITY, bos);
+
+            int imgWidth = bPhoto.getWidth();
+            int imgHeight = bPhoto.getHeight();
+
+            bos.flush();
+            bos.close();
+            out.close();
+
+            gotoEditPhotoCapture(photo.getPath(), imgWidth, imgHeight);
+
+            ExifUtils.setAttributes(photo, mCameraView.getExifLocation(), mFlashMode);
+
+        } catch (IOException e) {
+            LogUtil.e(TAG, e.getLocalizedMessage());
+        } catch (OutOfMemoryError oome) {
+            Log.e(TAG, "OutOfMemoryError: " + oome.getMessage());
+            mCameraView.finishWithError("Out of memory: " + oome.getMessage());
+        }
+    }
+
     private final Camera.PictureCallback mPicture = new Camera.PictureCallback() {
 
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
 
-            if (data != null) {
-                Bitmap bPhoto = null;
-                try {
+            if (data == null) {
+                return;
+            }
+
+            Bitmap bPhoto = null;
+            try {
+                // In scanner mode only, try grabbing image processing output
+                if(mCameraMode.equals("scanner")) {
+                    bPhoto = ipInterceptPhotoCapture();
+                }
+
+                // Only process photo data if the image processor did not succeed in supplying output
+                if(bPhoto == null) {
 
                     int orientation = ((mLastOrientation + 45) / 90) * 90;
                     int rotation = 0;
@@ -419,57 +628,58 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                     Log.d(TAG, "After cropping the photo is " + bPhoto.getWidth() + " x " + bPhoto.getHeight());
 
                     Log.d(TAG, "bPhoto rotated and ready for storage.");
+                }
 
-                    File photo = getPhotoPath();
-                    if (photo.exists()) {
-                        photo.delete();
-                    }
+                File photo = getPhotoPath();
+                if (photo.exists()) {
+                    photo.delete();
+                }
 
-                    FileOutputStream out = new FileOutputStream(photo.getPath());
-                    BufferedOutputStream bos = new BufferedOutputStream(out);
-                    bPhoto.compress(Bitmap.CompressFormat.JPEG, HIGH_QUALITY, bos);
-                    int imgWidth = bPhoto.getWidth();
-                    int imgHeight = bPhoto.getHeight();
+                FileOutputStream out = new FileOutputStream(photo.getPath());
+                BufferedOutputStream bos = new BufferedOutputStream(out);
+                bPhoto.compress(Bitmap.CompressFormat.JPEG, HIGH_QUALITY, bos);
+                int imgWidth = bPhoto.getWidth();
+                int imgHeight = bPhoto.getHeight();
 
-                    bos.flush();
-                    bos.close();
-                    out.close();
+                bos.flush();
+                bos.close();
+                out.close();
 
-                    // Transition to the EditPhotoCaptureActivity as long as the current mode isn't FastCam
-                    if (!mCameraMode.equals("fastcam")) {
-                        gotoEditPhotoCapture(photo.getPath(), imgWidth, imgHeight);
-                    }
+                // Transition to the EditPhotoCaptureActivity as long as the current mode isn't FastCam
+                if (!mCameraMode.equals("fastcam")) {
+                    gotoEditPhotoCapture(photo.getPath(), imgWidth, imgHeight);
+                }
 
-                    // If the current mode is FastCam, then upload the photo immediately
-                    else {
-                        uploadFastCamPhoto(photo, imgWidth, imgHeight);
+                // If the current mode is FastCam, then upload the photo immediately
+                else {
+                    uploadFastCamPhoto(photo, imgWidth, imgHeight);
 
-                        // Start the camera preview again
-                        mCamera.startPreview();
-                        //setupListeners();
-                    }
+                    // Start the camera preview again
+                    mCamera.startPreview();
+                    //setupListeners();
+                }
 
-                    try {
-                        ExifUtils.setAttributes(photo, mCameraView.getExifLocation(), mFlashMode);
-                    } catch (IOException e) {
-                        LogUtil.e(TAG, e.getLocalizedMessage());
-                    }
-
-                } catch (FileNotFoundException e) {
-                    Log.d(TAG, "File not found: " + e.getMessage());
+                try {
+                    ExifUtils.setAttributes(photo, mCameraView.getExifLocation(), mFlashMode);
                 } catch (IOException e) {
-                    Log.d(TAG, "Error accessing file: " + e.getMessage());
-                } catch (OutOfMemoryError oome) {
-                    Log.e(TAG, "OutOfMemoryError: " + oome.getMessage());
-                    mCameraView.finishWithError("Out of memory: " + oome.getMessage());
-                } finally {
-                    if (bPhoto != null) {
-                        bPhoto.recycle();
-                        bPhoto = null;
-                    }
+                    LogUtil.e(TAG, e.getLocalizedMessage());
+                }
+
+            } catch (FileNotFoundException e) {
+                Log.d(TAG, "File not found: " + e.getMessage());
+            } catch (IOException e) {
+                Log.d(TAG, "Error accessing file: " + e.getMessage());
+            } catch (OutOfMemoryError oome) {
+                Log.e(TAG, "OutOfMemoryError: " + oome.getMessage());
+                mCameraView.finishWithError("Out of memory: " + oome.getMessage());
+            } finally {
+                if (bPhoto != null) {
+                    bPhoto.recycle();
+                    bPhoto = null;
                 }
             }
         }
+
     };
 
     /**
@@ -926,9 +1136,13 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 mCamera.setOneShotPreviewCallback(mPreviewCallback);
             }
             else {
-
                 // Start the auto focus after the exposure is complete.
                 mCamera.autoFocus(mAutoFocusCallback);
+
+                // Restart the scanner if necessary (one shot preview callback drops the scanner's callback)
+                if(mCameraMode.equals("scanner")) {
+                    ipStartCapturing();
+                }
             }
         }
     };
@@ -1244,6 +1458,9 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         // start preview with new settings
         try {
             mCamera.setPreviewDisplay(mPreview.getHolder());
+            if(mCameraMode.equals("scanner")) {
+                ipStartCapturing();
+            }
             mCamera.startPreview();
 
         } catch (Exception e){
