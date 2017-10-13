@@ -74,7 +74,7 @@ CCCamera.propTypes = {
   auxModeCaption: PropTypes.string,
   onAuxModeClicked: PropTypes.func,
 
-  showCameraUI: PropTypes.bool,
+  hideNativeUI: PropTypes.bool,
 
   onClose: PropTypes.func,
   photoAccepted: PropTypes.func,

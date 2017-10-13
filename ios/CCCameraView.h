@@ -47,7 +47,7 @@
     double propExifLocationLongitude;
     long propExifLocationTimestamp;
     NSString *propAuxModeCaption;
-		BOOL showCameraUI;
+		BOOL hideNativeUI;
 
     BOOL isActive;
 }
@@ -65,7 +65,7 @@
 @property (nonatomic, assign) double propExifLocationLongitude;
 @property (nonatomic, assign) long propExifLocationTimestamp;
 @property (nonatomic, retain) NSString *propAuxModeCaption;
-@property (nonatomic, assign) BOOL showCameraUI;
+@property (nonatomic, assign) BOOL hideNativeUI;
 @property (nonatomic, assign) BOOL isActive;
 
 @property (nonatomic, copy) RCTDirectEventBlock onClose;
@@ -101,6 +101,6 @@
 -(void)setExifLon:(double)val;
 -(void)setExifLocTimestamp:(double)val;
 -(void)setAuxModeCaption:(NSString *)val;
--(void)setShowCameraUI:(BOOL)val;
+-(void)setHideNativeUI:(BOOL)val;
 
 @end

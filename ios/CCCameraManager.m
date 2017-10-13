@@ -79,9 +79,9 @@ RCT_CUSTOM_VIEW_PROPERTY(auxModeCaption, NSString, CCCameraView) {
     [latestView setAuxModeCaption:auxModeCaption];
 }
 
-RCT_CUSTOM_VIEW_PROPERTY(showCameraUI, BOOL, CCCameraView) {
-    BOOL showCameraUI = [RCTConvert BOOL:json];
-    [latestView setShowCameraUI:showCameraUI];
+RCT_CUSTOM_VIEW_PROPERTY(hideNativeUI, BOOL, CCCameraView) {
+    BOOL hideNativeUI = [RCTConvert BOOL:json];
+    [latestView setHideNativeUI:hideNativeUI];
 }
 
 RCT_EXPORT_VIEW_PROPERTY(onClose, RCTDirectEventBlock)

@@ -54,7 +54,7 @@ public class CCCameraView extends RelativeLayout {
     protected double propExifLocationLongitude;
     protected long propExifLocationTimestamp;
     public String propAuxModeCaption;
-    public boolean showCameraUI;
+    public boolean hideNativeUI;
 
     // Permissions required to take a picture
     private static final String[] CAMERA_PERMISSIONS = {
@@ -328,16 +328,16 @@ public class CCCameraView extends RelativeLayout {
         }
     }
 
-    public void setShowCameraUI(boolean val){
-      showCameraUI = val;
+    public void setHideNativeUI(boolean val){
+      hideNativeUI = val;
 
-      if (showCameraUI) {
-        if (mCameraLayout.getVisibility() == View.GONE) {
-            mCameraLayout.setVisibility(View.VISIBLE);
-        }
-      } else {
+      if (hideNativeUI) {
         if (mCameraLayout.getVisibility() == View.VISIBLE) {
             mCameraLayout.setVisibility(View.GONE);
+        }
+      } else {
+        if (mCameraLayout.getVisibility() == View.GONE) {
+            mCameraLayout.setVisibility(View.VISIBLE);
         }
       }
     }
