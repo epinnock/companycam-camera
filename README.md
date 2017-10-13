@@ -65,5 +65,5 @@ Type: `string`.  Caption for the 'auxiliary' button at the bottom (e.g. 'AFTER C
 #### onAuxModeClicked
 Type: `() => void`. Invoked when the 'auxiliary' button at the bottom is pressed (e.g. launch after cam).
 
-### hideNativeUI
+#### hideNativeUI
 Type: `bool`. Determine whether the native UI should be hidden (default is `false`).
