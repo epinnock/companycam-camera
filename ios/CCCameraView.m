@@ -18,7 +18,7 @@
 @synthesize volumeButtonHandler;
 @synthesize placeName;
 @synthesize placeAddress;
-@synthesize showCameraUI;
+@synthesize hideNativeUI;
 @synthesize appPhotoDirectory;
 @synthesize propExifLocationLatitude;
 @synthesize propExifLocationLongitude;
@@ -249,10 +249,10 @@
     [self.cameraLayout setAuxModeLabelText:self.propAuxModeCaption];
 }
 
--(void)setShowCameraUI:(BOOL)val {
+-(void)setHideNativeUI:(BOOL)val {
   val ?
-    [self.cameraLayout showCameraLayout] :
-    [self.cameraLayout hideCameraLayout];
+    [self.cameraLayout hideCameraLayout] :
+    [self.cameraLayout showCameraLayout];
 }
 
 @end

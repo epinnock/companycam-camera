@@ -71,9 +71,9 @@ public class CCCameraManager extends ViewGroupManager<CCCameraView> {
         view.setAuxModeCaption(val);
     }
 
-    @ReactProp(name = "showCameraUI")
-    public void setShowCameraUI(CCCameraView view, boolean val){
-        view.setShowCameraUI(val);
+    @ReactProp(name = "hideNativeUI")
+    public void setHideNativeUI(CCCameraView view, boolean val){
+        view.setHideNativeUI(val);
     }
 
     @Override
