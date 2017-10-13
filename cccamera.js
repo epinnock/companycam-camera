@@ -84,6 +84,20 @@ CCCamera.propTypes = {
   ...View.propTypes
 };
 
+CCCamera.defaultProps = {
+  projectName: '',
+  projectAddress: '',
+
+  exifLat: 0,
+  exifLon: 0,
+  exifLocTimestamp: 0,
+
+  auxModeCaption: '',
+  onAuxModeClicked: () => {},
+
+  hideNativeUI: false,
+};
+
 const RNCCCamera = requireNativeComponent('CompanyCamCamera', CCCamera);
 
 export default CCCamera;
