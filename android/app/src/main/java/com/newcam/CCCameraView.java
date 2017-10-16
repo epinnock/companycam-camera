@@ -237,12 +237,12 @@ public class CCCameraView extends RelativeLayout {
             return;
         }
 
-        //invoke photoTaken prop
+        //invoke onPhotoTaken prop
         WritableMap event = Arguments.createMap();
         event.putString("filename", imgFile.getAbsolutePath());
         event.putInt("imgWidth", imgWidth);
         event.putInt("imgHeight", imgHeight);
-        _doEvent("photoTaken", event);
+        _doEvent("onPhotoTaken", event);
     }
 
     public void doPhotoAccepted(File imgFile, int imgWidth, int imgHeight){
@@ -251,12 +251,12 @@ public class CCCameraView extends RelativeLayout {
             return;
         }
 
-        // Invoke photoAccepted prop
+        // Invoke onPhotoAccepted prop
         WritableMap event = Arguments.createMap();
         event.putString("filename", imgFile.getAbsolutePath());
         event.putInt("imgWidth", imgWidth);
         event.putInt("imgHeight", imgHeight);
-        _doEvent("photoAccepted", event);
+        _doEvent("onPhotoAccepted", event);
     }
 
     private void propOnClose(String errmsg, String button) {

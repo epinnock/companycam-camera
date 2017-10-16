@@ -19,29 +19,23 @@ class CCCamera extends React.Component {
     this.props.onClose(errmsg, button);
   }
 
-  _photoAccepted(event) {
-    if(!this.props.photoAccepted){ return; }
+  _onPhotoAccepted(event) {
+    if(!this.props.onPhotoAccepted){ return; }
 
     const { filename, imgWidth, imgHeight } = event.nativeEvent;
-    this.props.photoAccepted(filename, [imgWidth, imgHeight]);
+    this.props.onPhotoAccepted(filename, [imgWidth, imgHeight]);
   }
 
-  _photoTaken(event) {
-    console.log("_photoTaken called in cccamera.js");
-    if(!this.props.photoTaken){ return; }
+  _onPhotoTaken(event) {
+    console.log("_onPhotoTaken called in cccamera.js");
+    if(!this.props.onPhotoTaken){ return; }
 
     const { filename, imgWidth, imgHeight } = event.nativeEvent;
-    this.props.photoTaken(filename, [imgWidth, imgHeight]);
+    this.props.onPhotoTaken(filename, [imgWidth, imgHeight]);
   }
 
   _onAuxModeClicked(event) {
-
     console.log("_onAuxModeClicked called in cccamera.js");
-    /*if(!this.props.photoTaken){ return; }
-
-    const { filename, imgWidth, imgHeight } = event.nativeEvent;
-    this.props.photoTaken(filename, [imgWidth, imgHeight]);*/
-
     if(!this.props.onAuxModeClicked){ return; }
 
     this.props.onAuxModeClicked();
@@ -52,10 +46,8 @@ class CCCamera extends React.Component {
       <RNCCCamera
         {...this.props}
         onClose={this._onClose.bind(this)}
-        photoAccepted={this._photoAccepted.bind(this)}
-        onPhotoAccepted={this._photoAccepted.bind(this)}
-        photoTaken={this._photoTaken.bind(this)}
-        onPhotoTaken={this._photoTaken.bind(this)}
+        onPhotoAccepted={this._onPhotoAccepted.bind(this)}
+        onPhotoTaken={this._onPhotoTaken.bind(this)}
         onAuxModeClicked={this._onAuxModeClicked.bind(this)}
       />
     );
@@ -77,9 +69,7 @@ CCCamera.propTypes = {
   hideNativeUI: PropTypes.bool,
 
   onClose: PropTypes.func,
-  photoAccepted: PropTypes.func,
   onPhotoAccepted: PropTypes.func,
-  photoTaken: PropTypes.func,
   onPhotoTaken: PropTypes.func,
   ...View.propTypes
 };

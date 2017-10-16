@@ -82,10 +82,10 @@ public class CCCameraManager extends ViewGroupManager<CCCameraView> {
         return MapBuilder.of(
             "onClose",
             MapBuilder.of("registrationName", "onClose"),
-            "photoAccepted",
-            MapBuilder.of("registrationName", "photoAccepted"),
-            "photoTaken",
-            MapBuilder.of("registrationName", "photoTaken"),
+            "onPhotoAccepted",
+            MapBuilder.of("registrationName", "onPhotoAccepted"),
+            "onPhotoTaken",
+            MapBuilder.of("registrationName", "onPhotoTaken"),
             "onAuxModeClicked",
             MapBuilder.of("registrationName", "onAuxModeClicked")
         );

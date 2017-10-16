@@ -53,10 +53,10 @@ Type: `(errmsg: string, button: string) => void`. Close the camera (i.e., stop r
 - `button === 'close'`: The close button was pressed
 - `button === 'capture'`: A photo was taken, and needs to be confirmed/edited
 
-#### photoTaken
+#### onPhotoTaken
 Type: `(file: string, dims: [w: int, h: int]) => void`. Invoked when a photo is taken in ordinary (i.e., non-fastcam) mode.
 
-#### photoAccepted
+#### onPhotoAccepted
 Type: `(file: string, dims: [w: int, h: int]) => void`. Invoked when a photo is taken in fastcam mode.
 
 #### auxModeCaption
