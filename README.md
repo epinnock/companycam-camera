@@ -79,7 +79,7 @@ Type: `bool`. Determine whether the native UI should be hidden (default is `fals
 
 #### iOS:
 
-Download the v3.2.0 `iOS pack` and put `opencv2.framework` into `node_modules/companycam-camera/ios`.
+Download the v3.2.0 `iOS pack` from https://opencv.org/releases.html and put `opencv2.framework` into `node_modules/companycam-camera/ios`.
 
 #### Android:
 
