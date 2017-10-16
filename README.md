@@ -71,3 +71,20 @@ Type: `() => void`. Invoked when the 'auxiliary' button at the bottom is pressed
 
 #### hideNativeUI
 Type: `bool`. Determine whether the native UI should be hidden (default is `false`).
+
+***
+## Development
+
+### OpenCV Setup
+
+#### iOS:
+
+TODO: Write this.
+
+#### Android:
+
+TODO: Finish this. Add NDK via Android SDK manager.  Install OpenCV Android SDK.
+
+### Scanner functionality
+
+The scanner's functionality is in the repo `companycam-docscan`.  At the moment, the correct workflow to modify the scanner is to checkout that repo, modify the files there, and copy the files in `lib/src` to both the Android and iOS native folders of `companycam-camera`.
