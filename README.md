@@ -25,6 +25,10 @@ in the repositories section of android/build.gradle.
 - Cloned version 40, and removed Apptimize
 - Currently on branch `v40minusApptimize`
 
+### v48 - Oct 16, 2017:
+- https://github.com/CompanyCam/companycam-camera/commit/771049881b1a8e8cb57745dd5afb8fcfd9e0bbd4
+- Ensure consistent prop names onPhotoTaken and onPhotoAccepted
+
 ***
 ## Component props
 
