@@ -29,6 +29,8 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
     public native long newScanner();
     public native void deleteScanner(long ptr);
     public native void resetScanner(long ptr);
+
+    // NOTE: In initializing imageBGRA and imageOutput: Java int is 4 bytes, so each int corresponds to one BGRA pixel
     public native void nativeScan(long ptr,
         /* Image to be scanned */
         int width, int height, byte imageYUV[], int[] imageBGRA,
