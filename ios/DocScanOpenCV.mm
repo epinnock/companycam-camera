@@ -16,8 +16,8 @@
 // The docScanner object uses the OpenCV framework to perform the actual image processing
 @property (nonatomic) DocScanner *docScanner;
 
-// The lastScanTimestampMS is the time at which the last scan was performed
-@property (nonatomic) long long lastScanTimestampMS;
+// lastUpdateRect is the timestamp of the currently-drawn perspective rect
+@property (nonatomic) long long lastUpdateRect;
 
 // The widthOrig and heightOrig are the width and height of the preview image
 @property (nonatomic) int widthOrig;
@@ -94,19 +94,6 @@
 
 -(BOOL)setPreviewBytes:(UIImage *)image {
     
-    // Check how much time has elsapsed since the last the last image was processed
-    long long currentUNIXTimeMS = [[NSDate date] timeIntervalSince1970] * 1000.0;
-    
-    if (self.lastScanTimestampMS == 0) {
-        self.lastScanTimestampMS = currentUNIXTimeMS;
-        return YES;
-    }
-    else if (currentUNIXTimeMS - self.lastScanTimestampMS < 500.0) {
-        return YES;
-    }
-    
-    self.lastScanTimestampMS = currentUNIXTimeMS;
-    
     BOOL requestNextFrame = YES;
     
     // Convert the image to a Mat object
@@ -121,7 +108,7 @@
     const geom::PerspectiveRect pRect = self.docScanner->getPerspectiveRect();
     
     // Update the perspectiveRectArray
-    [self updatePerspecitveRectArray:pRect];
+    [self updatePerspectiveRectArray:pRect];
     
     switch (self.latestStatus) {
         case DocScanner::UNSTABLE:
@@ -267,7 +254,20 @@
 }
 
 // This method updates the perspectiveRectArray based on the given geom::PerspectiveRect object
--(void)updatePerspecitveRectArray:(geom::PerspectiveRect)pRect {
+-(void)updatePerspectiveRectArray:(geom::PerspectiveRect)pRect {
+    
+    // Check how much time has elapsed since the last 'perspectiveRect' was stored
+    long long currentUNIXTimeMS = [[NSDate date] timeIntervalSince1970] * 1000.0;
+    
+    if (self.lastUpdateRect == 0) {
+        self.lastUpdateRect = currentUNIXTimeMS;
+    }
+    else if (currentUNIXTimeMS - self.lastUpdateRect < 50.0) {
+        return;
+    }
+    
+    // If enough time has elapsed, update rect and proceed
+    self.lastUpdateRect = currentUNIXTimeMS;
     
     // Reset the perspectiveRectArray
     self.perspectiveRectArray = [[NSMutableArray alloc] initWithCapacity:1];
