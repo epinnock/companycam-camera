@@ -6,7 +6,7 @@
 //  Copyright © 2016 Company Cam. All rights reserved.
 //
 
-#import "NSData+CCImageEXIF.h"
+#import "NSData+CCImageExif.h"
 #import <ImageIO/ImageIO.h>
 
 @implementation NSData (CCImageEXIF)

@@ -96,8 +96,12 @@
     
     switch (orientation) {
         case UIImageOrientationDown:
-        case UIImageOrientationDownMirrored:
             transform = CGAffineTransformTranslate(transform, (self.size.width + (fabs(self.size.height - self.size.width))/2), (self.size.height - (fabs(self.size.height - self.size.width))/2));
+            transform = CGAffineTransformRotate(transform, M_PI);
+            break;
+            
+        case UIImageOrientationDownMirrored:
+            transform = CGAffineTransformTranslate(transform, (self.size.width - (fabs(self.size.height - self.size.width))/2), (self.size.height - (fabs(self.size.height - self.size.width))/2));
             transform = CGAffineTransformRotate(transform, M_PI);
             break;
             
@@ -112,9 +116,13 @@
             transform = CGAffineTransformTranslate(transform, 0, self.size.height);
             transform = CGAffineTransformRotate(transform, -M_PI_2);
             break;
+            
         case UIImageOrientationUp:
-        case UIImageOrientationUpMirrored:
             transform = CGAffineTransformTranslate(transform, -(fabs(self.size.height - self.size.width))/2, (fabs(self.size.height - self.size.width))/2);
+            break;
+            
+        case UIImageOrientationUpMirrored:
+            transform = CGAffineTransformTranslate(transform, (fabs(self.size.height - self.size.width))/2, (fabs(self.size.height - self.size.width))/2);
             break;
     }
     
