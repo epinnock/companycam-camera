@@ -382,11 +382,11 @@
     
     switch (thisStatus) {
         case DocScanner::STABLE:
-            return [UIColor colorWithRed:(128.0/255.0) green:0 blue:(128.0/255.0) alpha:0.5];
+            return [UIColor colorWithRed:0 green:1 blue:0 alpha:0.5];
         case DocScanner::DONE:
-            return [UIColor colorWithRed:(128.0/255.0) green:0 blue:1 alpha:0.5];
+            return [UIColor colorWithRed:0 green:0.5 blue:1 alpha:0.5];
         default:
-            return [UIColor colorWithRed:(64.0/255.0) green:1 blue:0 alpha:0.5];
+            return [UIColor colorWithRed:1 green:0 blue:0 alpha:0.25];
     }
 }
 
