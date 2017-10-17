@@ -17,8 +17,6 @@
 
 // The docScanner object uses the OpenCV framework to perform the actual image processing
 @property (nonatomic) DocScanner *docScanner;
-
-@property (nonatomic) long long lastDrawMS; //timestamp: last draw
 @property (nonatomic) long long lastScanMS; //timestamp: last scan
 
 // The widthOrig and heightOrig are the width and height of the preview image
@@ -275,15 +273,6 @@
 // This method updates the perspectiveRectArray based on the given geom::PerspectiveRect object
 -(void)updatePerspectiveRectArray:(geom::PerspectiveRect)pRect {
     
-    // Only draw if enough time has passed since the last draw
-    long long currentUNIXTimeMS = [[NSDate date] timeIntervalSince1970] * 1000.0;
-    if (self.lastDrawMS == 0) {
-        self.lastDrawMS = currentUNIXTimeMS;
-    } else if (currentUNIXTimeMS - self.lastDrawMS < 50.0) {
-        return;
-    }
-    self.lastDrawMS = currentUNIXTimeMS;
-    
     // Reset the perspectiveRectArray
     self.perspectiveRectArray = [[NSMutableArray alloc] initWithCapacity:1];
     
@@ -354,7 +343,9 @@
 #endif
     
     // If the perspectiveRectArray is defined, then draw it on the screen
-    if (self.perspectiveRectArray != nil && [self.perspectiveRectArray count] > 3) {
+    if (self.perspectiveRectArray != nil &&
+        [self.perspectiveRectArray count] > 3 &&
+        self.latestStatus != DocScanner::UNSTABLE) {
 
         // Get the current graphics context
         CGContextRef context = UIGraphicsGetCurrentContext();
@@ -382,9 +373,9 @@
     
     switch (thisStatus) {
         case DocScanner::STABLE:
-            return [UIColor colorWithRed:0 green:1 blue:0 alpha:0.5];
-        case DocScanner::DONE:
             return [UIColor colorWithRed:0 green:0.5 blue:1 alpha:0.5];
+        case DocScanner::DONE:
+            return [UIColor colorWithRed:0 green:1 blue:0 alpha:0.5];
         default:
             return [UIColor colorWithRed:1 green:0 blue:0 alpha:0.25];
     }
