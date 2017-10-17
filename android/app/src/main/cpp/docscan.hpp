@@ -12,6 +12,7 @@ class DocScanner
     protected:
         const int optWorkingSize;
         const int optMaxOutputDim;
+        unsigned long optStableDurationMS;
 
         cv::Mat imageResized;
         cv::Mat imageGray;
@@ -30,6 +31,8 @@ class DocScanner
 
         enum ScanStatus { UNSTABLE, STABLE, DONE };
         ScanStatus smartScan(const cv::Mat& imageOrig);
+
+        void setStableDurationMS(const unsigned long ms);
         void reset();
 
         void scan(const cv::Mat& imageOrig, const bool doGenerateOutput);

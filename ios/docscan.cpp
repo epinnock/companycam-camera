@@ -12,11 +12,12 @@
 const int DEFAULT_WORKING_SIZE = 384;
 const int DEFAULT_MAX_OUTPUT_DIM = 1024;
 const float MAX_STABLE_DEVIATION_PCT = 0.03;
-const unsigned long REQUIRED_STABLE_DURATION_MS = 1000;
+const unsigned long DEFAULT_STABLE_DURATION_MS = 1000;
 
 DocScanner::DocScanner(const int optWorkingSize, const int optMaxOutputDim) :
     optWorkingSize(optWorkingSize),
     optMaxOutputDim(optMaxOutputDim),
+    optStableDurationMS(DEFAULT_STABLE_DURATION_MS),
     didGenerateOutput(false),
     timeLastUnstable(std::chrono::high_resolution_clock::now()),
     pRect(geom::invalidPerspectiveRect())
@@ -42,6 +43,11 @@ cv::Mat DocScanner::getOutputImage() const
 geom::PerspectiveRect DocScanner::getPerspectiveRect() const
 {
     return pRect;
+}
+
+void DocScanner::setStableDurationMS(const unsigned long ms)
+{
+    optStableDurationMS = ms;
 }
 
 /** Resets {@link smartScan}; i.e., set the status back to UNSTABLE. */
@@ -77,7 +83,7 @@ DocScanner::ScanStatus DocScanner::smartScan(const cv::Mat& imageOrig)
     }
 
     const unsigned long msStable = std::chrono::duration_cast<std::chrono::milliseconds>(timeNow-timeLastUnstable).count();
-    if (msStable > REQUIRED_STABLE_DURATION_MS) {
+    if (msStable > optStableDurationMS) {
         if (!didGenerateOutput) {
             scan(imageOrig, true);
             didGenerateOutput = true;
