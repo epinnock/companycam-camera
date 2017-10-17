@@ -147,13 +147,46 @@
     
     // Now we draw the underlying CGImage into a new context, applying the transform
     // calculated above.
-    CGContextRef ctx = CGBitmapContextCreate(NULL, self.size.width, self.size.height,
+    CGFloat contextWidth = self.size.width;
+    CGFloat contextHeight = self.size.height;
+    CGFloat xOffset = 0.0;
+    CGFloat yOffset = 0.0;
+    switch (orientation) {
+        case UIImageOrientationUp:
+            contextWidth = self.size.height;
+            contextHeight = self.size.width;
+            xOffset = (fabs(contextHeight - contextWidth))/2.0;
+            yOffset = -(fabs(contextHeight - contextWidth))/2.0;
+            break;
+        case UIImageOrientationUpMirrored:
+            contextWidth = self.size.height;
+            contextHeight = self.size.width;
+            xOffset = -(fabs(contextHeight - contextWidth))/2.0;
+            yOffset = -(fabs(contextHeight - contextWidth))/2.0;
+            break;
+        case UIImageOrientationDown:
+            contextWidth = self.size.height;
+            contextHeight = self.size.width;
+            xOffset = -(fabs(contextHeight - contextWidth))/2.0;
+            yOffset = (fabs(contextHeight - contextWidth))/2.0;
+            break;
+        case UIImageOrientationDownMirrored:
+            contextWidth = self.size.height;
+            contextHeight = self.size.width;
+            xOffset = (fabs(contextHeight - contextWidth))/2.0;
+            yOffset = (fabs(contextHeight - contextWidth))/2.0;
+            break;
+        default:
+            break;
+    }
+    
+    CGContextRef ctx = CGBitmapContextCreate(NULL, contextWidth, contextHeight,
                                              CGImageGetBitsPerComponent(self.CGImage), 0,
                                              CGImageGetColorSpace(self.CGImage),
                                              CGImageGetBitmapInfo(self.CGImage));
     
     CGContextConcatCTM(ctx, transform);
-    CGContextDrawImage(ctx, CGRectMake(0,0,self.size.height,self.size.width), self.CGImage);
+    CGContextDrawImage(ctx, CGRectMake(xOffset,yOffset,self.size.height,self.size.width), self.CGImage);
     
     // And now we just create a new UIImage from the drawing context
     CGImageRef cgimg = CGBitmapContextCreateImage(ctx);
