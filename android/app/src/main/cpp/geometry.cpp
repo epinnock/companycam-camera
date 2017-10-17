@@ -99,21 +99,21 @@ namespace geom
         // Case 2/4: Hit top and right
         if (hitX1 && hitY0) {
             float triW = containerW - pointY0.x;
-            float triH = pointX0.y;
+            float triH = pointX1.y;
             return 0.5 * triW * triH;
         }
 
         // Case 3/4: Hit bottom and left
         if (hitX0 && hitY1) {
-            float triW = pointY0.x;
+            float triW = pointY1.x;
             float triH = containerH - pointX0.y;
             return containerW * containerH - 0.5 * triW * triH;
         }
 
         // Case 4/4: Hit bottom and right
         if (hitX1 && hitY1) {
-            float triW = containerW - pointY0.x;
-            float triH = containerH - pointX0.y;
+            float triW = containerW - pointY1.x;
+            float triH = containerH - pointX1.y;
             return containerW * containerH - 0.5 * triW * triH;
         }
 
