@@ -11,7 +11,7 @@
 #import <opencv2/core/core.hpp>
 #import <opencv2/imgproc/imgproc.hpp>
 
-#define SHOW_DOCSCAN_DEBUG_IMAGE
+#undef SHOW_DOCSCAN_DEBUG_IMAGE
 
 @interface DocScanOpenCV()
 
@@ -48,37 +48,37 @@
 @implementation DocScanOpenCV
 
 -(id)initWithCoder:(NSCoder *)aDecoder {
-    
+
     self = [super initWithCoder:aDecoder];
     if (self) {
-        
+
     }
-    
+
     // Initialize the view
     [self initView];
-    
+
     return self;
 }
 
 -(id)initWithFrame:(CGRect)frame {
-    
+
     self = [super initWithFrame:frame];
     if (self) {
-        
+
     }
-    
+
     // Initialize the view
     [self initView];
-    
+
     return self;
 }
 
 // This method does some initial setup of the view
 -(void)initView {
-    
+
     // Initialize the docScanner object
     self.docScanner = new DocScanner();
-    
+
     // Initialize the perspectiveRectArray
     self.perspectiveRectArray = [[NSMutableArray alloc] initWithCapacity:1];
 }
@@ -86,18 +86,18 @@
 #pragma mark CCCameraImageProcessor methods
 
 -(void)setImageParams:(int)widthOrig :(int)heightOrig :(int)widthContainer :(int)heightContainer :(int)MAX_OUTPUT_DIM {
-    
+
     // Set the original width and height of the image
     self.widthOrig = widthOrig;
     self.heightOrig = heightOrig;
-    
+
     // Set the width and height of the preview view
     self.widthOverlay = widthContainer;
     self.heightOverlay = heightContainer;
 }
 
 -(BOOL)setPreviewBytes:(UIImage *)image {
-    
+
     // Reset scanner time if enough time has elapsed since last scan
     long long currentUNIXTimeMS = [[NSDate date] timeIntervalSince1970] * 1000.0;
     if (self.lastScanMS == 0) {
@@ -106,27 +106,27 @@
         self.docScanner->reset();
     }
     self.lastScanMS = currentUNIXTimeMS;
-    
+
     BOOL requestNextFrame = YES;
-    
+
     // Convert the image to a Mat object
     cv::Mat thisMat = [self cvMatFromUIImage:image];
-    
+
     NSLog(@"Got a matrix!");
-    
+
     // Pass the matrix to the DocScanner and get the scan status
     self.latestStatus = self.docScanner->smartScan(thisMat);
-    
+
 #ifdef SHOW_DOCSCAN_DEBUG_IMAGE
     self.debugImage = [self UIImageFromCVMat:self.docScanner->getDebugImage()];
 #endif
-    
+
     // Get the current rect from the DocScanner
     const geom::PerspectiveRect pRect = self.docScanner->getPerspectiveRect();
-    
+
     // Update the perspectiveRectArray
     [self updatePerspectiveRectArray:pRect];
-    
+
     switch (self.latestStatus) {
         case DocScanner::UNSTABLE:
             NSLog(@"The scan was UNSTABLE");
@@ -135,10 +135,10 @@
             NSLog(@"The scan was STABLE");
             break;
         case DocScanner::DONE: {
-            
+
             // Set the requestNextFrame flag so that the camera will stop sending frames to the scanner
             requestNextFrame = NO;
-            
+
             NSLog(@"The scan was DONE");
             break;
         }
@@ -146,19 +146,19 @@
             NSLog(@"The scan was none of the above");
             break;
     }
-    
+
     // Redraw the updated perspective rect
     [self performSelector:@selector(setNeedsDisplay) onThread:[NSThread mainThread] withObject:nil waitUntilDone:NO];
-    
+
     return requestNextFrame;
 }
 
 
 -(void)clearVisiblePreview {
-    
+
     // Reset the perspectiveRectArray
     self.perspectiveRectArray = [[NSMutableArray alloc] initWithCapacity:1];
-    
+
     // Redraw the updated perspective rect
     [self performSelector:@selector(setNeedsDisplay) onThread:[NSThread mainThread] withObject:nil waitUntilDone:NO];
 }
@@ -188,13 +188,13 @@
 // This method for converting a UIImage into a Mat object comes from the OpenCV documentation at:
 // http://docs.opencv.org/2.4/doc/tutorials/ios/image_manipulation/image_manipulation.html
 -(cv::Mat)cvMatFromUIImage:(UIImage *)image {
-    
+
     CGColorSpaceRef colorSpace = CGImageGetColorSpace(image.CGImage);
     CGFloat cols = image.size.width;
     CGFloat rows = image.size.height;
-    
+
     cv::Mat cvMat(rows, cols, CV_8UC4); // 8 bits per component, 4 channels (color channels + alpha)
-    
+
     CGContextRef contextRef = CGBitmapContextCreate(
         cvMat.data,     // Pointer to  data
         cols,           // Width of bitmap
@@ -203,45 +203,45 @@
         cvMat.step[0],  // Bytes per row
         colorSpace,     // Colorspace
         kCGImageAlphaNoneSkipLast | kCGBitmapByteOrderDefault); // Bitmap info flags
-    
+
     CGContextDrawImage(contextRef, CGRectMake(0, 0, cols, rows), image.CGImage);
     CGContextRelease(contextRef);
-    
+
     return cvMat;
 }
 
 // This method for converting a Mat into a UIImage comes from the OpenCV documentation at:
 // http://docs.opencv.org/2.4/doc/tutorials/ios/image_manipulation/image_manipulation.html
 -(UIImage *)UIImageFromCVMat:(cv::Mat)cvMat {
-    
+
     // If the width of cvMat is less than the height, then transpose it because the subsequent UIImage operations (rotation, scaling, cropping, JPEG conversion) will fail otherwise
     BOOL shouldPostRotate = NO;
     if (cvMat.cols < cvMat.rows) {
-        
+
         // Transpose the matrix
         cvMat = cvMat.t();
-        
+
         // Reverse the columns after the transpose so the image isn't mirrored
         cv::Mat tempMat;
         cv::flip(cvMat, tempMat, 1);
         cvMat = tempMat;
-        
+
         // If the matrix had to be transposed, then set the flag to post rotate the image after it's created to reset it to the original orientation
         shouldPostRotate = YES;
     }
-    
+
     NSData *data = [NSData dataWithBytes:cvMat.data length:cvMat.elemSize()*cvMat.total()];
     CGColorSpaceRef colorSpace;
-    
+
     if (cvMat.elemSize() == 1) {
         colorSpace = CGColorSpaceCreateDeviceGray();
     }
     else {
         colorSpace = CGColorSpaceCreateDeviceRGB();
     }
-    
+
     CGDataProviderRef provider = CGDataProviderCreateWithCFData((__bridge CFDataRef)data);
-    
+
     // Creating CGImage from cv::Mat
     CGImageRef imageRef = CGImageCreate(
         cvMat.cols,                                 //width
@@ -255,27 +255,27 @@
         NULL,                                       //decode
         false,                                      //should interpolate
         kCGRenderingIntentDefault);                 //intent
-    
+
     // Getting UIImage from CGImage
     UIImage *finalImage = [UIImage imageWithCGImage:imageRef];
     CGImageRelease(imageRef);
     CGDataProviderRelease(provider);
     CGColorSpaceRelease(colorSpace);
-    
+
     // If the matrix had to be transposed, then rotate the finalImage back to it's original orientation
     if (shouldPostRotate) {
         finalImage = [finalImage imageRotatedByDegrees:-90.0f];
     }
-    
+
     return finalImage;
 }
 
 // This method updates the perspectiveRectArray based on the given geom::PerspectiveRect object
 -(void)updatePerspectiveRectArray:(geom::PerspectiveRect)pRect {
-    
+
     // Reset the perspectiveRectArray
     self.perspectiveRectArray = [[NSMutableArray alloc] initWithCapacity:1];
-    
+
     // Get each of the original points from the PerspectiveRect object
     CGPoint point00 = CGPointMake(pRect.p00.x, pRect.p00.y);
     CGPoint point10 = CGPointMake(pRect.p10.x, pRect.p10.y);
@@ -328,7 +328,7 @@
 // Only override drawRect: if you perform custom drawing.
 // An empty implementation adversely affects performance during animation.
 - (void)drawRect:(CGRect)rect {
-    
+
 #ifdef SHOW_DOCSCAN_DEBUG_IMAGE
     if (self.debugImage != nil) {
         CGContextRef context = UIGraphicsGetCurrentContext();
@@ -341,7 +341,7 @@
            self.debugImage.CGImage);
     }
 #endif
-    
+
     // If the perspectiveRectArray is defined, then draw it on the screen
     if (self.perspectiveRectArray != nil &&
         [self.perspectiveRectArray count] > 3 &&
@@ -370,7 +370,7 @@
 
 // This method retuns the color for the given scan status
 -(UIColor *)getColorForScanStatus:(DocScanner::ScanStatus)thisStatus {
-    
+
     switch (thisStatus) {
         case DocScanner::STABLE:
             return [UIColor colorWithRed:0 green:0.5 blue:1 alpha:0.5];
