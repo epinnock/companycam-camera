@@ -199,16 +199,18 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
             scanStatus, pRect);
 
         // Draw overlay
-        Matrix matOrigToOverlay = getOrigToOverlayMatrix(rotation);
-        float[] pRectTransform = new float[8];
-        matOrigToOverlay.mapPoints(pRectTransform, pRect);
-
-        int overlayColor = COLOR_UNSTABLE;
-        if(scanStatus[0] == SCAN_STATUS_STABLE){ overlayColor = COLOR_STABLE; }
-        if(scanStatus[0] == SCAN_STATUS_DONE){ overlayColor = COLOR_DONE; }
-
         bitmapOverlay.eraseColor(COLOR_0000);
-        drawPerspectiveRect(canvasOverlay, pRectTransform, overlayColor);
+        if (scanStatus[0] != SCAN_STATUS_UNSTABLE) {
+            Matrix matOrigToOverlay = getOrigToOverlayMatrix(rotation);
+            float[] pRectTransform = new float[8];
+            matOrigToOverlay.mapPoints(pRectTransform, pRect);
+
+            int overlayColor = COLOR_UNSTABLE;
+            if(scanStatus[0] == SCAN_STATUS_STABLE){ overlayColor = COLOR_STABLE; }
+            if(scanStatus[0] == SCAN_STATUS_DONE){ overlayColor = COLOR_DONE; }
+
+            drawPerspectiveRect(canvasOverlay, pRectTransform, overlayColor);
+        }
 
         // Process output image if appropriate
         boolean requestNextFrame = true;
