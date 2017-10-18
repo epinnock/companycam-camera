@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "CCCameraImageProcessor.h"
-#import "UIImage+CCHelper.h"
+#import "UIImage+CCMHelper.h"
 
 @class CCCameraManager;
 

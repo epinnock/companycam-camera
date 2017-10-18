@@ -264,7 +264,7 @@
 
     // If the matrix had to be transposed, then rotate the finalImage back to it's original orientation
     if (shouldPostRotate) {
-        finalImage = [finalImage imageRotatedByDegrees:-90.0f];
+        finalImage = [finalImage CCMImageRotatedByDegrees:-90.0f];
     }
 
     return finalImage;
