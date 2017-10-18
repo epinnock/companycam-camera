@@ -288,16 +288,21 @@ namespace geom
         cv::Point2f s11(0,0);
         cv::Point2f s01(0,0);
 
+        float count = 0;
         for (const auto& rect : rects) {
+            if (!rect.valid) { continue; }
             s00 += rect.p00;
             s10 += rect.p10;
             s11 += rect.p11;
             s01 += rect.p01;
+            count++;
         }
-        s00 /= (float)rects.size();
-        s10 /= (float)rects.size();
-        s11 /= (float)rects.size();
-        s01 /= (float)rects.size();
+        if (count == 0) { return invalidPerspectiveRect(); }
+
+        s00 /= count;
+        s10 /= count;
+        s11 /= count;
+        s01 /= count;
 
         return perspectiveRectFromPoints(
             s00, s10, s11, s01,

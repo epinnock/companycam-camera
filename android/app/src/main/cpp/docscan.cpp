@@ -31,7 +31,7 @@ DocScanner::DocScanner() :
 /** Returns the most recent debug image. */
 cv::Mat DocScanner::getDebugImage() const
 {
-    return imageResized;
+    return imageEdges;
 }
 
 /** Returns the most recent output image. */
@@ -133,7 +133,8 @@ void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
     const double cannyThresh2 = 3*cannyThresh1;
     cv::Canny(imageBlur, imageCanny, cannyThresh1, cannyThresh2);
 
-    // Get rid of contours which are very near the edge of the image
+    // Get rid of contours which are very near the edge of the image,
+    // or which are completely contained in largest bounding box
     std::vector<std::vector<cv::Point> > contours;
     std::vector<cv::Vec4i> hierarchy;
     cv::findContours(imageCanny, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, cv::Point(0,0));
@@ -145,15 +146,36 @@ void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
     const int CMAXX = imageEdges.size().width - CMINX;
     const int CMAXY = imageEdges.size().height - CMINY;
 
+    cv::Rect largestBox;
     for (int i=0; i<contours.size(); i++) {
-        cv::Rect box = cv::boundingRect(contours[i]);
+        const cv::Rect box = cv::boundingRect(contours[i]);
 
         if (box.x < CMINX) { continue; }
         if (box.y < CMINY) { continue; }
         if (box.x+box.width  > CMAXX) { continue; }
         if (box.y+box.height > CMAXY) { continue; }
 
-        cv::Scalar color = cv::Scalar(255);
+        if ((i == 0) || box.area() > largestBox.area()) {
+            largestBox = box;
+        }
+    }
+
+    const cv::Scalar color = cv::Scalar(255);
+    //cv::rectangle(imageEdges, largestBox, color);
+
+    for (int i=0; i<contours.size(); i++) {
+        const cv::Rect box = cv::boundingRect(contours[i]);
+
+        if (box.x < CMINX) { continue; }
+        if (box.y < CMINY) { continue; }
+        if (box.x+box.width  > CMAXX) { continue; }
+        if (box.y+box.height > CMAXY) { continue; }
+
+        if ((box.x > largestBox.x) &&
+            (box.y > largestBox.y) &&
+            (box.x+box.width < largestBox.x+largestBox.width) &&
+            (box.y+box.height < largestBox.y+largestBox.height)) { continue; }
+
         //cv::rectangle(drawing, box, color);
         cv::drawContours(imageEdges, contours, i, color, 1, 8, hierarchy, 0, cv::Point());
     }
