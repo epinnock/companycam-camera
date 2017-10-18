@@ -134,7 +134,7 @@ void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
     cv::Canny(imageBlur, imageCanny, cannyThresh1, cannyThresh2);
 
     // Get rid of contours which are very near the edge of the image,
-    // or which are completely contained in largest bounding box
+    // or completely inside or outside the largest contour bounding box
     std::vector<std::vector<cv::Point> > contours;
     std::vector<cv::Vec4i> hierarchy;
     cv::findContours(imageCanny, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, cv::Point(0,0));
@@ -150,6 +150,7 @@ void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
     for (int i=0; i<contours.size(); i++) {
         const cv::Rect box = cv::boundingRect(contours[i]);
 
+        // box very near edge of screen
         if (box.x < CMINX) { continue; }
         if (box.y < CMINY) { continue; }
         if (box.x+box.width  > CMAXX) { continue; }
@@ -166,17 +167,24 @@ void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
     for (int i=0; i<contours.size(); i++) {
         const cv::Rect box = cv::boundingRect(contours[i]);
 
+        // box very near edge of screen
         if (box.x < CMINX) { continue; }
         if (box.y < CMINY) { continue; }
         if (box.x+box.width  > CMAXX) { continue; }
         if (box.y+box.height > CMAXY) { continue; }
 
+        // box contained inside largestBox
         if ((box.x > largestBox.x) &&
             (box.y > largestBox.y) &&
             (box.x+box.width < largestBox.x+largestBox.width) &&
             (box.y+box.height < largestBox.y+largestBox.height)) { continue; }
 
-        //cv::rectangle(drawing, box, color);
+        // box completely outside largestBox
+        if ((box.x > largestBox.x+largestBox.width) ||
+            (box.y > largestBox.y+largestBox.height) ||
+            (box.x+box.width < largestBox.x) ||
+            (box.y+box.height < largestBox.y)) { continue; }
+
         cv::drawContours(imageEdges, contours, i, color, 1, 8, hierarchy, 0, cv::Point());
     }
 
@@ -187,9 +195,9 @@ void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
     //threshold – Accumulator threshold parameter. Only those lines are returned that get enough votes ( >\texttt{threshold} ).
     //minLineLength – Minimum line length. Line segments shorter than that are rejected.
     //maxLineGap – Maximum allowed gap between points on the same line to link them.
-    const int houghThreshold = 50;
-    const double houghMinLength = 50;
-    const double houghMaxGap = 40;
+    const int houghThreshold = 20;
+    const double houghMinLength = 30;
+    const double houghMaxGap = 30;
     cv::HoughLinesP(
         imageEdges,
         lines,
