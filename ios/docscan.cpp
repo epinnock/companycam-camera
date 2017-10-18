@@ -11,7 +11,7 @@
 
 const int DEFAULT_WORKING_SIZE = 384;
 const int DEFAULT_MAX_OUTPUT_DIM = 1024;
-const float MAX_STABLE_DEVIATION_PCT = 0.03;
+const float MAX_STABLE_DEVIATION_PCT = 0.015;
 const unsigned long DEFAULT_STABLE_DURATION_MS = 1000;
 
 DocScanner::DocScanner(const int optWorkingSize, const int optMaxOutputDim) :
