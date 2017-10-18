@@ -20,7 +20,8 @@ DocScanner::DocScanner(const int optWorkingSize, const int optMaxOutputDim) :
     optStableDurationMS(DEFAULT_STABLE_DURATION_MS),
     didGenerateOutput(false),
     timeLastUnstable(std::chrono::high_resolution_clock::now()),
-    pRect(geom::invalidPerspectiveRect())
+    pRect(geom::invalidPerspectiveRect()),
+    recentRectsIndex(0)
 { }
 
 DocScanner::DocScanner() :
@@ -30,7 +31,7 @@ DocScanner::DocScanner() :
 /** Returns the most recent debug image. */
 cv::Mat DocScanner::getDebugImage() const
 {
-    return imageResized;
+    return imageEdges;
 }
 
 /** Returns the most recent output image. */
@@ -121,8 +122,8 @@ void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
         0,
         0,
         CV_INTER_LINEAR);
-    cv::cvtColor(imageResized, imageGray, CV_BGR2GRAY);
-    cv::GaussianBlur(imageGray, imageBlur, cv::Size(9,9), 0, 0);
+    //cv::cvtColor(imageResized, imageGray, CV_BGR2GRAY);
+    cv::GaussianBlur(imageResized, imageBlur, cv::Size(9,9), 0, 0);
 
     // Canny
     //--------------------------------
@@ -130,7 +131,62 @@ void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
     //threshold2 – second threshold for the hysteresis procedure.
     const double cannyThresh1 = 24;
     const double cannyThresh2 = 3*cannyThresh1;
-    cv::Canny(imageBlur, imageEdges, cannyThresh1, cannyThresh2);
+    cv::Canny(imageBlur, imageCanny, cannyThresh1, cannyThresh2);
+
+    // Get rid of contours which are very near the edge of the image,
+    // or completely inside or outside the largest contour bounding box
+    std::vector<std::vector<cv::Point> > contours;
+    std::vector<cv::Vec4i> hierarchy;
+    cv::findContours(imageCanny, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, cv::Point(0,0));
+
+    imageEdges = cv::Mat::zeros(imageCanny.size(), CV_8U);
+
+    const int CMINX = 5;
+    const int CMINY = 5;
+    const int CMAXX = imageEdges.size().width - CMINX;
+    const int CMAXY = imageEdges.size().height - CMINY;
+
+    cv::Rect largestBox;
+    for (int i=0; i<contours.size(); i++) {
+        const cv::Rect box = cv::boundingRect(contours[i]);
+
+        // box very near edge of screen
+        if (box.x < CMINX) { continue; }
+        if (box.y < CMINY) { continue; }
+        if (box.x+box.width  > CMAXX) { continue; }
+        if (box.y+box.height > CMAXY) { continue; }
+
+        if ((i == 0) || box.area() > largestBox.area()) {
+            largestBox = box;
+        }
+    }
+
+    const cv::Scalar color = cv::Scalar(255);
+    //cv::rectangle(imageEdges, largestBox, color);
+
+    for (int i=0; i<contours.size(); i++) {
+        const cv::Rect box = cv::boundingRect(contours[i]);
+
+        // box very near edge of screen
+        if (box.x < CMINX) { continue; }
+        if (box.y < CMINY) { continue; }
+        if (box.x+box.width  > CMAXX) { continue; }
+        if (box.y+box.height > CMAXY) { continue; }
+
+        // box contained inside largestBox
+        if ((box.x > largestBox.x) &&
+            (box.y > largestBox.y) &&
+            (box.x+box.width < largestBox.x+largestBox.width) &&
+            (box.y+box.height < largestBox.y+largestBox.height)) { continue; }
+
+        // box completely outside largestBox
+        if ((box.x > largestBox.x+largestBox.width) ||
+            (box.y > largestBox.y+largestBox.height) ||
+            (box.x+box.width < largestBox.x) ||
+            (box.y+box.height < largestBox.y)) { continue; }
+
+        cv::drawContours(imageEdges, contours, i, color, 1, 8, hierarchy, 0, cv::Point());
+    }
 
     // Hough
     //--------------------------------
@@ -139,9 +195,9 @@ void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
     //threshold – Accumulator threshold parameter. Only those lines are returned that get enough votes ( >\texttt{threshold} ).
     //minLineLength – Minimum line length. Line segments shorter than that are rejected.
     //maxLineGap – Maximum allowed gap between points on the same line to link them.
-    const int houghThreshold = 50;
-    const double houghMinLength = 50;
-    const double houghMaxGap = 40;
+    const int houghThreshold = 20;
+    const double houghMinLength = 30;
+    const double houghMaxGap = 30;
     cv::HoughLinesP(
         imageEdges,
         lines,
@@ -160,7 +216,14 @@ void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
         cv::line(imageResized, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), colorRed, 1);
     }
 
-    pRect = geom::perspectiveRectFromLines(lines, wResize, hResize);
+    geom::PerspectiveRect currentRect = geom::perspectiveRectFromLines(lines, wResize, hResize);
+    while (recentRects.size() < 5) {
+        recentRects.push_back(currentRect);
+    }
+    recentRects[recentRectsIndex] = currentRect;
+    recentRectsIndex = (recentRectsIndex + 1) % 5;
+
+    pRect = geom::getSmoothedRects(recentRects, wResize, hResize);
     // Quit early if no perspective rect found
     if (!pRect.valid) { return; }
 

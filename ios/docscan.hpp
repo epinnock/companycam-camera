@@ -17,10 +17,14 @@ class DocScanner
         cv::Mat imageResized;
         cv::Mat imageGray;
         cv::Mat imageBlur;
+        cv::Mat imageCanny;
         cv::Mat imageEdges;
         cv::Mat imageOutputContainer;
         cv::Mat imageOutput;
         geom::PerspectiveRect pRect;
+
+        std::vector<geom::PerspectiveRect> recentRects;
+        int recentRectsIndex;
 
         bool didGenerateOutput;
         std::chrono::time_point<std::chrono::high_resolution_clock> timeLastUnstable;
