@@ -277,6 +277,39 @@ namespace geom
             containerH);
     }
 
+    /** Returns the average rect, dropping outliers */
+    PerspectiveRect getSmoothedRects(
+        const std::vector<PerspectiveRect>& rects,
+        const int containerW,
+        const int containerH)
+    {
+        cv::Point2f s00(0,0);
+        cv::Point2f s10(0,0);
+        cv::Point2f s11(0,0);
+        cv::Point2f s01(0,0);
+
+        float count = 0;
+        for (const auto& rect : rects) {
+            if (!rect.valid) { continue; }
+            s00 += rect.p00;
+            s10 += rect.p10;
+            s11 += rect.p11;
+            s01 += rect.p01;
+            count++;
+        }
+        if (count == 0) { return invalidPerspectiveRect(); }
+
+        s00 /= count;
+        s10 /= count;
+        s11 /= count;
+        s01 /= count;
+
+        return perspectiveRectFromPoints(
+            s00, s10, s11, s01,
+            containerW,
+            containerH);
+    }
+
     /** Returns the screen-space bounding box of a {@link PerpsectiveRect}. */
     cv::Rect perspectiveRectBoundingBox(const PerspectiveRect& rect)
     {
