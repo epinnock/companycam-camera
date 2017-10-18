@@ -17,6 +17,7 @@ class DocScanner
         cv::Mat imageResized;
         cv::Mat imageGray;
         cv::Mat imageBlur;
+        cv::Mat imageCanny;
         cv::Mat imageEdges;
         cv::Mat imageOutputContainer;
         cv::Mat imageOutput;

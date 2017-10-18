@@ -121,8 +121,8 @@ void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
         0,
         0,
         CV_INTER_LINEAR);
-    cv::cvtColor(imageResized, imageGray, CV_BGR2GRAY);
-    cv::GaussianBlur(imageGray, imageBlur, cv::Size(9,9), 0, 0);
+    //cv::cvtColor(imageResized, imageGray, CV_BGR2GRAY);
+    cv::GaussianBlur(imageResized, imageBlur, cv::Size(9,9), 0, 0);
 
     // Canny
     //--------------------------------
@@ -130,7 +130,32 @@ void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
     //threshold2 – second threshold for the hysteresis procedure.
     const double cannyThresh1 = 24;
     const double cannyThresh2 = 3*cannyThresh1;
-    cv::Canny(imageBlur, imageEdges, cannyThresh1, cannyThresh2);
+    cv::Canny(imageBlur, imageCanny, cannyThresh1, cannyThresh2);
+
+    // Get rid of contours which are very near the edge of the image
+    std::vector<std::vector<cv::Point> > contours;
+    std::vector<cv::Vec4i> hierarchy;
+    cv::findContours(imageCanny, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE, cv::Point(0,0));
+
+    imageEdges = cv::Mat::zeros(imageCanny.size(), CV_8U);
+
+    const int CMINX = 5;
+    const int CMINY = 5;
+    const int CMAXX = imageEdges.size().width - CMINX;
+    const int CMAXY = imageEdges.size().height - CMINY;
+
+    for (int i=0; i<contours.size(); i++) {
+        cv::Rect box = cv::boundingRect(contours[i]);
+
+        if (box.x < CMINX) { continue; }
+        if (box.y < CMINY) { continue; }
+        if (box.x+box.width  > CMAXX) { continue; }
+        if (box.y+box.height > CMAXY) { continue; }
+
+        cv::Scalar color = cv::Scalar(255);
+        //cv::rectangle(drawing, box, color);
+        cv::drawContours(imageEdges, contours, i, color, 1, 8, hierarchy, 0, cv::Point());
+    }
 
     // Hough
     //--------------------------------
