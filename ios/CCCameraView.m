@@ -171,7 +171,7 @@
 
 }
 
--(void)doPhotoTaken:(NSString *)imgFile :(int)imgWidth :(int)imgHeight {
+-(void)doPhotoTaken:(NSString *)imgFile :(int)imgWidth :(int)imgHeight completion:(void(^)(void))callback{
 
     if (imgFile == nil) {
         [self propOnClose:@"There was an error saving the photo file" :@"error"];
@@ -187,6 +187,7 @@
     if (self.onPhotoTaken) {
         self.onPhotoTaken(event);
         [self finishWithResult:@"capture"];
+        callback();
     }
 }
 

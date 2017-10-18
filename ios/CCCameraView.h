@@ -85,7 +85,7 @@
 -(void)propOnClose:(NSString *)errmsg :(NSString *)button;
 -(void)propOnAuxModeClicked;
 -(void)doEvent:(NSString *)eventName :(NSDictionary *)event;
--(void)doPhotoTaken:(NSString *)imgFile :(int)imgWidth :(int)imgHeight;
+-(void)doPhotoTaken:(NSString *)imgFile :(int)imgWidth :(int)imgHeight completion:(void(^)(void))callback;
 -(void)doPhotoAccepted:(NSString *)imgFile :(int)imgWidth :(int)imgHeight;
 -(CLLocation *)getExifLocation;
 
