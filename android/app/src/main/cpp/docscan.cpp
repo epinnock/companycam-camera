@@ -20,7 +20,8 @@ DocScanner::DocScanner(const int optWorkingSize, const int optMaxOutputDim) :
     optStableDurationMS(DEFAULT_STABLE_DURATION_MS),
     didGenerateOutput(false),
     timeLastUnstable(std::chrono::high_resolution_clock::now()),
-    pRect(geom::invalidPerspectiveRect())
+    pRect(geom::invalidPerspectiveRect()),
+    recentRectsIndex(0)
 { }
 
 DocScanner::DocScanner() :
@@ -185,7 +186,14 @@ void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
         cv::line(imageResized, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), colorRed, 1);
     }
 
-    pRect = geom::perspectiveRectFromLines(lines, wResize, hResize);
+    geom::PerspectiveRect currentRect = geom::perspectiveRectFromLines(lines, wResize, hResize);
+    while (recentRects.size() < 5) {
+        recentRects.push_back(currentRect);
+    }
+    recentRects[recentRectsIndex] = currentRect;
+    recentRectsIndex = (recentRectsIndex + 1) % 5;
+
+    pRect = geom::getSmoothedRects(recentRects, wResize, hResize);
     // Quit early if no perspective rect found
     if (!pRect.valid) { return; }
 
