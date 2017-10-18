@@ -719,11 +719,16 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
 
         // Execute the proper callback depending on the current camera mode
         if (self.cameraMode != CCCameraModeFastCam) {
-            [latestView doPhotoTaken:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage)];
+            [latestView doPhotoTaken:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage) completion:^{
 
-            // Hide the loading view and enable the buttons again
-            [latestView.cameraLayout hideLoadingView];
-            [latestView.cameraLayout enableButtons];
+              // wait two seconds to enable buttons to allow editor to load
+              dispatch_time_t delayTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC));
+              dispatch_after(delayTime, dispatch_get_main_queue(), ^(void){
+                // Hide the loading view and enable the buttons again
+                [latestView.cameraLayout hideLoadingView];
+                [latestView.cameraLayout enableButtons];
+              });
+            }];
         }
         else {
             [latestView doPhotoAccepted:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage)];
