@@ -1,6 +1,8 @@
 #ifndef CCIP_GEOMETRY_HPP
 #define CCIP_GEOMETRY_HPP
 
+#include <vector>
+
 #include <opencv2/core/core.hpp>
 
 namespace geom
@@ -36,6 +38,11 @@ namespace geom
         const int screenH);
     PerspectiveRect perspectiveRectFromLines(
         const std::vector<cv::Vec4i>& lines,
+        const int containerW,
+        const int containerH);
+
+    PerspectiveRect getSmoothedRects(
+        const std::vector<PerspectiveRect>& rects,
         const int containerW,
         const int containerH);
 
