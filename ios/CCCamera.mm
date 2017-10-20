@@ -161,6 +161,10 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     [self.captureSession stopRunning];
 
     // Remove any observers
+    // [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
+
+-(void)dealloc {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
