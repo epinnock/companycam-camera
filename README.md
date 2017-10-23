@@ -94,4 +94,5 @@ TODO: Finish this. Add NDK via Android SDK manager.  Install OpenCV Android SDK.
 
 ### Scanner functionality
 
-The scanner's functionality is in the repo `companycam-docscan`.  At the moment, the correct workflow to modify the scanner is to checkout that repo, modify the files there, and copy the files in `lib/src` to both the Android and iOS native folders of `companycam-camera`.
+The scanner's functionality is in the repo `companycam-docscan`.  At the moment, the correct workflow to modify the scanner is to clone that repo, modify the files there, and copy the files in `lib/src` to both the Android and iOS native folders of `companycam-camera`.  In other words, don't modify the docscan files in `companycam-camera`, because they are duplicated for Android and iOS and will get out of sync that way.
+
