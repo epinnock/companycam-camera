@@ -29,6 +29,13 @@ in the repositories section of android/build.gradle.
 - https://github.com/CompanyCam/companycam-camera/commit/771049881b1a8e8cb57745dd5afb8fcfd9e0bbd4
 - Ensure consistent prop names onPhotoTaken and onPhotoAccepted
 
+### v49 - Oct 23, 2017:
+- https://github.com/CompanyCam/companycam-camera/commit/78c346af4ad4c7ea3795583be43ddc1a4345988b
+- First release candidate for iOS camera and OpenCV scanner on Android+iOS
+- Fix some rotation and cropping issues
+- Various improvements to scanner, and fix Android scanner rotation
+- Fixes concerning observers and button timeouts
+
 ***
 ## Component props
 
