@@ -29,6 +29,13 @@ in the repositories section of android/build.gradle.
 - https://github.com/CompanyCam/companycam-camera/commit/771049881b1a8e8cb57745dd5afb8fcfd9e0bbd4
 - Ensure consistent prop names onPhotoTaken and onPhotoAccepted
 
+### v49 - Oct 23, 2017:
+- https://github.com/CompanyCam/companycam-camera/commit/78c346af4ad4c7ea3795583be43ddc1a4345988b
+- First release candidate for iOS camera and OpenCV scanner on Android+iOS
+- Fix some rotation and cropping issues
+- Various improvements to scanner, and fix Android scanner rotation
+- Fixes concerning observers and button timeouts
+
 ***
 ## Component props
 
@@ -83,8 +90,9 @@ Download the v3.2.0 `iOS pack` from https://opencv.org/releases.html and put `op
 
 #### Android:
 
-TODO: Finish this. Add NDK via Android SDK manager.  Install OpenCV Android SDK.
+Add NDK via Android SDK manager.  Install OpenCV Android SDK.  In `android/app/CMakeLists.txt`, make sure the line `SET(OpenCV_DIR [...]/OpenCV-android-sdk/sdk/native/jni)` is pointing to the correct path (we should figure out a way to avoid this step).
 
 ### Scanner functionality
 
-The scanner's functionality is in the repo `companycam-docscan`.  At the moment, the correct workflow to modify the scanner is to checkout that repo, modify the files there, and copy the files in `lib/src` to both the Android and iOS native folders of `companycam-camera`.
+The scanner's functionality is in the repo `companycam-docscan`.  At the moment, the correct workflow to modify the scanner is to clone that repo, modify the files there, and copy the files in `lib/src` to both the Android and iOS native folders of `companycam-camera`.  In other words, don't modify the docscan files in `companycam-camera`, because they are duplicated for Android and iOS and will get out of sync that way.
+

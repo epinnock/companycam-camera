@@ -518,10 +518,28 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         }
     };
 
-    protected void forceNormalPhotoCapture(Bitmap bPhoto){
+    /** Return a rotation matrix which should be applied to photos after capturing **/
+    private Matrix getPhotoRotationMatrix() {
+        int orientation = ((mLastOrientation + 45) / 90) * 90;
+        int rotation = 0;
+        Camera.CameraInfo info = new Camera.CameraInfo();
+        Camera.getCameraInfo(mCameraId, info);
+
+        rotation = (info.orientation + orientation) % 360;
+
+        Matrix matrix = new Matrix();
+        matrix.postRotate(rotation);
+
+        return matrix;
+    }
+
+    protected void forceNormalPhotoCapture(Bitmap bPhoto) {
         if (bPhoto == null) {
             return;
         }
+
+        Matrix matrix = getPhotoRotationMatrix();
+        bPhoto = Bitmap.createBitmap(bPhoto, 0, 0, bPhoto.getWidth(), bPhoto.getHeight(), matrix, true);
 
         File photo = getPhotoPath();
         if (photo.exists()) {
@@ -570,14 +588,6 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
                 // Only process photo data if the image processor did not succeed in supplying output
                 if(bPhoto == null) {
-
-                    int orientation = ((mLastOrientation + 45) / 90) * 90;
-                    int rotation = 0;
-                    Camera.CameraInfo info = new Camera.CameraInfo();
-                    Camera.getCameraInfo(mCameraId, info);
-
-                    rotation = (info.orientation + orientation) % 360;
-
                     BitmapFactory.Options options = new BitmapFactory.Options();
 
                     // Decoding the data with inJustDecodeBounds = true returns a null bitmap, but it decodes the size without having to
@@ -611,12 +621,9 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                         return;
                     }
 
-                    Matrix matrix = new Matrix();
-                    matrix.postRotate(rotation);
-
+                    Matrix matrix = getPhotoRotationMatrix();
                     Log.d(TAG, "calculations done, ready to rotate");
                     bPhoto = Bitmap.createBitmap(bPhoto, 0, 0, bPhoto.getWidth(), bPhoto.getHeight(), matrix, true);
-
                     Log.d(TAG, "Before cropping the photo is " + bPhoto.getWidth() + " x " + bPhoto.getHeight());
 
                     // Get the height and width of the screen in portrait coordinates (where height > width)
