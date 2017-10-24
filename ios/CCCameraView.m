@@ -81,6 +81,12 @@
                                                  name:@"CCCameraModuleInactiveNotification"
                                                object:nil];
 
+    // Register to receive a notification when the CCCameraModule is force released
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(onRelease:)
+                                                 name:@"CCCameraModuleReleaseNotification"
+                                               object:nil];
+
     // Register to receive notifications when the app is sent to the background or enters the foreground
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSetActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSetInactive:) name:UIApplicationDidEnterBackgroundNotification object:nil];
@@ -126,6 +132,28 @@
 
     // Remove any observers
     //[[NSNotificationCenter defaultCenter] removeObserver:self];
+
+    self.isActive = NO;
+}
+
+// This method responds to the CCCameraModuleReleaseNotification
+-(void)onRelease:(NSNotification *)notification {
+
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [[NSNotificationCenter defaultCenter] removeObserver:self.camera];
+
+    // Stop the volumeButtonHandler
+    [self.volumeButtonHandler stopHandler];
+
+    // Release the camera
+    id<CCCameraDelegate> cameraDelegate = (id<CCCameraDelegate>)self.camera;
+    [cameraDelegate releaseCamera];
+
+    // remove any react subviews
+    NSArray<id<RCTComponent>> *childSubviews = [self reactSubviews];
+    for (int i = 0; i < childSubviews.count; i++) {
+        [self removeReactSubview:(UIView *)childSubviews[i]];
+    }
 
     self.isActive = NO;
 }

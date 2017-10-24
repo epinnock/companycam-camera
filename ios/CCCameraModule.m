@@ -40,4 +40,13 @@ RCT_EXPORT_METHOD(setInactive) {
                                                       userInfo:nil];
 }
 
+RCT_EXPORT_METHOD(releaseCamera) {
+    isActive = NO;
+    
+    // Post a notification to let any interested objects know that the CCCameraModule is inactive
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"CCCameraModuleReleaseNotification"
+                                                        object:self
+                                                      userInfo:nil];
+}
+
 @end
