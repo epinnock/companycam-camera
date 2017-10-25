@@ -24,8 +24,6 @@ DerivedData
 *.xcuserstate
 project.xcworkspace
 
-ios/opencv2.framework/
-
 # Android/IntelliJ
 #
 build/
@@ -44,3 +42,8 @@ buck-out/
 \.buckd/
 android/app/libs
 *.keystore
+
+# OpenCV/NDK
+ios/opencv2.framework/
+android/app/src/main/jniLibs
+.externalNativeBuild

@@ -333,6 +333,31 @@
                 android:layout_marginBottom="5dp"/>
 
         </LinearLayout>
+
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+
+            <LinearLayout
+                android:id="@+id/label_instructions_wrapper"
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:textAlignment="center"
+                android:gravity="center_vertical|center_horizontal"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/label_instructions"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Hold camera steady over the document.\nYour photo will be taken automatically."
+                    android:textColor="@android:color/white"/>
+
+            </LinearLayout>
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout
@@ -456,6 +481,32 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="SCANNER"
+                    android:textColor="@android:color/white"
+                    android:fontFamily="sans-serif-light"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_height="wrap_content"
+                android:layout_width="100dp"
+                android:gravity="center_horizontal"
+                android:id="@+id/aux_layout"
+                android:visibility="visible">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/mode_icon"
+                    android:id="@+id/aux_selected_icon"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="5dp"/>
+
+                <TextView
+                    android:id="@+id/aux_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="AUX"
                     android:textColor="@android:color/white"
                     android:fontFamily="sans-serif-light"/>
 

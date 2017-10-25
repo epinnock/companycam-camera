@@ -47,6 +47,9 @@
     double propExifLocationLongitude;
     long propExifLocationTimestamp;
     NSString *propAuxModeCaption;
+		BOOL hideNativeUI;
+
+    BOOL isActive;
 }
 
 @property (nonatomic, retain) CCCameraManager *manager;
@@ -62,6 +65,8 @@
 @property (nonatomic, assign) double propExifLocationLongitude;
 @property (nonatomic, assign) long propExifLocationTimestamp;
 @property (nonatomic, retain) NSString *propAuxModeCaption;
+@property (nonatomic, assign) BOOL hideNativeUI;
+@property (nonatomic, assign) BOOL isActive;
 
 @property (nonatomic, copy) RCTDirectEventBlock onClose;
 @property (nonatomic, copy) RCTDirectEventBlock onPhotoTaken;
@@ -69,6 +74,7 @@
 @property (nonatomic, copy) RCTDirectEventBlock onAuxModeClicked;
 
 -(id)initWithManager:(CCCameraManager*)_manager bridge:(RCTBridge *)_bridge;
+-(void)setupView;
 -(void)setCamera:(CCCamera *)thisCamera;
 -(void)finishWithResult:(NSString *)button;
 
@@ -79,7 +85,7 @@
 -(void)propOnClose:(NSString *)errmsg :(NSString *)button;
 -(void)propOnAuxModeClicked;
 -(void)doEvent:(NSString *)eventName :(NSDictionary *)event;
--(void)doPhotoTaken:(NSString *)imgFile :(int)imgWidth :(int)imgHeight;
+-(void)doPhotoTaken:(NSString *)imgFile :(int)imgWidth :(int)imgHeight completion:(void(^)(void))callback;
 -(void)doPhotoAccepted:(NSString *)imgFile :(int)imgWidth :(int)imgHeight;
 -(CLLocation *)getExifLocation;
 
@@ -95,5 +101,6 @@
 -(void)setExifLon:(double)val;
 -(void)setExifLocTimestamp:(double)val;
 -(void)setAuxModeCaption:(NSString *)val;
+-(void)setHideNativeUI:(BOOL)val;
 
 @end

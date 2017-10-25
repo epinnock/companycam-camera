@@ -1,7 +1,9 @@
 package com.newcam;
 
+import android.content.Intent;
+
 import com.facebook.react.common.MapBuilder;
-import com.facebook.react.uimanager.SimpleViewManager;
+import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.annotations.ReactProp;
 
@@ -13,7 +15,7 @@ import javax.annotation.Nullable;
  * Created by dan on 12/16/16.
  */
 
-public class CCCameraManager extends SimpleViewManager<CCCameraView> {
+public class CCCameraManager extends ViewGroupManager<CCCameraView> {
 
     public static final String REACT_CLASS = "CompanyCamCamera";
 
@@ -69,16 +71,21 @@ public class CCCameraManager extends SimpleViewManager<CCCameraView> {
         view.setAuxModeCaption(val);
     }
 
+    @ReactProp(name = "hideNativeUI")
+    public void setHideNativeUI(CCCameraView view, boolean val){
+        view.setHideNativeUI(val);
+    }
+
     @Override
     @Nullable
     public Map getExportedCustomDirectEventTypeConstants() {
         return MapBuilder.of(
             "onClose",
             MapBuilder.of("registrationName", "onClose"),
-            "photoAccepted",
-            MapBuilder.of("registrationName", "photoAccepted"),
-            "photoTaken",
-            MapBuilder.of("registrationName", "photoTaken"),
+            "onPhotoAccepted",
+            MapBuilder.of("registrationName", "onPhotoAccepted"),
+            "onPhotoTaken",
+            MapBuilder.of("registrationName", "onPhotoTaken"),
             "onAuxModeClicked",
             MapBuilder.of("registrationName", "onAuxModeClicked")
         );
