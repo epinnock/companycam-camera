@@ -224,7 +224,9 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
      */
     protected void ipStopCapturing(){
         ipCancelCapturing = true;
-        mCamera.setPreviewCallbackWithBuffer(null);
+        if (mCamera != null) {
+            mCamera.setPreviewCallbackWithBuffer(null);
+        }
     }
 
     @Override
