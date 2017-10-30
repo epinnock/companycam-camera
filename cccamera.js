@@ -45,6 +45,8 @@ class CCCamera extends React.Component {
     return (
       <RNCCCamera
         {...this.props}
+        projectName={this.props.projectName || ''}
+        projectAddress={this.props.projectAddress || ''}
         onClose={this._onClose.bind(this)}
         onPhotoAccepted={this._onPhotoAccepted.bind(this)}
         onPhotoTaken={this._onPhotoTaken.bind(this)}
