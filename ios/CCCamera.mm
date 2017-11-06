@@ -107,7 +107,7 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
                                                    object:nil];
 
         // Register to receive notifications when the app is sent to the background or enters the foreground
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSetActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
+        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSetActive:) name:UIApplicationWillEnterForegroundNotification object:nil];
         [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSetInactive:) name:UIApplicationDidEnterBackgroundNotification object:nil];
 
         // Set the default camera type to be back-facing
@@ -141,7 +141,7 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     return self;
 }
 
-// This method responds to the UIApplicationDidBecomeActiveNotification
+// This method responds to the UIApplicationWillEnterForegroundNotification
 -(void)onSetActive:(NSNotification *)notification {
 
     // Setup the capture session
