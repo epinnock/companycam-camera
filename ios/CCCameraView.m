@@ -88,7 +88,7 @@
                                                object:nil];
 
     // Register to receive notifications when the app is sent to the background or enters the foreground
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSetActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSetActive:) name:UIApplicationWillEnterForegroundNotification object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSetInactive:) name:UIApplicationDidEnterBackgroundNotification object:nil];
 
     self.isActive = YES;
@@ -118,10 +118,14 @@
 // This method responds to the CCCameraModuleActiveNotification
 -(void)onSetActive:(NSNotification *)notification {
 
-    // Start the volumeButtonHandler
-    [self.volumeButtonHandler startHandler:YES];
+    // skip if already active
+    if (!self.isActive) {
+      
+      // Start the volumeButtonHandler
+      [self.volumeButtonHandler startHandler:YES];
 
-    self.isActive = YES;
+      self.isActive = YES;
+    }
 }
 
 // This method responds to the CCCameraModuleInactiveNotification
