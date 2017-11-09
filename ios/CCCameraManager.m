@@ -15,20 +15,20 @@ static CCCameraView *latestView;
 RCT_EXPORT_MODULE(CompanyCamCamera)
 
 -(UIView *)view {
-
+    
     if (latestView == nil) {
         latestView = [[CCCameraView alloc] initWithManager:self bridge:self.bridge];
     }
     else {
         [latestView setupView];
     }
-
+    
     // Create the CCCamera object
     latestView.camera = [[CCCamera alloc] init];
-
+    
     // Set the layout object's reference to the camera
     [latestView.cameraLayout setCameraObject:latestView.camera];
-
+    
     return latestView;
 }
 
@@ -83,6 +83,55 @@ RCT_EXPORT_VIEW_PROPERTY(onPhotoTaken, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onPhotoAccepted, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onAuxModeClicked, RCTDirectEventBlock)
 
+RCT_CUSTOM_VIEW_PROPERTY(flashMode, NSInteger, CCCameraFlashMode) {
+    CCCameraFlashMode mode = [RCTConvert NSInteger:json];
+    [self setFlashMode:mode];
+}
 
+- (void)setFlashMode:(CCCameraFlashMode)flashMode {
+    AVCaptureDevice *device = [[latestView.camera deviceInput] device];
+    NSError *error = nil;
+    
+    AVCaptureTorchMode torchMode;
+    
+    // Limit to torch on/off
+    switch (flashMode) {
+        case CCCameraFlashModeAuto:
+            torchMode = AVCaptureTorchModeOff;
+            break;
+        case CCCameraFlashModeOn:
+            torchMode = AVCaptureTorchModeOff;
+            break;
+        case CCCameraFlashModeOff:
+            torchMode = AVCaptureTorchModeOff;
+            break;
+        case CCCameraFlashModeTorch:
+            torchMode = AVCaptureTorchModeOn;
+            break;
+        default:
+            torchMode = AVCaptureTorchModeOff;
+            break;
+    }
+    
+    if (![device lockForConfiguration:&error]) {
+        NSLog(@"%@", error);
+        return;
+    }
+    if (device.hasTorch && [device isTorchModeSupported:torchMode])
+    {
+        NSError *error = nil;
+        if ([device lockForConfiguration:&error])
+        {
+            [device setTorchMode:torchMode];
+            [device unlockForConfiguration];
+        }
+        else
+        {
+            NSLog(@"%@", error);
+        }
+    }
+    [device unlockForConfiguration];
+}
 
 @end
+

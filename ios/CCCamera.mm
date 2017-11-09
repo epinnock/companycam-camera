@@ -98,10 +98,7 @@
         ///////////////////////////////////////////
         
         // Get the saved settings from the NSUserDefaults.  Restrict the possible flash modes to "torch" and "off".  Restrict the possible camera modes to "fastcam" and "camera".
-        self.flashMode = (CCCameraFlashMode)[[[NSUserDefaults standardUserDefaults] objectForKey:PREFS_FLASH_MODE] intValue];
-        if (!(self.flashMode == CCCameraFlashModeOff || self.flashMode == CCCameraFlashModeTorch)) {
-            self.flashMode = CCCameraFlashModeOff;
-        }
+        
         self.resolutionMode = (CCCameraResolutionMode)[[[NSUserDefaults standardUserDefaults] objectForKey:PREFS_RESOLUTION_MODE] intValue];
         self.cameraMode = (CCCameraMode)[[[NSUserDefaults standardUserDefaults] objectForKey:PREFS_CAMERA_MODE] intValue];
         if (!(self.cameraMode == CCCameraModeFastCam || self.cameraMode == CCCameraModeCamera)) {
@@ -443,6 +440,50 @@
     else {
         return CCCameraModeCamera;
     }
+}
+
+-(void)setFlashMode:(CCCameraFlashMode)mode {
+    
+    NSError *error = nil;
+    
+    if (!self.camera) return;
+    if (![self.camera hasFlash]) return;
+    if (![self.camera lockForConfiguration:&error]) {
+        NSLog(@"%@", error);
+        return;
+    }
+    if (self.camera.hasFlash)
+    {
+        switch (mode) {
+            case CCCameraFlashModeAuto:
+                //[self.camera setFlashMode:AVCaptureFlashModeAuto];
+                [self.camera setTorchMode:AVCaptureTorchModeOff];
+                break;
+            case CCCameraFlashModeOn:
+                //[self.camera setFlashMode:AVCaptureFlashModeOn];
+                [self.camera setTorchMode:AVCaptureTorchModeOff];
+                break;
+            case CCCameraFlashModeOff:
+                //[self.camera setFlashMode:AVCaptureFlashModeOff];
+                [self.camera setTorchMode:AVCaptureTorchModeOff];
+                break;
+            case CCCameraFlashModeTorch:
+                //[self.camera setFlashMode:AVCaptureFlashModeOff];
+                [self.camera setTorchMode:AVCaptureTorchModeOn];
+                break;
+            default:
+                //[self.camera setFlashMode:AVCaptureFlashModeOff];
+                [self.camera setTorchMode:AVCaptureTorchModeOff];
+                break;
+        }
+        [self.camera unlockForConfiguration];
+    }
+    else
+    {
+        NSLog(@"%@", error);
+    }
+    
+    [self.camera unlockForConfiguration];
 }
 
 // This method updates the flash setting for the camera
@@ -1223,15 +1264,16 @@
 }
 
 #pragma mark Persistent settings
-
-// This method persists the flash mode to the NSUserDefaults
--(void)persistFlashMode:(NSString *)thisFlashMode {
-    
-    // Persist the flash mode
-    self.flashMode = [self getFlashModeFromString:thisFlashMode];
-    [[NSUserDefaults standardUserDefaults] removeObjectForKey:PREFS_FLASH_MODE];
-    [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithInt:self.flashMode] forKey:PREFS_FLASH_MODE];
-}
+/*
+ // This method persists the flash mode to the NSUserDefaults
+ -(void)persistFlashMode:(NSString *)thisFlashMode {
+ 
+ // Persist the flash mode
+ self.flashMode = [self getFlashModeFromString:thisFlashMode];
+ [[NSUserDefaults standardUserDefaults] removeObjectForKey:PREFS_FLASH_MODE];
+ [[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithInt:self.flashMode] forKey:PREFS_FLASH_MODE];
+ }
+ */
 
 // This method persists the resolution mode to the NSUserDefaults
 -(void)persistResolutionMode:(NSString *)thisResolutionMode {

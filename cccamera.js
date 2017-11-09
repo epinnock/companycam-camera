@@ -7,6 +7,16 @@ import {
 
 const CameraModule = NativeModules.CCCameraModule;
 
+function convertNativeProps(props) {
+  const newProps = { ...props };
+
+  if (typeof props.flashMode === 'string') {
+    newProps.flashMode = CameraModule.constants.FlashMode[props.flashMode];
+  }
+
+  return newProps;
+}
+
 class CCCamera extends React.Component {
 
   static constants = {
@@ -49,9 +59,11 @@ class CCCamera extends React.Component {
   }
 
   render() {
+    const cameraProps = convertNativeProps(this.props);
+
     return (
       <RNCCCamera
-        {...this.props}
+        {...cameraProps}
         projectName={this.props.projectName || ''}
         projectAddress={this.props.projectAddress || ''}
         onClose={this._onClose.bind(this)}
@@ -80,7 +92,9 @@ CCCamera.propTypes = {
   onClose: PropTypes.func,
   onPhotoAccepted: PropTypes.func,
   onPhotoTaken: PropTypes.func,
-  ...View.propTypes
+  ...View.propTypes,
+
+  flashMode: PropTypes.number,
 };
 
 CCCamera.defaultProps = {
