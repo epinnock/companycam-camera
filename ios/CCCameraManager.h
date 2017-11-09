@@ -9,6 +9,7 @@
 #import <React/RCTViewManager.h>
 #import "CCCameraView.h"
 #import "CCCamera.h"
+#import "CCCameraEnums.h"
 #import "CCCameraLayout.h"
 
 @interface CCCameraManager : RCTViewManager {

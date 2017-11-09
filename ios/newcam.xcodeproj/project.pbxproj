@@ -51,6 +51,7 @@
 /* Begin PBXFileReference section */
 		0B02877F1F96A64D0078065A /* UIImage+CCMHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+CCMHelper.m"; sourceTree = "<group>"; };
 		0B0287801F96A64E0078065A /* UIImage+CCMHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+CCMHelper.h"; sourceTree = "<group>"; };
+		0BD090B11FB4C30A009D5E45 /* CCCameraEnums.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CCCameraEnums.h; sourceTree = "<group>"; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = newcam/Images.xcassets; sourceTree = "<group>"; };
 		DB2FF1DE1F0379CB0005A9BE /* docscan.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = docscan.cpp; sourceTree = "<group>"; };
 		DB2FF1DF1F0379CB0005A9BE /* docscan.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = docscan.hpp; sourceTree = "<group>"; };
@@ -136,6 +137,7 @@
 				DB54DE471EC3A6B6004AEF31 /* CCCameraView.m */,
 				DB9F696E1ECD664A004D4F85 /* CCCameraModule.h */,
 				DB9F696F1ECD664A004D4F85 /* CCCameraModule.m */,
+				0BD090B11FB4C30A009D5E45 /* CCCameraEnums.h */,
 			);
 			name = newcam;
 			sourceTree = "<group>";

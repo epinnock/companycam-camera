@@ -26,28 +26,6 @@
 // Define a constant for the maximum image processing size for the scanner mode
 #define MAX_DIM_PROCESSING_OUTPUT 1024
 
-typedef NS_ENUM( NSInteger, CCCameraSetupResult ) {
-    CCCameraSetupResultSuccess,
-    CCCameraSetupResultCameraNotAuthorized,
-    CCCameraSetupResultSessionConfigurationFailed
-};
-typedef NS_ENUM( NSInteger, CCCameraFlashMode ) {
-    CCCameraFlashModeAuto,
-    CCCameraFlashModeOn,
-    CCCameraFlashModeOff,
-    CCCameraFlashModeTorch
-};
-typedef NS_ENUM( NSInteger, CCCameraResolutionMode ) {
-    CCCameraResolutionModeNormal,
-    CCCameraResolutionModeHigh,
-    CCCameraResolutionModeSuper
-};
-typedef NS_ENUM( NSInteger, CCCameraMode ) {
-    CCCameraModeFastCam,
-    CCCameraModeCamera,
-    CCCameraModeScanner
-};
-
 @interface CCCamera() <CvVideoCameraDelegate>
 
 // The flashMode string defines the flash mode to use

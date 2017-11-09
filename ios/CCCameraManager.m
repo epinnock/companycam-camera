@@ -8,12 +8,6 @@
 
 #import "CCCameraManager.h"
 
-typedef NS_ENUM( NSInteger, AVCamSetupResult ) {
-    AVCamSetupResultSuccess,
-    AVCamSetupResultCameraNotAuthorized,
-    AVCamSetupResultSessionConfigurationFailed
-};
-
 @implementation CCCameraManager
 
 static CCCameraView *latestView;

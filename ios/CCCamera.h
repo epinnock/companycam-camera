@@ -11,6 +11,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <Photos/Photos.h>
 #import "CCCameraDelegate.h"
+#import "CCCameraEnums.h"
 #import "CCCameraManager.h"
 #import "UIImage+CCMHelper.h"
 #import "StorageUtility.h"
