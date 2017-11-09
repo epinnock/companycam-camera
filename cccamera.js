@@ -1,10 +1,17 @@
 import React, { Component, PropTypes } from 'react';
 import {
+  NativeModules,
   requireNativeComponent,
   View,
 } from 'react-native';
 
+const CameraModule = NativeModules.CCCameraModule;
+
 class CCCamera extends React.Component {
+
+  static constants = {
+    FlashMode: CameraModule.FlashMode,
+  };
 
   constructor(props){
     super(props);
@@ -89,6 +96,8 @@ CCCamera.defaultProps = {
 
   hideNativeUI: false,
 };
+
+export const constants = CCCamera.constants;
 
 const RNCCCamera = requireNativeComponent('CompanyCamCamera', CCCamera);
 

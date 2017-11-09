@@ -7,6 +7,7 @@
 //
 
 #import "CCCameraModule.h"
+#import "CCCameraEnums.h"
 
 @implementation CCCameraModule
 
@@ -20,11 +21,24 @@ RCT_EXPORT_MODULE(CCCameraModule);
     return @[@"onClose", @"onError", @"onPhotoTaken", @"onPhotoAccepted"];
 }
 
+- (NSDictionary *)constantsToExport
+{
+    return @{
+             @"FlashMode": @{
+                     @"off": @(CCCameraFlashModeOff),
+                     @"on": @(CCCameraFlashModeOn),
+                     @"auto": @(CCCameraFlashModeAuto),
+                     @"torch": @(CCCameraFlashModeTorch),
+                     },
+             };
+}
+
+
 #pragma mark React methods
 
 RCT_EXPORT_METHOD(setActive) {
     isActive = YES;
-
+    
     // Post a notification to let any interested objects know that the CCCameraModule is active
     [[NSNotificationCenter defaultCenter] postNotificationName:@"CCCameraModuleActiveNotification"
                                                         object:self
@@ -33,7 +47,7 @@ RCT_EXPORT_METHOD(setActive) {
 
 RCT_EXPORT_METHOD(setInactive) {
     isActive = NO;
-
+    
     // Post a notification to let any interested objects know that the CCCameraModule is inactive
     [[NSNotificationCenter defaultCenter] postNotificationName:@"CCCameraModuleInactiveNotification"
                                                         object:self
@@ -50,3 +64,4 @@ RCT_EXPORT_METHOD(releaseCamera) {
 }
 
 @end
+
