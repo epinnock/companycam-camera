@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0B0287811F96A64E0078065A /* UIImage+CCMHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 0B02877F1F96A64D0078065A /* UIImage+CCMHelper.m */; };
+		0B4AD7F91FBCDC6A001C1A5F /* CCCameraModuleIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 0B4AD7F71FBCDC6A001C1A5F /* CCCameraModuleIOS.m */; };
 		DB0BCA011F044135004B8447 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB2FF1E81F0413190005A9BE /* AssetsLibrary.framework */; };
 		DB2FF1E21F0379CB0005A9BE /* docscan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DB2FF1DE1F0379CB0005A9BE /* docscan.cpp */; };
 		DB2FF1E31F0379CB0005A9BE /* geometry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DB2FF1E01F0379CB0005A9BE /* geometry.cpp */; };
@@ -24,7 +25,6 @@
 		DB58BF541F153577003D503B /* NSData+CCImageExif.m in Sources */ = {isa = PBXBuildFile; fileRef = DB58BF531F153577003D503B /* NSData+CCImageExif.m */; };
 		DB58BF5A1F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.m in Sources */ = {isa = PBXBuildFile; fileRef = DB58BF591F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.m */; };
 		DB8F58D01F2FD116008119EA /* DocScanOpenCV.mm in Sources */ = {isa = PBXBuildFile; fileRef = DB8F58CF1F2FD116008119EA /* DocScanOpenCV.mm */; };
-		DB9F69701ECD664A004D4F85 /* CCCameraModule.m in Sources */ = {isa = PBXBuildFile; fileRef = DB9F696F1ECD664A004D4F85 /* CCCameraModule.m */; };
 		DB9F698B1ECD701E004D4F85 /* CCCameraView.xib in Resources */ = {isa = PBXBuildFile; fileRef = DB9F696C1ECD390A004D4F85 /* CCCameraView.xib */; };
 		DB9F69C91ED014CE004D4F85 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		DB9F69CC1ED10567004D4F85 /* CCCameraLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = DB9F69CB1ED10567004D4F85 /* CCCameraLayout.m */; };
@@ -51,6 +51,8 @@
 /* Begin PBXFileReference section */
 		0B02877F1F96A64D0078065A /* UIImage+CCMHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+CCMHelper.m"; sourceTree = "<group>"; };
 		0B0287801F96A64E0078065A /* UIImage+CCMHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+CCMHelper.h"; sourceTree = "<group>"; };
+		0B4AD7F71FBCDC6A001C1A5F /* CCCameraModuleIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCCameraModuleIOS.m; sourceTree = "<group>"; };
+		0B4AD7F81FBCDC6A001C1A5F /* CCCameraModuleIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCCameraModuleIOS.h; sourceTree = "<group>"; };
 		0BD090B11FB4C30A009D5E45 /* CCCameraEnums.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CCCameraEnums.h; sourceTree = "<group>"; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = newcam/Images.xcassets; sourceTree = "<group>"; };
 		DB2FF1DE1F0379CB0005A9BE /* docscan.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = docscan.cpp; sourceTree = "<group>"; };
@@ -83,8 +85,6 @@
 		DB8F58CE1F2FD116008119EA /* DocScanOpenCV.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DocScanOpenCV.h; sourceTree = "<group>"; };
 		DB8F58CF1F2FD116008119EA /* DocScanOpenCV.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; fileEncoding = 4; indentWidth = 4; path = DocScanOpenCV.mm; sourceTree = "<group>"; tabWidth = 4; };
 		DB9F696C1ECD390A004D4F85 /* CCCameraView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CCCameraView.xib; sourceTree = "<group>"; };
-		DB9F696E1ECD664A004D4F85 /* CCCameraModule.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = CCCameraModule.h; sourceTree = "<group>"; tabWidth = 4; };
-		DB9F696F1ECD664A004D4F85 /* CCCameraModule.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = CCCameraModule.m; sourceTree = "<group>"; tabWidth = 4; };
 		DB9F69851ECD6FC9004D4F85 /* CCCameraResources.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CCCameraResources.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		DB9F69871ECD6FC9004D4F85 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DB9F69CA1ED10567004D4F85 /* CCCameraLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.h; path = CCCameraLayout.h; sourceTree = "<group>"; tabWidth = 4; };
@@ -133,10 +133,10 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				DB54DE3E1EC3A56F004AEF31 /* CCCameraManager.h */,
 				DB54DE3F1EC3A56F004AEF31 /* CCCameraManager.m */,
+				0B4AD7F81FBCDC6A001C1A5F /* CCCameraModuleIOS.h */,
+				0B4AD7F71FBCDC6A001C1A5F /* CCCameraModuleIOS.m */,
 				DB54DE461EC3A6B6004AEF31 /* CCCameraView.h */,
 				DB54DE471EC3A6B6004AEF31 /* CCCameraView.m */,
-				DB9F696E1ECD664A004D4F85 /* CCCameraModule.h */,
-				DB9F696F1ECD664A004D4F85 /* CCCameraModule.m */,
 				0BD090B11FB4C30A009D5E45 /* CCCameraEnums.h */,
 			);
 			name = newcam;
@@ -379,7 +379,6 @@
 				DB58BF5A1F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.m in Sources */,
 				DB54DE6B1EC3AC62004AEF31 /* CCCamera.mm in Sources */,
 				DB58BF471F11C8E8003D503B /* StorageUtility.m in Sources */,
-				DB9F69701ECD664A004D4F85 /* CCCameraModule.m in Sources */,
 				0B0287811F96A64E0078065A /* UIImage+CCMHelper.m in Sources */,
 				DB58BF511F11DC72003D503B /* FocusIndicatorView.m in Sources */,
 				DB58BF541F153577003D503B /* NSData+CCImageExif.m in Sources */,
@@ -389,6 +388,7 @@
 				DB2FF1E21F0379CB0005A9BE /* docscan.cpp in Sources */,
 				DB54DE6D1EC3AC62004AEF31 /* CCCameraManager.m in Sources */,
 				DB54DE6E1EC3AC62004AEF31 /* CCCameraView.h in Sources */,
+				0B4AD7F91FBCDC6A001C1A5F /* CCCameraModuleIOS.m in Sources */,
 				DBC9692D1EDFD73200578CE2 /* CCCameraPreviewView.m in Sources */,
 				DB54DE6F1EC3AC62004AEF31 /* CCCameraView.m in Sources */,
 			);

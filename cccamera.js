@@ -5,7 +5,7 @@ import {
   View,
 } from 'react-native';
 
-const CameraModule = NativeModules.CCCameraModule;
+const CameraModule = NativeModules.CCCameraModuleIOS || NativeModules.CCCameraModule;
 
 function convertNativeProps(props) {
   const newProps = { ...props };
