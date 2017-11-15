@@ -120,7 +120,7 @@
 
     // skip if already active
     if (!self.isActive) {
-      
+
       // Start the volumeButtonHandler
       [self.volumeButtonHandler startHandler:YES];
 
@@ -192,7 +192,7 @@
 // This method can be used to send an event with the given name and body
 -(void)doEvent:(NSString *)eventName :(NSDictionary *)event {
 
-    CCCameraModule *thisModule = (CCCameraModule *)[self.bridge moduleForName:@"CCCameraModule"];
+    CCCameraModuleIOS *thisModule = (CCCameraModuleIOS *)[self.bridge moduleForName:@"CCCameraModuleIOS"];
     [thisModule sendEventWithName:eventName body:event];
 
     // Create a CCCameraEvent object

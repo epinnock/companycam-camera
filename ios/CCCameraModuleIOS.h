@@ -1,5 +1,5 @@
 //
-//  CCCameraModule.h
+//  CCCameraModuleIOS.h
 //  newcam
 //
 //  Created by Matt Boyd on 5/18/17.
@@ -10,7 +10,7 @@
 #import <React/RCTBridgeModule.h>
 #import <React/RCTEventEmitter.h>
 
-@interface CCCameraModule : RCTEventEmitter <RCTBridgeModule> {
+@interface CCCameraModuleIOS : RCTEventEmitter <RCTBridgeModule> {
 
     BOOL isActive;
 }

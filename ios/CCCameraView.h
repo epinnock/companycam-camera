@@ -11,7 +11,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <CoreLocation/CoreLocation.h>
 #import <React/RCTBridge.h>
-#import "CCCameraModule.h"
+#import "CCCameraModuleIOS.h"
 #import <React/RCTUIManager.h>
 #import "ResizingSubview.h"
 #import "CCCameraLayoutDelegate.h"
