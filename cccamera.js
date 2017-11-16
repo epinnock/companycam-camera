@@ -4,6 +4,7 @@ import {
   requireNativeComponent,
   View,
 } from 'react-native';
+import CameraLayout from './CameraLayout';
 
 const CameraModule = NativeModules.CCCameraModuleIOS || NativeModules.CCCameraModule;
 
@@ -70,7 +71,9 @@ class CCCamera extends React.Component {
         onPhotoAccepted={this._onPhotoAccepted.bind(this)}
         onPhotoTaken={this._onPhotoTaken.bind(this)}
         onAuxModeClicked={this._onAuxModeClicked.bind(this)}
-      />
+      >
+        <CameraLayout />
+      </RNCCCamera>
     );
   }
 }
