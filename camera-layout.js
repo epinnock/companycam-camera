@@ -197,7 +197,26 @@ class CameraLayout extends Component {
     });
   }
 
+  toggleFlashMode = () => {
+    const constants = {...this.props.cameraConstants};
+    const nextState = { ...this.props.cameraState };
+
+    switch (this.props.cameraState.flashMode) {
+      case constants.FlashMode.off:
+        nextState.flashMode = constants.FlashMode.torch;
+        break;
+      case constants.FlashMode.torch:
+        nextState.flashMode = constants.FlashMode.off;
+        break;
+      default: break;
+    }
+
+    this.props.setCameraState(nextState);
+  }
+
   render() {
+    const constants = {...this.props.cameraConstants};
+    const { flashMode } = this.props.cameraState;
     const { cameraMode } = this.state;
 
     return (
@@ -305,12 +324,11 @@ class CameraLayout extends Component {
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
-                  const { flashOn } = this.state;
-                  this.displayToast(
-                    flashOn ? 'Flash disabled' : 'Flash enabled',
-                    flashOn ? 'Flash is now off' : 'Flash is now on'
-                  );
-                  this.setState(toggleFlash);
+                  this.toggleFlashMode();
+                  // this.displayToast(
+                  //   flashOn ? 'Flash disabled' : 'Flash enabled',
+                  //   flashOn ? 'Flash is now off' : 'Flash is now on'
+                  // );
                 }}
                 style={[styles.uiButton, { backgroundColor: 'blue' }]}
               >

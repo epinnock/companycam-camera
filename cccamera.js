@@ -4,7 +4,7 @@ import {
   requireNativeComponent,
   View,
 } from 'react-native';
-import CameraLayout from './CameraLayout';
+import CameraLayout from './camera-layout';
 
 const CameraModule = NativeModules.CCCameraModuleIOS || NativeModules.CCCameraModule;
 
@@ -12,7 +12,7 @@ function convertNativeProps(props) {
   const newProps = { ...props };
 
   if (typeof props.flashMode === 'string') {
-    newProps.flashMode = CameraModule.constants.FlashMode[props.flashMode];
+    newProps.flashMode = CCCamera.constants.FlashMode[props.flashMode];
   }
 
   return newProps;
@@ -26,9 +26,14 @@ class CCCamera extends React.Component {
 
   constructor(props){
     super(props);
+
+    // TODO: Implement using Settings from RN to persist modes
+    this.state = {
+      flashMode: constants.FlashMode.off,
+    };
   }
 
-  _onClose(event) {
+  _onClose = (event) => {
     console.log("_onClose called in cccamera.js");
     if(!this.props.onClose){ return; }
 
@@ -37,14 +42,14 @@ class CCCamera extends React.Component {
     this.props.onClose(errmsg, button);
   }
 
-  _onPhotoAccepted(event) {
+  _onPhotoAccepted = (event) => {
     if(!this.props.onPhotoAccepted){ return; }
 
     const { filename, imgWidth, imgHeight } = event.nativeEvent;
     this.props.onPhotoAccepted(filename, [imgWidth, imgHeight]);
   }
 
-  _onPhotoTaken(event) {
+  _onPhotoTaken = (event) => {
     console.log("_onPhotoTaken called in cccamera.js");
     if(!this.props.onPhotoTaken){ return; }
 
@@ -52,7 +57,7 @@ class CCCamera extends React.Component {
     this.props.onPhotoTaken(filename, [imgWidth, imgHeight]);
   }
 
-  _onAuxModeClicked(event) {
+  _onAuxModeClicked = (event) => {
     console.log("_onAuxModeClicked called in cccamera.js");
     if(!this.props.onAuxModeClicked){ return; }
 
@@ -60,19 +65,23 @@ class CCCamera extends React.Component {
   }
 
   render() {
-    const cameraProps = convertNativeProps(this.props);
-
     return (
       <RNCCCamera
-        {...cameraProps}
-        projectName={this.props.projectName || ''}
-        projectAddress={this.props.projectAddress || ''}
-        onClose={this._onClose.bind(this)}
-        onPhotoAccepted={this._onPhotoAccepted.bind(this)}
-        onPhotoTaken={this._onPhotoTaken.bind(this)}
-        onAuxModeClicked={this._onAuxModeClicked.bind(this)}
+        {...this.props}
+        hideNativeUI
+
+        onClose={this._onClose}
+        onPhotoAccepted={this._onPhotoAccepted}
+        onPhotoTaken={this._onPhotoTaken}
+        onAuxModeClicked={this._onAuxModeClicked}
+
+        flashMode={this.state.flashMode}
       >
-        <CameraLayout />
+        <CameraLayout
+          cameraConstants={constants}
+          cameraState={{...this.state}}
+          setCameraState={(nextState) => this.setState(nextState)}
+        />
       </RNCCCamera>
     );
   }
