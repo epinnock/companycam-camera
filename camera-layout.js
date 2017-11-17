@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
+
 import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import DeviceInfo from 'react-native-device-info';
@@ -204,9 +205,11 @@ class CameraLayout extends Component {
     switch (this.props.cameraState.flashMode) {
       case constants.FlashMode.off:
         nextState.flashMode = constants.FlashMode.torch;
+        this.displayToast('Flash enabled', 'Flash is now on');
         break;
       case constants.FlashMode.torch:
         nextState.flashMode = constants.FlashMode.off;
+        this.displayToast('Flash disabled', 'Flash is now off');
         break;
       default: break;
     }
@@ -230,7 +233,7 @@ class CameraLayout extends Component {
         >
           <View style={styles.header}>
             <TouchableOpacity
-              onPress={() => Actions.pop()}
+              onPress={() => this.props.onClose()}
               style={styles.uiButton}
             >
               <MaterialIcon name="close" size={24} color="white" />
@@ -323,17 +326,15 @@ class CameraLayout extends Component {
                 <FeatherIcon name="repeat" size={24} color="white" />
               </TouchableOpacity>
               <TouchableOpacity
-                onPress={() => {
-                  this.toggleFlashMode();
-                  // this.displayToast(
-                  //   flashOn ? 'Flash disabled' : 'Flash enabled',
-                  //   flashOn ? 'Flash is now off' : 'Flash is now on'
-                  // );
-                }}
-                style={[styles.uiButton, { backgroundColor: 'blue' }]}
+                onPress={() => {this.toggleFlashMode(); }}
+                style={styles.uiButton}
               >
                 <MaterialCommunityIcon
-                  name={this.state.flashOn ? FLASH_ON_ICON : FLASH_OFF_ICON}
+                  name={
+                    flashMode === constants.FlashMode.torch ?
+                      FLASH_ON_ICON :
+                      FLASH_OFF_ICON
+                  }
                   size={24}
                   color="white"
                 />
@@ -389,5 +390,13 @@ class CameraLayout extends Component {
     );
   }
 }
+
+CameraLayout.propTypes = {
+  cameraConstants: PropTypes.object,
+  cameraState: PropTypes.object,
+  setCameraState: PropTypes.func,
+
+  onClose: PropTypes.func,
+};
 
 export default CameraLayout;

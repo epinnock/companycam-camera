@@ -81,6 +81,8 @@ class CCCamera extends React.Component {
           cameraConstants={constants}
           cameraState={{...this.state}}
           setCameraState={(nextState) => this.setState(nextState)}
+          
+          onClose={this._onClose}
         />
       </RNCCCamera>
     );
