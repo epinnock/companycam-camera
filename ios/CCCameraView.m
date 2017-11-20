@@ -203,7 +203,7 @@
 
 }
 
--(void)doPhotoTaken:(NSString *)imgFile :(int)imgWidth :(int)imgHeight completion:(void(^)(void))callback{
+-(void)doPhotoTaken:(NSString *)imgFile :(int)imgWidth :(int)imgHeight :(NSString *)photoOrigin completion:(void(^)(void))callback{
 
     if (imgFile == nil) {
         [self propOnClose:@"There was an error saving the photo file" :@"error"];
@@ -214,7 +214,8 @@
     id event = @{
                  @"filename": imgFile,
                  @"imgWidth": [NSNumber numberWithInt:imgWidth],
-                 @"imgHeight": [NSNumber numberWithInt:imgHeight]
+                 @"imgHeight": [NSNumber numberWithInt:imgHeight],
+                 @"photoOrigin": photoOrigin
                  };
     if (self.onPhotoTaken) {
         self.onPhotoTaken(event);
@@ -223,7 +224,7 @@
     }
 }
 
--(void)doPhotoAccepted:(NSString *)imgFile :(int)imgWidth :(int)imgHeight {
+-(void)doPhotoAccepted:(NSString *)imgFile :(int)imgWidth :(int)imgHeight :(NSString *)photoOrigin {
 
     if (imgFile == nil) {
         [self propOnClose:@"There was an error saving the photo file" :@"error"];
@@ -234,7 +235,8 @@
     id event = @{
                  @"filename": imgFile,
                  @"imgWidth": [NSNumber numberWithInt:imgWidth],
-                 @"imgHeight": [NSNumber numberWithInt:imgHeight]
+                 @"imgHeight": [NSNumber numberWithInt:imgHeight],
+                 @"photoOrigin": photoOrigin
                  };
     if (self.onPhotoAccepted) {
         self.onPhotoAccepted(event);
