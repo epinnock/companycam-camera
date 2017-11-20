@@ -724,9 +724,24 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
             }];
         }
         
+        NSString *photoOrigin = nil;
+        switch (self.cameraMode) {
+            case CCCameraModeCamera:
+                photoOrigin = @"STANDARD_CAMERA";
+                break;
+            case CCCameraModeFastCam:
+                photoOrigin = @"STANDARD_CAMERA_FASTCAM";
+                break;
+            case CCCameraModeScanner:
+                photoOrigin = @"STANDARD_CAMERA_DOCSCAN";
+                break;
+            default:
+                photoOrigin = @"STANDARD_CAMERA";
+        }
+        
         // Execute the proper callback depending on the current camera mode
         if (self.cameraMode != CCCameraModeFastCam) {
-            [latestView doPhotoTaken:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage) completion:^{
+            [latestView doPhotoTaken:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage) :photoOrigin completion:^{
                 
                 // wait a second to enable buttons to allow editor to load
                 dispatch_time_t delayTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC));
@@ -738,7 +753,7 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
             }];
         }
         else {
-            [latestView doPhotoAccepted:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage)];
+            [latestView doPhotoAccepted:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage) :photoOrigin ];
         }
     }
 }

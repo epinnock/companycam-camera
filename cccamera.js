@@ -4,39 +4,49 @@ import {
   View,
 } from 'react-native';
 
-class CCCamera extends React.Component {
+const normalizePhotoOrigin = (photoOrigin) => {
+  const validPhotoOrigin = (
+    photoOrigin === 'STANDARD_CAMERA' ||
+    photoOrigin === 'STANDARD_CAMERA_FASTCAM' ||
+    photoOrigin === 'STANDARD_CAMERA_DOCSCAN'
+  );
+  return validPhotoOrigin ? photoOrigin : 'STANDARD_CAMERA';
+};
 
-  constructor(props){
-    super(props);
-  }
+class CCCamera extends Component {
 
-  _onClose(event) {
-    console.log("_onClose called in cccamera.js");
-    if(!this.props.onClose){ return; }
+  _onClose = (event) => {
+    console.log('_onClose called in cccamera.js');
+    if (!this.props.onClose) { return; }
 
     const errmsg = event.nativeEvent.errmsg;
     const button = event.nativeEvent.button;
     this.props.onClose(errmsg, button);
   }
 
-  _onPhotoAccepted(event) {
-    if(!this.props.onPhotoAccepted){ return; }
+  _onPhotoAccepted = (event) => {
+    if (!this.props.onPhotoAccepted) { return; }
 
-    const { filename, imgWidth, imgHeight } = event.nativeEvent;
-    this.props.onPhotoAccepted(filename, [imgWidth, imgHeight]);
+    const { filename, imgWidth, imgHeight, photoOrigin } = event.nativeEvent;
+    const origin = normalizePhotoOrigin(photoOrigin);
+
+    console.log(`_onPhotoAccepted called in cccamera.js (dims: ${imgWidth}x${imgHeight}, origin: ${origin})`);
+    this.props.onPhotoAccepted(filename, [imgWidth, imgHeight], origin);
   }
 
-  _onPhotoTaken(event) {
-    console.log("_onPhotoTaken called in cccamera.js");
-    if(!this.props.onPhotoTaken){ return; }
+  _onPhotoTaken = (event) => {
+    if (!this.props.onPhotoTaken) { return; }
 
-    const { filename, imgWidth, imgHeight } = event.nativeEvent;
-    this.props.onPhotoTaken(filename, [imgWidth, imgHeight]);
+    const { filename, imgWidth, imgHeight, photoOrigin } = event.nativeEvent;
+    const origin = normalizePhotoOrigin(photoOrigin);
+
+    console.log(`_onPhotoTaken called in cccamera.js (dims: ${imgWidth}x${imgHeight}, origin: ${origin})`);
+    this.props.onPhotoTaken(filename, [imgWidth, imgHeight], origin);
   }
 
-  _onAuxModeClicked(event) {
-    console.log("_onAuxModeClicked called in cccamera.js");
-    if(!this.props.onAuxModeClicked){ return; }
+  _onAuxModeClicked = () => {
+    console.log('_onAuxModeClicked called in cccamera.js');
+    if (!this.props.onAuxModeClicked) { return; }
 
     this.props.onAuxModeClicked();
   }
@@ -47,10 +57,10 @@ class CCCamera extends React.Component {
         {...this.props}
         projectName={this.props.projectName || ''}
         projectAddress={this.props.projectAddress || ''}
-        onClose={this._onClose.bind(this)}
-        onPhotoAccepted={this._onPhotoAccepted.bind(this)}
-        onPhotoTaken={this._onPhotoTaken.bind(this)}
-        onAuxModeClicked={this._onAuxModeClicked.bind(this)}
+        onClose={this._onClose}
+        onPhotoAccepted={this._onPhotoAccepted}
+        onPhotoTaken={this._onPhotoTaken}
+        onAuxModeClicked={this._onAuxModeClicked}
       />
     );
   }
@@ -73,7 +83,7 @@ CCCamera.propTypes = {
   onClose: PropTypes.func,
   onPhotoAccepted: PropTypes.func,
   onPhotoTaken: PropTypes.func,
-  ...View.propTypes
+  ...View.propTypes,
 };
 
 CCCamera.defaultProps = {

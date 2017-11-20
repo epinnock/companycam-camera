@@ -36,10 +36,14 @@ Type: `(errmsg: string, button: string) => void`. Close the camera (i.e., stop r
 - `button === 'capture'`: A photo was taken, and needs to be confirmed/edited
 
 #### onPhotoTaken
-Type: `(file: string, dims: [w: int, h: int]) => void`. Invoked when a photo is taken in ordinary (i.e., non-fastcam) mode.
+Type: `(file: string, dims: [w: int, h: int], photoOrigin: string) => void`. Invoked when a photo is taken and should be displayed to the user for reviewing or editing.  Valid photoOrigin values are:
+- `undefined` or `null`: No origin information; treat as `'STANDARD_CAMERA'`
+- `'STANDARD_CAMERA'`: Taken as normal photo without fastcam
+- `'STANDARD_CAMERA_FASTCAM'`: Taken as normal photo with fastcam
+- `'STANDARD_CAMERA_DOCSCAN'`: Taken with document scanner
 
 #### onPhotoAccepted
-Type: `(file: string, dims: [w: int, h: int]) => void`. Invoked when a photo is taken in fastcam mode.
+Type: `(file: string, dims: [w: int, h: int], photoOrigin: string) => void`. Invoked when a photo is taken and should be immediately uploaded.  Valid photoOrigin values are the same as for `onPhotoTaken`.
 
 #### auxModeCaption
 Type: `string`.  Caption for the 'auxiliary' button at the bottom (e.g. 'AFTER CAM').
@@ -66,4 +70,3 @@ Add NDK via Android SDK manager.  Install OpenCV Android SDK.  In `android/app/C
 ### Scanner functionality
 
 The scanner's functionality is in the repo `companycam-docscan`.  At the moment, the correct workflow to modify the scanner is to clone that repo, modify the files there, and copy the files in `lib/src` to both the Android and iOS native folders of `companycam-camera`.  In other words, don't modify the docscan files in `companycam-camera`, because they are duplicated for Android and iOS and will get out of sync that way.
-

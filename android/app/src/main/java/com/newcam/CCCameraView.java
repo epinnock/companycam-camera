@@ -231,7 +231,7 @@ public class CCCameraView extends RelativeLayout {
         rctEventEmitter.receiveEvent(getId(), eventName, event);
     }
 
-    public void doPhotoTaken(File imgFile, int imgWidth, int imgHeight){
+    public void doPhotoTaken(File imgFile, int imgWidth, int imgHeight, PhotoOrigin origin){
         if(!imgFile.exists()) {
             propOnClose("There was an error saving the photo file.", "error");
             return;
@@ -242,10 +242,11 @@ public class CCCameraView extends RelativeLayout {
         event.putString("filename", imgFile.getAbsolutePath());
         event.putInt("imgWidth", imgWidth);
         event.putInt("imgHeight", imgHeight);
+        event.putString("photoOrigin", origin.toString());
         _doEvent("onPhotoTaken", event);
     }
 
-    public void doPhotoAccepted(File imgFile, int imgWidth, int imgHeight){
+    public void doPhotoAccepted(File imgFile, int imgWidth, int imgHeight, PhotoOrigin origin){
         if(!imgFile.exists()) {
             propOnClose("There was an error saving the photo file.", "error");
             return;
@@ -256,6 +257,7 @@ public class CCCameraView extends RelativeLayout {
         event.putString("filename", imgFile.getAbsolutePath());
         event.putInt("imgWidth", imgWidth);
         event.putInt("imgHeight", imgHeight);
+        event.putString("photoOrigin", origin.toString());
         _doEvent("onPhotoAccepted", event);
     }
 
