@@ -122,12 +122,9 @@ CCCamera.propTypes = {
   onPhotoAccepted: PropTypes.func,
   onPhotoTaken: PropTypes.func,
   ...View.propTypes,
-<<<<<<< HEAD
 
   flashMode: PropTypes.number,
   cameraMode: PropTypes.number,
-=======
->>>>>>> 1c0e08b997ed0cdf6492b03ca57e62f518cc71ba
 };
 
 CCCamera.defaultProps = {
