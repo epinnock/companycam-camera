@@ -18,6 +18,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 
 import com.newcam.CCCameraView;
+import com.newcam.PhotoOrigin;
 import com.newcam.R;
 import com.newcam.imageprocessing.CCCameraImageProcessor;
 import com.newcam.utils.ExifUtils;
@@ -658,12 +659,12 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
                 // Transition to the EditPhotoCaptureActivity as long as the current mode isn't FastCam
                 if (!mCameraMode.equals("fastcam")) {
-                    gotoEditPhotoCapture(photo.getPath(), imgWidth, imgHeight);
+                    gotoEditPhotoCapture(photo.getPath(), imgWidth, imgHeight, PhotoOrigin.fromCameraMode(mCameraMode));
                 }
 
                 // If the current mode is FastCam, then upload the photo immediately
                 else {
-                    uploadFastCamPhoto(photo, imgWidth, imgHeight);
+                    uploadFastCamPhoto(photo, imgWidth, imgHeight, PhotoOrigin.fromCameraMode(mCameraMode));
 
                     // Start the camera preview again
                     mCamera.startPreview();

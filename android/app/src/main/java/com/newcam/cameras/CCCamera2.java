@@ -38,6 +38,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 
 import com.newcam.CCCameraView;
+import com.newcam.PhotoOrigin;
 import com.newcam.R;
 import com.newcam.utils.ExifUtils;
 import com.newcam.utils.PhotoUtils;
@@ -1488,12 +1489,12 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
                 //TODO: better if gotoEdit/uploadFastCam are done *after* exif is set and bPhoto is recycled?
                 // Transition to the EditPhotoCaptureActivity as long as the current mode isn't FastCam
                 if (!mCameraMode.equals("fastcam")) {
-                    gotoEditPhotoCapture(photo.getPath(), imgWidth, imgHeight);
+                    gotoEditPhotoCapture(photo.getPath(), imgWidth, imgHeight, PhotoOrigin.fromCameraMode(mCameraMode));
                 }
 
                 // If the current mode is FastCam, then upload the photo immediately
                 else {
-                    uploadFastCamPhoto(photo, imgWidth, imgHeight);
+                    uploadFastCamPhoto(photo, imgWidth, imgHeight, PhotoOrigin.fromCameraMode(mCameraMode));
                 }
 
                 try {

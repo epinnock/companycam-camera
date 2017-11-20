@@ -29,15 +29,18 @@ class CCCamera extends Component {
 
     const { filename, imgWidth, imgHeight, photoOrigin } = event.nativeEvent;
     const origin = normalizePhotoOrigin(photoOrigin);
+
+    console.log(`_onPhotoAccepted called in cccamera.js (dims: ${imgWidth}x${imgHeight}, origin: ${origin})`);
     this.props.onPhotoAccepted(filename, [imgWidth, imgHeight], origin);
   }
 
   _onPhotoTaken = (event) => {
-    console.log('_onPhotoTaken called in cccamera.js');
     if (!this.props.onPhotoTaken) { return; }
 
     const { filename, imgWidth, imgHeight, photoOrigin } = event.nativeEvent;
     const origin = normalizePhotoOrigin(photoOrigin);
+
+    console.log(`_onPhotoTaken called in cccamera.js (dims: ${imgWidth}x${imgHeight}, origin: ${origin})`);
     this.props.onPhotoTaken(filename, [imgWidth, imgHeight], origin);
   }
 
