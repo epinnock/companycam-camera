@@ -12,6 +12,7 @@ import android.widget.RelativeLayout;
 
 import com.newcam.CCCameraManager;
 import com.newcam.CCCameraView;
+import com.newcam.PhotoOrigin;
 import com.newcam.R;
 import com.newcam.utils.AppPreferences;
 import com.newcam.utils.CCCameraInterface;
@@ -272,7 +273,7 @@ public abstract class CCCamera implements CCCameraInterface {
     }
 
     // This method transitions to the photo editor after capturing a photo
-    public void gotoEditPhotoCapture(String photoPath, int imgWidth, int imgHeight) {
+    public void gotoEditPhotoCapture(String photoPath, int imgWidth, int imgHeight, PhotoOrigin photoOrigin) {
 
         if (photoPath == null) {
             new AlertDialog.Builder(mContext)
@@ -289,12 +290,12 @@ public abstract class CCCamera implements CCCameraInterface {
 
         File file = new File(photoPath);
 
-        mCameraView.doPhotoTaken(file, imgWidth, imgHeight);
+        mCameraView.doPhotoTaken(file, imgWidth, imgHeight, photoOrigin);
         mCameraView.finishWithResult("capture");
     }
 
     // This method uploads photos taken while in FastCam mode
-    public void uploadFastCamPhoto(File photo, int imgWidth, int imgHeight) {
+    public void uploadFastCamPhoto(File photo, int imgWidth, int imgHeight, PhotoOrigin photoOrigin) {
 
         // If saveToPhone is set, then save the image to the device in addition to sending it to the server.
         SharedPreferences preferences = getSharedPreferences();
@@ -305,6 +306,6 @@ public abstract class CCCamera implements CCCameraInterface {
             String imageURL = PhotoActions.writeImageToDevice(mContext, Uri.fromFile(photo));
         }
 
-        CCCameraManager.getLatestView().doPhotoAccepted(photo, imgWidth, imgHeight);
+        CCCameraManager.getLatestView().doPhotoAccepted(photo, imgWidth, imgHeight, photoOrigin);
     }
 }
