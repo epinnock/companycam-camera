@@ -561,7 +561,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             bos.close();
             out.close();
 
-            gotoEditPhotoCapture(photo.getPath(), imgWidth, imgHeight);
+            gotoEditPhotoCapture(photo.getPath(), imgWidth, imgHeight, PhotoOrigin.fromCameraMode(mCameraMode));
 
             ExifUtils.setAttributes(photo, mCameraView.getExifLocation(), mFlashMode);
 
