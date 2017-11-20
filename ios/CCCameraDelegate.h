@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <React/RCTBridgeModule.h>
 #import "CCCameraEnums.h"
 
 @protocol CCCameraDelegate <NSObject>
@@ -47,7 +48,7 @@
 
 // This method captures a photo from the camera
 @optional
--(void)takePicture;
+-(void)takePicture:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 
 // This method handles a screen touch event
 @optional

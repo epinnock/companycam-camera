@@ -27,6 +27,9 @@ const normalizePhotoOrigin = (photoOrigin) => {
   return validPhotoOrigin ? photoOrigin : 'STANDARD_CAMERA';
 };
 
+
+class CCCamera extends React.Component {
+
   static constants = {
     FlashMode: CameraModule.FlashMode,
     CameraMode: CameraModule.CameraMode,
@@ -40,6 +43,15 @@ const normalizePhotoOrigin = (photoOrigin) => {
       flashMode: constants.FlashMode.off,
       cameraMode: constants.CameraMode.photo,
     };
+  }
+
+  capture() {
+    if (this.camera) {
+      const options = {};
+      NativeModules.CompanyCamCamera.capture()
+        .then((filePath) => { console.log('resolve in js', filePath)})
+        .catch(() => { console.log('reject in js')});
+    }
   }
 
   _onClose = (event) => {
@@ -83,10 +95,11 @@ const normalizePhotoOrigin = (photoOrigin) => {
       <RNCCCamera
         {...this.props}
         hideNativeUI
+        ref={(cam) => { this.camera = cam; }}
 
         onClose={this._onClose}
-        onPhotoAccepted={this._onPhotoAccepted}
-        onPhotoTaken={this._onPhotoTaken}
+        onPhotoAccepted={() => this._onPhotoAccepted()}
+        onPhotoTaken={() => this._onPhotoTaken()}
         onAuxModeClicked={this._onAuxModeClicked}
 
         flashMode={this.state.flashMode}
@@ -97,7 +110,11 @@ const normalizePhotoOrigin = (photoOrigin) => {
           cameraState={{...this.state}}
           setCameraState={(nextState) => this.setState(nextState)}
 
-          onClose={this._onClose}
+          captureButtonPress={() => {
+            console.log(this.camera);
+            this.capture();
+          }}
+          onClose={(e) => this._onClose(e)}
         />
       </RNCCCamera>
     );
@@ -142,6 +159,7 @@ CCCamera.defaultProps = {
 };
 
 export const constants = CCCamera.constants;
+
 
 const RNCCCamera = requireNativeComponent('CompanyCamCamera', CCCamera);
 

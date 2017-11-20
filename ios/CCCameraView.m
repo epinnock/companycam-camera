@@ -46,7 +46,7 @@
             // Initiate the takePicture method
             if (self.camera != nil) {
                 id<CCCameraDelegate> cameraDelegate = (id<CCCameraDelegate>)self.camera;
-                [cameraDelegate takePicture];
+                [cameraDelegate takePicture:nil reject:nil];
             }
 
         } downBlock:^{
@@ -219,7 +219,7 @@
                  };
     if (self.onPhotoTaken) {
         self.onPhotoTaken(event);
-        [self finishWithResult:@"capture"];
+        // [self finishWithResult:@"capture"];
         callback();
     }
 }

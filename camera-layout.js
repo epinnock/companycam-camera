@@ -255,7 +255,7 @@ class CameraLayout extends Component {
         >
           <View style={styles.header}>
             <TouchableOpacity
-              onPress={() => this.props.onClose()}
+              onPress={(e) => this.props.onClose(e)}
               style={styles.uiButton}
             >
               <MaterialIcon name="close" size={24} color="white" />
@@ -351,7 +351,7 @@ class CameraLayout extends Component {
               {
                 !PrimaryModeIsScan &&
                   <TouchableOpacity
-                    onPress={() => {}}
+                    onPress={() => { this.props.captureButtonPress() }}
                     style={styles.captureButton}
                   />
               }
@@ -363,6 +363,12 @@ class CameraLayout extends Component {
               >
                 <FeatherIcon name="repeat" size={24} color="white" />
               </TouchableOpacity>
+
+              {/* Magic invisible view for when scanner mode is active */}
+              {
+                PrimaryModeIsScan &&
+                  <View style={[styles.captureButton, { opacity: 0 }]} />
+              }
 
               {/* Flash mode button */}
               <TouchableOpacity
@@ -441,6 +447,7 @@ CameraLayout.propTypes = {
   cameraState: PropTypes.object,
   setCameraState: PropTypes.func,
 
+  captureButtonPress: PropTypes.func,
   onClose: PropTypes.func,
 };
 

@@ -52,6 +52,10 @@
 
 @property (nonatomic) CvVideoCamera *videoCamera;
 
+
+@property (nonatomic) RCTPromiseResolveBlock takePictureResolve;
+@property (nonatomic) RCTPromiseRejectBlock takePictureReject;
+
 @end
 
 @implementation CCCamera
@@ -714,21 +718,16 @@
                 photoOrigin = @"STANDARD_CAMERA";
         }
 
+        if (self.takePictureResolve) {
+          self.takePictureResolve(filePath);
+        }
+
         // Execute the proper callback depending on the current camera mode
         if (self.cameraMode != CCCameraModeFastCam) {
-            [latestView doPhotoTaken:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage) :photoOrigin completion:^{
-
-                // wait a second to enable buttons to allow editor to load
-                dispatch_time_t delayTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC));
-                dispatch_after(delayTime, dispatch_get_main_queue(), ^(void){
-                    // Hide the loading view and enable the buttons again
-                    [latestView.cameraLayout hideLoadingView];
-                    [latestView.cameraLayout enableButtons];
-                });
-            }];
+            // [latestView doPhotoTaken:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage) :photoOrigin]
         }
         else {
-            [latestView doPhotoAccepted:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage) :photoOrigin ];
+            // [latestView doPhotoAccepted:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage) :photoOrigin ];
         }
     }
 }
@@ -925,31 +924,35 @@
 }
 
 // This method captures a photo from the camera
--(void)takePicture {
+-(void)takePicture:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
 
     // The volumeButtonHandler may try to trigger this method, so make sure the current camera mode is CCCameraModeCamera or CCCameraModeFastCam before trying to capture a photo.
     if (!(self.cameraMode == CCCameraModeCamera || self.cameraMode == CCCameraModeFastCam)) {
         return;
     }
 
+     CCCameraView *latestView = [CCCameraManager getLatestView];
+    
     // Animate the screen flash
-    CCCameraView *latestView = [CCCameraManager getLatestView];
-    [latestView.cameraLayout animateScreenFlash];
-
-    // Show the loading view and disable all the buttons while the photo is processing
-    if (self.cameraMode == CCCameraModeCamera) {
-        [latestView.cameraLayout showLoadingView];
-        [latestView.cameraLayout disableButtons];
-
-        // Pause the camera preview while the photo is processing
-        [latestView.previewView.previewLayer.connection setEnabled:NO];
-    }
+    // [latestView.cameraLayout animateScreenFlash];
+    //
+    // // Show the loading view and disable all the buttons while the photo is processing
+    // if (self.cameraMode == CCCameraModeCamera) {
+    //     [latestView.cameraLayout showLoadingView];
+    //     [latestView.cameraLayout disableButtons];
+    //
+    //     // Pause the camera preview while the photo is processing
+    //     [latestView.previewView.previewLayer.connection setEnabled:NO];
+    // }
 
     /*
      Retrieve the video preview layer's video orientation on the main queue before
      entering the session queue. We do this to ensure UI elements are accessed on
      the main thread and session configuration is done on the session queue.
      */
+
+    self.takePictureResolve = resolve;
+    self.takePictureReject = reject;
 
     AVCaptureVideoOrientation videoPreviewLayerVideoOrientation = latestView.previewView.previewLayer.connection.videoOrientation;
 
