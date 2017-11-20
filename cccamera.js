@@ -4,6 +4,15 @@ import {
   View,
 } from 'react-native';
 
+const normalizePhotoOrigin = (photoOrigin) => {
+  const validPhotoOrigin = (
+    photoOrigin === 'STANDARD_CAMERA' ||
+    photoOrigin === 'STANDARD_CAMERA_FASTCAM' ||
+    photoOrigin === 'STANDARD_CAMERA_DOCSCAN'
+  );
+  return validPhotoOrigin ? photoOrigin : 'STANDARD_CAMERA';
+};
+
 class CCCamera extends Component {
 
   _onClose = (event) => {
@@ -19,7 +28,8 @@ class CCCamera extends Component {
     if (!this.props.onPhotoAccepted) { return; }
 
     const { filename, imgWidth, imgHeight, photoOrigin } = event.nativeEvent;
-    this.props.onPhotoAccepted(filename, [imgWidth, imgHeight], photoOrigin);
+    const origin = normalizePhotoOrigin(photoOrigin);
+    this.props.onPhotoAccepted(filename, [imgWidth, imgHeight], origin);
   }
 
   _onPhotoTaken = (event) => {
@@ -27,7 +37,8 @@ class CCCamera extends Component {
     if (!this.props.onPhotoTaken) { return; }
 
     const { filename, imgWidth, imgHeight, photoOrigin } = event.nativeEvent;
-    this.props.onPhotoTaken(filename, [imgWidth, imgHeight], photoOrigin);
+    const origin = normalizePhotoOrigin(photoOrigin);
+    this.props.onPhotoTaken(filename, [imgWidth, imgHeight], origin);
   }
 
   _onAuxModeClicked = () => {
