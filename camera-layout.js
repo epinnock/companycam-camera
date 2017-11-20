@@ -158,32 +158,48 @@ const styles = StyleSheet.create({
   // },
 });
 
-function toggleFastCam(state) {
-  return {
-    fastCamActive: !state.fastCamActive,
-  };
-}
-
-function toggleFlash(state) {
-  return {
-    flashOn: !state.flashOn,
-  };
-}
-
 class CameraLayout extends Component {
 
   constructor(props) {
     super(props);
 
+    this.toastTimer = null;
+
     this.state = {
       author: 'Jared Goertzen',
       showToast: false,
-      fastCamActive: false,
-      flashOn: false,
-      cameraMode: CAMERA_MODE_PHOTO,
       toastTitleText: '',
       toastMessageText: '',
     };
+  }
+
+  setCameraMode = (nextMode) => {
+    const constants = {...this.props.cameraConstants};
+    const nextState = { ...this.props.cameraState };
+
+    if (this.props.cameraState.cameraMode !== nextMode) {
+      nextState.cameraMode = nextMode;
+
+      switch (nextMode) {
+        case constants.CameraMode.photo:
+          if (this.props.cameraState.cameraMode === constants.CameraMode.scanner) {
+            this.displayToast('Photo mode', '');
+          } else {
+            this.displayToast('Fastcam disabled', '');
+          }
+          break;
+        case constants.CameraMode.scanner:
+          this.displayToast('Scanner mode', '');
+          break;
+        case constants.CameraMode.fastcam:
+          this.displayToast('Fastcam enabled', '');
+          break;
+        default: break;
+      }
+    }
+
+    this.props.setCameraState(nextState);
+    this.forceUpdate(); // since the state is in the parent, we need this to rerender icons
   }
 
   displayToast = (title, message) => {
@@ -192,7 +208,8 @@ class CameraLayout extends Component {
       toastTitleText: title,
       toastMessageText: message,
     }, () => {
-      setTimeout(() => {
+      clearTimeout(this.toastTimer);
+      this.toastTimer = setTimeout(() => {
         this.setState({ showToast: false });
       }, 1750);
     });
@@ -215,12 +232,17 @@ class CameraLayout extends Component {
     }
 
     this.props.setCameraState(nextState);
+    this.forceUpdate(); // since the state is in the parent, we need this to rerender icons
   }
 
   render() {
     const constants = {...this.props.cameraConstants};
-    const { flashMode } = this.props.cameraState;
-    const { cameraMode } = this.state;
+    console.log(constants);
+
+    const { flashMode, cameraMode } = this.props.cameraState;
+
+    const TorchIsOn = flashMode === constants.FlashMode.torch;
+    const PrimaryModeIsScan = cameraMode === constants.CameraMode.scanner;
 
     return (
       <View style={styles.cameraUIContainer}>
@@ -292,49 +314,63 @@ class CameraLayout extends Component {
             </View> */}
 
             <View style={styles.captureContainer}>
-              <TouchableOpacity
-                onPress={() => {}}
-                style={styles.uiButton}
-              >
-                <MaterialIcon name="crop-portrait" size={32} color="white" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {
-                  const { fastCamActive } = this.state;
-                  this.displayToast(
-                    fastCamActive ? 'FastCam disabled' : 'FastCam enabled',
-                    fastCamActive ? 'FastCam is now off' : 'FastCam is now on'
-                  );
-                  this.setState(toggleFastCam);
-                }}
-                style={[styles.uiButton, { backgroundColor: 'purple' }]}
-              >
-                <MaterialIcon
-                  name={this.state.fastCamActive ? FASTCAM_ON_ICON : FASTCAM_OFF_ICON}
-                  size={24}
-                  color="white"
-                />
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => {}}
-                style={styles.captureButton}
-              />
+
+              {/* Preview tray */}
+              {
+                !PrimaryModeIsScan &&
+                  <TouchableOpacity
+                    onPress={() => {}}
+                    style={styles.uiButton}
+                  >
+                    <MaterialIcon name="crop-portrait" size={32} color="white" />
+                  </TouchableOpacity>
+              }
+
+              {/* Fast cam toggle button */}
+              {
+                !PrimaryModeIsScan &&
+                  <TouchableOpacity
+                    onPress={() => {
+                      if (cameraMode === constants.CameraMode.fastcam) {
+                        this.setCameraMode(constants.CameraMode.photo);
+                      } else {
+                        this.setCameraMode(constants.CameraMode.fastcam);
+                      }
+                    }}
+                    style={styles.uiButton}
+                  >
+                    <MaterialIcon
+                      name={cameraMode === constants.CameraMode.fastcam ? FASTCAM_ON_ICON : FASTCAM_OFF_ICON}
+                      size={24}
+                      color="white"
+                    />
+                  </TouchableOpacity>
+              }
+
+              {/* Capture button */}
+              {
+                !PrimaryModeIsScan &&
+                  <TouchableOpacity
+                    onPress={() => {}}
+                    style={styles.captureButton}
+                  />
+              }
+
+              {/* Front/back camera button */}
               <TouchableOpacity
                 onPress={() => {}}
                 style={styles.uiButton}
               >
                 <FeatherIcon name="repeat" size={24} color="white" />
               </TouchableOpacity>
+
+              {/* Flash mode button */}
               <TouchableOpacity
                 onPress={() => {this.toggleFlashMode(); }}
                 style={styles.uiButton}
               >
                 <MaterialCommunityIcon
-                  name={
-                    flashMode === constants.FlashMode.torch ?
-                      FLASH_ON_ICON :
-                      FLASH_OFF_ICON
-                  }
+                  name={TorchIsOn ? FLASH_ON_ICON : FLASH_OFF_ICON}
                   size={24}
                   color="white"
                 />
@@ -342,15 +378,18 @@ class CameraLayout extends Component {
             </View>
 
             <View style={styles.modeContainer}>
+
+              {/* Photo mode button */}
               <TouchableOpacity
-                onPress={() => this.setState({ cameraMode: CAMERA_MODE_PHOTO })}
+                onPress={() => this.setCameraMode(constants.CameraMode.photo)}
                 style={styles.modeButton}
               >
-                <ModeTitle isCurrentMode={cameraMode === CAMERA_MODE_PHOTO}>
+                <ModeTitle isCurrentMode={!PrimaryModeIsScan}>
                   PHOTO
                 </ModeTitle>
-                <ModeIndicator isCurrentMode={cameraMode === CAMERA_MODE_PHOTO} />
+                <ModeIndicator isCurrentMode={!PrimaryModeIsScan}/>
               </TouchableOpacity>
+
               {/* TODO video video video... */}
               {/* <TouchableOpacity
                 onPress={() => {}}
@@ -359,15 +398,19 @@ class CameraLayout extends Component {
                 <ModeTitle>VIDEO</ModeTitle>
                 <ModeIndicator />
               </TouchableOpacity> */}
+
+              {/* Scanner mode button */}
               <TouchableOpacity
-                onPress={() => this.setState({ cameraMode: CAMERA_MODE_SCAN })}
+                onPress={() => this.setCameraMode(constants.CameraMode.scanner)}
                 style={styles.modeButton}
               >
-                <ModeTitle isCurrentMode={cameraMode === CAMERA_MODE_SCAN}>
+                <ModeTitle isCurrentMode={PrimaryModeIsScan}>
                   SCAN
                 </ModeTitle>
-                <ModeIndicator isCurrentMode={cameraMode === CAMERA_MODE_SCAN} />
+                <ModeIndicator isCurrentMode={PrimaryModeIsScan}/>
               </TouchableOpacity>
+
+              {/* AR mode button */}
               <TouchableOpacity
                 onPress={() => {}}
                 style={styles.modeButton}
@@ -375,6 +418,8 @@ class CameraLayout extends Component {
                 <ModeTitle>AR</ModeTitle>
                 <ModeIndicator />
               </TouchableOpacity>
+
+              {/* Before after mode button */}
               <TouchableOpacity
                 onPress={() => {}}
                 style={styles.modeButton}

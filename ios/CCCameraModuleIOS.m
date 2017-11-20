@@ -29,7 +29,12 @@ RCT_EXPORT_MODULE(CCCameraModuleIOS);
                      @"on": @(CCCameraFlashModeOn),
                      @"auto": @(CCCameraFlashModeAuto),
                      @"torch": @(CCCameraFlashModeTorch),
-                     },
+                   },
+             @"CameraMode": @{
+                     @"fastcam": @(CCCameraModeFastCam),
+                     @"photo": @(CCCameraModeCamera),
+                     @"scanner": @(CCCameraModeScanner),
+                   },
              };
 }
 

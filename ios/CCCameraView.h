@@ -103,4 +103,6 @@
 -(void)setAuxModeCaption:(NSString *)val;
 -(void)setHideNativeUI:(BOOL)val;
 
+-(void)setCameraMode:(int)mode;
+
 @end

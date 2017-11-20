@@ -22,6 +22,7 @@ class CCCamera extends React.Component {
 
   static constants = {
     FlashMode: CameraModule.FlashMode,
+    CameraMode: CameraModule.CameraMode,
   };
 
   constructor(props){
@@ -30,6 +31,7 @@ class CCCamera extends React.Component {
     // TODO: Implement using Settings from RN to persist modes
     this.state = {
       flashMode: constants.FlashMode.off,
+      cameraMode: constants.CameraMode.photo,
     };
   }
 
@@ -76,12 +78,13 @@ class CCCamera extends React.Component {
         onAuxModeClicked={this._onAuxModeClicked}
 
         flashMode={this.state.flashMode}
+        cameraMode={this.state.cameraMode}
       >
         <CameraLayout
           cameraConstants={constants}
           cameraState={{...this.state}}
           setCameraState={(nextState) => this.setState(nextState)}
-          
+
           onClose={this._onClose}
         />
       </RNCCCamera>
@@ -109,6 +112,7 @@ CCCamera.propTypes = {
   ...View.propTypes,
 
   flashMode: PropTypes.number,
+  cameraMode: PropTypes.number,
 };
 
 CCCamera.defaultProps = {

@@ -15,20 +15,20 @@ static CCCameraView *latestView;
 RCT_EXPORT_MODULE(CompanyCamCamera)
 
 -(UIView *)view {
-    
+
     if (latestView == nil) {
         latestView = [[CCCameraView alloc] initWithManager:self bridge:self.bridge];
     }
     else {
         [latestView setupView];
     }
-    
+
     // Create the CCCamera object
     latestView.camera = [[CCCamera alloc] init];
-    
+
     // Set the layout object's reference to the camera
     [latestView.cameraLayout setCameraObject:latestView.camera];
-    
+
     return latestView;
 }
 
@@ -91,9 +91,9 @@ RCT_CUSTOM_VIEW_PROPERTY(flashMode, NSInteger, CCCameraFlashMode) {
 - (void)setFlashMode:(CCCameraFlashMode)flashMode {
     AVCaptureDevice *device = [[latestView.camera deviceInput] device];
     NSError *error = nil;
-    
+
     AVCaptureTorchMode torchMode;
-    
+
     // Limit to torch on/off
     switch (flashMode) {
         case CCCameraFlashModeAuto:
@@ -112,7 +112,7 @@ RCT_CUSTOM_VIEW_PROPERTY(flashMode, NSInteger, CCCameraFlashMode) {
             torchMode = AVCaptureTorchModeOff;
             break;
     }
-    
+
     if (![device lockForConfiguration:&error]) {
         NSLog(@"%@", error);
         return;
@@ -133,5 +133,9 @@ RCT_CUSTOM_VIEW_PROPERTY(flashMode, NSInteger, CCCameraFlashMode) {
     [device unlockForConfiguration];
 }
 
-@end
+RCT_CUSTOM_VIEW_PROPERTY(cameraMode, NSInteger, CCCameraMode) {
+    CCCameraMode mode = [RCTConvert NSInteger:json];
+    [latestView setCameraMode:mode];
+}
 
+@end

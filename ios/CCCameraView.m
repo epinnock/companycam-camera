@@ -288,4 +288,8 @@
     [self.cameraLayout showCameraLayout];
 }
 
+-(void)setCameraMode:(int)mode {
+  NSLog(@"cameraMode %d", mode);
+}
+
 @end
