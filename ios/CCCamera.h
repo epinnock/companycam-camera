@@ -19,34 +19,34 @@
 #import "NSMutableDictionary+CCImageMetadata.h"
 
 @interface CCCamera : NSObject <CCCameraDelegate, AVCaptureVideoDataOutputSampleBufferDelegate> {
-    
+
     // The session queue is used to handle the camera-related functionality that occurs on background threads without blocking the UI
     dispatch_queue_t captureSessionQueue;
-    
+
     // The mCaptureSession is used to display the camera preview and to capture the photo.
     AVCaptureSession *captureSession;
-    
+
     // The camera is a reference to the current camera being used
     AVCaptureDevice *camera;
-    
+
     // The cameraType is a reference to the camera type (rear- or forward-facing) currently being used
     AVCaptureDevicePosition cameraType;
-    
+
     // The deviceInput is used to capture input from the current camera
     AVCaptureDeviceInput *deviceInput;
-    
+
     // The photoOutput is used to record the output from the current camera
     AVCaptureStillImageOutput *photoOutput;
-    
+
     // The photoData is used to store the NSData from the photo output
     NSData *photoData;
-    
+
     // The videoOutput is used to provide the preview frames for the scanner mode
     AVCaptureVideoDataOutput *videoOutput;
-    
+
     // The ipDidAllocate flag describes whether or not the image processor has already been initialized for the scanner mode
     BOOL ipDidAllocate;
-    
+
     // The currentScaleNumber and startingScaleNumber are used to handle pinch/zoom gestures
     double currentScaleNumber;
     double startingScaleNumber;
@@ -75,7 +75,6 @@
 -(void)persistResolutionMode:(NSString *)thisResolutionMode;
 -(void)persistCameraMode:(NSString *)thisCameraMode;
 
--(void)setFlashMode:(CCCameraFlashMode)thisFlashMode;
+-(void)changeCameraMode:(CCCameraMode)mode;
 
 @end
-

@@ -135,7 +135,7 @@ RCT_CUSTOM_VIEW_PROPERTY(flashMode, NSInteger, CCCameraFlashMode) {
 
 RCT_CUSTOM_VIEW_PROPERTY(cameraMode, NSInteger, CCCameraMode) {
     CCCameraMode mode = [RCTConvert NSInteger:json];
-    [latestView setCameraMode:mode];
+    [latestView.camera changeCameraMode:mode];
 }
 
 @end

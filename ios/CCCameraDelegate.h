@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "CCCameraEnums.h"
 
 @protocol CCCameraDelegate <NSObject>
 
@@ -57,5 +58,3 @@
 -(void)handleZoom:(double)zoomScale :(BOOL)zoomEnded;
 
 @end
-
-

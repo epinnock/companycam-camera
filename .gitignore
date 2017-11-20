@@ -37,6 +37,9 @@ local.properties
 node_modules/
 npm-debug.log
 
+# Git
+*.diff
+
 # BUCK
 buck-out/
 \.buckd/

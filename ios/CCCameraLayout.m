@@ -502,19 +502,19 @@
 -(IBAction)fastCamSubviewClick:(id)sender {
     
     // Set the camera mode
-    [self setCameraMode:@"fastcam"];
+//    [self setCameraMode:@"fastcam"];
 }
 
 -(IBAction)cameraSubviewClick:(id)sender {
     
     // Set the camera mode
-    [self setCameraMode:@"camera"];
+//    [self setCameraMode:@"camera"];
 }
 
 -(IBAction)scannerSubviewClick:(id)sender {
     
     // Set the camera mode
-    [self setCameraMode:@"scanner"];
+//    [self setCameraMode:@"scanner"];
 }
 
 -(IBAction)auxModeSubviewClick:(id)sender {
@@ -527,7 +527,7 @@
     else {
         
         // Set the camera mode
-        [self setCameraMode:@"aux"];
+//        [self setCameraMode:@"aux"];
     }
 }
 
@@ -550,7 +550,7 @@
     [self setCameraButtonVisibility];
     
     // Set the camera layout state
-    [self setCameraMode:[self.camera getCameraModeString]];
+//    [self setCameraMode:[self.camera getCameraModeString]];
     
 }
 

@@ -18,6 +18,7 @@
 #import "CCCameraDelegate.h"
 #import "CCCameraPreviewView.h"
 #import "JPSVolumeButtonHandler/JPSVolumeButtonHandler.h"
+#import "CCCameraEnums.h"
 
 @class CCCameraManager;
 @class CCCamera;
@@ -103,6 +104,5 @@
 -(void)setAuxModeCaption:(NSString *)val;
 -(void)setHideNativeUI:(BOOL)val;
 
--(void)setCameraMode:(int)mode;
 
 @end
