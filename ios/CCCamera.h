@@ -77,5 +77,6 @@
 -(void)persistCameraMode:(NSString *)thisCameraMode;
 
 -(void)changeCameraMode:(CCCameraMode)mode;
+-(void)changeResolution:(CCCameraResolutionMode)mode;
 
 @end

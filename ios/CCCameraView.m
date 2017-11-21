@@ -86,12 +86,18 @@
                                              selector:@selector(onRelease:)
                                                  name:@"CCCameraModuleReleaseNotification"
                                                object:nil];
-    
+
     // Register to receive a notification when the capture function is called
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(onCapture:)
                                                  name:@"CCCameraModuleCaptureNotification"
                                                object:nil];
+
+    // Register to receive a notification when the capture function is called
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                            selector:@selector(onCameraFlip:)
+                                                name:@"CCCameraModuleFlipNotification"
+                                              object:nil];
 
     // Register to receive notifications when the app is sent to the background or enters the foreground
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSetActive:) name:UIApplicationWillEnterForegroundNotification object:nil];
@@ -170,10 +176,18 @@
 
 // This method responds to the CCCameraModuleReleaseNotification
 -(void)onCapture:(NSNotification *)notification {
-    
+
     // Release the camera
     id<CCCameraDelegate> cameraDelegate = (id<CCCameraDelegate>)self.camera;
     [cameraDelegate takePicture];
+}
+
+// This method responds to the CCCameraModuleReleaseNotification
+-(void)onCameraFlip:(NSNotification *)notification {
+
+    // Release the camera
+    id<CCCameraDelegate> cameraDelegate = (id<CCCameraDelegate>)self.camera;
+    [cameraDelegate toggleCamera];
 }
 
 #pragma mark Component props - functions

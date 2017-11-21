@@ -35,6 +35,11 @@ RCT_EXPORT_MODULE(CCCameraModuleIOS);
                      @"photo": @(CCCameraModeCamera),
                      @"scanner": @(CCCameraModeScanner),
                    },
+             @"ResolutionMode": @{
+                     @"normal": @(CCCameraResolutionModeNormal),
+                     @"high": @(CCCameraResolutionModeHigh),
+                     @"super": @(CCCameraResolutionModeSuper),
+                   },
              };
 }
 
@@ -71,6 +76,13 @@ RCT_EXPORT_METHOD(releaseCamera) {
 RCT_EXPORT_METHOD(capture) {
     // Post a notification to let any interested objects know that capture is called
     [[NSNotificationCenter defaultCenter] postNotificationName:@"CCCameraModuleCaptureNotification"
+                                                        object:self
+                                                      userInfo:nil];
+}
+
+RCT_EXPORT_METHOD(flipCamera) {
+    // Post a notification to let any interested objects know that capture is called
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"CCCameraModuleFlipNotification"
                                                         object:self
                                                       userInfo:nil];
 }

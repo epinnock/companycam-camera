@@ -138,9 +138,10 @@ RCT_CUSTOM_VIEW_PROPERTY(cameraMode, NSInteger, CCCameraMode) {
     [latestView.camera changeCameraMode:mode];
 }
 
-RCT_EXPORT_METHOD(capture:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
-  id<CCCameraDelegate> cameraDelegate = (id<CCCameraDelegate>)latestView.camera;
-  [cameraDelegate takePicture];
+RCT_CUSTOM_VIEW_PROPERTY(resolutionMode, NSInteger, CCCameraResolutionMode) {
+    CCCameraResolutionMode mode = [RCTConvert NSInteger:json];
+    [latestView.camera changeResolution:mode];
 }
+
 
 @end

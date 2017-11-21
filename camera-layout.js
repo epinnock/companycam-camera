@@ -5,6 +5,8 @@ import LinearGradient from 'react-native-linear-gradient';
 import DeviceInfo from 'react-native-device-info';
 import CCCamera from '@companycam/companycam-camera';
 import styled from 'styled-components/native';
+import CameraSettings from './camera-settings';
+import { invert } from 'lodash';
 
 // TODO remove what we dont use for icons...
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
@@ -170,6 +172,7 @@ class CameraLayout extends Component {
       showToast: false,
       toastTitleText: '',
       toastMessageText: '',
+      showSettings: true, // false,
     };
   }
 
@@ -200,6 +203,18 @@ class CameraLayout extends Component {
 
     this.props.setCameraState(nextState);
     this.forceUpdate(); // since the state is in the parent, we need this to rerender icons
+  }
+
+  setResolutionMode = (nextModeString) => {
+    const constants = {...this.props.cameraConstants};
+    const nextState = { ...this.props.cameraState };
+    
+    const nextMode = constants.ResolutionMode[nextModeString];
+
+    if (this.props.cameraState.resolutionMode !== nextMode) {
+      nextState.resolutionMode = nextMode;
+      this.props.setCameraState(nextState);
+    }
   }
 
   displayToast = (title, message) => {
@@ -239,10 +254,12 @@ class CameraLayout extends Component {
     const constants = {...this.props.cameraConstants};
     console.log(constants);
 
-    const { flashMode, cameraMode } = this.props.cameraState;
+    const { flashMode, cameraMode, resolutionMode } = this.props.cameraState;
 
     const TorchIsOn = flashMode === constants.FlashMode.torch;
     const PrimaryModeIsScan = cameraMode === constants.CameraMode.scanner;
+
+    const invertedResolutionModes = invert(constants.ResolutionMode);
 
     return (
       <View style={styles.cameraUIContainer}>
@@ -274,7 +291,7 @@ class CameraLayout extends Component {
             </TouchableOpacity>
 
             <TouchableOpacity
-              onPress={() => {}}
+              onPress={() => this.setState({ showSettings: true })}
               style={styles.uiButton}
             >
               <MaterialIcon name="settings" size={24} color="white" />
@@ -351,14 +368,14 @@ class CameraLayout extends Component {
               {
                 !PrimaryModeIsScan &&
                   <TouchableOpacity
-                    onPress={() => { this.props.captureButtonPress() }}
+                    onPress={() => { this.props.captureButtonPress(); }}
                     style={styles.captureButton}
                   />
               }
 
               {/* Front/back camera button */}
               <TouchableOpacity
-                onPress={() => {}}
+                onPress={() => { this.props.flipCamera(); }}
                 style={styles.uiButton}
               >
                 <FeatherIcon name="repeat" size={24} color="white" />
@@ -437,6 +454,16 @@ class CameraLayout extends Component {
 
           </View>
         </LinearGradient>
+
+        {
+          this.state.showSettings &&
+            <View style={{ zIndex: 2, position: 'absolute', top: 0, left: 0, height: '100%', width: '100%' }}>
+              <CameraSettings
+                resolutionModeString={invertedResolutionModes[this.props.cameraState.resolutionMode]}
+                setResolutionMode={(mode) => this.setResolutionMode(mode)}
+              />
+            </View>
+        }
       </View>
     );
   }
@@ -448,6 +475,7 @@ CameraLayout.propTypes = {
   setCameraState: PropTypes.func,
 
   captureButtonPress: PropTypes.func,
+  flipCamera: PropTypes.func,
   onClose: PropTypes.func,
 };
 

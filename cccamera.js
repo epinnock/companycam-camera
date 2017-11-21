@@ -31,8 +31,9 @@ const normalizePhotoOrigin = (photoOrigin) => {
 class CCCamera extends React.Component {
 
   static constants = {
-    FlashMode: CameraModule.FlashMode,
-    CameraMode: CameraModule.CameraMode,
+    FlashMode: CameraModule.FlashMode, // off, on, auto, torch
+    CameraMode: CameraModule.CameraMode, // fastcam, photo, scanner
+    ResolutionMode: CameraModule.ResolutionMode, // normal, high, super
   };
 
   constructor(props){
@@ -42,6 +43,7 @@ class CCCamera extends React.Component {
     this.state = {
       flashMode: constants.FlashMode.off,
       cameraMode: constants.CameraMode.photo,
+      resolutionMode: constants.ResolutionMode.normal,
     };
   }
 
@@ -96,6 +98,7 @@ class CCCamera extends React.Component {
 
         flashMode={this.state.flashMode}
         cameraMode={this.state.cameraMode}
+        resolutionMode={this.state.resolutionMode}
       >
         <CameraLayout
           cameraConstants={constants}
@@ -104,6 +107,7 @@ class CCCamera extends React.Component {
           onClose={(e) => this._onClose(e)}
 
           captureButtonPress={() => { CameraModule.capture(); }}
+          flipCamera={() => { CameraModule.flipCamera(); }}
         />
       </RNCCCamera>
     );
@@ -131,6 +135,7 @@ CCCamera.propTypes = {
 
   flashMode: PropTypes.number,
   cameraMode: PropTypes.number,
+  resolutionMode: PropTypes.number,
 };
 
 CCCamera.defaultProps = {

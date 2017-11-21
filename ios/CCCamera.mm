@@ -756,6 +756,11 @@
     }
 }
 
+// This method sets the camera mode
+-(void)changeResolution:(CCCameraResolutionMode)mode {
+    self.resolutionMode = mode;
+}
+
 #pragma mark CCCameraDelegate methods
 
 // This method starts the camera
