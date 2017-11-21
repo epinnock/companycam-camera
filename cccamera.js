@@ -45,15 +45,6 @@ class CCCamera extends React.Component {
     };
   }
 
-  capture() {
-    if (this.camera) {
-      const options = {};
-      NativeModules.CompanyCamCamera.capture()
-        .then((filePath) => { console.log('resolve in js', filePath)})
-        .catch(() => { console.log('reject in js')});
-    }
-  }
-
   _onClose = (event) => {
     console.log("_onClose called in cccamera.js");
     if (!this.props.onClose) { return; }
@@ -74,6 +65,8 @@ class CCCamera extends React.Component {
   }
 
   _onPhotoTaken = (event) => {
+    console.log('hi hi');
+    console.log(this.props);
     if (!this.props.onPhotoTaken) { return; }
 
     const { filename, imgWidth, imgHeight, photoOrigin } = event.nativeEvent;
@@ -95,11 +88,10 @@ class CCCamera extends React.Component {
       <RNCCCamera
         {...this.props}
         hideNativeUI
-        ref={(cam) => { this.camera = cam; }}
 
         onClose={this._onClose}
-        onPhotoAccepted={() => this._onPhotoAccepted()}
-        onPhotoTaken={() => this._onPhotoTaken()}
+        onPhotoAccepted={this._onPhotoAccepted}
+        onPhotoTaken={this._onPhotoTaken}
         onAuxModeClicked={this._onAuxModeClicked}
 
         flashMode={this.state.flashMode}
@@ -109,12 +101,9 @@ class CCCamera extends React.Component {
           cameraConstants={constants}
           cameraState={{...this.state}}
           setCameraState={(nextState) => this.setState(nextState)}
-
-          captureButtonPress={() => {
-            console.log(this.camera);
-            this.capture();
-          }}
           onClose={(e) => this._onClose(e)}
+
+          captureButtonPress={() => { CameraModule.capture(); }}
         />
       </RNCCCamera>
     );

@@ -48,7 +48,8 @@
 
 // This method captures a photo from the camera
 @optional
--(void)takePicture:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
+-(void)takePicture;
+// -(void)takePicture:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject;
 
 // This method handles a screen touch event
 @optional

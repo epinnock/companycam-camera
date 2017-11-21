@@ -46,7 +46,7 @@
             // Initiate the takePicture method
             if (self.camera != nil) {
                 id<CCCameraDelegate> cameraDelegate = (id<CCCameraDelegate>)self.camera;
-                [cameraDelegate takePicture:nil reject:nil];
+                [cameraDelegate takePicture];
             }
 
         } downBlock:^{
@@ -85,6 +85,12 @@
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(onRelease:)
                                                  name:@"CCCameraModuleReleaseNotification"
+                                               object:nil];
+    
+    // Register to receive a notification when the capture function is called
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(onCapture:)
+                                                 name:@"CCCameraModuleCaptureNotification"
                                                object:nil];
 
     // Register to receive notifications when the app is sent to the background or enters the foreground
@@ -160,6 +166,14 @@
     }
 
     self.isActive = NO;
+}
+
+// This method responds to the CCCameraModuleReleaseNotification
+-(void)onCapture:(NSNotification *)notification {
+    
+    // Release the camera
+    id<CCCameraDelegate> cameraDelegate = (id<CCCameraDelegate>)self.camera;
+    [cameraDelegate takePicture];
 }
 
 #pragma mark Component props - functions

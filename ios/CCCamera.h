@@ -17,6 +17,7 @@
 #import "StorageUtility.h"
 #import "NSData+CCImageExif.h"
 #import "NSMutableDictionary+CCImageMetadata.h"
+#import "CCCameraView.h"
 
 @interface CCCamera : NSObject <CCCameraDelegate, AVCaptureVideoDataOutputSampleBufferDelegate> {
 

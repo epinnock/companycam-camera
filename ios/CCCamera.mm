@@ -718,16 +718,18 @@
                 photoOrigin = @"STANDARD_CAMERA";
         }
 
-        if (self.takePictureResolve) {
-          self.takePictureResolve(filePath);
-        }
+//        if (self.takePictureResolve) {
+//          self.takePictureResolve(filePath);
+//        }
 
         // Execute the proper callback depending on the current camera mode
         if (self.cameraMode != CCCameraModeFastCam) {
-            // [latestView doPhotoTaken:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage) :photoOrigin]
+             [latestView doPhotoTaken:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage) :photoOrigin completion:^{
+               // do nothing at the moment
+             }];
         }
         else {
-            // [latestView doPhotoAccepted:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage) :photoOrigin ];
+             [latestView doPhotoAccepted:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage) :photoOrigin ];
         }
     }
 }
@@ -924,7 +926,8 @@
 }
 
 // This method captures a photo from the camera
--(void)takePicture:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
+-(void)takePicture {
+// -(void)takePicture:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
 
     // The volumeButtonHandler may try to trigger this method, so make sure the current camera mode is CCCameraModeCamera or CCCameraModeFastCam before trying to capture a photo.
     if (!(self.cameraMode == CCCameraModeCamera || self.cameraMode == CCCameraModeFastCam)) {
@@ -932,7 +935,7 @@
     }
 
      CCCameraView *latestView = [CCCameraManager getLatestView];
-    
+
     // Animate the screen flash
     // [latestView.cameraLayout animateScreenFlash];
     //
@@ -951,8 +954,8 @@
      the main thread and session configuration is done on the session queue.
      */
 
-    self.takePictureResolve = resolve;
-    self.takePictureReject = reject;
+    // self.takePictureResolve = resolve;
+    // self.takePictureReject = reject;
 
     AVCaptureVideoOrientation videoPreviewLayerVideoOrientation = latestView.previewView.previewLayer.connection.videoOrientation;
 

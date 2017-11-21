@@ -68,4 +68,11 @@ RCT_EXPORT_METHOD(releaseCamera) {
                                                       userInfo:nil];
 }
 
+RCT_EXPORT_METHOD(capture) {
+    // Post a notification to let any interested objects know that capture is called
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"CCCameraModuleCaptureNotification"
+                                                        object:self
+                                                      userInfo:nil];
+}
+
 @end

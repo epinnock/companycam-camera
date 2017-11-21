@@ -484,7 +484,7 @@
 -(IBAction)captureButtonClick:(id)sender {
     
     if (self.camera != nil) {
-        [self.camera takePicture:nil reject:nil];
+        [self.camera takePicture];
     }
 }
 

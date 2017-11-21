@@ -140,7 +140,7 @@ RCT_CUSTOM_VIEW_PROPERTY(cameraMode, NSInteger, CCCameraMode) {
 
 RCT_EXPORT_METHOD(capture:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject) {
   id<CCCameraDelegate> cameraDelegate = (id<CCCameraDelegate>)latestView.camera;
-  [cameraDelegate takePicture:resolve reject:reject];
+  [cameraDelegate takePicture];
 }
 
 @end
