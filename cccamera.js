@@ -67,7 +67,6 @@ class CCCamera extends React.Component {
   }
 
   _onPhotoTaken = (event) => {
-    console.log('hi hi');
     console.log(this.props);
     if (!this.props.onPhotoTaken) { return; }
 
@@ -86,6 +85,8 @@ class CCCamera extends React.Component {
   }
 
   render() {
+    const { hideCameraLayout } = this.props;
+
     return (
       <RNCCCamera
         {...this.props}
@@ -100,15 +101,18 @@ class CCCamera extends React.Component {
         cameraMode={this.state.cameraMode}
         resolutionMode={this.state.resolutionMode}
       >
-        <CameraLayout
-          cameraConstants={constants}
-          cameraState={{...this.state}}
-          setCameraState={(nextState) => this.setState(nextState)}
-          onClose={(e) => this._onClose(e)}
+        {
+          !hideCameraLayout &&
+            <CameraLayout
+              cameraConstants={constants}
+              cameraState={{...this.state}}
+              setCameraState={(nextState) => this.setState(nextState)}
+              onClose={(e) => this._onClose(e)}
 
-          captureButtonPress={() => { CameraModule.capture(); }}
-          flipCamera={() => { CameraModule.flipCamera(); }}
-        />
+              captureButtonPress={() => { CameraModule.capture(); }}
+              flipCamera={() => { CameraModule.flipCamera(); }}
+            />
+        }
       </RNCCCamera>
     );
   }
@@ -127,6 +131,7 @@ CCCamera.propTypes = {
   onAuxModeClicked: PropTypes.func,
 
   hideNativeUI: PropTypes.bool,
+  hideCameraLayout: PropTypes.bool,
 
   onClose: PropTypes.func,
   onPhotoAccepted: PropTypes.func,
@@ -150,6 +155,7 @@ CCCamera.defaultProps = {
   onAuxModeClicked: () => {},
 
   hideNativeUI: false,
+  hideCameraLayout: false,
 };
 
 export const constants = CCCamera.constants;

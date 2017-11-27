@@ -50,6 +50,7 @@ const styles = StyleSheet.create({
     flex: 1,
     zIndex: 1,
     justifyContent: 'space-between',
+    width: '100%',
   },
   header: {
     flexDirection: 'row',
