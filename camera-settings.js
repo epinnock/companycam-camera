@@ -67,7 +67,13 @@ class CameraSettings extends PureComponent {
         <View style={styles.header}>
           <FeatherIcon name="x" size={24} color="transparent" />
           <Text style={{ fontSize: 16 }}>Camera Settings</Text>
-          <FeatherIcon name="x" size={24} color="black" />
+          <TouchableOpacity
+            activeOpacity={1}
+            hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+            onPress={() => this.props.closeSelf()}
+          >
+            <FeatherIcon name="x" size={24} color="black" />
+          </TouchableOpacity>
         </View>
 
         {/* Quality Settings group */}
@@ -132,6 +138,7 @@ class CameraSettings extends PureComponent {
 CameraSettings.propTypes = {
   resolutionModeString: PropTypes.string,
   setResolutionMode: PropTypes.func,
+  closeSelf: PropTypes.func,
 };
 
 export default CameraSettings;

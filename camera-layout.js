@@ -172,7 +172,7 @@ class CameraLayout extends Component {
       showToast: false,
       toastTitleText: '',
       toastMessageText: '',
-      showSettings: true, // false,
+      showSettings: false,
     };
   }
 
@@ -208,7 +208,7 @@ class CameraLayout extends Component {
   setResolutionMode = (nextModeString) => {
     const constants = {...this.props.cameraConstants};
     const nextState = { ...this.props.cameraState };
-    
+
     const nextMode = constants.ResolutionMode[nextModeString];
 
     if (this.props.cameraState.resolutionMode !== nextMode) {
@@ -252,7 +252,7 @@ class CameraLayout extends Component {
 
   render() {
     const constants = {...this.props.cameraConstants};
-    console.log(constants);
+    console.log(this.props.cameraState);
 
     const { flashMode, cameraMode, resolutionMode } = this.props.cameraState;
 
@@ -461,6 +461,7 @@ class CameraLayout extends Component {
               <CameraSettings
                 resolutionModeString={invertedResolutionModes[this.props.cameraState.resolutionMode]}
                 setResolutionMode={(mode) => this.setResolutionMode(mode)}
+                closeSelf={() => this.setState({ showSettings: false })}
               />
             </View>
         }
