@@ -19,6 +19,7 @@
 #import "CCCameraPreviewView.h"
 #import "JPSVolumeButtonHandler/JPSVolumeButtonHandler.h"
 #import "CCCameraEnums.h"
+#import "CameraFocusSquare.h"
 
 @class CCCameraManager;
 @class CCCamera;
@@ -68,6 +69,8 @@
 @property (nonatomic, retain) NSString *propAuxModeCaption;
 @property (nonatomic, assign) BOOL hideNativeUI;
 @property (nonatomic, assign) BOOL isActive;
+
+@property (nonatomic, strong) CCCameraFocusSquare *camFocus;
 
 @property (nonatomic, copy) RCTDirectEventBlock onClose;
 @property (nonatomic, copy) RCTDirectEventBlock onPhotoTaken;

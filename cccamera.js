@@ -113,6 +113,7 @@ class CCCamera extends React.Component {
               flipCamera={() => { CameraModule.flipCamera(); }}
             />
         }
+        {this.props.children}
       </RNCCCamera>
     );
   }

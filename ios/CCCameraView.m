@@ -190,6 +190,43 @@
     [cameraDelegate toggleCamera];
 }
 
+#pragma mark Touches
+
+- (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    // Update the touch state.
+    if ([[event touchesForView:self.view] count] > 1) {
+
+    }
+    
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+    if (self.camFocus)
+    {
+        [self.camFocus removeFromSuperview];
+    }
+    
+    id<CCCameraDelegate> cameraDelegate = (id<CCCameraDelegate>)self.camera;
+    [cameraDelegate handleTouchEvent:event];
+    
+    UITouch *touch = [[event allTouches] anyObject];
+    CGPoint touchPoint = [touch locationInView:touch.view];
+
+    // animate at the focus point
+    self.camFocus = [[CCCameraFocusSquare alloc] initWithFrame:CGRectMake(touchPoint.x-40, touchPoint.y-40, 80, 80)];
+    [self.camFocus setBackgroundColor:[UIColor clearColor]];
+    [self addSubview:self.camFocus];
+    [self.camFocus setNeedsDisplay];
+    
+    [UIView beginAnimations:nil context:NULL];
+    [UIView setAnimationDuration:1.0];
+    [self.camFocus setAlpha:0.0];
+    [UIView commitAnimations];
+}
+
+
 #pragma mark Component props - functions
 
 // This method invokes the onClose prop

@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0B0287811F96A64E0078065A /* UIImage+CCMHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 0B02877F1F96A64D0078065A /* UIImage+CCMHelper.m */; };
+		0B17E6981FCE01EC0037A942 /* CameraFocusSquare.m in Sources */ = {isa = PBXBuildFile; fileRef = 0B17E6971FCE01EC0037A942 /* CameraFocusSquare.m */; };
 		0B4AD7F91FBCDC6A001C1A5F /* CCCameraModuleIOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 0B4AD7F71FBCDC6A001C1A5F /* CCCameraModuleIOS.m */; };
 		DB0BCA011F044135004B8447 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB2FF1E81F0413190005A9BE /* AssetsLibrary.framework */; };
 		DB2FF1E21F0379CB0005A9BE /* docscan.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DB2FF1DE1F0379CB0005A9BE /* docscan.cpp */; };
@@ -51,6 +52,8 @@
 /* Begin PBXFileReference section */
 		0B02877F1F96A64D0078065A /* UIImage+CCMHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+CCMHelper.m"; sourceTree = "<group>"; };
 		0B0287801F96A64E0078065A /* UIImage+CCMHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+CCMHelper.h"; sourceTree = "<group>"; };
+		0B17E6971FCE01EC0037A942 /* CameraFocusSquare.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CameraFocusSquare.m; sourceTree = "<group>"; };
+		0B17E6991FCE02490037A942 /* CameraFocusSquare.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CameraFocusSquare.h; sourceTree = "<group>"; };
 		0B4AD7F71FBCDC6A001C1A5F /* CCCameraModuleIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCCameraModuleIOS.m; sourceTree = "<group>"; };
 		0B4AD7F81FBCDC6A001C1A5F /* CCCameraModuleIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCCameraModuleIOS.h; sourceTree = "<group>"; };
 		0BD090B11FB4C30A009D5E45 /* CCCameraEnums.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CCCameraEnums.h; sourceTree = "<group>"; };
@@ -214,6 +217,8 @@
 				DB9F69D01ED109F2004D4F85 /* ResizingSubview.m */,
 				DBC9692B1EDFD73200578CE2 /* CCCameraPreviewView.h */,
 				DBC9692C1EDFD73200578CE2 /* CCCameraPreviewView.m */,
+				0B17E6991FCE02490037A942 /* CameraFocusSquare.h */,
+				0B17E6971FCE01EC0037A942 /* CameraFocusSquare.m */,
 			);
 			name = views;
 			sourceTree = "<group>";
@@ -376,6 +381,7 @@
 				DB3DAD311EE67AAE005B2885 /* GradientBackgroundView.m in Sources */,
 				DB9F69CC1ED10567004D4F85 /* CCCameraLayout.m in Sources */,
 				DB54DE6A1EC3AC62004AEF31 /* CCCamera.h in Sources */,
+				0B17E6981FCE01EC0037A942 /* CameraFocusSquare.m in Sources */,
 				DB58BF5A1F1556CA003D503B /* NSMutableDictionary+CCImageMetadata.m in Sources */,
 				DB54DE6B1EC3AC62004AEF31 /* CCCamera.mm in Sources */,
 				DB58BF471F11C8E8003D503B /* StorageUtility.m in Sources */,
