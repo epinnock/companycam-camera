@@ -8,16 +8,6 @@ import CameraLayout from './camera-layout';
 
 const CameraModule = NativeModules.CCCameraModuleIOS || NativeModules.CCCameraModule;
 
-function convertNativeProps(props) {
-  const newProps = { ...props };
-
-  if (typeof props.flashMode === 'string') {
-    newProps.flashMode = CCCamera.constants.FlashMode[props.flashMode];
-  }
-
-  return newProps;
-}
-
 const normalizePhotoOrigin = (photoOrigin) => {
   const validPhotoOrigin = (
     photoOrigin === 'STANDARD_CAMERA' ||

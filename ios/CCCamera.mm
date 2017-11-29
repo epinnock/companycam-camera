@@ -53,9 +53,6 @@
 @property (nonatomic) CvVideoCamera *videoCamera;
 
 
-@property (nonatomic) RCTPromiseResolveBlock takePictureResolve;
-@property (nonatomic) RCTPromiseRejectBlock takePictureReject;
-
 @end
 
 @implementation CCCamera
@@ -718,10 +715,6 @@
                 photoOrigin = @"STANDARD_CAMERA";
         }
 
-//        if (self.takePictureResolve) {
-//          self.takePictureResolve(filePath);
-//        }
-
         // Execute the proper callback depending on the current camera mode
         if (self.cameraMode != CCCameraModeFastCam) {
              [latestView doPhotoTaken:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage) :photoOrigin completion:^{
@@ -959,8 +952,6 @@
      the main thread and session configuration is done on the session queue.
      */
 
-    // self.takePictureResolve = resolve;
-    // self.takePictureReject = reject;
 
     AVCaptureVideoOrientation videoPreviewLayerVideoOrientation = latestView.previewView.previewLayer.connection.videoOrientation;
 

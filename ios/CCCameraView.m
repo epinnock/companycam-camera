@@ -40,8 +40,7 @@ BOOL _multipleTouches;
         UIPinchGestureRecognizer *pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinchToZoomRecognizer:)];
         [self addGestureRecognizer:pinchGesture];
         _multipleTouches = NO;
-        self.tag = 1234;
-        
+
         // Load the nib for this view
         NSBundle *bundle = [NSBundle bundleWithURL:[[NSBundle mainBundle] URLForResource:@"CCCameraResources" withExtension:@"bundle"]];
 
@@ -217,35 +216,35 @@ BOOL _multipleTouches;
         {
             [self.camFocus removeFromSuperview];
         }
-        
+
         UITouch *touch = [[event allTouches] anyObject];
         CGPoint touchPoint = [touch locationInView:touch.view];
-    
+
         //   TODO: Find a better solution to determining if a button was touched or not
         //
         //   The rub is that since we are listening to all touches, that includes
         //   when the user touches a button. This solution takes into account that
         //   the touch point on a button has a very low y-coord value, while a touch
         //   point in the center of the screen will have a y-coord higher than 64
-        
+
         if (touchPoint.y > 64) {
             id<CCCameraDelegate> cameraDelegate = (id<CCCameraDelegate>)self.camera;
             [cameraDelegate handleTouchEvent:event];
-            
-        
+
+
             // animate at the focus point
             self.camFocus = [[CCCameraFocusSquare alloc] initWithFrame:CGRectMake(touchPoint.x-40, touchPoint.y-40, 80, 80)];
             [self.camFocus setBackgroundColor:[UIColor clearColor]];
             [self addSubview:self.camFocus];
             [self.camFocus setNeedsDisplay];
-            
+
             [UIView beginAnimations:nil context:NULL];
             [UIView setAnimationDuration:1.0];
             [self.camFocus setAlpha:0.0];
             [UIView commitAnimations];
         }
     }
-    
+
     if (allTouchesEnded) {
         _multipleTouches = NO;
     }
@@ -259,7 +258,7 @@ BOOL _multipleTouches;
         [pinchRecognizer state] == UIGestureRecognizerStateFailed) {
         zoomEnded = YES;
     }
-    
+
     id<CCCameraDelegate> cameraDelegate = (id<CCCameraDelegate>)self.camera;
     [cameraDelegate handleZoom:pinchRecognizer.scale :zoomEnded];
 }
