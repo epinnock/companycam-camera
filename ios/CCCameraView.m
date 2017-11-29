@@ -26,6 +26,8 @@
 @synthesize propAuxModeCaption;
 @synthesize isActive;
 
+BOOL _multipleTouches;
+
 #pragma mark Initialization methods
 
 -(id)initWithManager:(CCCameraManager*)_manager bridge:(RCTBridge *)_bridge {
@@ -33,7 +35,13 @@
     if (self = [super init]) {
         self.manager = _manager;
         self.bridge = _bridge;
+        [self.view setBackgroundColor:[UIColor orangeColor]];
 
+        // Set up pinch-to-zoom handler
+        UIPinchGestureRecognizer *pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinchToZoomRecognizer:)];
+        [self addGestureRecognizer:pinchGesture];
+        _multipleTouches = NO;
+        
         // Load the nib for this view
         NSBundle *bundle = [NSBundle bundleWithURL:[[NSBundle mainBundle] URLForResource:@"CCCameraResources" withExtension:@"bundle"]];
 
@@ -194,36 +202,56 @@
 
 - (void) touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    // Update the touch state.
-    if ([[event touchesForView:self.view] count] > 1) {
-
+    // How many touches we got here?
+    if ([[event allTouches] count] > 1) {
+        _multipleTouches = YES;
     }
-    
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-    if (self.camFocus)
-    {
-        [self.camFocus removeFromSuperview];
+    BOOL allTouchesEnded = ([touches count] == [[event allTouches] count]);
+
+    if (allTouchesEnded && !_multipleTouches) {
+        if (self.camFocus)
+        {
+            [self.camFocus removeFromSuperview];
+        }
+        
+        id<CCCameraDelegate> cameraDelegate = (id<CCCameraDelegate>)self.camera;
+        [cameraDelegate handleTouchEvent:event];
+        
+        UITouch *touch = [[event allTouches] anyObject];
+        CGPoint touchPoint = [touch locationInView:touch.view];
+
+        // animate at the focus point
+        self.camFocus = [[CCCameraFocusSquare alloc] initWithFrame:CGRectMake(touchPoint.x-40, touchPoint.y-40, 80, 80)];
+        [self.camFocus setBackgroundColor:[UIColor clearColor]];
+        [self addSubview:self.camFocus];
+        [self.camFocus setNeedsDisplay];
+        
+        [UIView beginAnimations:nil context:NULL];
+        [UIView setAnimationDuration:1.0];
+        [self.camFocus setAlpha:0.0];
+        [UIView commitAnimations];
+    }
+    
+    if (allTouchesEnded) {
+        _multipleTouches = NO;
+    }
+}
+
+-(void) handlePinchToZoomRecognizer:(UIPinchGestureRecognizer*)pinchRecognizer {
+    // Check if this zoom event has ended
+    BOOL zoomEnded = NO;
+    if ([pinchRecognizer state] == UIGestureRecognizerStateEnded ||
+        [pinchRecognizer state] == UIGestureRecognizerStateCancelled ||
+        [pinchRecognizer state] == UIGestureRecognizerStateFailed) {
+        zoomEnded = YES;
     }
     
     id<CCCameraDelegate> cameraDelegate = (id<CCCameraDelegate>)self.camera;
-    [cameraDelegate handleTouchEvent:event];
-    
-    UITouch *touch = [[event allTouches] anyObject];
-    CGPoint touchPoint = [touch locationInView:touch.view];
-
-    // animate at the focus point
-    self.camFocus = [[CCCameraFocusSquare alloc] initWithFrame:CGRectMake(touchPoint.x-40, touchPoint.y-40, 80, 80)];
-    [self.camFocus setBackgroundColor:[UIColor clearColor]];
-    [self addSubview:self.camFocus];
-    [self.camFocus setNeedsDisplay];
-    
-    [UIView beginAnimations:nil context:NULL];
-    [UIView setAnimationDuration:1.0];
-    [self.camFocus setAlpha:0.0];
-    [UIView commitAnimations];
+    [cameraDelegate handleZoom:pinchRecognizer.scale :zoomEnded];
 }
 
 
