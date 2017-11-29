@@ -287,7 +287,7 @@ class CameraLayout extends Component {
                 numberOfLines={1}
                 style={styles.headerTitle}
               >
-                Project Name
+                {this.props.projectName || ''}
               </Text>
             </TouchableOpacity>
 
@@ -436,7 +436,7 @@ class CameraLayout extends Component {
 
               {/* AR mode button */}
               <TouchableOpacity
-                onPress={() => {}}
+                onPress={() => this.props.arModePress()}
                 style={styles.modeButton}
               >
                 <ModeTitle>AR</ModeTitle>
@@ -445,7 +445,7 @@ class CameraLayout extends Component {
 
               {/* Before after mode button */}
               <TouchableOpacity
-                onPress={() => {}}
+                onPress={() => this.props.baModePress()}
                 style={styles.modeButton}
               >
                 <ModeTitle>B/A</ModeTitle>
@@ -479,6 +479,8 @@ CameraLayout.propTypes = {
   captureButtonPress: PropTypes.func,
   flipCamera: PropTypes.func,
   onClose: PropTypes.func,
+
+  projectName: PropTypes.string,
 };
 
 export default CameraLayout;

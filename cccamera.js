@@ -111,6 +111,11 @@ class CCCamera extends React.Component {
 
               captureButtonPress={() => { CameraModule.capture(); }}
               flipCamera={() => { CameraModule.flipCamera(); }}
+
+              projectName={this.props.projectName}
+
+              arModePress={this.props.arModePress}
+              baModePress={this.props.baModePress}
             />
         }
         {this.props.children}

@@ -65,8 +65,6 @@ class CameraSettings extends PureComponent {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <FeatherIcon name="x" size={24} color="transparent" />
-          <Text style={{ fontSize: 16 }}>Camera Settings</Text>
           <TouchableOpacity
             activeOpacity={1}
             hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
@@ -74,6 +72,8 @@ class CameraSettings extends PureComponent {
           >
             <FeatherIcon name="x" size={24} color="black" />
           </TouchableOpacity>
+          <Text style={{ fontSize: 16 }}>Camera Settings</Text>
+          <FeatherIcon name="x" size={24} color="transparent" />
         </View>
 
         {/* Quality Settings group */}
