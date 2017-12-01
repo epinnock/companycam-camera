@@ -31,7 +31,7 @@ DocScanner::DocScanner() :
 /** Returns the most recent debug image. */
 cv::Mat DocScanner::getDebugImage() const
 {
-    return imageEdges;
+    return imageResized;
 }
 
 /** Returns the most recent output image. */
@@ -86,8 +86,7 @@ DocScanner::ScanStatus DocScanner::smartScan(const cv::Mat& imageOrig)
     const unsigned long msStable = std::chrono::duration_cast<std::chrono::milliseconds>(timeNow-timeLastUnstable).count();
     if (msStable > optStableDurationMS) {
         if (!didGenerateOutput) {
-            scan(imageOrig, true);
-            didGenerateOutput = true;
+            didGenerateOutput = scan(imageOrig, true);
         }
         return DocScanner::DONE;
     } else {
@@ -98,9 +97,9 @@ DocScanner::ScanStatus DocScanner::smartScan(const cv::Mat& imageOrig)
 /** Performs a single scan of imageOrig.  The results of
  * {@link getPerspectiveRect} and {@link getDebugImage} will be updated, even
  * if the scan was unsuccessful.  The result of {@link getOutputImage} will
- * only be updated if doGenerateOutput is true.
+ * only be updated if doGenerateOutput is true AND this function returns true.
  */
-void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
+bool DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
 {
     // Determine proportional working size
     //--------------------------------
@@ -225,7 +224,7 @@ void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
 
     pRect = geom::getSmoothedRects(recentRects, wResize, hResize);
     // Quit early if no perspective rect found
-    if (!pRect.valid) { return; }
+    if (!pRect.valid) { return false; }
 
     cv::line(imageResized, pRect.p00, pRect.p10, colorPink, 2);
     cv::line(imageResized, pRect.p10, pRect.p11, colorPink, 2);
@@ -241,7 +240,7 @@ void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
     // Perspective correction
     //--------------------------------
     // Only carry out this final step if requested
-    if (!doGenerateOutput) { return; }
+    if (!doGenerateOutput) { return false; }
 
     // Don't bother creating image bigger than the bounding box; also limit to optMaxOutputDim
     cv::Rect rectBounds = perspectiveRectBoundingBox(pRect);
@@ -252,6 +251,11 @@ void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
     const int outputW = correctedScale * pRect.correctedWidth;
     const int outputH = correctedScale * pRect.correctedHeight;
 
+    // Quit if something has gone wrong with the rect
+    const bool invalidW = (outputW < 0) || (outputW > optMaxOutputDim);
+    const bool invalidH = (outputH < 0) || (outputH > optMaxOutputDim);
+    if (invalidW || invalidH) { return false; }
+
     std::vector<cv::Point2f> rectPerspective = { pRect.p00, pRect.p01, pRect.p11, pRect.p10 };
     std::vector<cv::Point2f> rectTarget = {
         cv::Point2f(0,0),
@@ -261,8 +265,8 @@ void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
     };
 
     // Since this method will be called many times with different imageOutput
-    // sizes, create a fixed-size imageOutputContainer which will *not* be
-    // re-allocated every frame, and then write to an ROI of the desired size.
+    // sizes, write to ROI inside fixed-size imageOutputContainer.
+    // (cv::Mat::create only allocates if needed; if not, returns immediately)
     imageOutputContainer.create(cv::Size(optMaxOutputDim,optMaxOutputDim), imageOrig.type());
     cv::Rect outputTarget(0,0,outputW,outputH);
     imageOutput = imageOutputContainer(outputTarget);
@@ -273,4 +277,5 @@ void DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
         imageOutput,
         perspectiveTransform,
         cv::Size(outputW, outputH));
+    return true;
 }
