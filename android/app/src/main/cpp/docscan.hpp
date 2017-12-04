@@ -39,7 +39,7 @@ class DocScanner
         void setStableDurationMS(const unsigned long ms);
         void reset();
 
-        void scan(const cv::Mat& imageOrig, const bool doGenerateOutput);
+        bool scan(const cv::Mat& imageOrig, const bool doGenerateOutput);
         cv::Mat getDebugImage() const;
         cv::Mat getOutputImage() const;
         geom::PerspectiveRect getPerspectiveRect() const;
