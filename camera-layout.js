@@ -285,13 +285,13 @@ class CameraLayout extends Component {
   doFlashAnimation = () => {
     Animated.sequence([
       Animated.timing(this.state.screenFlashOpacity, {
-        toValue: 0.8,
+        toValue: 1,
         duration: 120,
         // easing: Easing.cubic,
       }),
       Animated.timing(this.state.screenFlashOpacity, {
         toValue: 0,
-        duration: 280,
+        duration: 120,
         // easing: Easing.cubic,
       }),
     ]).start();
@@ -311,8 +311,8 @@ class CameraLayout extends Component {
         <LinearGradient
           colors={
             isiPhoneX ?
-              ['rgba(0,0,0,0.25)', 'transparent'] :
-              ['rgba(0,0,0,0.25)', 'rgba(0,0,0,0.05)', 'transparent']
+              ['rgba(0,0,0,0.35)', 'transparent'] :
+              ['rgba(0,0,0,0.35)', 'rgba(0,0,0,0.05)', 'transparent']
           }
         >
           <View style={styles.header}>
@@ -371,8 +371,8 @@ class CameraLayout extends Component {
         <LinearGradient
           colors={
             isiPhoneX ?
-              ['transparent', 'rgba(0,0,0,0.25)'] :
-              ['transparent', 'rgba(0,0,0,0.05)', 'rgba(0,0,0,0.25)']
+              ['transparent', 'rgba(0,0,0,0.35)'] :
+              ['transparent', 'rgba(0,0,0,0.05)', 'rgba(0,0,0,0.35)']
           }
         >
           <View style={styles.footer}>
