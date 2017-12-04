@@ -727,11 +727,7 @@
         }
         else {
              [latestView doPhotoAccepted:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage) :photoOrigin ];
-            // activate the camera preview again, after 0.8 seconds
-            dispatch_time_t delayTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC));
-            dispatch_after(delayTime, dispatch_get_main_queue(), ^(void){
-                [latestView.previewView.previewLayer.connection setEnabled:YES];
-            });
+//            [latestView.previewView.previewLayer.connection setEnabled:YES];
         }
     }
 }
@@ -940,7 +936,9 @@
      CCCameraView *latestView = [CCCameraManager getLatestView];
 
     // Pause the camera preview while the photo is processing
-    [latestView.previewView.previewLayer.connection setEnabled:NO];
+    if (self.cameraMode == CCCameraModeCamera) {
+     [latestView.previewView.previewLayer.connection setEnabled:NO];
+    }
 
     // Animate the screen flash
     // [latestView.cameraLayout animateScreenFlash];
