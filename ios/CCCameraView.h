@@ -57,6 +57,7 @@
 @property (nonatomic, retain) CCCameraManager *manager;
 @property (nonatomic, retain) RCTBridge *bridge;
 @property (nonatomic, retain) CCCamera *camera;
+@property (nonatomic, retain) UIView *flashView;
 @property (nonatomic, retain) id<CCCameraLayoutDelegate> cameraLayout;
 @property (nonatomic, retain) IBOutlet CCCameraPreviewView *previewView;
 @property (strong, nonatomic) JPSVolumeButtonHandler *volumeButtonHandler;

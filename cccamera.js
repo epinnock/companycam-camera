@@ -56,19 +56,13 @@ class CCCamera extends React.Component {
 
         switch (persistMode) {
           case PERSIST_FLASH_MODE:
-            if (value !== null) {
-              nextState.flashMode = parseInt(value);
-            }
+            nextState.flashMode = value ? parseInt(value) : constants.FlashMode.off;
             break;
           case PERSIST_FASTCAM_MODE:
-            if (value !== null) {
-              nextState.cameraMode = parseInt(value);
-            }
+            nextState.cameraMode = value ? parseInt(value) : constants.CameraMode.photo;
             break;
           case PERSIST_RESOLUTION_MODE:
-            if (value !== null) {
-              nextState.resolutionMode = parseInt(value);
-            }
+            nextState.resolutionMode = value ? parseInt(value) : constants.ResolutionMode.normal;
             break;
           default: break;
         }

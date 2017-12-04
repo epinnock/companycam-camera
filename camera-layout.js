@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 
 import {
   View, Text, TouchableOpacity, StyleSheet,
-  Platform, AsyncStorage,
+  Platform, AsyncStorage, Animated, Easing,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import DeviceInfo from 'react-native-device-info';
@@ -183,6 +183,7 @@ class CameraLayout extends Component {
       toastTitleText: '',
       toastMessageText: '',
       showSettings: false,
+      screenFlashOpacity: new Animated.Value(0),
     };
   }
 
@@ -281,10 +282,23 @@ class CameraLayout extends Component {
     });
   }
 
+  doFlashAnimation = () => {
+    Animated.sequence([
+      Animated.timing(this.state.screenFlashOpacity, {
+        toValue: 0.8,
+        duration: 120,
+        // easing: Easing.cubic,
+      }),
+      Animated.timing(this.state.screenFlashOpacity, {
+        toValue: 0,
+        duration: 280,
+        // easing: Easing.cubic,
+      }),
+    ]).start();
+  }
+
   render() {
     const constants = {...this.props.cameraConstants};
-    console.log(this.props.cameraState);
-
     const { flashMode, cameraMode, resolutionMode } = this.props.cameraState;
 
     const TorchIsOn = flashMode === constants.FlashMode.torch;
@@ -337,6 +351,22 @@ class CameraLayout extends Component {
               <Text style={styles.toastMessage}>{this.state.toastMessageText}</Text>
             </View> : null
         }
+
+        {/* flash animation */}
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            backgroundColor: 'white',
+            height: '100%',
+            width: '100%',
+            opacity: this.state.screenFlashOpacity.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 1],
+              extrapolate: 'clamp',
+            }),
+          }}
+        />
 
         <LinearGradient
           colors={
@@ -399,7 +429,10 @@ class CameraLayout extends Component {
               {
                 !PrimaryModeIsScan &&
                   <TouchableOpacity
-                    onPress={() => { this.props.captureButtonPress(); }}
+                    onPress={() => {
+                      this.doFlashAnimation();
+                      this.props.captureButtonPress();
+                    }}
                     style={styles.captureButton}
                   />
               }
@@ -496,6 +529,7 @@ class CameraLayout extends Component {
               />
             </View>
         }
+
       </View>
     );
   }

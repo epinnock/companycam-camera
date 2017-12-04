@@ -718,11 +718,20 @@
         // Execute the proper callback depending on the current camera mode
         if (self.cameraMode != CCCameraModeFastCam) {
              [latestView doPhotoTaken:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage) :photoOrigin completion:^{
-               // do nothing at the moment
+                 // activate the camera preview again, after 0.8 seconds
+                 dispatch_time_t delayTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC));
+                 dispatch_after(delayTime, dispatch_get_main_queue(), ^(void){
+                     [latestView.previewView.previewLayer.connection setEnabled:YES];
+                 });
              }];
         }
         else {
              [latestView doPhotoAccepted:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage) :photoOrigin ];
+            // activate the camera preview again, after 0.8 seconds
+            dispatch_time_t delayTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC));
+            dispatch_after(delayTime, dispatch_get_main_queue(), ^(void){
+                [latestView.previewView.previewLayer.connection setEnabled:YES];
+            });
         }
     }
 }
@@ -922,7 +931,6 @@
 
 // This method captures a photo from the camera
 -(void)takePicture {
-// -(void)takePicture:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject {
 
     // The volumeButtonHandler may try to trigger this method, so make sure the current camera mode is CCCameraModeCamera or CCCameraModeFastCam before trying to capture a photo.
     if (!(self.cameraMode == CCCameraModeCamera || self.cameraMode == CCCameraModeFastCam)) {
@@ -930,6 +938,9 @@
     }
 
      CCCameraView *latestView = [CCCameraManager getLatestView];
+
+    // Pause the camera preview while the photo is processing
+    [latestView.previewView.previewLayer.connection setEnabled:NO];
 
     // Animate the screen flash
     // [latestView.cameraLayout animateScreenFlash];
@@ -939,8 +950,7 @@
     //     [latestView.cameraLayout showLoadingView];
     //     [latestView.cameraLayout disableButtons];
     //
-    //     // Pause the camera preview while the photo is processing
-    //     [latestView.previewView.previewLayer.connection setEnabled:NO];
+    //
     // }
 
     /*

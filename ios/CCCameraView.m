@@ -46,6 +46,11 @@ BOOL _multipleTouches;
 
         [bundle loadNibNamed:@"CCCameraView" owner:self options:nil];
         [self addSubview:self.view];
+        
+        self.flashView = [[UIView alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
+        self.flashView.backgroundColor = [UIColor whiteColor];
+        self.flashView.alpha = 0.0;
+        [self addSubview:self.flashView];
 
         // Initialize the volumeButtonHandler
         self.volumeButtonHandler = [JPSVolumeButtonHandler volumeButtonHandlerWithUpBlock:^{
@@ -54,6 +59,7 @@ BOOL _multipleTouches;
             if (self.camera != nil) {
                 id<CCCameraDelegate> cameraDelegate = (id<CCCameraDelegate>)self.camera;
                 [cameraDelegate takePicture];
+                [self animateScreenFlash];
             }
 
         } downBlock:^{
@@ -111,6 +117,26 @@ BOOL _multipleTouches;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSetInactive:) name:UIApplicationDidEnterBackgroundNotification object:nil];
 
     self.isActive = YES;
+}
+
+// This method animates the screen flash after capturing a photo
+-(void)animateScreenFlash {
+    
+    /* http://stackoverflow.com/questions/12924094/simulate-a-picture-taken-screen-flash */
+    
+    CAKeyframeAnimation *opacityAnimation = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
+    NSArray *animationValues = @[ @0.8f, @0.0f ];
+    NSArray *animationTimes = @[ @0.3f, @1.0f ];
+    id timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
+    NSArray *animationTimingFunctions = @[ timingFunction, timingFunction ];
+    [opacityAnimation setValues:animationValues];
+    [opacityAnimation setKeyTimes:animationTimes];
+    [opacityAnimation setTimingFunctions:animationTimingFunctions];
+    opacityAnimation.fillMode = kCAFillModeForwards;
+    opacityAnimation.removedOnCompletion = YES;
+    opacityAnimation.duration = 0.4;
+    
+    [self.flashView.layer addAnimation:opacityAnimation forKey:@"animation"];
 }
 
 // This method can be used to do any necessary cleanup before closing the view
