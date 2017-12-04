@@ -802,9 +802,6 @@
             // Set the layout object's reference to the camera
             CCCameraView *latestView = [CCCameraManager getLatestView];
             [latestView.cameraLayout setCameraObject:latestView.camera];
-
-            // Update the flash setting for this camera
-            [self updateFlashSetting:self.flashMode];
         }
     });
 }
@@ -920,7 +917,7 @@
     }
 
     // Update the flash mode for the camera
-    [self updateFlashSetting:self.flashMode];
+//    [self updateFlashSetting:self.flashMode];
 }
 
 // This method captures a photo from the camera

@@ -477,8 +477,8 @@
 -(IBAction)flashButtonClick:(id)sender {
     
     // Set the flash mode for the camera and set the flash image
-    [camera toggleFlash];
-    [self setFlashModeImage:[camera getFlashModeString]];
+//    [camera toggleFlash];
+//    [self setFlashModeImage:[camera getFlashModeString]];
 }
 
 -(IBAction)captureButtonClick:(id)sender {

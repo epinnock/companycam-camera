@@ -1,12 +1,21 @@
 import React, { Component, PropTypes } from 'react';
 
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import {
+  View, Text, TouchableOpacity, StyleSheet,
+  Platform, AsyncStorage,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import DeviceInfo from 'react-native-device-info';
 import CCCamera from '@companycam/companycam-camera';
 import styled from 'styled-components/native';
 import CameraSettings from './camera-settings';
 import { invert } from 'lodash';
+
+import {
+  PERSIST_FASTCAM_MODE,
+  PERSIST_FLASH_MODE,
+  PERSIST_RESOLUTION_MODE,
+} from './cccam-enums';
 
 // TODO remove what we dont use for icons...
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
@@ -177,7 +186,7 @@ class CameraLayout extends Component {
     };
   }
 
-  setCameraMode = (nextMode) => {
+  setCameraMode = async (nextMode) => {
     const constants = {...this.props.cameraConstants};
     const nextState = { ...this.props.cameraState };
 
@@ -200,13 +209,22 @@ class CameraLayout extends Component {
           break;
         default: break;
       }
+
+      // if we aren't in scanner mode, store mode to be persisted later
+      if (nextMode !== constants.CameraMode.scanner) {
+        try {
+          await AsyncStorage.setItem(PERSIST_FASTCAM_MODE, nextMode.toString());
+        } catch (error) {
+          console.warn('error storing camera mode', error);
+        }
+      }
     }
 
     this.props.setCameraState(nextState);
     this.forceUpdate(); // since the state is in the parent, we need this to rerender icons
   }
 
-  setResolutionMode = (nextModeString) => {
+  setResolutionMode = async (nextModeString) => {
     const constants = {...this.props.cameraConstants};
     const nextState = { ...this.props.cameraState };
 
@@ -215,23 +233,16 @@ class CameraLayout extends Component {
     if (this.props.cameraState.resolutionMode !== nextMode) {
       nextState.resolutionMode = nextMode;
       this.props.setCameraState(nextState);
+
+      try {
+        await AsyncStorage.setItem(PERSIST_RESOLUTION_MODE, nextMode.toString());
+      } catch (error) {
+        console.warn('error storing resolution mode', error);
+      }
     }
   }
 
-  displayToast = (title, message) => {
-    this.setState({
-      showToast: true,
-      toastTitleText: title,
-      toastMessageText: message,
-    }, () => {
-      clearTimeout(this.toastTimer);
-      this.toastTimer = setTimeout(() => {
-        this.setState({ showToast: false });
-      }, 1750);
-    });
-  }
-
-  toggleFlashMode = () => {
+  toggleFlashMode = async () => {
     const constants = {...this.props.cameraConstants};
     const nextState = { ...this.props.cameraState };
 
@@ -247,8 +258,27 @@ class CameraLayout extends Component {
       default: break;
     }
 
+    try {
+      await AsyncStorage.setItem(PERSIST_FLASH_MODE, nextState.flashMode.toString());
+    } catch (error) {
+      console.warn('error storing flash mode', error);
+    }
+
     this.props.setCameraState(nextState);
     this.forceUpdate(); // since the state is in the parent, we need this to rerender icons
+  }
+
+  displayToast = (title, message) => {
+    this.setState({
+      showToast: true,
+      toastTitleText: title,
+      toastMessageText: message,
+    }, () => {
+      clearTimeout(this.toastTimer);
+      this.toastTimer = setTimeout(() => {
+        this.setState({ showToast: false });
+      }, 1750);
+    });
   }
 
   render() {

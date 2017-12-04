@@ -3,8 +3,15 @@ import {
   NativeModules,
   requireNativeComponent,
   View,
+  AsyncStorage,
 } from 'react-native';
 import CameraLayout from './camera-layout';
+
+import {
+  PERSIST_FASTCAM_MODE,
+  PERSIST_FLASH_MODE,
+  PERSIST_RESOLUTION_MODE,
+} from './cccam-enums';
 
 const CameraModule = NativeModules.CCCameraModuleIOS || NativeModules.CCCameraModule;
 
@@ -29,12 +36,57 @@ class CCCamera extends React.Component {
   constructor(props){
     super(props);
 
-    // TODO: Implement using Settings from RN to persist modes
     this.state = {
-      flashMode: constants.FlashMode.off,
-      cameraMode: constants.CameraMode.photo,
-      resolutionMode: constants.ResolutionMode.normal,
+      hasPersistedModes: false,
     };
+  }
+
+  componentDidMount() {
+    this._persistCameraModes()
+  }
+
+  _persistCameraModes = async () => {
+    try {
+      const persistedModes = await AsyncStorage.multiGet([PERSIST_FASTCAM_MODE, PERSIST_FLASH_MODE, PERSIST_RESOLUTION_MODE]);
+      const nextState = { ...this.state };
+
+      for (modeKeyValuePair of persistedModes) {
+        const persistMode = modeKeyValuePair[0];
+        const value = modeKeyValuePair[1];
+
+        switch (persistMode) {
+          case PERSIST_FLASH_MODE:
+            if (value !== null) {
+              nextState.flashMode = parseInt(value);
+            }
+            break;
+          case PERSIST_FASTCAM_MODE:
+            if (value !== null) {
+              nextState.cameraMode = parseInt(value);
+            }
+            break;
+          case PERSIST_RESOLUTION_MODE:
+            if (value !== null) {
+              nextState.resolutionMode = parseInt(value);
+            }
+            break;
+          default: break;
+        }
+      }
+
+      this.setState({
+        ...nextState,
+        hasPersistedModes: true,
+      });
+    } catch (error) {
+      console.warn('error persisting modes', error);
+      this.setState({
+        hasPersistedModes: true,
+        flashMode: constants.FlashMode.off,
+        cameraMode: constants.CameraMode.photo,
+        resolutionMode: constants.ResolutionMode.normal,
+      });
+    }
   }
 
   _onClose = (event) => {
