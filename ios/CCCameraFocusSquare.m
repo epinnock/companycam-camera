@@ -9,7 +9,6 @@
 #import "CCCameraFocusSquare.h"
 #import <QuartzCore/QuartzCore.h>
 
-const float squareLength = 80.0f;
 @implementation CCCameraFocusSquare
 
 - (id)initWithFrame:(CGRect)frame
