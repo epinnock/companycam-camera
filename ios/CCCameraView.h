@@ -19,7 +19,7 @@
 #import "CCCameraPreviewView.h"
 #import "JPSVolumeButtonHandler/JPSVolumeButtonHandler.h"
 #import "CCCameraEnums.h"
-#import "CameraFocusSquare.h"
+#import "CCCameraFocusSquare.h"
 
 @class CCCameraManager;
 @class CCCamera;

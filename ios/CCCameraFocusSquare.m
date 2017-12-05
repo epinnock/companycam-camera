@@ -1,12 +1,12 @@
 //
-//  CameraFocusSquare.m
+//  CCCameraFocusSquare.m
 //  CCCamera
 //
 //  Created by Jason Gaare on 11/28/17.
 //
 //  Emphatically copied from https://github.com/lwansbrough/react-native-camera/blob/master/ios/CameraFocusSquare.m
 
-#import "CameraFocusSquare.h"
+#import "CCCameraFocusSquare.h"
 #import <QuartzCore/QuartzCore.h>
 
 const float squareLength = 80.0f;
@@ -17,7 +17,7 @@ const float squareLength = 80.0f;
   self = [super initWithFrame:frame];
   if (self) {
     // Initialization code
-    
+
     [self setBackgroundColor:[UIColor clearColor]];
     [self.layer setBorderWidth:2.0];
     [self.layer setCornerRadius:4.0];

@@ -1,5 +1,5 @@
 //
-//  CameraFocusSquare.h
+//  CCCameraFocusSquare.h
 //  CCCamera
 //
 //  Created by Jason Gaare on 11/28/17.

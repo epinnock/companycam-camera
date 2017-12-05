@@ -722,6 +722,7 @@
         }
         else {
              [latestView doPhotoAccepted:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage) :photoOrigin ];
+            
         }
     }
 }
