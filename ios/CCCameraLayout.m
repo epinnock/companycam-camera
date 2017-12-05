@@ -127,7 +127,7 @@
 -(void)initView {
     
     // Make sure all the buttons are enabled by default
-    [self enableButtons];
+//    [self enableButtons];
     
     // Initialize the motionManager
     [self initializeMotionManager];
@@ -538,16 +538,16 @@
     self.camera = _camera;
     
     // Set the visibility of the flash button
-    [self setFlashButtonVisibility];
+//    [self setFlashButtonVisibility];
     
     // Set the flash mode image
     //    [self setFlashModeImage:[self.camera getFlashModeString]];
     
     // Set the resolution mode image
-    [self setResolutionImage:[self.camera getResolutionModeString]];
+//    [self setResolutionImage:[self.camera getResolutionModeString]];
     
     // Set the visibility of the camera button
-    [self setCameraButtonVisibility];
+//    [self setCameraButtonVisibility];
     
     // Set the camera layout state
 //    [self setCameraMode:[self.camera getCameraModeString]];
@@ -718,7 +718,7 @@
     
     // Scanner mode
     else if ([cameraMode isEqualToString:@"scanner"]) {
-        [scannerMessageLabel setHidden:NO];
+//        [scannerMessageLabel setHidden:NO];
         [captureButton setImage:[self getCCImageNamed:@"icon-capture-new.png"] forState:UIControlStateNormal];
         [captureButton setHidden:YES];
         [fastCamIndicator setHidden:YES];
@@ -912,7 +912,7 @@
     self.focusIndicatorTimer = [NSTimer scheduledTimerWithTimeInterval:animationIncrementTime target:self selector:@selector(incrementFocusIndicatorRadius:) userInfo:nil repeats:YES];
     
     // Show the focusIndicatorView
-    [self.focusIndicatorView setHidden:NO];
+//    [self.focusIndicatorView setHidden:NO];
 }
 
 // This method hides the auto focus indicator view
@@ -934,12 +934,23 @@
 
 // This method shows the layout view
 -(void)showCameraLayout {
-    [self setHidden:NO];
+    [[self topSubview] setHidden:NO];
+    [[self bottomSubview] setHidden:NO];
+    [[self focusIndicatorView] setHidden:NO];
+    [[self toggleCamera] setHidden:NO];
+    [[self toggleFlash] setHidden:NO];
+    [[self captureButton] setHidden:NO];
 }
 
 // This method hides the layout view
 -(void)hideCameraLayout {
-    [self setHidden:YES];
+    [[self topSubview] setHidden:YES];
+    [[self bottomSubview] setHidden:YES];
+    [[self focusIndicatorView] setHidden:YES];
+    [[self toggleCamera] setHidden:YES];
+    [[self toggleFlash] setHidden:YES];
+    [[self captureButton] setHidden:YES];
+    [[self scannerMessageLabel] setHidden:YES];
 }
 
 // This method enables all the buttons

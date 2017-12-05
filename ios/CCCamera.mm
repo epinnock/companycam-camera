@@ -718,16 +718,10 @@
         // Execute the proper callback depending on the current camera mode
         if (self.cameraMode != CCCameraModeFastCam) {
              [latestView doPhotoTaken:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage) :photoOrigin completion:^{
-                 // activate the camera preview again, after 0.8 seconds
-                 dispatch_time_t delayTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.8 * NSEC_PER_SEC));
-                 dispatch_after(delayTime, dispatch_get_main_queue(), ^(void){
-                     [latestView.previewView.previewLayer.connection setEnabled:YES];
-                 });
              }];
         }
         else {
              [latestView doPhotoAccepted:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage) :photoOrigin ];
-//            [latestView.previewView.previewLayer.connection setEnabled:YES];
         }
     }
 }
