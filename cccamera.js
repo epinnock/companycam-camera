@@ -145,7 +145,10 @@ class CCCamera extends React.Component {
               setCameraState={(nextState) => this.setState(nextState)}
               onClose={(e) => this._onClose(e)}
 
-              captureButtonPress={() => { CameraModule.capture(); }}
+              captureButtonPress={() => {
+                CameraModule.capture();
+                this.props.captureButtonPress();
+              }}
               flipCamera={() => { CameraModule.flipCamera(); }}
 
               projectName={this.props.projectName}
