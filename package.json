@@ -12,6 +12,16 @@
 	"devDependencies": {
 		"babel-preset-react-native": "1.9.1"
 	},
+	"peerDependencies": {
+		"lodash": "4.14.0",
+		"react": "15.4.2",
+    "react-native": "0.42.3",
+		"react-native-device-info": "0.12.1",
+		"react-native-linear-gradient": "2.0.0",
+		"react-native-orientation": "git+https://github.com/youennPennarun/react-native-orientation.git#05d0f60256d9ea750c3dc820a664193d464bdc6e",
+		"react-native-vector-icons": "4.4.2",
+		"styled-components": "2.1.0",
+	},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/CompanyCam/companycam-camera"

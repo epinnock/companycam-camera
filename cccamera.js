@@ -104,6 +104,11 @@ class CCCamera extends React.Component {
 
   _onPhotoTaken = (event) => {
     console.log(this.props);
+
+    if (this.state.cameraMode === constants.CameraMode.scanner) {
+      this._persistCameraModes(); // leave scan mode
+    }
+
     if (!this.props.onPhotoTaken) { return; }
 
     const { filename, imgWidth, imgHeight, photoOrigin } = event.nativeEvent;
@@ -186,6 +191,10 @@ CCCamera.propTypes = {
   flashMode: PropTypes.number,
   cameraMode: PropTypes.number,
   resolutionMode: PropTypes.number,
+
+  arModePress: PropTypes.func,
+  baModePress: PropTypes.func,
+  captureButtonPress: PropTypes.func,
 };
 
 CCCamera.defaultProps = {
@@ -201,6 +210,10 @@ CCCamera.defaultProps = {
 
   hideNativeUI: false,
   hideCameraLayout: false,
+
+  arModePress: () => {},
+  baModePress: () => {},
+  captureButtonPress: () => {},
 };
 
 export const constants = CCCamera.constants;

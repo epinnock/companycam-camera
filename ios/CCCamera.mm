@@ -718,6 +718,10 @@
         // Execute the proper callback depending on the current camera mode
         if (self.cameraMode != CCCameraModeFastCam) {
              [latestView doPhotoTaken:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage) :photoOrigin completion:^{
+                 dispatch_time_t delayTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC));
+                 dispatch_after(delayTime, dispatch_get_main_queue(), ^(void){
+                     [latestView.previewView.previewLayer.connection setEnabled:YES];
+                 });
              }];
         }
         else {
@@ -965,6 +969,7 @@
 
             if (imageDataSampleBuffer) {
 
+                
                 self.photoData = [AVCaptureStillImageOutput jpegStillImageNSDataRepresentation:imageDataSampleBuffer];
 
                 // If the photoData wasn't nil, then save the image to the file system
