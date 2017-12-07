@@ -40,6 +40,12 @@ RCT_EXPORT_MODULE(CCCameraModuleIOS);
                      @"high": @(CCCameraResolutionModeHigh),
                      @"super": @(CCCameraResolutionModeSuper),
                    },
+             @"Orientation": @{
+                     @"portrait": @(CCCameraOrientationPortrait),
+                     @"landscapeleft": @(CCCameraOrientationLandscapeLeft),
+                     @"landscaperight": @(CCCameraOrientationLandscapeRight),
+                     @"portraitupsidedown": @(CCCameraOrientationPortraitUpsideDown),
+                   },
              };
 }
 

@@ -3,10 +3,10 @@ import React, { Component, PropTypes } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
   Platform, AsyncStorage, Animated, Easing,
+  Dimensions, DeviceEventEmitter,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import DeviceInfo from 'react-native-device-info';
-import CCCamera from '@companycam/companycam-camera';
 import styled from 'styled-components/native';
 import CameraSettings from './camera-settings';
 import { invert } from 'lodash';
@@ -184,8 +184,49 @@ class CameraLayout extends Component {
       toastMessageText: '',
       showSettings: false,
       screenFlashOpacity: new Animated.Value(0),
+      orientationDegrees: new Animated.Value(0),
+      swapHeaderButtons: false,
     };
   }
+
+  componentDidMount() {
+    DeviceEventEmitter.addListener('CCCameraOrientationChange', this._orientationChange);
+  }
+
+  componentWillUnmount() {
+    DeviceEventEmitter.addListener('CCCameraOrientationChange', this._orientationChange);
+  }
+
+  _orientationChange = (changeEvent) => {
+      const constants = {...this.props.cameraConstants};
+      const { orientation } = changeEvent;
+
+      let nextDegree = 0;
+      let swapHeaderButtons = false;
+
+      switch (orientation) {
+        case constants.Orientation.portrait:
+          nextDegree = 0;
+          break;
+        case constants.Orientation.landscapeleft:
+          nextDegree = 90;
+          swapHeaderButtons = true;
+          break;
+        case constants.Orientation.landscaperight:
+          nextDegree = -90;
+          break;
+        case constants.Orientation.portraitupsidedown:
+          nextDegree = 180;
+          break;
+        default: break;
+      }
+
+      Animated.timing(this.state.orientationDegrees, {
+        toValue: nextDegree,
+        duration: 100,
+      }).start();
+      this.setState({ swapHeaderButtons });
+    }
 
   setCameraMode = async (nextMode) => {
     const constants = {...this.props.cameraConstants};
@@ -315,7 +356,11 @@ class CameraLayout extends Component {
               ['rgba(0,0,0,0.35)', 'rgba(0,0,0,0.05)', 'transparent']
           }
         >
-          <View style={styles.header}>
+          <View
+            style={[styles.header, {
+              flexDirection: this.state.swapHeaderButtons ? 'row-reverse' : 'row',
+            }]}
+          >
             <TouchableOpacity
               onPress={(e) => this.props.onClose(e)}
               style={styles.uiButton}
@@ -396,11 +441,19 @@ class CameraLayout extends Component {
               {/* Preview tray */}
               {
                 !PrimaryModeIsScan &&
-                  <TouchableOpacity
-                    onPress={() => {}}
-                    style={styles.uiButton}
-                  >
-                    <MaterialIcon name="crop-portrait" size={32} color="white" />
+                  <TouchableOpacity onPress={() => {}}>
+                    <Animated.View
+                      style={[styles.uiButton, {
+                        transform: [{
+                          rotate: this.state.orientationDegrees.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ['0deg', '1deg'],
+                          }),
+                        }]
+                      }]}
+                    >
+                      <MaterialIcon name="crop-portrait" size={32} color="white" />
+                    </Animated.View>
                   </TouchableOpacity>
               }
 
@@ -415,13 +468,23 @@ class CameraLayout extends Component {
                         this.setCameraMode(constants.CameraMode.fastcam);
                       }
                     }}
-                    style={styles.uiButton}
                   >
-                    <MaterialIcon
-                      name={cameraMode === constants.CameraMode.fastcam ? FASTCAM_ON_ICON : FASTCAM_OFF_ICON}
-                      size={24}
-                      color="white"
-                    />
+                    <Animated.View
+                      style={[styles.uiButton, {
+                        transform: [{
+                          rotate: this.state.orientationDegrees.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ['0deg', '1deg'],
+                          }),
+                        }]
+                      }]}
+                    >
+                      <MaterialIcon
+                        name={cameraMode === constants.CameraMode.fastcam ? FASTCAM_ON_ICON : FASTCAM_OFF_ICON}
+                        size={24}
+                        color="white"
+                      />
+                    </Animated.View>
                   </TouchableOpacity>
               }
 
@@ -438,11 +501,19 @@ class CameraLayout extends Component {
               }
 
               {/* Front/back camera button */}
-              <TouchableOpacity
-                onPress={() => { this.props.flipCamera(); }}
-                style={styles.uiButton}
-              >
-                <FeatherIcon name="repeat" size={24} color="white" />
+              <TouchableOpacity onPress={() => { this.props.flipCamera(); }}>
+                <Animated.View
+                  style={[styles.uiButton, {
+                    transform: [{
+                      rotate: this.state.orientationDegrees.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['0deg', '1deg'],
+                      }),
+                    }]
+                  }]}
+                >
+                  <FeatherIcon name="repeat" size={24} color="white" />
+                </Animated.View>
               </TouchableOpacity>
 
               {/* Magic invisible view for when scanner mode is active */}
@@ -452,15 +523,23 @@ class CameraLayout extends Component {
               }
 
               {/* Flash mode button */}
-              <TouchableOpacity
-                onPress={() => {this.toggleFlashMode(); }}
-                style={styles.uiButton}
-              >
-                <MaterialCommunityIcon
-                  name={TorchIsOn ? FLASH_ON_ICON : FLASH_OFF_ICON}
-                  size={24}
-                  color="white"
-                />
+              <TouchableOpacity onPress={() => {this.toggleFlashMode(); }}>
+                <Animated.View
+                  style={[styles.uiButton, {
+                    transform: [{
+                      rotate: this.state.orientationDegrees.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['0deg', '1deg'],
+                      }),
+                    }]
+                  }]}
+                >
+                  <MaterialCommunityIcon
+                    name={TorchIsOn ? FLASH_ON_ICON : FLASH_OFF_ICON}
+                    size={24}
+                    color="white"
+                  />
+                </Animated.View>
               </TouchableOpacity>
             </View>
 

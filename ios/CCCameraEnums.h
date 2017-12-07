@@ -36,3 +36,10 @@ typedef NS_ENUM( NSInteger, AVCamSetupResult ) {
   AVCamSetupResultCameraNotAuthorized,
   AVCamSetupResultSessionConfigurationFailed
 };
+
+typedef NS_ENUM( NSInteger, CCCameraOrientation ) {
+  CCCameraOrientationPortrait,
+  CCCameraOrientationLandscapeLeft,
+  CCCameraOrientationLandscapeRight,
+  CCCameraOrientationPortraitUpsideDown,
+};
