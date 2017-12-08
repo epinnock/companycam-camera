@@ -22,7 +22,7 @@ import com.newcam.cameras.CCCamera;
 import com.newcam.cameras.CCCamera1;
 import com.newcam.cameras.CCCamera2;
 import com.newcam.imageprocessing.CCCameraImageProcessor;
-import com.newcam.imageprocessing.DocScanOpenCV;
+import com.newcam.imageprocessing.TensorFlowExperiment;
 import com.newcam.utils.AppPreferences;
 import com.newcam.utils.CameraCheck;
 import com.newcam.views.CCCameraLayout;
@@ -90,12 +90,12 @@ public class CCCameraView extends RelativeLayout {
             RelativeLayout.LayoutParams newParams = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             this.addView(mCameraLayout, newParams);
 
-            DocScanOpenCV dso = new DocScanOpenCV(context);
-            dso.setLayoutParams(newParams);
-            dso.bringToFront();
-            this.addView(dso);
+            TensorFlowExperiment imageProcessorView = new TensorFlowExperiment(context);
+            imageProcessorView.setLayoutParams(newParams);
+            imageProcessorView.bringToFront();
+            this.addView(imageProcessorView);
 
-            ccImageProcessor = dso;
+            ccImageProcessor = imageProcessorView;
 
             init(context);
         }else{

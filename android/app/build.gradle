@@ -39,6 +39,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:23.2.1'
     compile 'com.android.support:design:23.1.0'
     compile 'com.facebook.react:react-native:+'
+    compile 'org.tensorflow:tensorflow-android:+'
     // From node_modules
     compile 'com.google.code.gson:gson:2.4'
     compile 'org.parceler:parceler:1.1.2'
