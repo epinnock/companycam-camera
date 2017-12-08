@@ -43,6 +43,7 @@ BOOL _multipleTouches;
 
         // make sure we will get orientation notifications
         [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
+        self.camOrientation = CCCameraOrientationPortrait;
         
         // Load the nib for this view
         NSBundle *bundle = [NSBundle bundleWithURL:[[NSBundle mainBundle] URLForResource:@"CCCameraResources" withExtension:@"bundle"]];
@@ -237,44 +238,26 @@ BOOL _multipleTouches;
 {
     UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
     
-    CCCameraOrientation ccamOrientation;
     switch (orientation) {
         case UIDeviceOrientationPortrait:
-            ccamOrientation = CCCameraOrientationPortrait;
+            self.camOrientation = CCCameraOrientationPortrait;
             break;
         case UIDeviceOrientationLandscapeLeft:
-            ccamOrientation = CCCameraOrientationLandscapeLeft;
+            self.camOrientation = CCCameraOrientationLandscapeLeft;
             break;
         case UIDeviceOrientationLandscapeRight:
-            ccamOrientation = CCCameraOrientationLandscapeRight;
+            self.camOrientation = CCCameraOrientationLandscapeRight;
             break;
         case UIDeviceOrientationPortraitUpsideDown:
-            ccamOrientation = CCCameraOrientationPortraitUpsideDown;
+            self.camOrientation = CCCameraOrientationPortraitUpsideDown;
             break;
-            
         default:
-            // orientation is unknown, we try to get the status bar orientation
-            switch ([[UIApplication sharedApplication] statusBarOrientation]) {
-                case UIInterfaceOrientationPortrait:
-                    ccamOrientation = CCCameraOrientationPortrait;
-                    break;
-                case UIInterfaceOrientationLandscapeLeft:
-                    ccamOrientation = CCCameraOrientationLandscapeLeft;
-                case UIInterfaceOrientationLandscapeRight:
-                    ccamOrientation = CCCameraOrientationLandscapeRight;
-                    break;
-                case UIInterfaceOrientationPortraitUpsideDown:
-                    ccamOrientation = CCCameraOrientationPortraitUpsideDown;
-                    break;
-                default:
-                    ccamOrientation = CCCameraOrientationPortrait;
-                    break;
-            }
+            // use last known orientation (if FaceUp or FaceDown, or unknown)
             break;
     }
     
     [self.bridge.eventDispatcher sendDeviceEventWithName:@"CCCameraOrientationChange"
-                                                    body:@{@"orientation": [NSNumber numberWithInteger:ccamOrientation]}];
+                                                    body:@{@"orientation": [NSNumber numberWithInteger:self.camOrientation]}];
     
 }
 

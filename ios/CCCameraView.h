@@ -72,6 +72,7 @@
 @property (nonatomic, assign) BOOL isActive;
 
 @property (nonatomic, strong) CCCameraFocusSquare *camFocus;
+@property (nonatomic, assign) CCCameraOrientation camOrientation;
 
 @property (nonatomic, copy) RCTDirectEventBlock onClose;
 @property (nonatomic, copy) RCTDirectEventBlock onPhotoTaken;
