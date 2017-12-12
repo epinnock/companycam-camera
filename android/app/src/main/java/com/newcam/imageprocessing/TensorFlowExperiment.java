@@ -15,8 +15,6 @@ import android.view.View;
 
 import org.tensorflow.contrib.android.TensorFlowInferenceInterface;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.IntBuffer;
 
 /**
@@ -56,8 +54,16 @@ public class TensorFlowExperiment extends View implements CCCameraImageProcessor
     private static final String TF_OUTPUT_NODE = "combo/output";
 
     private TensorFlowInferenceInterface tfi;
-    private float[] floatArrayIn;
-    private float[] floatArrayOut;
+    private float[] floatArrayTFInput;
+    private float[] floatArrayTFOutput;
+
+    // TODO: Just used for the 'testing' blocks in setPreviewBytes for now
+    //--------------------------------------
+    private int[] cArrayTFInput;
+    private int[] cArrayTFOutput;
+    private Bitmap bitmapTFInput;
+    private Bitmap bitmapTFOutput;
+    private Canvas canvasTFInput;
 
     // Overlay image (should match container size)
     //--------------------------------------
@@ -79,14 +85,25 @@ public class TensorFlowExperiment extends View implements CCCameraImageProcessor
     protected Bitmap bitmapOriginal;
 
 
+
     public TensorFlowExperiment(Context context) {
         super(context);
         this.context = context;
 
         // TODO: Only load when ImageProcessor starts--if done here, it will load when camera opens regardless of mode
         tfi = new TensorFlowInferenceInterface(getResources().getAssets(), TF_MODEL_FILE);
-        floatArrayIn = new float[TF_IN_ROWS * TF_IN_COLS];
-        floatArrayOut = new float[TF_OUT_ROWS * TF_OUT_COLS];
+        floatArrayTFInput = new float[TF_IN_ROWS * TF_IN_COLS];
+        floatArrayTFOutput = new float[TF_OUT_ROWS * TF_OUT_COLS];
+
+        // TODO: Just used for the 'testing' blocks in setPreviewBytes for now
+        //---------------------------------------------------------
+        // Used to convert between bitmaps and float arrays
+        cArrayTFInput = new int[TF_IN_COLS * TF_IN_ROWS];
+        cArrayTFOutput = new int[TF_OUT_COLS * TF_OUT_ROWS];
+        bitmapTFInput = Bitmap.createBitmap(TF_IN_COLS, TF_IN_ROWS, Bitmap.Config.ARGB_8888);
+        bitmapTFOutput = Bitmap.createBitmap(TF_OUT_COLS, TF_OUT_ROWS, Bitmap.Config.ARGB_8888);
+        canvasTFInput = new Canvas(bitmapTFInput);
+        //---------------------------------------------------------
     }
 
     // RenderScript stuff
@@ -169,47 +186,46 @@ public class TensorFlowExperiment extends View implements CCCameraImageProcessor
 
     @Override
     public boolean setPreviewBytes(byte[] data, int rotation) {
+        if (!imageParamsHaveBeenSet) { return true; }
 
-        // Convert preview bytes -> Bitmap
+        // Convert preview bytes -> bitmapOriginal
         convertYUVToRGB(bitmapOriginal, data);
 
-        // Resize and encode into floats (TODO: Just for testing; use a better method!)
+        // TODO: Just for testing; use a better method!
+        // Convert: bitmapOriginal -> bitmapTFInput -> cArrayTFInput -> floatArrayTFInput
         //---------------------------------------------------------
-        Bitmap bitmapInput = Bitmap.createBitmap(TF_IN_COLS, TF_IN_ROWS, Bitmap.Config.ARGB_8888);
-        Canvas canvasInput = new Canvas(bitmapInput);
         Matrix matOrigToInput = getOrigToInput(rotation);
-        canvasInput.drawBitmap(bitmapOriginal, matOrigToInput, null);
+        canvasTFInput.drawBitmap(bitmapOriginal, matOrigToInput, null);
 
         int nPixelsIn = TF_IN_COLS * TF_IN_ROWS;
-        int[] rawOrig = new int[nPixelsIn];
-        bitmapInput.getPixels(rawOrig, 0, TF_IN_COLS, 0, 0, TF_IN_COLS, TF_IN_ROWS);
+        bitmapTFInput.getPixels(cArrayTFInput, 0, TF_IN_COLS, 0, 0, TF_IN_COLS, TF_IN_ROWS);
         for (int i=0; i<nPixelsIn; i++) {
-            int c = rawOrig[i];
-            floatArrayIn[i] = (0.299f*(float)Color.red(c) + 0.587f*(float)Color.red(c) + 0.114f*(float)Color.red(c))/255.0f;
+            int c = cArrayTFInput[i];
+            floatArrayTFInput[i] = (0.299f*(float)Color.red(c) + 0.587f*(float)Color.red(c) + 0.114f*(float)Color.red(c))/255.0f;
         }
         //---------------------------------------------------------
 
         // Feed input, compute and fetch output
-        tfi.feed(TF_INPUT_NODE, floatArrayIn, 1, TF_IN_ROWS, TF_IN_COLS, 1);
+        tfi.feed(TF_INPUT_NODE, floatArrayTFInput, 1, TF_IN_ROWS, TF_IN_COLS, 1);
         String[] outputNodes = { TF_OUTPUT_NODE };
         tfi.run(outputNodes);
-        tfi.fetch(TF_OUTPUT_NODE, floatArrayOut);
+        tfi.fetch(TF_OUTPUT_NODE, floatArrayTFOutput);
 
-        // Convert output float array to Bitmap for display (TODO: Just for testing; use a better method!)
+        // TODO: Just for testing; use a better method!
+        // Convert: floatArrayTFOutput -> cArrayTFOutput -> bitmapTFOutput -> bitmapOverlay
         //---------------------------------------------------------
         int nPixelsOut = TF_OUT_COLS * TF_OUT_ROWS;
-        int[] rawPv = new int[nPixelsOut];
+
         for (int i=0; i<nPixelsOut; i++) {
-            int c = (int)(255.0f * floatArrayOut[i]);
-            rawPv[i] = Color.argb(128, c, c, c);
+            int c = (int)(255.0f * floatArrayTFOutput[i]);
+            cArrayTFOutput[i] = Color.argb(192, c, c, c);
         }
-        Bitmap bitmapPv = Bitmap.createBitmap(TF_OUT_COLS, TF_OUT_ROWS, Bitmap.Config.ARGB_8888);
-        bitmapPv.copyPixelsFromBuffer(IntBuffer.wrap(rawPv));
+        bitmapTFOutput.copyPixelsFromBuffer(IntBuffer.wrap(cArrayTFOutput));
 
         bitmapOverlay.eraseColor(COLOR_0000);
-        Rect rSrc = new Rect(0, 0, bitmapPv.getWidth(), bitmapPv.getHeight());
+        Rect rSrc = new Rect(0, 0, bitmapTFOutput.getWidth(), bitmapTFOutput.getHeight());
         Rect rDst = new Rect(0, 0, bitmapOverlay.getWidth(), bitmapOverlay.getHeight());
-        canvasOverlay.drawBitmap(bitmapPv, rSrc, rDst, null);
+        canvasOverlay.drawBitmap(bitmapTFOutput, rSrc, rDst, null);
         //---------------------------------------------------------
 
         this.invalidate();
