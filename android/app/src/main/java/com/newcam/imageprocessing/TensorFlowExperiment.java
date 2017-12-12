@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
@@ -136,6 +137,36 @@ public class TensorFlowExperiment extends View implements CCCameraImageProcessor
         imageParamsHaveBeenSet = true;
     }
 
+    protected Matrix getOrigToInput(int rotation) {
+        int dimSrcLarge = Math.max(widthOrig, heightOrig);
+        int dimSrcSmall = Math.min(widthOrig, heightOrig);
+
+        int dimDstLarge = Math.max(TF_IN_COLS, TF_IN_ROWS);
+        int dimDstSmall = Math.min(TF_IN_COLS, TF_IN_ROWS);
+
+        float scaleL = (float)dimDstLarge / (float)dimSrcLarge;
+        float scaleS = (float)dimDstSmall / (float)dimSrcSmall;
+        float scale = Math.max(scaleL, scaleS);
+
+        Matrix mTransFirst = new Matrix();
+        mTransFirst.setTranslate(-(float)widthOrig/2.0f, -(float)heightOrig/2.0f);
+
+        Matrix mScale = new Matrix();
+        mScale.setScale(scale, scale);
+
+        Matrix mRotate = new Matrix();
+        mRotate.setRotate(rotation);
+
+        Matrix mTransLast = new Matrix();
+        mTransLast.setTranslate((float)TF_IN_COLS/2.0f, (float)TF_IN_ROWS/2.0f);
+
+        Matrix mFinal = mTransFirst;
+        mFinal.postConcat(mScale);
+        mFinal.postConcat(mRotate);
+        mFinal.postConcat(mTransLast);
+        return mFinal;
+    }
+
     @Override
     public boolean setPreviewBytes(byte[] data, int rotation) {
 
@@ -144,10 +175,14 @@ public class TensorFlowExperiment extends View implements CCCameraImageProcessor
 
         // Resize and encode into floats (TODO: Just for testing; use a better method!)
         //---------------------------------------------------------
-        Bitmap bitmapResized = Bitmap.createScaledBitmap(bitmapOriginal, TF_IN_COLS, TF_IN_ROWS, true);
+        Bitmap bitmapInput = Bitmap.createBitmap(TF_IN_COLS, TF_IN_ROWS, Bitmap.Config.ARGB_8888);
+        Canvas canvasInput = new Canvas(bitmapInput);
+        Matrix matOrigToInput = getOrigToInput(rotation);
+        canvasInput.drawBitmap(bitmapOriginal, matOrigToInput, null);
+
         int nPixelsIn = TF_IN_COLS * TF_IN_ROWS;
         int[] rawOrig = new int[nPixelsIn];
-        bitmapResized.getPixels(rawOrig, 0, TF_IN_COLS, 0, 0, TF_IN_COLS, TF_IN_ROWS);
+        bitmapInput.getPixels(rawOrig, 0, TF_IN_COLS, 0, 0, TF_IN_COLS, TF_IN_ROWS);
         for (int i=0; i<nPixelsIn; i++) {
             int c = rawOrig[i];
             floatArrayIn[i] = (0.299f*(float)Color.red(c) + 0.587f*(float)Color.red(c) + 0.114f*(float)Color.red(c))/255.0f;
@@ -168,8 +203,13 @@ public class TensorFlowExperiment extends View implements CCCameraImageProcessor
             int c = (int)(255.0f * floatArrayOut[i]);
             rawPv[i] = Color.argb(128, c, c, c);
         }
-        bitmapOverlay = Bitmap.createBitmap(TF_OUT_COLS, TF_OUT_ROWS, Bitmap.Config.ARGB_8888);
-        bitmapOverlay.copyPixelsFromBuffer(IntBuffer.wrap(rawPv));
+        Bitmap bitmapPv = Bitmap.createBitmap(TF_OUT_COLS, TF_OUT_ROWS, Bitmap.Config.ARGB_8888);
+        bitmapPv.copyPixelsFromBuffer(IntBuffer.wrap(rawPv));
+
+        bitmapOverlay.eraseColor(COLOR_0000);
+        Rect rSrc = new Rect(0, 0, bitmapPv.getWidth(), bitmapPv.getHeight());
+        Rect rDst = new Rect(0, 0, bitmapOverlay.getWidth(), bitmapOverlay.getHeight());
+        canvasOverlay.drawBitmap(bitmapPv, rSrc, rDst, null);
         //---------------------------------------------------------
 
         this.invalidate();
