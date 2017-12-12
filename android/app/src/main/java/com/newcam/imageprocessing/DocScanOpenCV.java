@@ -230,6 +230,7 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
         return requestNextFrame;
     }
 
+    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         if(!initializedBitmaps){ return; }
