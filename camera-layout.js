@@ -3,7 +3,7 @@ import React, { Component, PropTypes } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
   Platform, AsyncStorage, Animated, Easing,
-  Dimensions, NativeEventEmitter, NativeModules,
+  Dimensions,
 } from 'react-native';
 
 import LinearGradient from 'react-native-linear-gradient';
@@ -23,8 +23,6 @@ import {
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FeatherIcon from 'react-native-vector-icons/Feather';
-
-const orientationEmitter = new NativeEventEmitter(NativeModules.Orientation);
 
 const CAMERA_MODE_PHOTO = 'photo-mode';
 const CAMERA_MODE_SCAN = 'scan-mode';
@@ -195,19 +193,17 @@ class CameraLayout extends Component {
   }
 
   componentDidMount() {
-    this.orientationSubscription = orientationEmitter.addListener(
-        'CCCameraOrientationChange',
-        (orientation) => this._orientationChange(orientation)
-      );
+    Orientation.addCCCameraOrientationListener((orientation) => this._orientationChange(orientation));
   }
 
   componentWillUnmount() {
-    this.orientationSubscription.remove();
+    Orientation.removeCCCameraOrientationListener((orientation) => this._orientationChange(orientation));
   }
 
-  _orientationChange = (changeEvent) => {
+  _orientationChange = (orientation) => {
       const orientationEnum = Orientation.getOrientations();
-      const { orientation } = changeEvent;
+
+      console.log(orientationEnum, orientation);
 
       let nextDegree = 0;
       let swapHeaderButtons = false;

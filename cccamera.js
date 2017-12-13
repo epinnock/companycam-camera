@@ -31,7 +31,6 @@ class CCCamera extends React.Component {
     FlashMode: CameraModule.FlashMode, // off, on, auto, torch
     CameraMode: CameraModule.CameraMode, // fastcam, photo, scanner
     ResolutionMode: CameraModule.ResolutionMode, // normal, high, super
-    Orientation: CameraModule.Orientation, // portrait, landscapeleft, landscaperight, portraitupsidedown,
   };
 
   constructor(props){
