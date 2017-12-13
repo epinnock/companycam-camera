@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.renderscript.Allocation;
 import android.renderscript.Element;
@@ -225,7 +226,9 @@ public class TensorFlowExperiment extends View implements CCCameraImageProcessor
         bitmapOverlay.eraseColor(COLOR_0000);
         Rect rSrc = new Rect(0, 0, bitmapTFOutput.getWidth(), bitmapTFOutput.getHeight());
         Rect rDst = new Rect(0, 0, bitmapOverlay.getWidth(), bitmapOverlay.getHeight());
-        canvasOverlay.drawBitmap(bitmapTFOutput, rSrc, rDst, null);
+
+        Paint paint = new Paint(Paint.FILTER_BITMAP_FLAG);
+        canvasOverlay.drawBitmap(bitmapTFOutput, rSrc, rDst, paint);
         //---------------------------------------------------------
 
         this.invalidate();
