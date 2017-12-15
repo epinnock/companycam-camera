@@ -93,6 +93,8 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
 @synthesize ipDidAllocate;
 @synthesize currentScaleNumber;
 @synthesize startingScaleNumber;
+@synthesize tempFocusFinished;
+@synthesize tempExposureFinished;
 
 -(id)init {
     self = [super init];
@@ -284,16 +286,10 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
              can only be manipulated on the main thread.
              Note: As an exception to the above rule, it is not necessary to serialize video orientation changes
              on the AVCaptureVideoPreviewLayer’s connection with other session manipulation.
-             
-             Use the status bar orientation as the initial video orientation.
              */
-            UIInterfaceOrientation statusBarOrientation = [UIApplication sharedApplication].statusBarOrientation;
-            AVCaptureVideoOrientation initialVideoOrientation = AVCaptureVideoOrientationPortrait;
-            if ( statusBarOrientation != UIInterfaceOrientationUnknown ) {
-                initialVideoOrientation = (AVCaptureVideoOrientation)statusBarOrientation;
-            }
             
-            [CCCameraManager getLatestView].previewView.previewLayer.connection.videoOrientation = initialVideoOrientation;
+            // Set the videoOrientation to portrait because the layout is fixed to portrait
+            [CCCameraManager getLatestView].previewView.previewLayer.connection.videoOrientation = AVCaptureVideoOrientationPortrait;
         } );
     }
     else {
@@ -320,19 +316,7 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         [self.captureSession commitConfiguration];
         return;
     }
-    
-    //    CCCameraView *latestView = [CCCameraManager getLatestView];
-    //    self.videoCamera = [[CvVideoCamera alloc] initWithParentView:latestView.previewView];
-    //    self.videoCamera.defaultAVCaptureDevicePosition = AVCaptureDevicePositionBack;
-    //    self.videoCamera.defaultAVCaptureSessionPreset = AVCaptureSessionPreset1280x720;
-    //    self.videoCamera.defaultFPS = 30;
-    //    //self.videoSource.imageWidth = 1280;
-    //    //self.videoSource.imageHeight = 720;
-    //    self.videoCamera.delegate = self;
-    //    self.videoCamera.recordVideo = NO;
-    //    self.videoCamera.grayscaleMode = NO;
-    //    [self startCvVideoCamera];
-    
+
     // Add a video output for capturing the preview frames
     AVCaptureVideoDataOutput *thisVideoOutput = [[AVCaptureVideoDataOutput alloc] init];
     if ([self.captureSession canAddOutput:thisVideoOutput]) {
@@ -523,6 +507,8 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         // Get the max dimension for the current resolution setting
         CGFloat maxDimension = [self getDesiredMinimumHeightForResolution:self.resolutionMode];
         
+        NSLog([NSString stringWithFormat:@"ScanFocus: The size of the scanned image before resizing is width = %f and height = %f", image.size.width, image.size.height]);
+
         if (image.size.width > image.size.height) {
             imageRatio = image.size.height / image.size.width;
             image = [image CCMScaledToSize:CGSizeMake(maxDimension, floorf(imageRatio * maxDimension))];
@@ -758,6 +744,26 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
     }
 }
 
+// This method processes a scanned image
+-(void)processScannedImage {
+    
+    NSLog(@"ScanFocus: processScannedImage was called");
+    
+    CCCameraView *latestView = [CCCameraManager getLatestView];
+    
+    // Remove the sample buffer delegate from the video output
+    [self.videoOutput setSampleBufferDelegate:nil queue:nil];
+    
+    // Remove the ipDidAllocate flag so that the image processor will get initialized again the next time the scanner mode is selected
+    self.ipDidAllocate = NO;
+    
+    // Get the image output from the image processor
+    UIImage *latestScanImage = [latestView.cameraLayout getOutputImage];
+    
+    // Process the output image
+    [self processPhotoData:latestScanImage];
+}
+
 #pragma mark CCCameraDelegate methods
 
 // This method starts the camera
@@ -796,8 +802,9 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
             // Uncomment this section to add listeners for the completion of the auto focus and auto exposure routines
             ///////////////////////////////////////////
             // Add observers for the focus and exposure
-            //[self.camera addObserver:self forKeyPath:@"adjustingFocus" options:0 context:nil];
-            //[self.camera addObserver:self forKeyPath:@"adjustingExposure" options:0 context:nil];
+            int flags = NSKeyValueObservingOptionNew;
+            [self.camera addObserver:self forKeyPath:@"adjustingFocus" options:flags context:nil];
+            [self.camera addObserver:self forKeyPath:@"adjustingExposure" options:flags context:nil];
             ///////////////////////////////////////////
             
             // Add the new input to the capture session
@@ -809,6 +816,10 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
             
             // Update the flash setting for this camera
             [self updateFlashSetting:self.flashMode];
+            
+            // Set the initial values for the tempFocusFinished and tempExposureFinished flags
+            tempFocusFinished = YES;
+            tempExposureFinished = YES;
         }
     });
 }
@@ -833,14 +844,13 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         
         // Uncomment this section if you'd like to add listeners for the completion of the auto focus or auto exposure routines
         ///////////////////////////////////////////
-        /*
          // Remove the observers for the focus and exposure if necessary
          @try {
          [self.camera removeObserver:self forKeyPath:@"adjustingFocus" context:nil];
          [self.camera removeObserver:self forKeyPath:@"adjustingExposure" context:nil];
          }
          @catch(id exception) {
-         }*/
+         }
         ////////////////////////////////////////////
     }
 }
@@ -970,71 +980,6 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
                 
                 // If the photoData wasn't nil, then save the image to the file system
                 [self processPhotoData];
-                
-                //                if (self.photoData != nil) {
-                //
-                //                    // Get a reference to the CCCameraView
-                //                    CCCameraView *thisCameraView = [CCCameraManager getLatestView];
-                //
-                //                    // Create a UIImage from the photoData and rotate it to the proper orientation
-                //                    UIImage *originalImage = [UIImage imageWithData:self.photoData scale:1.0f];
-                //                    UIImage *rotatedImage = [originalImage CCMRotateForImageOrientation:[self getCurrentImageOrientation]];
-                //
-                //                    // Crop the image to the size of the CCCameraView
-                //                    UIImage *croppedImage = [self resizeImage:rotatedImage];
-                //
-                //                    // Set the additional pieces of metadata
-                //                    NSMutableDictionary *mutableMetadata = [[self.photoData exifDataForImage] mutableCopy];
-                //                    NSDate *now = [NSDate date];
-                //                    [mutableMetadata setDateDigitized:now];
-                //                    [mutableMetadata setDateOriginal:now];
-                //                    [mutableMetadata setImageOrientation:[self getCurrentImageOrientation]];
-                //                    [mutableMetadata setLocation:[thisCameraView getExifLocation]];
-                //
-                //                    // Get the data for the rotated image
-                //                    NSData *jpeg = UIImageJPEGRepresentation(croppedImage, 0.6f);
-                //
-                //                    // Write the rotated image data to the file system
-                //                    NSString *filePath = [StorageUtility writeDataToFile:jpeg];
-                //
-                //                    // If saveToPhone is set, then save the image to the device in addition to sending it to the server.
-                //                    BOOL saveToPhone = [[NSUserDefaults standardUserDefaults] boolForKey:@"SaveToPhone"];
-                //                    if (saveToPhone) {
-                //
-                //                        // Check for permission to acceess the camera roll
-                //                        [PHPhotoLibrary requestAuthorization:^( PHAuthorizationStatus status ) {
-                //                            if (status == PHAuthorizationStatusAuthorized) {
-                //
-                //                                NSLog(@"Trying to save a photo to the camera roll");
-                //
-                //                                // Add the photo to the camera roll
-                //                                [[PHPhotoLibrary sharedPhotoLibrary] performChanges:^{
-                //                                    PHAssetCreationRequest *creationRequest = [PHAssetCreationRequest creationRequestForAsset];
-                //                                    [creationRequest addResourceWithType:PHAssetResourceTypePhoto data:UIImageJPEGRepresentation(croppedImage, 0.7f) options:nil];
-                //                                } completionHandler:^( BOOL success, NSError * _Nullable error ) {
-                //                                    if (!success) {
-                //                                        NSLog(@"Error occurred while saving photo to photo library: %@", error);
-                //                                    }
-                //                                }];
-                //                            }
-                //                            else {
-                //                                NSLog( @"Not authorized to save photo" );
-                //                            }
-                //                        }];
-                //                    }
-                //
-                //                    // Execute the proper callback depending on the current camera mode
-                //                    if (self.cameraMode != CCCameraModeFastCam) {
-                //                        [thisCameraView doPhotoTaken:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage)];
-                //
-                //                        // Hide the loading view and enable the buttons again
-                //                        [latestView.cameraLayout hideLoadingView];
-                //                        [latestView.cameraLayout enableButtons];
-                //                    }
-                //                    else {
-                //                        [thisCameraView doPhotoAccepted:filePath :(int)CGImageGetWidth(croppedImage.CGImage) :(int)CGImageGetHeight(croppedImage.CGImage)];
-                //                    }
-                //                }
             }
             else {
                 
@@ -1166,23 +1111,49 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         // Release the Quartz image
         CGImageRelease(quartzImage);
         
-        // Send the image to the image processor
-        BOOL requestNextFrame = [latestView.cameraLayout setPreviewBytes:image];
+        // If the foundStableImage flag is set, then the scanner already found a stable image once and the autofocus routine has completed.  Send the preview bytes to the scanner and tell it to generate a new output immediately.
+        if (foundStableImage) {
+            
+            NSLog(@"ScanFocus: a stable image has already been found.");
+            
+            foundStableImage = NO;
+            
+            // Send the preview bytes to the scanner again and have it generate a new output image
+            [latestView.cameraLayout setPreviewBytes:image :YES];
+            
+            // Process the newly scanned image
+            [self processScannedImage];
+        }
         
-        // If the scan is done, then stop sending the frames to the image processor
-        if (!requestNextFrame) {
+        // Otherwise, check to see if the scan is done
+        else {
             
-            // Remove the sample buffer delegate from the video output
-            [self.videoOutput setSampleBufferDelegate:nil queue:nil];
+            // Send the image to the image processor
+            BOOL requestNextFrame = [latestView.cameraLayout setPreviewBytes:image :NO];
             
-            // Remove the ipDidAllocate flag so that the image processor will get initialized again the next time the scanner mode is selected
-            self.ipDidAllocate = NO;
-            
-            // Get the image output from the image processor
-            UIImage *latestScanImage = [latestView.cameraLayout getOutputImage];
-            
-            // Process the output image
-            [self processPhotoData:latestScanImage];
+            // If the scan is done, then try to focus the camera
+            if (!requestNextFrame) {
+                
+                // Check to see if the camera supports focus
+                if (self.camera != nil && [self.camera isFocusModeSupported:AVCaptureFocusModeAutoFocus] && [self.camera isFocusPointOfInterestSupported]) {
+                    
+                    // Check if the autofocus routine has already started
+                    if (!awaitingFocus) {
+                        
+                        // Set the awaitingFocus flag
+                        awaitingFocus = YES;
+                        
+                        // Try to auto focus the camera at the center of the scanned image
+                        CGPoint center = [latestView.cameraLayout getPerspectiveRectCenter];
+                        [self focusAtPoint:center];
+                    }
+                }
+                
+                // If the camera doesn't support focus, then just process the scanned image right now
+                else {
+                    [self processScannedImage];
+                }
+            }
         }
     }
 }
@@ -1226,37 +1197,50 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
         UITouch *touch = [[event allTouches] anyObject];
         CGPoint thisTouchPoint = [touch locationInView:latestView];
         
-        // Normalize the touch point coordinates with respect to the height and width of the camera view
-        int previewWidth = latestView.frame.size.width;
-        int previewHeight = latestView.frame.size.height;
-        
-        // The x and y coordinates from the touch event need to be converted to normalized landscape coordinates in order to set the focus point of interest
-        
-        // First, normalize the coordinates in the camera view reference frame
-        double n_y = thisTouchPoint.y/previewHeight;
-        double n_x = thisTouchPoint.x/previewWidth;
-        
-        // Then convert the normalized coordinates to a landcape reference frame with (0, 0) representing the upper left and (1, 1) representing the lower right when the home button is on the right.
-        CGPoint nsc = CGPointMake(n_y, 1.0 - n_x);
-        
-        // Set the focus point of interest
-        NSError *error;
-        [self.camera lockForConfiguration:&error];
-        [self.camera setFocusPointOfInterest:nsc];
-        [self.camera setFocusMode:AVCaptureFocusModeContinuousAutoFocus];
-        
-        // Check if the camera support auto exposure
-        if ([self.camera isExposureModeSupported:AVCaptureExposureModeAutoExpose] && [self.camera isExposurePointOfInterestSupported]) {
-            
-            // Set the exposure point of interest
-            [self.camera setExposurePointOfInterest:nsc];
-            [self.camera setExposureMode:AVCaptureExposureModeContinuousAutoExposure];
-        }
-        [self.camera unlockForConfiguration];
-        
+        // Focus the camera at this point
+        [self focusAtPoint:thisTouchPoint];
+
         // Show the focusIndicatorView
         [latestView.cameraLayout showAutoFocusIndicator:thisTouchPoint :YES];
     }
+}
+
+-(void)focusAtPoint:(CGPoint)thisTouchPoint {
+    
+    // Get a reference to the CCCameraView
+    CCCameraView *latestView = [CCCameraManager getLatestView];
+    
+    // Normalize the touch point coordinates with respect to the height and width of the camera view
+    int previewWidth = latestView.frame.size.width;
+    int previewHeight = latestView.frame.size.height;
+    
+    // The x and y coordinates from the touch event need to be converted to normalized landscape coordinates in order to set the focus point of interest
+    
+    // First, normalize the coordinates in the camera view reference frame
+    double n_y = thisTouchPoint.y/previewHeight;
+    double n_x = thisTouchPoint.x/previewWidth;
+    
+    NSLog([NSString stringWithFormat:@"focusing at point (%f, %f)", n_x, n_y]);
+    
+    // Then convert the normalized coordinates to a landcape reference frame with (0, 0) representing the upper left and (1, 1) representing the lower right when the home button is on the right.
+    CGPoint nsc = CGPointMake(n_y, 1.0 - n_x);
+    
+    // Set the focus point of interest
+    NSError *error;
+    tempFocusFinished = NO;
+    [self.camera lockForConfiguration:&error];
+    [self.camera setFocusPointOfInterest:nsc];
+    [self.camera setFocusMode:AVCaptureFocusModeAutoFocus];
+    
+    // Check if the camera support auto exposure
+    if ([self.camera isExposureModeSupported:AVCaptureExposureModeAutoExpose] && [self.camera isExposurePointOfInterestSupported]) {
+        
+        // Set the exposure point of interest
+        tempExposureFinished = NO;
+        [self.camera setExposurePointOfInterest:nsc];
+        [self.camera setExposureMode:AVCaptureExposureModeAutoExpose];
+    }
+    [self.camera unlockForConfiguration];
 }
 
 #pragma mark Persistent settings
@@ -1309,15 +1293,61 @@ typedef NS_ENUM( NSInteger, CCCameraMode ) {
 #pragma mark Key-Value observation methods
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+
+    if ([keyPath isEqualToString:@"adjustingFocus"]) {
+        
+        BOOL adjustingFocus = [ [change objectForKey:NSKeyValueChangeNewKey] isEqualToNumber:[NSNumber numberWithInt:1] ];
+        if(awaitingFocus) NSLog(@"ScanFocus: adjustingFocus was %@", adjustingFocus ? @"YES" : @"NO" );
+
+        // If the camera is no longer focusing, then set the tempFocusFinished flag
+        if (self.camera != nil && !self.camera.isAdjustingFocus) {
+            if(awaitingFocus) NSLog(@"ScanFocus: autofocus finished.");
+            tempFocusFinished = YES;
+        }
+    }
+    
+    else if ([keyPath isEqualToString:@"adjustingExposure"]) {
+        
+        BOOL adjustingExposure = [ [change objectForKey:NSKeyValueChangeNewKey] isEqualToNumber:[NSNumber numberWithInt:1] ];
+        if(awaitingFocus) NSLog(@"ScanFocus: adjustingExposure was %@", adjustingExposure ? @"YES" : @"NO" );
+        
+        // If the camera is no longer exposing, then set the tempExposureFinished flag
+        if (self.camera != nil && !self.camera.isAdjustingExposure) {
+            tempExposureFinished = YES;
+        }
+    }
     
     if ([keyPath isEqualToString:@"adjustingFocus"] || [keyPath isEqualToString:@"adjustingExposure"]) {
         
-        // If the camera is no longer focusing or exposing, then hide the focus indicator view
-        if (self.camera != nil && !self.camera.isAdjustingFocus && !self.camera.isAdjustingExposure) {
+        // If both the autoFocus and autoExposure have completed, then hide the indicator view
+        if (tempFocusFinished && tempExposureFinished) {
             
             // Get a reference to the CCCameraView
             CCCameraView *latestView = [CCCameraManager getLatestView];
             [latestView.cameraLayout hideAutoFocusIndicator];
+            
+            // If the awaitingFocus flag is set, then this auto focus event was triggered by the scanner, so try to retrieve an image from the scanner again now that the focus is complete
+            if (awaitingFocus) {
+                
+                // Turn off the awaiting focus flag again
+                awaitingFocus = NO;
+                
+                // Check if the current status of the scanner is DONE
+                if ([latestView.cameraLayout isDone]) {
+                    
+                    NSLog(@"ScanFocus: autofocus finished and the scanner was DONE.");
+                    
+                    // If this status is DONE, then get a new image from the scanner.  Set the foundStableImage flag so that the next preview will generate a new output image.
+                    foundStableImage = YES;
+                }
+                else {
+                    
+                    NSLog(@"ScanFocus: autofocus finished and the scanner was NOT DONE.");
+                    
+                    // If the status is no longer stable, then simply process the last image that the scanner recorded
+                    [self processScannedImage];
+                }
+            }
         }
     }
 }
