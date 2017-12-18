@@ -5,7 +5,9 @@ import {
   Platform, AsyncStorage, Animated, Easing,
   Dimensions, DeviceEventEmitter, Image,
 } from 'react-native';
+
 import LinearGradient from 'react-native-linear-gradient';
+import Orientation from 'react-native-orientation';
 import DeviceInfo from 'react-native-device-info';
 import styled from 'styled-components/native';
 import CameraSettings from './camera-settings';
@@ -180,36 +182,41 @@ class CameraLayout extends Component {
       screenFlashOpacity: new Animated.Value(0),
       orientationDegrees: new Animated.Value(0),
       swapHeaderButtons: false,
+      isLandscape: false,
     };
   }
 
   componentDidMount() {
-    DeviceEventEmitter.addListener('CCCameraOrientationChange', this._orientationChange);
+    Orientation.addCCCameraOrientationListener((orientation) => this._orientationChange(orientation));
   }
 
   componentWillUnmount() {
-    DeviceEventEmitter.addListener('CCCameraOrientationChange', this._orientationChange);
+    Orientation.removeCCCameraOrientationListener((orientation) => this._orientationChange(orientation));
   }
 
-  _orientationChange = (changeEvent) => {
-      const constants = {...this.props.cameraConstants};
-      const { orientation } = changeEvent;
+  _orientationChange = (orientation) => {
+      const orientationEnum = Orientation.getOrientations();
+
+      console.log(orientationEnum, orientation);
 
       let nextDegree = 0;
       let swapHeaderButtons = false;
+      let isLandscape = false;
 
       switch (orientation) {
-        case constants.Orientation.portrait:
+        case orientationEnum.portrait:
           nextDegree = 0;
           break;
-        case constants.Orientation.landscapeleft:
+        case orientationEnum.landscapeleft:
           nextDegree = 90;
           swapHeaderButtons = true;
+          isLandscape = true;
           break;
-        case constants.Orientation.landscaperight:
+        case orientationEnum.landscaperight:
           nextDegree = -90;
+          isLandscape = true;
           break;
-        case constants.Orientation.portraitupsidedown:
+        case orientationEnum.portraitupsidedown:
           nextDegree = 180;
           break;
         default: break;
@@ -507,7 +514,7 @@ class CameraLayout extends Component {
                   <TouchableOpacity
                     onPress={() => {
                       this.doFlashAnimation();
-                      this.props.captureButtonPress();
+                      this.props.captureButtonPress(this.state.isLandscape);
                     }}
                     style={styles.captureButton}
                   />

@@ -40,10 +40,6 @@ BOOL _multipleTouches;
         UIPinchGestureRecognizer *pinchGesture = [[UIPinchGestureRecognizer alloc] initWithTarget:self action:@selector(handlePinchToZoomRecognizer:)];
         [self addGestureRecognizer:pinchGesture];
         _multipleTouches = NO;
-
-        // make sure we will get orientation notifications
-        [[UIDevice currentDevice] beginGeneratingDeviceOrientationNotifications];
-        self.camOrientation = CCCameraOrientationPortrait;
         
         // Load the nib for this view
         NSBundle *bundle = [NSBundle bundleWithURL:[[NSBundle mainBundle] URLForResource:@"CCCameraResources" withExtension:@"bundle"]];
@@ -115,12 +111,6 @@ BOOL _multipleTouches;
                                             selector:@selector(onCameraFlip:)
                                                 name:@"CCCameraModuleFlipNotification"
                                               object:nil];
-    
-    // Set up orientation change notifier
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(deviceOrientationDidChange:)
-                                                 name:UIDeviceOrientationDidChangeNotification
-                                               object:nil];
 
     // Register to receive notifications when the app is sent to the background or enters the foreground
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(onSetActive:) name:UIApplicationWillEnterForegroundNotification object:nil];
@@ -231,34 +221,6 @@ BOOL _multipleTouches;
     // Release the camera
     id<CCCameraDelegate> cameraDelegate = (id<CCCameraDelegate>)self.camera;
     [cameraDelegate toggleCamera];
-}
-
-// This method responds to UIDeviceOrientationDidChangeNotification
-- (void)deviceOrientationDidChange:(NSNotification *)notification
-{
-    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-    
-    switch (orientation) {
-        case UIDeviceOrientationPortrait:
-            self.camOrientation = CCCameraOrientationPortrait;
-            break;
-        case UIDeviceOrientationLandscapeLeft:
-            self.camOrientation = CCCameraOrientationLandscapeLeft;
-            break;
-        case UIDeviceOrientationLandscapeRight:
-            self.camOrientation = CCCameraOrientationLandscapeRight;
-            break;
-        case UIDeviceOrientationPortraitUpsideDown:
-            self.camOrientation = CCCameraOrientationPortraitUpsideDown;
-            break;
-        default:
-            // use last known orientation (if FaceUp or FaceDown, or unknown)
-            break;
-    }
-    
-    [self.bridge.eventDispatcher sendDeviceEventWithName:@"CCCameraOrientationChange"
-                                                    body:@{@"orientation": [NSNumber numberWithInteger:self.camOrientation]}];
-    
 }
 
 #pragma mark Touches
