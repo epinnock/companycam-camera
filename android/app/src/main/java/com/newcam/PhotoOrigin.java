@@ -20,12 +20,12 @@ public enum PhotoOrigin {
         return stringValue;
     }
 
-    public static PhotoOrigin fromCameraMode(String cameraMode) {
-        if (cameraMode.equals("camera")) {
+    public static PhotoOrigin fromCameraMode(CameraMode mode) {
+        if (mode == CameraMode.CAMERA) {
             return PhotoOrigin.STANDARD_CAMERA;
-        } else if (cameraMode.equals("fastcam")) {
+        } else if (mode == CameraMode.FASTCAM) {
             return PhotoOrigin.STANDARD_CAMERA_FASTCAM;
-        } else if (cameraMode.equals("scanner")) {
+        } else if (mode == CameraMode.SCANNER) {
             return PhotoOrigin.STANDARD_CAMERA_DOCSCAN;
         } else {
             return PhotoOrigin.STANDARD_CAMERA;

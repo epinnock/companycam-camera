@@ -28,19 +28,6 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
 
     public static final String MODULE_NAME = "CCCameraModule";
 
-    public static final int CC_CAMERA_FLASH_OFF = 0;
-    public static final int CC_CAMERA_FLASH_ON = 1;
-    public static final int CC_CAMERA_FLASH_AUTO = 2;
-    public static final int CC_CAMERA_FLASH_TORCH = 3;
-
-    public static final int CC_CAMERA_MODE_FASTCAM = 0;
-    public static final int CC_CAMERA_MODE_CAMERA = 1;
-    public static final int CC_CAMERA_MODE_SCANNER = 2;
-
-    public static final int CC_RESOLUTION_MODE_NORMAL = 0;
-    public static final int CC_RESOLUTION_MODE_HIGH = 1;
-    public static final int CC_RESOLUTION_MODE_SUPER = 2;
-
     private ReactApplicationContext mContext;
 
     //TODO: only re-acquire the camera on onHostResume if onHostPause has occurred
@@ -71,10 +58,10 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
             private Map<String, Object> getFlashModeConstants() {
                 return Collections.unmodifiableMap(new HashMap<String, Object>() {
                     {
-                        put("off", CC_CAMERA_FLASH_OFF);
-                        put("on", CC_CAMERA_FLASH_ON);
-                        put("auto", CC_CAMERA_FLASH_AUTO);
-                        put("torch", CC_CAMERA_FLASH_TORCH);
+                        put("off", FlashMode.OFF);
+                        put("on", FlashMode.ON);
+                        put("auto", FlashMode.AUTO);
+                        put("torch", FlashMode.TORCH);
                     }
                 });
             }
@@ -82,9 +69,9 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
             private Map<String, Object> getCameraModeConstants() {
                 return Collections.unmodifiableMap(new HashMap<String, Object>() {
                     {
-                        put("fastcam", CC_CAMERA_MODE_FASTCAM);
-                        put("photo", CC_CAMERA_MODE_CAMERA);
-                        put("scanner", CC_CAMERA_MODE_SCANNER);
+                        put("fastcam", CameraMode.FASTCAM);
+                        put("photo", CameraMode.CAMERA);
+                        put("scanner", CameraMode.SCANNER);
                     }
                 });
             }
@@ -92,9 +79,9 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
             private Map<String, Object> getResolutionModeConstants() {
                 return Collections.unmodifiableMap(new HashMap<String, Object>() {
                     {
-                        put("normal", CC_RESOLUTION_MODE_NORMAL);
-                        put("high", CC_RESOLUTION_MODE_HIGH);
-                        put("super", CC_RESOLUTION_MODE_SUPER);
+                        put("normal", ResolutionMode.NORMAL);
+                        put("high", ResolutionMode.HIGH);
+                        put("super", ResolutionMode.SUPER);
                     }
                 });
             }
@@ -146,6 +133,26 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
         }
 
         camView.releaseCamera();
+    }
+
+    @ReactMethod
+    public void capture() {
+        CCCameraView camView = CCCameraManager.getLatestView();
+        if(camView == null){
+            printDebug("No CCCameraView instance; failed");
+            return;
+        }
+        camView.moduleCapture();
+    }
+
+    @ReactMethod
+    public void flipCamera() {
+        CCCameraView camView = CCCameraManager.getLatestView();
+        if(camView == null){
+            printDebug("No CCCameraView instance; failed");
+            return;
+        }
+        camView.moduleFlipCamera();
     }
 
     @ReactMethod

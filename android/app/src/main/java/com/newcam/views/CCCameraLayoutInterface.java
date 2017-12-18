@@ -1,4 +1,8 @@
-package com.newcam.utils;
+package com.newcam.views;
+
+import com.newcam.CameraMode;
+import com.newcam.FlashMode;
+import com.newcam.ResolutionMode;
 
 /**
  * Created by mattboyd on 2/10/17.
@@ -12,16 +16,16 @@ public interface CCCameraLayoutInterface {
     void setFlashButtonVisibility();
 
     // This method sets the flash button image
-    void setFlashModeImage(String flashMode);
+    void setFlashModeImage(FlashMode mode);
 
     // This method sets the resolution button image
-    void setResolutionImage(String resolutionMode);
+    void setResolutionImage(ResolutionMode mode);
 
     // This method sets the camera button visibility
     void setCameraButtonVisibility();
 
     // This method sets the camera mode layout features
-    void setCameraMode(String cameraMode);
+    void setCameraMode(CameraMode mode);
 
     // This method shows the resolution layout
     void showResolutionLayout();

@@ -177,6 +177,18 @@ public class CCCameraView extends RelativeLayout {
         }
     }
 
+    public void moduleCapture() {
+        if (mCamera != null) {
+            mCamera.takePicture();
+        }
+    }
+
+    public void moduleFlipCamera() {
+        if (mCamera != null) {
+            mCamera.toggleCamera();
+        }
+    }
+
     public void labelTouch() {
         // Finish the view with a result
         //finishWithResult("label"); //TODO: temporarily disabled
@@ -342,6 +354,26 @@ public class CCCameraView extends RelativeLayout {
             mCameraLayout.setVisibility(View.VISIBLE);
         }
       }
+    }
+
+    public void setFlashMode(FlashMode mode) {
+        if (mCamera != null) {
+            mCamera.persistFlashMode(mode);
+            mCamera.setFlash(mode);
+        }
+    }
+
+    public void setCameraMode(CameraMode mode) {
+        if (mCamera != null) {
+            mCamera.persistCameraMode(mode);
+        }
+    }
+
+    public void setResolutionMode(ResolutionMode mode) {
+        if (mCamera != null) {
+            mCamera.persistResolutionMode(mode);
+            mCamera.setResolution(mode);
+        }
     }
     //-------------------------------------
 }

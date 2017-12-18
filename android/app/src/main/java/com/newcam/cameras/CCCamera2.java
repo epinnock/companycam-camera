@@ -38,8 +38,10 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 
 import com.newcam.CCCameraView;
+import com.newcam.FlashMode;
 import com.newcam.PhotoOrigin;
 import com.newcam.R;
+import com.newcam.ResolutionMode;
 import com.newcam.utils.ExifUtils;
 import com.newcam.utils.PhotoUtils;
 import com.notagilx.companycam.util.LogUtil;
@@ -1524,7 +1526,7 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
     ///////////////////////////////
 
     @Override
-    public void setResolution(String resolutionMode) {
+    public void setResolution(ResolutionMode mode) {
 
         if (mCamera != null) {
 
@@ -1629,12 +1631,18 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
             mFlashMode = "auto";
         }*/
 
-        if(mFlashMode.equals("torch")) {
-            mFlashMode = "off";
+        if(mFlashMode == FlashMode.TORCH) {
+            setFlash(FlashMode.OFF);
+        } else {
+            setFlash(FlashMode.TORCH);
         }
-        else {
-            mFlashMode = "torch";
-        }
+
+
+    }
+
+    @Override
+    public void setFlash(FlashMode mode) {
+        mFlashMode = mode;
 
         // Call updatePreview to get the light to turn on or off if necessary
         updatePreview();
