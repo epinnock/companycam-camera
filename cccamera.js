@@ -4,8 +4,10 @@ import {
   requireNativeComponent,
   View,
   AsyncStorage,
+  Dimensions,
 } from 'react-native';
 import CameraLayout from './camera-layout';
+import CameraLayoutTablet from './camera-layout-tablet';
 
 import {
   PERSIST_FASTCAM_MODE,
@@ -14,6 +16,7 @@ import {
 } from './cccam-enums';
 
 const CameraModule = NativeModules.CCCameraModuleIOS || NativeModules.CCCameraModule;
+const isTablet = Math.min(Dimensions.get('window').width, Dimensions.get('window').height) >= 768;
 
 const normalizePhotoOrigin = (photoOrigin) => {
   const validPhotoOrigin = (
@@ -128,6 +131,7 @@ class CCCamera extends React.Component {
 
   render() {
     const { hideCameraLayout } = this.props;
+    const CCCameraLayout = isTablet ? CameraLayoutTablet : CameraLayout;
 
     return (
       <RNCCCamera

@@ -3,13 +3,12 @@ import React, { Component, PropTypes } from 'react';
 import {
   View, Text, TouchableOpacity, StyleSheet,
   Platform, AsyncStorage, Animated, Easing,
-  Dimensions, DeviceEventEmitter, Image,
+  Dimensions, DeviceEventEmitter,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import DeviceInfo from 'react-native-device-info';
 import styled from 'styled-components/native';
 import CameraSettings from './camera-settings';
-import CameraTray from './camera-tray';
 import { invert } from 'lodash';
 
 import {
@@ -26,9 +25,6 @@ import FeatherIcon from 'react-native-vector-icons/Feather';
 const CAMERA_MODE_PHOTO = 'photo-mode';
 const CAMERA_MODE_SCAN = 'scan-mode';
 
-const isTablet = Math.min(Dimensions.get('window').width, Dimensions.get('window').height) >= 768;
-const isiPhoneX = Platform.OS === 'ios' && DeviceInfo.getDeviceId() === 'iPhone10,3';
-
 const FASTCAM_ON_ICON = 'burst-mode'; // MaterialIcon set
 const FASTCAM_OFF_ICON = 'photo'; // MaterialIcon set
 const FLASH_ON_ICON = 'flashlight'; // MaterialCommunityIcon set
@@ -36,6 +32,7 @@ const FLASH_OFF_ICON = 'flashlight-off'; // MaterialCommunityIcon set
 
 const ModeIndicator = styled.View`
   margin-top: 4;
+  margin-bottom: 4;
   height: 4;
   width: ${props => props.isCurrentMode ? '16' : '0'};
   border-radius: 2;
@@ -44,6 +41,8 @@ const ModeIndicator = styled.View`
 
 const ModeTitle = styled.Text`
   background-color: transparent;
+
+  ${''/* with color.... */}
   color: ${props => props.isCurrentMode ? '#FFB300' : 'white'};
 `;
 
@@ -53,14 +52,13 @@ const styles = StyleSheet.create({
     zIndex: 1,
     justifyContent: 'space-between',
     width: '100%',
-    backgroundColor: 'steelblue',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     height: 56,
-    marginTop: isiPhoneX ? 30 : 0,
+    marginTop: 0,
   },
   headerTitle: {
     color: 'white',
@@ -78,8 +76,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     width: 44,
     height: 44,
+    margin: 8,
     borderRadius: 22,
-    backgroundColor: 'transparent',
+    backgroundColor: 'blue',
   },
   captureButton: {
     alignItems: 'center',
@@ -88,24 +87,29 @@ const styles = StyleSheet.create({
     height: 72,
     borderRadius: 36,
     borderWidth: 4,
-    borderColor: 'white',
+    borderColor: 'red',
   },
   footer: {
-    paddingBottom: isiPhoneX ? 34 : 4,
+    flex: 1,
+    backgroundColor: 'green',
+    borderBottomColor: 'red',
+    borderBottomWidth: 1,
+    borderTopColor: 'red',
+    borderTopWidth: 1,
+    maxHeight: '50%',
   },
   captureContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    paddingBottom: 24,
-    paddingHorizontal: 8,
+    backgroundColor: 'orange',
   },
   modeContainer: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
+    backgroundColor: 'palevioletred',
   },
   modeButton: {
+    flexDirection: 'row-reverse',
     alignItems: 'center',
   },
   toast: {
@@ -180,6 +184,16 @@ class CameraLayout extends Component {
       screenFlashOpacity: new Animated.Value(0),
       orientationDegrees: new Animated.Value(0),
       swapHeaderButtons: false,
+      swapCameraUI: false,
+      dynamicFooterStyles: {
+        alignItems: 'flex-end',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+      },
+      dynamicCaptureContainerStyles: {
+        alignItems: 'center',
+        justifyContent: 'space-around',
+      },
     };
   }
 
@@ -197,20 +211,56 @@ class CameraLayout extends Component {
 
       let nextDegree = 0;
       let swapHeaderButtons = false;
+      let swapCameraUI = false;
+      let dynamicFooterStyles = {
+        alignItems: 'flex-end',
+        flexDirection: 'column',
+        justifyContent: 'center',
+      };
+      let dynamicCaptureContainerStyles = {
+        alignItems: 'center',
+        // justifyContent: 'space-around',
+      };
 
       switch (orientation) {
         case constants.Orientation.portrait:
           nextDegree = 0;
+          dynamicCaptureContainerStyles = {
+            paddingHorizontal: 32,
+          };
           break;
         case constants.Orientation.landscapeleft:
           nextDegree = 90;
           swapHeaderButtons = true;
+          dynamicFooterStyles = {
+            alignItems: 'flex-end',
+            flexDirection: 'row',
+            justifyContent: 'center',
+          };
+          dynamicCaptureContainerStyles = {
+            flexDirection: 'row-reverse',
+            paddingVertical: 32,
+          };
           break;
         case constants.Orientation.landscaperight:
           nextDegree = -90;
+          dynamicFooterStyles = {
+            alignItems: 'flex-end',
+            flexDirection: 'row-reverse',
+            justifyContent: 'center',
+          };
+          dynamicCaptureContainerStyles = {
+            flexDirection: 'row',
+            paddingVertical: 32,
+          };
           break;
         case constants.Orientation.portraitupsidedown:
           nextDegree = 180;
+          swapCameraUI = true;
+          dynamicCaptureContainerStyles = {
+            flexDirection: 'column-reverse',
+            paddingHorizontal: 32,
+          };
           break;
         default: break;
       }
@@ -219,7 +269,11 @@ class CameraLayout extends Component {
         toValue: nextDegree,
         duration: 100,
       }).start();
-      this.setState({ swapHeaderButtons });
+
+      this.setState({
+        swapHeaderButtons, swapCameraUI,
+        dynamicCaptureContainerStyles, dynamicFooterStyles
+      });
     }
 
   setCameraMode = async (nextMode) => {
@@ -342,46 +396,43 @@ class CameraLayout extends Component {
     const invertedResolutionModes = invert(constants.ResolutionMode);
 
     return (
-      <View style={styles.cameraUIContainer}>
-        <LinearGradient
-          colors={
-            isiPhoneX ?
-              ['rgba(0,0,0,0.35)', 'transparent'] :
-              ['rgba(0,0,0,0.35)', 'rgba(0,0,0,0.05)', 'transparent']
-          }
+      <View
+        style={[styles.cameraUIContainer, {
+          flexDirection: this.state.swapCameraUI ? 'column-reverse' : 'column',
+        }]}
+      >
+        <View
+          style={[styles.header, {
+            flexDirection: this.state.swapHeaderButtons ? 'row-reverse' : 'row',
+            transform: [{ rotate: this.state.swapCameraUI ? '180deg' : '0deg'}],
+          }]}
         >
-          <View
-            style={[styles.header, {
-              flexDirection: this.state.swapHeaderButtons ? 'row-reverse' : 'row',
-            }]}
+          <TouchableOpacity
+            onPress={(e) => this.props.onClose(e)}
+            style={styles.uiButton}
           >
-            <TouchableOpacity
-              onPress={(e) => this.props.onClose(e)}
-              style={styles.uiButton}
-            >
-              <MaterialIcon name="close" size={24} color="white" />
-            </TouchableOpacity>
+            <MaterialIcon name="close" size={24} color="white" />
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => {}}
-              style={styles.headerTitleButton}
+          <TouchableOpacity
+            onPress={() => {}}
+            style={styles.headerTitleButton}
+          >
+            <Text
+              numberOfLines={1}
+              style={styles.headerTitle}
             >
-              <Text
-                numberOfLines={1}
-                style={styles.headerTitle}
-              >
-                {this.props.projectName || ''}
-              </Text>
-            </TouchableOpacity>
+              {this.props.projectName || ''}
+            </Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={() => this.setState({ showSettings: true })}
-              style={styles.uiButton}
-            >
-              <MaterialIcon name="settings" size={24} color="white" />
-            </TouchableOpacity>
-          </View>
-        </LinearGradient>
+          <TouchableOpacity
+            onPress={() => this.setState({ showSettings: true })}
+            style={styles.uiButton}
+          >
+            <MaterialIcon name="settings" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
 
         {
           this.state.showToast ?
@@ -407,215 +458,187 @@ class CameraLayout extends Component {
           }}
         />
 
-        <LinearGradient
-          colors={
-            isiPhoneX ?
-              ['transparent', 'rgba(0,0,0,0.35)'] :
-              ['transparent', 'rgba(0,0,0,0.05)', 'rgba(0,0,0,0.35)']
-          }
+        <View
+          style={[styles.footer, this.state.dynamicFooterStyles]}
         >
-          <View style={styles.footer}>
 
-            {/*
-              TODO eventually would be nice to track if zoomed in...
-              + pinch to zoom would update the magnification (ie 2.8x etc)
-              + would be cool if you had two lenses you could tap on icon
-                to switch them
-            */}
-            {/* <View style={styles.zoomContainer}>
-              <TouchableOpacity
-                style={styles.zoomButton}
-              >
-                <Text style={styles.zoomText}>1x</Text>
-              </TouchableOpacity>
-            </View> */}
+          {/*
+            TODO eventually would be nice to track if zoomed in...
+            + pinch to zoom would update the magnification (ie 2.8x etc)
+            + would be cool if you had two lenses you could tap on icon
+              to switch them
+          */}
+          {/* <View style={styles.zoomContainer}>
+            <TouchableOpacity
+              style={styles.zoomButton}
+            >
+              <Text style={styles.zoomText}>1x</Text>
+            </TouchableOpacity>
+          </View> */}
 
+          <View style={[styles.captureContainer, this.state.dynamicCaptureContainerStyles]}>
 
-            <View style={styles.captureContainer}>
-
-              {/* Preview tray */}
-              <TouchableOpacity onPress={() => {}}>
-                <Animated.View
-                  style={[styles.uiButton, {
-                    transform: [{
-                      rotate: this.state.orientationDegrees.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['0deg', '1deg'],
-                      }),
-                    }]
-                  }]}
-                >
-                  <Image
-                    style={{
-                      height: 32, width: 32,
-                      borderRadius: 6,
-                      borderWidth: 2,
-                      borderColor: 'white',
-                    }}
-                    source={{uri: 'https://picsum.photos/640/1136/?image=0'}}
-                    resizeMode='cover'
+            {/* Preview tray */}
+            {
+              !PrimaryModeIsScan &&
+                <TouchableOpacity onPress={() => {}}>
+                  <Animated.View
+                    style={[styles.uiButton, {
+                      transform: [{
+                        rotate: this.state.orientationDegrees.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ['0deg', '1deg'],
+                        }),
+                      }]
+                    }]}
                   >
-                    <View
-                      style={{
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flex: 1,
-                        width: '100%',
-                        backgroundColor: 'rgba(0,0,0,0.2)',
-                      }}
-                    >
-                      <Text style={{ color: 'white' }}>2</Text>
-                    </View>
-                  </Image>
-                </Animated.View>
-              </TouchableOpacity>
+                    <MaterialIcon name="crop-portrait" size={32} color="white" />
+                  </Animated.View>
+                </TouchableOpacity>
+            }
 
-              {/* Fast cam toggle button */}
-              {
-                !PrimaryModeIsScan &&
-                  <TouchableOpacity
-                    onPress={() => {
-                      if (cameraMode === constants.CameraMode.fastcam) {
-                        this.setCameraMode(constants.CameraMode.photo);
-                      } else {
-                        this.setCameraMode(constants.CameraMode.fastcam);
-                      }
-                    }}
-                  >
-                    <Animated.View
-                      style={[styles.uiButton, {
-                        transform: [{
-                          rotate: this.state.orientationDegrees.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: ['0deg', '1deg'],
-                          }),
-                        }]
-                      }]}
-                    >
-                      <MaterialIcon
-                        name={cameraMode === constants.CameraMode.fastcam ? FASTCAM_ON_ICON : FASTCAM_OFF_ICON}
-                        size={24}
-                        color="white"
-                      />
-                    </Animated.View>
-                  </TouchableOpacity>
-              }
-
-              {/* Capture button */}
-              {
-                !PrimaryModeIsScan &&
-                  <TouchableOpacity
-                    onPress={() => {
-                      this.doFlashAnimation();
-                      this.props.captureButtonPress();
-                    }}
-                    style={styles.captureButton}
-                  />
-              }
-
-              {/* Front/back camera button */}
-              {
-                !PrimaryModeIsScan &&
-                  <TouchableOpacity onPress={() => { this.props.flipCamera(); }}>
-                    <Animated.View
-                      style={[styles.uiButton, {
-                        transform: [{
-                          rotate: this.state.orientationDegrees.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: ['0deg', '1deg'],
-                          }),
-                        }]
-                      }]}
-                    >
-                      <FeatherIcon name="repeat" size={24} color="white" />
-                    </Animated.View>
-                  </TouchableOpacity>
-              }
-
-              {/* Magic invisible view for when scanner mode is active */}
-              {
-                PrimaryModeIsScan &&
-                  <View style={[styles.captureButton, { opacity: 0 }]} />
-              }
-
-              {/* Flash mode button */}
-              <TouchableOpacity onPress={() => {this.toggleFlashMode(); }}>
-                <Animated.View
-                  style={[styles.uiButton, {
-                    transform: [{
-                      rotate: this.state.orientationDegrees.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['0deg', '1deg'],
-                      }),
-                    }]
-                  }]}
+            {/* Fast cam toggle button */}
+            {
+              !PrimaryModeIsScan &&
+                <TouchableOpacity
+                  onPress={() => {
+                    if (cameraMode === constants.CameraMode.fastcam) {
+                      this.setCameraMode(constants.CameraMode.photo);
+                    } else {
+                      this.setCameraMode(constants.CameraMode.fastcam);
+                    }
+                  }}
                 >
-                  <MaterialCommunityIcon
-                    name={TorchIsOn ? FLASH_ON_ICON : FLASH_OFF_ICON}
-                    size={24}
-                    color="white"
-                  />
-                </Animated.View>
-              </TouchableOpacity>
-            </View>
+                  <Animated.View
+                    style={[styles.uiButton, {
+                      transform: [{
+                        rotate: this.state.orientationDegrees.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ['0deg', '1deg'],
+                        }),
+                      }]
+                    }]}
+                  >
+                    <MaterialIcon
+                      name={cameraMode === constants.CameraMode.fastcam ? FASTCAM_ON_ICON : FASTCAM_OFF_ICON}
+                      size={24}
+                      color="white"
+                    />
+                  </Animated.View>
+                </TouchableOpacity>
+            }
 
-            <View style={styles.modeContainer}>
+            {/* Capture button */}
+            {
+              !PrimaryModeIsScan &&
+                <TouchableOpacity
+                  onPress={() => {
+                    this.doFlashAnimation();
+                    this.props.captureButtonPress();
+                  }}
+                  style={styles.captureButton}
+                />
+            }
 
-              {/* Photo mode button */}
-              <TouchableOpacity
-                onPress={() => this.setCameraMode(constants.CameraMode.photo)}
-                style={styles.modeButton}
+            {/* Front/back camera button */}
+            {
+              !PrimaryModeIsScan &&
+                <TouchableOpacity onPress={() => { this.props.flipCamera(); }}>
+                  <Animated.View
+                    style={[styles.uiButton, {
+                      transform: [{
+                        rotate: this.state.orientationDegrees.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ['0deg', '1deg'],
+                        }),
+                      }]
+                    }]}
+                  >
+                    <FeatherIcon name="repeat" size={24} color="white" />
+                  </Animated.View>
+                </TouchableOpacity>
+            }
+
+            {/* Magic invisible view for when scanner mode is active */}
+            {/* {
+              PrimaryModeIsScan &&
+                <View style={[styles.captureButton, { opacity: 0 }]} />
+            } */}
+
+            {/* Flash mode button */}
+            <TouchableOpacity onPress={() => {this.toggleFlashMode(); }}>
+              <Animated.View
+                style={[styles.uiButton, {
+                  transform: [{
+                    rotate: this.state.orientationDegrees.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: ['0deg', '1deg'],
+                    }),
+                  }]
+                }]}
               >
-                <ModeTitle isCurrentMode={!PrimaryModeIsScan}>
-                  PHOTO
-                </ModeTitle>
-                <ModeIndicator isCurrentMode={!PrimaryModeIsScan}/>
-              </TouchableOpacity>
-
-              {/* TODO video video video... */}
-              {/* <TouchableOpacity
-                onPress={() => {}}
-                style={styles.modeButton}
-              >
-                <ModeTitle>VIDEO</ModeTitle>
-                <ModeIndicator />
-              </TouchableOpacity> */}
-
-              {/* Scanner mode button */}
-              <TouchableOpacity
-                onPress={() => this.setCameraMode(constants.CameraMode.scanner)}
-                style={styles.modeButton}
-              >
-                <ModeTitle isCurrentMode={PrimaryModeIsScan}>
-                  SCAN
-                </ModeTitle>
-                <ModeIndicator isCurrentMode={PrimaryModeIsScan}/>
-              </TouchableOpacity>
-
-              {/* AR mode button */}
-              <TouchableOpacity
-                onPress={() => this.props.arModePress()}
-                style={styles.modeButton}
-              >
-                <ModeTitle>AR</ModeTitle>
-                <ModeIndicator />
-              </TouchableOpacity>
-
-              {/* Before after mode button */}
-              <TouchableOpacity
-                onPress={() => this.props.baModePress()}
-                style={styles.modeButton}
-              >
-                <ModeTitle>B/A</ModeTitle>
-                <ModeIndicator />
-              </TouchableOpacity>
-            </View>
-
+                <MaterialCommunityIcon
+                  name={TorchIsOn ? FLASH_ON_ICON : FLASH_OFF_ICON}
+                  size={24}
+                  color="white"
+                />
+              </Animated.View>
+            </TouchableOpacity>
           </View>
 
-          <CameraTray />
+          <View style={styles.modeContainer}>
 
-        </LinearGradient>
+            {/* Photo mode button */}
+            <TouchableOpacity
+              onPress={() => this.setCameraMode(constants.CameraMode.photo)}
+              style={styles.modeButton}
+            >
+              <ModeTitle isCurrentMode={!PrimaryModeIsScan}>
+                PHOTO
+              </ModeTitle>
+              {/* <ModeIndicator isCurrentMode={!PrimaryModeIsScan}/> */}
+            </TouchableOpacity>
+
+            {/* TODO video video video... */}
+            {/* <TouchableOpacity
+              onPress={() => {}}
+              style={styles.modeButton}
+            >
+              <ModeTitle>VIDEO</ModeTitle>
+              <ModeIndicator />
+            </TouchableOpacity> */}
+
+            {/* Scanner mode button */}
+            <TouchableOpacity
+              onPress={() => this.setCameraMode(constants.CameraMode.scanner)}
+              style={styles.modeButton}
+            >
+              <ModeTitle isCurrentMode={PrimaryModeIsScan}>
+                SCAN
+              </ModeTitle>
+              {/* <ModeIndicator isCurrentMode={PrimaryModeIsScan}/> */}
+            </TouchableOpacity>
+
+            {/* AR mode button */}
+            <TouchableOpacity
+              onPress={() => this.props.arModePress()}
+              style={styles.modeButton}
+            >
+              <ModeTitle>AR</ModeTitle>
+              {/* <ModeIndicator /> */}
+            </TouchableOpacity>
+
+            {/* Before after mode button */}
+            <TouchableOpacity
+              onPress={() => this.props.baModePress()}
+              style={styles.modeButton}
+            >
+              <ModeTitle>B/A</ModeTitle>
+              {/* <ModeIndicator /> */}
+            </TouchableOpacity>
+          </View>
+
+        </View>
 
         {
           this.state.showSettings &&
