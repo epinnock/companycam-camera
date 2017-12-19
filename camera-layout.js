@@ -55,7 +55,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
     justifyContent: 'space-between',
     width: '100%',
-    backgroundColor: 'steelblue',
+    backgroundColor: 'black',
   },
   header: {
     flexDirection: 'row',
