@@ -1,4 +1,4 @@
-package com.newcam;
+package com.newcam.enums;
 
 /**
  * Created by dan on 12/18/17.

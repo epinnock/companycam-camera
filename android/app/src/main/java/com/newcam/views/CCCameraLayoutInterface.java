@@ -1,8 +1,8 @@
 package com.newcam.views;
 
-import com.newcam.CameraMode;
-import com.newcam.FlashMode;
-import com.newcam.ResolutionMode;
+import com.newcam.enums.CameraMode;
+import com.newcam.enums.FlashMode;
+import com.newcam.enums.ResolutionMode;
 
 /**
  * Created by mattboyd on 2/10/17.

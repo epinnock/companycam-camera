@@ -1,4 +1,4 @@
-package com.newcam;
+package com.newcam.enums;
 
 /**
  * Created by dan on 11/20/17.
@@ -21,14 +21,15 @@ public enum PhotoOrigin {
     }
 
     public static PhotoOrigin fromCameraMode(CameraMode mode) {
-        if (mode == CameraMode.CAMERA) {
-            return PhotoOrigin.STANDARD_CAMERA;
-        } else if (mode == CameraMode.FASTCAM) {
-            return PhotoOrigin.STANDARD_CAMERA_FASTCAM;
-        } else if (mode == CameraMode.SCANNER) {
-            return PhotoOrigin.STANDARD_CAMERA_DOCSCAN;
-        } else {
-            return PhotoOrigin.STANDARD_CAMERA;
+        switch (mode) {
+            case FASTCAM:
+                return PhotoOrigin.STANDARD_CAMERA_FASTCAM;
+            case SCANNER:
+                return PhotoOrigin.STANDARD_CAMERA_DOCSCAN;
+            case CAMERA:
+            default:
+                return PhotoOrigin.STANDARD_CAMERA;
         }
+
     }
 }

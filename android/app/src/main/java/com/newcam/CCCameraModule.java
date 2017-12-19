@@ -11,6 +11,9 @@ import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.newcam.enums.CameraMode;
+import com.newcam.enums.FlashMode;
+import com.newcam.enums.ResolutionMode;
 import com.newcam.utils.AppPreferences;
 import com.newcam.utils.CameraCheck;
 

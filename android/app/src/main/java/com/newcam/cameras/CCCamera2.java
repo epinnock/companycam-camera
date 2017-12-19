@@ -38,10 +38,11 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 
 import com.newcam.CCCameraView;
-import com.newcam.FlashMode;
-import com.newcam.PhotoOrigin;
+import com.newcam.enums.CameraMode;
+import com.newcam.enums.FlashMode;
+import com.newcam.enums.PhotoOrigin;
 import com.newcam.R;
-import com.newcam.ResolutionMode;
+import com.newcam.enums.ResolutionMode;
 import com.newcam.utils.ExifUtils;
 import com.newcam.utils.PhotoUtils;
 import com.notagilx.companycam.util.LogUtil;
@@ -335,7 +336,7 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
                             // If there have been at least three consecutive callbacks where the auto focus is locked, then the onAutoFocusComplete
                             // function can be called for normal Camera mode.  If there haven't been at least three consecutive callbacks, then this
                             // auto focus state may be transient.
-                            if (numConsecutiveAFLockStates >= 3 && !mCameraMode.equals("fastcam") && !mFlashMode.equals("auto")) {
+                            if (numConsecutiveAFLockStates >= 3 && (mCameraMode != CameraMode.FASTCAM) && (mFlashMode != FlashMode.AUTO)) {
                                 onAutoFocusComplete();
                                 return;
                             }
@@ -811,19 +812,20 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
 
     // This method sets the flash mode for the given CaptureRequestBuilder
     private void setFlashModeForRequest(CaptureRequest.Builder builder) {
-
-        if (mFlashMode.equals("auto")) {
-            setAutoFlash(builder);
-        }
-        else if (mFlashMode.equals("on")) {
-            builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_SINGLE);
-        }
-        else if (mFlashMode.equals("torch")) {
-            builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
-            builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
-        }
-        else {
-            builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
+        switch (mFlashMode) {
+            case AUTO:
+                setAutoFlash(builder);
+                break;
+            case ON:
+                builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_SINGLE);
+                break;
+            case TORCH:
+                builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
+                builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
+                break;
+            case OFF:
+                builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
+            default:
         }
     }
 
@@ -1231,10 +1233,10 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
     private void initiatePhotoCapture() {
 
         // Set this flag to true to bypass the full AF and AE routine for capturing a photo in basic Camera mode.
-        boolean bypassAutoFocus = mFlashMode.equals("off") || mFlashMode.equals("torch");
+        boolean bypassAutoFocus = (mFlashMode == FlashMode.OFF) || (mFlashMode == FlashMode.TORCH);
 
         // If the camera is in FastCam mode, then capture the photo immediately without going through the auto focus and auto exposure.
-        if (mCameraMode.equals("fastcam") || bypassAutoFocus) {
+        if ((mCameraMode == CameraMode.FASTCAM) || bypassAutoFocus) {
             captureStillPicture();
         }
 
@@ -1489,14 +1491,13 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
                 Log.d(TAG, "bPhoto saved to mFile");
 
                 //TODO: better if gotoEdit/uploadFastCam are done *after* exif is set and bPhoto is recycled?
-                // Transition to the EditPhotoCaptureActivity as long as the current mode isn't FastCam
-                if (!mCameraMode.equals("fastcam")) {
-                    gotoEditPhotoCapture(photo.getPath(), imgWidth, imgHeight, PhotoOrigin.fromCameraMode(mCameraMode));
-                }
-
                 // If the current mode is FastCam, then upload the photo immediately
-                else {
+                if (mCameraMode == CameraMode.FASTCAM) {
                     uploadFastCamPhoto(photo, imgWidth, imgHeight, PhotoOrigin.fromCameraMode(mCameraMode));
+                }
+                // Transition to the EditPhotoCaptureActivity as long as the current mode isn't FastCam
+                else {
+                    gotoEditPhotoCapture(photo.getPath(), imgWidth, imgHeight, PhotoOrigin.fromCameraMode(mCameraMode));
                 }
 
                 try {
@@ -1619,25 +1620,11 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
 
     @Override
     public void toggleFlash() {
-
-        // Uncomment this section to allow the user to toggle between all four different available flash modes
-        /*if (mFlashMode.equals("auto")) {
-            mFlashMode = "on";
-        } else if (mFlashMode.equals("on")) {
-            mFlashMode = "torch";
-        } else if(mFlashMode.equals("torch")) {
-            mFlashMode = "off";
-        } else if (mFlashMode.equals("off")) {
-            mFlashMode = "auto";
-        }*/
-
-        if(mFlashMode == FlashMode.TORCH) {
+        if (mFlashMode == FlashMode.TORCH) {
             setFlash(FlashMode.OFF);
         } else {
             setFlash(FlashMode.TORCH);
         }
-
-
     }
 
     @Override

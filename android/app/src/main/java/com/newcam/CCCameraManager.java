@@ -4,6 +4,9 @@ import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
+import com.newcam.enums.CameraMode;
+import com.newcam.enums.FlashMode;
+import com.newcam.enums.ResolutionMode;
 
 import java.util.Map;
 

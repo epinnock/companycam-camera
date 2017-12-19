@@ -4,7 +4,7 @@ import android.location.Location;
 import android.media.ExifInterface;
 import android.os.Build;
 
-import com.newcam.FlashMode;
+import com.newcam.enums.FlashMode;
 
 import java.io.File;
 import java.io.IOException;

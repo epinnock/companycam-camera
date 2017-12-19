@@ -18,10 +18,10 @@ import android.widget.TextView;
 
 import com.newcam.CCCameraManager;
 import com.newcam.CCCameraView;
-import com.newcam.CameraMode;
-import com.newcam.FlashMode;
+import com.newcam.enums.CameraMode;
+import com.newcam.enums.FlashMode;
 import com.newcam.R;
-import com.newcam.ResolutionMode;
+import com.newcam.enums.ResolutionMode;
 import com.newcam.cameras.CCCamera;
 import com.notagilx.companycam.util.SingleClickListener;
 import com.notagilx.companycam.util.views.FocusIndicatorView;
@@ -690,14 +690,15 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
     @Override
     public void setFlashModeImage(FlashMode mode) {
         int imageRes;
-        if (mode == FlashMode.AUTO) {
-            imageRes = R.drawable.flashlight_off;
-        } else if (mode == FlashMode.ON) {
-            imageRes = R.drawable.flashlight_on;
-        } else if (mode == FlashMode.TORCH) {
-            imageRes = R.drawable.flashlight_on;
-        } else {
-            imageRes = R.drawable.flashlight_off;
+        switch (mode) {
+            case ON:
+            case TORCH:
+                imageRes = R.drawable.flashlight_on;
+                break;
+            case OFF:
+            case AUTO:
+            default:
+                imageRes = R.drawable.flashlight_off;
         }
 
         mToggleFlash.setImageResource(imageRes);

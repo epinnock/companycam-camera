@@ -12,11 +12,11 @@ import android.widget.RelativeLayout;
 
 import com.newcam.CCCameraManager;
 import com.newcam.CCCameraView;
-import com.newcam.CameraMode;
-import com.newcam.FlashMode;
-import com.newcam.PhotoOrigin;
+import com.newcam.enums.CameraMode;
+import com.newcam.enums.FlashMode;
+import com.newcam.enums.PhotoOrigin;
 import com.newcam.R;
-import com.newcam.ResolutionMode;
+import com.newcam.enums.ResolutionMode;
 import com.newcam.utils.AppPreferences;
 import com.notagilx.companycam.react_bridges.PhotoActions;
 import com.notagilx.companycam.util.StorageUtility;
@@ -157,14 +157,14 @@ public abstract class CCCamera implements CCCameraInterface {
 
     // This method returns the minimum desired image height in pixels for the given resolution setting
     public int getDesiredImageHeightForResolution(ResolutionMode mode) {
-        if (mode == ResolutionMode.SUPER) {
-            return 2160;
-        }
-        else if (mode == ResolutionMode.HIGH) {
-            return 1920;
-        }
-        else {
-            return 1440;
+        switch (mode) {
+            case SUPER:
+                return 2160;
+            case HIGH:
+                return 1920;
+            case NORMAL:
+            default:
+                return 1440;
         }
     }
 
