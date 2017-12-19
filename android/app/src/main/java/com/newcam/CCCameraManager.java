@@ -1,11 +1,12 @@
 package com.newcam;
 
-import android.content.Intent;
-
 import com.facebook.react.common.MapBuilder;
-import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.ThemedReactContext;
+import com.facebook.react.uimanager.ViewGroupManager;
 import com.facebook.react.uimanager.annotations.ReactProp;
+import com.newcam.enums.CameraMode;
+import com.newcam.enums.FlashMode;
+import com.newcam.enums.ResolutionMode;
 
 import java.util.Map;
 
@@ -74,6 +75,21 @@ public class CCCameraManager extends ViewGroupManager<CCCameraView> {
     @ReactProp(name = "hideNativeUI")
     public void setHideNativeUI(CCCameraView view, boolean val){
         view.setHideNativeUI(val);
+    }
+
+    @ReactProp(name = "flashMode")
+    public void setFlashMode(CCCameraView view, int val){
+        view.setFlashMode(FlashMode.fromInt(val));
+    }
+
+    @ReactProp(name = "cameraMode")
+    public void setCameraMode(CCCameraView view, int val){
+        view.setCameraMode(CameraMode.fromInt(val));
+    }
+
+    @ReactProp(name = "resolutionMode")
+    public void setResolutionMode(CCCameraView view, int val){
+        view.setResolutionMode(ResolutionMode.fromInt(val));
     }
 
     @Override

@@ -12,17 +12,17 @@ import android.widget.RelativeLayout;
 
 import com.newcam.CCCameraManager;
 import com.newcam.CCCameraView;
-import com.newcam.PhotoOrigin;
+import com.newcam.enums.CameraMode;
+import com.newcam.enums.FlashMode;
+import com.newcam.enums.PhotoOrigin;
 import com.newcam.R;
+import com.newcam.enums.ResolutionMode;
 import com.newcam.utils.AppPreferences;
-import com.newcam.utils.CCCameraInterface;
 import com.notagilx.companycam.react_bridges.PhotoActions;
 import com.notagilx.companycam.util.StorageUtility;
 import com.notagilx.companycam.util.views.CameraPreview;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by mattboyd on 2/5/17.
@@ -45,23 +45,13 @@ public abstract class CCCamera implements CCCameraInterface {
     private static final String PREFS_CAMERA_MODE = "PREFS_CAMERA_MODE";
 
     // The mFlashMode string defines the flash mode to use
-    // "auto" = auto flash
-    // "on" = flash on
-    // "off" = flash off
-    // "torch" = flash continuously on
-    public String mFlashMode;
+    public FlashMode mFlashMode;
 
     // The mResolutionMode string describes the image resolution to use
-    // "normal" = lowest resolution
-    // "high" = high resolution
-    // "super" = highest resolution
-    public String mResolutionMode;
+    public ResolutionMode mResolutionMode;
 
     // The mCameraMode string describes the type of camera setting to use
-    // "fastcam" = FastCam mode means that the user won't be given the option to edit photos after capturing them
-    // "camera" = this is the default camera mode that allows the user to edit photos after capturing them
-    // "scanner" = this is a mode that tries to identify documents in the photo and transforms the image to show a flattened version of the document
-    public String mCameraMode;
+    public CameraMode mCameraMode;
 
     // The mPreview is a custom SurfaceView for rendering the camera preview
     public CameraPreview mPreview;
@@ -84,12 +74,12 @@ public abstract class CCCamera implements CCCameraInterface {
 
         // Get the saved settings from the SharedPreferences.  Restrict the possible flash modes to "torch" and "off".
         SharedPreferences preferences = getSharedPreferences();
-        mFlashMode = preferences.getString(PREFS_FLASH_MODE, "off");
-        if (!(mFlashMode.equals("torch") || mFlashMode.equals("off"))) {
-            mFlashMode.equals("off");
+        mFlashMode = FlashMode.fromString(preferences.getString(PREFS_FLASH_MODE, "off"));
+        if (!(mFlashMode == FlashMode.TORCH || mFlashMode == FlashMode.OFF)) {
+            mFlashMode = FlashMode.OFF;
         }
-        mResolutionMode = preferences.getString(PREFS_RESOLUTION_MODE, "normal");
-        mCameraMode = preferences.getString(PREFS_CAMERA_MODE, "camera");
+        mResolutionMode = ResolutionMode.fromString(preferences.getString(PREFS_RESOLUTION_MODE, "normal"));
+        mCameraMode = CameraMode.fromString(preferences.getString(PREFS_CAMERA_MODE, "camera"));
 
         // Initialize the orientation listener
         initOrientationListener();
@@ -124,35 +114,35 @@ public abstract class CCCamera implements CCCameraInterface {
     /////////////////////////
 
     // This method persists the flash mode to the SharedPreferences
-    public void persistFlashMode(String flashMode) {
+    public void persistFlashMode(FlashMode mode) {
 
         // Persist flash mode
-        mFlashMode = flashMode;
+        mFlashMode = mode;
         SharedPreferences preferences = getSharedPreferences();
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(PREFS_FLASH_MODE, flashMode);
+        editor.putString(PREFS_FLASH_MODE, mode.toString());
         editor.apply();
     }
 
     // This method persists the resolution mode to the SharedPreferences
-    public void persistResoultionMode(String resolutionMode) {
+    public void persistResolutionMode(ResolutionMode mode) {
 
         // Persist flash mode
-        mResolutionMode = resolutionMode;
+        mResolutionMode = mode;
         SharedPreferences preferences = getSharedPreferences();
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(PREFS_RESOLUTION_MODE, resolutionMode);
+        editor.putString(PREFS_RESOLUTION_MODE, mode.toString());
         editor.apply();
     }
 
     // This method persists the camera mode to the SharedPreferences
-    public void persistCameraMode(String cameraMode) {
+    public void persistCameraMode(CameraMode mode) {
 
         // Persist flash mode
-        mCameraMode = cameraMode;
+        mCameraMode = mode;
         SharedPreferences preferences = getSharedPreferences();
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putString(PREFS_CAMERA_MODE, cameraMode);
+        editor.putString(PREFS_CAMERA_MODE, mode.toString());
         editor.apply();
     }
 
@@ -166,15 +156,15 @@ public abstract class CCCamera implements CCCameraInterface {
     ///////////////////////////
 
     // This method returns the minimum desired image height in pixels for the given resolution setting
-    public int getDesiredImageHeightForResolution(String resolutionMode) {
-        if (resolutionMode.equals("super")) {
-            return 2160;
-        }
-        else if (resolutionMode.equals("high")) {
-            return 1920;
-        }
-        else {
-            return 1440;
+    public int getDesiredImageHeightForResolution(ResolutionMode mode) {
+        switch (mode) {
+            case SUPER:
+                return 2160;
+            case HIGH:
+                return 1920;
+            case NORMAL:
+            default:
+                return 1440;
         }
     }
 

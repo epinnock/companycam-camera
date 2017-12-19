@@ -4,6 +4,8 @@ import android.location.Location;
 import android.media.ExifInterface;
 import android.os.Build;
 
+import com.newcam.enums.FlashMode;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Calendar;
@@ -14,7 +16,7 @@ import java.util.Calendar;
 
 public class ExifUtils {
 
-    public static void setAttributes(File imageFile, Location exifLoc, String flashMode) throws IOException {
+    public static void setAttributes(File imageFile, Location exifLoc, FlashMode flashMode) throws IOException {
 
         ExifInterface exif = new ExifInterface(imageFile.getPath());
 
@@ -55,7 +57,7 @@ public class ExifUtils {
         System.out.println("Set EXIF location timestamp: [" + exifGPSTimestamp + "]");
         //------------------------------------------------
 
-        exif.setAttribute(ExifInterface.TAG_FLASH, flashMode);
+        exif.setAttribute(ExifInterface.TAG_FLASH, flashMode.toString());
         exif.setAttribute(ExifInterface.TAG_MODEL, Build.MODEL);
         exif.setAttribute(ExifInterface.TAG_MAKE, Build.MANUFACTURER);
 
