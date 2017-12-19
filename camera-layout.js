@@ -165,21 +165,8 @@ const styles = StyleSheet.create({
   // },
 });
 
-// This is mostly just for testing!  Tray data will likely be a prop.
-// =================================================================
 const TRAY_EMPTY_TEXT_SCANNER = 'Fit document inside screen.\nPlace on contrasting background.';
 const TRAY_EMPTY_TEXT_CAMERA = 'Take some photos!';
-
-const trayDataScanner = [];
-const trayDataCamera = [
-  { url: 'https://picsum.photos/640/1136/?image=0', uploaded: true },
-  { url: 'https://picsum.photos/640/1136/?image=20', uploaded: false },
-  { url: 'https://picsum.photos/640/1136/?image=40', uploaded: false },
-  { url: 'https://picsum.photos/640/1136/?image=60', uploaded: true },
-  { url: 'https://picsum.photos/640/1136/?image=80', uploaded: true },
-  { url: 'https://picsum.photos/640/1136/?image=100', uploaded: true },
-];
-// ================================================================
 
 class CameraLayout extends Component {
 
@@ -362,6 +349,10 @@ class CameraLayout extends Component {
     const PrimaryModeIsScan = cameraMode === constants.CameraMode.scanner;
 
     const invertedResolutionModes = invert(constants.ResolutionMode);
+
+    const filteredCameraTrayData = this.props.cameraTrayData.filter((data) =>
+      data.isDocument === PrimaryModeIsScan
+    );
 
     return (
       <View style={styles.cameraUIContainer}>
@@ -637,7 +628,7 @@ class CameraLayout extends Component {
 
           <CameraTray
             emptyText={PrimaryModeIsScan ? TRAY_EMPTY_TEXT_SCANNER : TRAY_EMPTY_TEXT_CAMERA}
-            imageData={PrimaryModeIsScan ? trayDataScanner : trayDataCamera}
+            imageData={filteredCameraTrayData}
           />
 
         </LinearGradient>
@@ -668,6 +659,11 @@ CameraLayout.propTypes = {
   onClose: PropTypes.func,
 
   projectName: PropTypes.string,
+  cameraTrayData: PropTypes.array,
+};
+
+CameraLayout.defaultProps = {
+  cameraTrayData: [],
 };
 
 export default CameraLayout;
