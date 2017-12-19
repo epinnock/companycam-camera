@@ -5,7 +5,7 @@ import {
 
 import styled from 'styled-components/native';
 
-// const TRAYITEMHEIGHT = 80;
+const TRAYITEMHEIGHT = 80;
 
 const ImageTray = styled.View`
   background-color: #263238;
@@ -22,15 +22,15 @@ const ImageTrayActionBar = styled.View`
 `;
 
 const ImageTrayItem = styled.Image`
-  height: 80px;
-  width: 80px;
+  height: ${TRAYITEMHEIGHT}px;
+  width: ${TRAYITEMHEIGHT}px;
   margin-left: 8px;
   border-radius: 4px;
   border-width: ${props => props.active ? '2px' : '0'};
   border-color: ${props => props.active ? 'white' : 'transparent'};
 `;
 
-const ScanTip = styled.Image`
+const EmptyStateContent = styled.View`
   align-items: center;
   justify-content: center;
   height: 96px;
@@ -44,7 +44,28 @@ const styles = StyleSheet.create({
 });
 
 class CameraTray extends Component {
+
+  static renderTrayIconFromData(data) {
+    return (
+      <TouchableOpacity
+        onPress={() => {}}
+      >
+        {/*<Text>
+          {data.uploaded ? 'DONE' : 'PENDING'}
+        </Text>*/}
+        <ImageTrayItem
+          source={{ uri: data.url }}
+          resizeMode="cover"
+        />
+      </TouchableOpacity>
+    );
+  }
+
   render() {
+    const { imageData, emptyText } = this.props;
+
+    const trayIconsEmpty = !imageData || (imageData.length === 0);
+
     return (
       <ImageTray>
 
@@ -62,70 +83,34 @@ class CameraTray extends Component {
           </TouchableOpacity>
         </ImageTrayActionBar>
 
-        {/* <ScanTip>
-          <Text style={{ color: 'white', fontSize: 17, backgroundColor: 'transparent' }}>
-            {`Fit document inside screen.\nPlace on contrasting background.`}
-          </Text>
-        </ScanTip> */}
+        {trayIconsEmpty ? (
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.itemScroller}
-        >
-          <TouchableOpacity
-            onPress={() => {}}
+          <EmptyStateContent>
+            <Text style={{ color: 'white', fontSize: 17, backgroundColor: 'transparent' }}>
+              {emptyText}
+            </Text>
+          </EmptyStateContent>
+
+        ) : (
+
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.itemScroller}
           >
-            <ImageTrayItem
-              source={{uri: 'https://picsum.photos/640/1136/?image=0'}}
-              resizeMode='cover'
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {}}
-          >
-            <ImageTrayItem
-              source={{uri: 'https://picsum.photos/640/1136/?image=20'}}
-              resizeMode='cover'
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {}}
-          >
-            <ImageTrayItem
-              source={{uri: 'https://picsum.photos/640/1136/?image=40'}}
-              resizeMode='cover'
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {}}
-          >
-            <ImageTrayItem
-              source={{uri: 'https://picsum.photos/640/1136/?image=60'}}
-              resizeMode='cover'
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {}}
-          >
-            <ImageTrayItem
-              source={{uri: 'https://picsum.photos/640/1136/?image=80'}}
-              resizeMode='cover'
-            />
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {}}
-          >
-            <ImageTrayItem
-              source={{uri: 'https://picsum.photos/640/1136/?image=100'}}
-              resizeMode='cover'
-            />
-          </TouchableOpacity>
-        </ScrollView>
+            {imageData.map(CameraTray.renderTrayIconFromData)}
+          </ScrollView>
+
+        )}
 
       </ImageTray>
     );
   }
 }
+
+CameraTray.propTypes = {
+  imageData: PropTypes.object,
+  emptyText: PropTypes.string,
+};
 
 export default CameraTray;
