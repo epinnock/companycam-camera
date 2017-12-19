@@ -54,6 +54,12 @@ Type: `() => void`. Invoked when the 'auxiliary' button at the bottom is pressed
 #### hideNativeUI
 Type: `bool`. Determine whether the native UI should be hidden (default is `false`).
 
+#### cameraTrayData
+Array of objects `{ url:string, uploaded:bool, isDocument:bool }`.
+- `url`: Image to show; if local, must have a `file://` prefix
+- `uploaded`: Has this image uploaded?
+- `isDocument`: Should this go in the tray for the document scanner, rather than the photos tray?
+
 ***
 ## Development
 
