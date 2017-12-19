@@ -21,6 +21,10 @@ import com.facebook.react.uimanager.events.RCTEventEmitter;
 import com.newcam.cameras.CCCamera;
 import com.newcam.cameras.CCCamera1;
 import com.newcam.cameras.CCCamera2;
+import com.newcam.enums.CameraMode;
+import com.newcam.enums.FlashMode;
+import com.newcam.enums.PhotoOrigin;
+import com.newcam.enums.ResolutionMode;
 import com.newcam.imageprocessing.CCCameraImageProcessor;
 import com.newcam.imageprocessing.DocScanOpenCV;
 import com.newcam.utils.AppPreferences;
@@ -174,6 +178,18 @@ public class CCCameraView extends RelativeLayout {
     public void releaseCamera() {
         if (mCamera != null){
             mCamera.releaseCamera();
+        }
+    }
+
+    public void moduleCapture() {
+        if (mCamera != null) {
+            mCamera.takePicture();
+        }
+    }
+
+    public void moduleFlipCamera() {
+        if (mCamera != null) {
+            mCamera.toggleCamera();
         }
     }
 
@@ -342,6 +358,26 @@ public class CCCameraView extends RelativeLayout {
             mCameraLayout.setVisibility(View.VISIBLE);
         }
       }
+    }
+
+    public void setFlashMode(FlashMode mode) {
+        if (mCamera != null) {
+            mCamera.persistFlashMode(mode);
+            mCamera.setFlash(mode);
+        }
+    }
+
+    public void setCameraMode(CameraMode mode) {
+        if (mCamera != null) {
+            mCamera.persistCameraMode(mode);
+        }
+    }
+
+    public void setResolutionMode(ResolutionMode mode) {
+        if (mCamera != null) {
+            mCamera.persistResolutionMode(mode);
+            mCamera.setResolution(mode);
+        }
     }
     //-------------------------------------
 }

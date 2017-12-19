@@ -18,9 +18,11 @@ import android.widget.TextView;
 
 import com.newcam.CCCameraManager;
 import com.newcam.CCCameraView;
+import com.newcam.enums.CameraMode;
+import com.newcam.enums.FlashMode;
 import com.newcam.R;
+import com.newcam.enums.ResolutionMode;
 import com.newcam.cameras.CCCamera;
-import com.newcam.utils.CCCameraLayoutInterface;
 import com.notagilx.companycam.util.SingleClickListener;
 import com.notagilx.companycam.util.views.FocusIndicatorView;
 
@@ -433,7 +435,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         mFastCamLayout.setOnClickListener(new SingleClickListener(CLICK_REJECTION_INTERVAL) {
             @Override
             public void onSingleClick(View v) {
-                setCameraMode("fastcam");
+                setCameraMode(CameraMode.FASTCAM);
             }
         });
 
@@ -441,7 +443,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         mCameraLayout.setOnClickListener(new SingleClickListener(CLICK_REJECTION_INTERVAL) {
             @Override
             public void onSingleClick(View v) {
-                setCameraMode("camera");
+                setCameraMode(CameraMode.CAMERA);
             }
         });
 
@@ -449,7 +451,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         mScannerLayout.setOnClickListener(new SingleClickListener(CLICK_REJECTION_INTERVAL) {
             @Override
             public void onSingleClick(View v) {
-                setCameraMode("scanner");
+                setCameraMode(CameraMode.SCANNER);
             }
         });
 
@@ -470,8 +472,8 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
             public void onSingleClick(View v) {
 
                 // Set the resolution image and set the resolution of the camera
-                setResolutionImage("normal");
-                mCamera.setResolution("normal");
+                setResolutionImage(ResolutionMode.NORMAL);
+                mCamera.setResolution(ResolutionMode.NORMAL);
             }
         });
 
@@ -481,8 +483,8 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
             public void onSingleClick(View v) {
 
                 // Set the resolution image and set the resolution of the camera
-                setResolutionImage("high");
-                mCamera.setResolution("high");
+                setResolutionImage(ResolutionMode.HIGH);
+                mCamera.setResolution(ResolutionMode.HIGH);
             }
         });
 
@@ -492,8 +494,8 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
             public void onSingleClick(View v) {
 
                 // Set the resolution image and set the resolution of the camera
-                setResolutionImage("super");
-                mCamera.setResolution("super");
+                setResolutionImage(ResolutionMode.SUPER);
+                mCamera.setResolution(ResolutionMode.SUPER);
             }
         });
 
@@ -503,8 +505,8 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
             public void onSingleClick(View v) {
 
                 // Set the resolution image and set the resolution of the camera
-                setResolutionImage("normal");
-                mCamera.setResolution("normal");
+                setResolutionImage(ResolutionMode.NORMAL);
+                mCamera.setResolution(ResolutionMode.NORMAL);
             }
         });
 
@@ -514,8 +516,8 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
             public void onSingleClick(View v) {
 
                 // Set the resolution image and set the resolution of the camera
-                setResolutionImage("high");
-                mCamera.setResolution("high");
+                setResolutionImage(ResolutionMode.HIGH);
+                mCamera.setResolution(ResolutionMode.HIGH);
             }
         });
 
@@ -525,8 +527,8 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
             public void onSingleClick(View v) {
 
                 // Set the resolution image and set the resolution of the camera
-                setResolutionImage("super");
-                mCamera.setResolution("super");
+                setResolutionImage(ResolutionMode.SUPER);
+                mCamera.setResolution(ResolutionMode.SUPER);
             }
         });
 
@@ -686,27 +688,28 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
 
     // This method sets the flash mode and updates the flash button appropriately
     @Override
-    public void setFlashModeImage(String flashMode) {
+    public void setFlashModeImage(FlashMode mode) {
         int imageRes;
-        if (flashMode.equals("auto")) {
-            imageRes = R.drawable.flashlight_off;
-        } else if (flashMode.equals("on")) {
-            imageRes = R.drawable.flashlight_on;
-        } else if (flashMode.equals("torch")) {
-            imageRes = R.drawable.flashlight_on;
-        } else {
-            imageRes = R.drawable.flashlight_off;
+        switch (mode) {
+            case ON:
+            case TORCH:
+                imageRes = R.drawable.flashlight_on;
+                break;
+            case OFF:
+            case AUTO:
+            default:
+                imageRes = R.drawable.flashlight_off;
         }
 
         mToggleFlash.setImageResource(imageRes);
 
         // Persist flash mode
-        mCamera.persistFlashMode(flashMode);
+        mCamera.persistFlashMode(mode);
     }
 
     // This method sets the appropriate images resources for all the buttons in the resolution layouts and records the resolution mode.
     @Override
-    public void setResolutionImage(String resolutionMode) {
+    public void setResolutionImage(ResolutionMode mode) {
 
         // Determine whether the mToggleResolution button or the mCloseButton is currently controlling the resolution selection based on the
         // device orientation.  If this device is using the tablet layout, then the buttons are never reversed.
@@ -715,7 +718,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
             resolutionButton = mCloseButton;
         }
 
-        if (resolutionMode.equals("super")) {
+        if (mode == ResolutionMode.SUPER) {
             // Set the button images
             resolutionButton.setImageResource(R.drawable.superfine_size_icon);
             mNormalButton.setImageResource(R.drawable.normal_icon);
@@ -734,7 +737,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
             mResolutionLabel1.setText("Best for capturing great details.");
             mResolutionLabel2.setText("Largest file size.  Uses the most data.");
         }
-        else if (resolutionMode.equals("high")) {
+        else if (mode == ResolutionMode.HIGH) {
             // Set the button images
             resolutionButton.setImageResource(R.drawable.high_size_icon);
             mNormalButton.setImageResource(R.drawable.normal_icon);
@@ -774,7 +777,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         }
 
         // Persist resolution mode
-        mCamera.persistResoultionMode(resolutionMode);
+        mCamera.persistResolutionMode(mode);
     }
 
     // This method sets the visibility of the mToggleCamera button
@@ -799,10 +802,10 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
 
     // This method sets the camera mode and updates the camera mode labels accordingly
     @Override
-    public void setCameraMode(String cameraMode) {
+    public void setCameraMode(CameraMode mode) {
 
         // FastCam mode
-        if (cameraMode.equals("fastcam")) {
+        if (mode == CameraMode.FASTCAM) {
             mCaptureButton.setImageResource(R.drawable.fast_cam_icon);
             mCaptureButton.setVisibility(View.VISIBLE);
             setInstructionsText("");
@@ -817,7 +820,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         }
 
         // Camera mode
-        if (cameraMode.equals("camera")) {
+        if (mode == CameraMode.CAMERA) {
             mCaptureButton.setImageResource(R.drawable.snap_icon);
             mCaptureButton.setVisibility(View.VISIBLE);
             setInstructionsText("");
@@ -832,7 +835,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         }
 
         // Scanner mode
-        if (cameraMode.equals("scanner")) {
+        if (mode == CameraMode.SCANNER) {
             mCaptureButton.setVisibility(View.INVISIBLE);
             setInstructionsText(SCANNER_INSTRUCTIONS);
             
@@ -850,7 +853,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         mAuxLabel.setAlpha(0.6f);
 
         // Persist the camera mode
-        mCamera.persistCameraMode(cameraMode);
+        mCamera.persistCameraMode(mode);
     }
 
     // This method animates the presentation of the resolution layout when the resolution button is tapped

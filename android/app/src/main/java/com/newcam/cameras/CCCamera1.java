@@ -18,8 +18,11 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 
 import com.newcam.CCCameraView;
-import com.newcam.PhotoOrigin;
+import com.newcam.enums.CameraMode;
+import com.newcam.enums.FlashMode;
+import com.newcam.enums.PhotoOrigin;
 import com.newcam.R;
+import com.newcam.enums.ResolutionMode;
 import com.newcam.imageprocessing.CCCameraImageProcessor;
 import com.newcam.utils.ExifUtils;
 import com.newcam.utils.PhotoUtils;
@@ -231,11 +234,11 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
     }
 
     @Override
-    public void persistCameraMode(String cameraMode) {
-        super.persistCameraMode(cameraMode);
+    public void persistCameraMode(CameraMode mode) {
+        super.persistCameraMode(mode);
 
-        ipDebugLog("[persistCameraMode] " + cameraMode);
-        if(cameraMode.equals("scanner")){
+        ipDebugLog("[persistCameraMode] " + mode.toString());
+        if(mode == CameraMode.SCANNER){
             ipStartCapturing();
         }else{
             ipStopCapturing();
@@ -346,7 +349,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
     }
 
     // This method updates the flash mode in the camera parameters
-    private void updateFlashSetting(String flashMode) {
+    private void updateFlashSetting(FlashMode mode) {
 
         System.err.println("Trying to set the flash");
 
@@ -358,7 +361,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             // Make sure that setting the flash setting is supported or setting the camera parameters will fail
             if (p.getFlashMode() != null) {
                 System.err.println("Trying to set the flash and the flash mode was " + p.getFlashMode());
-                p.setFlashMode(flashMode);
+                p.setFlashMode(mode.toString());
                 safeSetParameters(mCamera, p, "updateFlashSetting()");
             }
         }
@@ -573,7 +576,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         }
     }
 
-    private final Camera.PictureCallback mPicture = new Camera.PictureCallback() {
+    private final Camera.PictureCallback mPictureCallback = new Camera.PictureCallback() {
 
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
@@ -585,7 +588,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             Bitmap bPhoto = null;
             try {
                 // In scanner mode only, try grabbing image processing output
-                if(mCameraMode.equals("scanner")) {
+                if(mCameraMode == CameraMode.SCANNER) {
                     bPhoto = ipInterceptPhotoCapture();
                 }
 
@@ -657,18 +660,17 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 bos.close();
                 out.close();
 
-                // Transition to the EditPhotoCaptureActivity as long as the current mode isn't FastCam
-                if (!mCameraMode.equals("fastcam")) {
-                    gotoEditPhotoCapture(photo.getPath(), imgWidth, imgHeight, PhotoOrigin.fromCameraMode(mCameraMode));
-                }
-
                 // If the current mode is FastCam, then upload the photo immediately
-                else {
+                if (mCameraMode == CameraMode.FASTCAM) {
                     uploadFastCamPhoto(photo, imgWidth, imgHeight, PhotoOrigin.fromCameraMode(mCameraMode));
 
                     // Start the camera preview again
                     mCamera.startPreview();
                     //setupListeners();
+                }
+                // Transition to the EditPhotoCaptureActivity as long as the current mode isn't FastCam
+                else {
+                    gotoEditPhotoCapture(photo.getPath(), imgWidth, imgHeight, PhotoOrigin.fromCameraMode(mCameraMode));
                 }
 
                 try {
@@ -800,7 +802,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
     ///////////////////////////////
 
     @Override
-    public void setResolution(String resolutionMode) {
+    public void setResolution(ResolutionMode mode) {
 
         if (mCamera != null) {
 
@@ -809,7 +811,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             //these are returned in descending order
             List<Camera.Size> lsps = param.getSupportedPictureSizes();
 
-            /*if (resolutionMode.equals("super")) {
+            /*if (resolutionMode == ResolutionMode.SUPER) {
                 for (Camera.Size size : lsps) {
                     if (size.width < 2160) {
                         break;
@@ -822,7 +824,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 }
                 LogUtil.e(TAG, "IN SUPER HIGH RES MODE");
             }
-            else if (resolutionMode.equals("high")) {
+            else if (resolutionMode == ResolutionMode.HIGH) {
                 for (Camera.Size size : lsps) {
                     if (size.width < 1920) {
                         break;
@@ -945,27 +947,19 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
     @Override
     public void toggleFlash() {
-
-        // Uncomment this section to allow the user to toggle between all four different available flash modes
-        /*if (mFlashMode.equals("auto")) {
-            mFlashMode = "on";
-        } else if (mFlashMode.equals("on")) {
-            mFlashMode = "torch";
-        } else if(mFlashMode.equals("torch")) {
-            mFlashMode = "off";
-        } else if (mFlashMode.equals("off")) {
-            mFlashMode = "auto";
-        }*/
-
-        if(mFlashMode.equals("torch")) {
-            mFlashMode = "off";
+        if (mFlashMode == FlashMode.TORCH) {
+            setFlash(FlashMode.OFF);
+        } else {
+            setFlash(FlashMode.TORCH);
         }
-        else {
-            mFlashMode = "torch";
-        }
+    }
+
+    @Override
+    public void setFlash(FlashMode mode) {
+        mFlashMode = mode;
 
         // Update the flash mode in the camera parameters
-        updateFlashSetting(mFlashMode);
+        updateFlashSetting(mode);
     }
 
     @Override
@@ -973,7 +967,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
         if (mCamera != null) {
             try {
-                mCamera.takePicture(shutterCallback, null, mPicture);
+                mCamera.takePicture(shutterCallback, null, mPictureCallback);
 
                 // TODO - Is there a reason the touch listener still needs to be removed after a photo is taken?
                 // Remove the touch listener from the mFrameLayout after a picture has been taken
@@ -1152,7 +1146,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 mCamera.autoFocus(mAutoFocusCallback);
 
                 // Restart the scanner if necessary (one shot preview callback drops the scanner's callback)
-                if(mCameraMode.equals("scanner")) {
+                if(mCameraMode == CameraMode.SCANNER) {
                     ipStartCapturing();
                 }
             }
@@ -1470,7 +1464,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         // start preview with new settings
         try {
             mCamera.setPreviewDisplay(mPreview.getHolder());
-            if(mCameraMode.equals("scanner")) {
+            if(mCameraMode == CameraMode.SCANNER) {
                 ipStartCapturing();
             }
             mCamera.startPreview();

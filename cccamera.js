@@ -36,7 +36,7 @@ class CCCamera extends React.Component {
     ResolutionMode: CameraModule.ResolutionMode, // normal, high, super
   };
 
-  constructor(props){
+  constructor(props) {
     super(props);
 
     this.state = {
@@ -45,7 +45,7 @@ class CCCamera extends React.Component {
   }
 
   componentDidMount() {
-    this._persistCameraModes()
+    this._persistCameraModes();
   }
 
   _persistCameraModes = async () => {
@@ -53,19 +53,19 @@ class CCCamera extends React.Component {
       const persistedModes = await AsyncStorage.multiGet([PERSIST_FASTCAM_MODE, PERSIST_FLASH_MODE, PERSIST_RESOLUTION_MODE]);
       const nextState = { ...this.state };
 
-      for (modeKeyValuePair of persistedModes) {
+      for (const modeKeyValuePair of persistedModes) {
         const persistMode = modeKeyValuePair[0];
         const value = modeKeyValuePair[1];
 
         switch (persistMode) {
           case PERSIST_FLASH_MODE:
-            nextState.flashMode = value ? parseInt(value) : constants.FlashMode.off;
+            nextState.flashMode = value ? parseInt(value, 10) : constants.FlashMode.off;
             break;
           case PERSIST_FASTCAM_MODE:
-            nextState.cameraMode = value ? parseInt(value) : constants.CameraMode.photo;
+            nextState.cameraMode = value ? parseInt(value, 10) : constants.CameraMode.photo;
             break;
           case PERSIST_RESOLUTION_MODE:
-            nextState.resolutionMode = value ? parseInt(value) : constants.ResolutionMode.normal;
+            nextState.resolutionMode = value ? parseInt(value, 10) : constants.ResolutionMode.normal;
             break;
           default: break;
         }
@@ -150,7 +150,7 @@ class CCCamera extends React.Component {
           !hideCameraLayout &&
             <CameraLayout
               cameraConstants={constants}
-              cameraState={{...this.state}}
+              cameraState={{ ...this.state }}
               setCameraState={(nextState) => this.setState(nextState)}
               onClose={(e) => this._onClose(e)}
 
