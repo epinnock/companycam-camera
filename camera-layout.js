@@ -189,17 +189,15 @@ class CameraLayout extends Component {
   }
 
   componentDidMount() {
-    Orientation.addCCCameraOrientationListener((orientation) => this._orientationChange(orientation));
+    Orientation.addCCCameraOrientationListener(this._orientationChange);
   }
 
   componentWillUnmount() {
-    Orientation.removeCCCameraOrientationListener((orientation) => this._orientationChange(orientation));
+    Orientation.removeCCCameraOrientationListener(this._orientationChange);
   }
 
   _orientationChange = (orientation) => {
       const orientationEnum = Orientation.getOrientations();
-
-      console.log(orientationEnum, orientation);
 
       let nextDegree = 0;
       let swapHeaderButtons = false;
