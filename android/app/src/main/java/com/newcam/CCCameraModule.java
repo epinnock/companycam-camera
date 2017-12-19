@@ -61,10 +61,10 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
             private Map<String, Object> getFlashModeConstants() {
                 return Collections.unmodifiableMap(new HashMap<String, Object>() {
                     {
-                        put("off", FlashMode.OFF);
-                        put("on", FlashMode.ON);
-                        put("auto", FlashMode.AUTO);
-                        put("torch", FlashMode.TORCH);
+                        put("off", FlashMode.OFF.toInt());
+                        put("on", FlashMode.ON.toInt());
+                        put("auto", FlashMode.AUTO.toInt());
+                        put("torch", FlashMode.TORCH.toInt());
                     }
                 });
             }
@@ -72,9 +72,9 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
             private Map<String, Object> getCameraModeConstants() {
                 return Collections.unmodifiableMap(new HashMap<String, Object>() {
                     {
-                        put("fastcam", CameraMode.FASTCAM);
-                        put("photo", CameraMode.CAMERA);
-                        put("scanner", CameraMode.SCANNER);
+                        put("fastcam", CameraMode.FASTCAM.toInt());
+                        put("photo", CameraMode.CAMERA.toInt());
+                        put("scanner", CameraMode.SCANNER.toInt());
                     }
                 });
             }
@@ -82,9 +82,9 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
             private Map<String, Object> getResolutionModeConstants() {
                 return Collections.unmodifiableMap(new HashMap<String, Object>() {
                     {
-                        put("normal", ResolutionMode.NORMAL);
-                        put("high", ResolutionMode.HIGH);
-                        put("super", ResolutionMode.SUPER);
+                        put("normal", ResolutionMode.NORMAL.toInt());
+                        put("high", ResolutionMode.HIGH.toInt());
+                        put("super", ResolutionMode.SUPER.toInt());
                     }
                 });
             }
