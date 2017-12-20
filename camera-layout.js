@@ -462,6 +462,7 @@ class CameraLayout extends Component {
                       borderRadius: 6,
                       borderWidth: 2,
                       borderColor: 'white',
+                      overlayColor: 'white', //fills in rounded corners on Android
                     }}
                     source={{uri: 'https://picsum.photos/640/1136/?image=0'}}
                     resizeMode='cover'
