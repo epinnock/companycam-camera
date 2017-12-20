@@ -45,6 +45,7 @@ class CCCamera extends React.Component {
   }
 
   componentDidMount() {
+    console.disableYellowBox = true;
     this._persistCameraModes();
   }
 
