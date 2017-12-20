@@ -13,7 +13,8 @@ const cloudIcon = (<MaterialIcon name="cloud-queue" size={18} color="white" />)
 const cloudOff = (<MaterialIcon name="cloud-off" size={18} color="rgba(255,255,255,0.8)" />)
 
 const ImageTray = styled.View`
-  background-color: #263238;
+  ${'' /* background-color: #263238; */}
+  background-color: rgba(38,50,56, 0.5);
 `;
 
 const ImageTrayActionBar = styled.View`
@@ -23,7 +24,8 @@ const ImageTrayActionBar = styled.View`
   padding-right: 16px;
   padding-bottom: 8px;
   padding-left: 16px;
-  background-color: #37474F;
+  ${'' /* background-color: #37474F; */}
+  background-color: rgba(55,71,79, 0.5);
 `;
 
 const ImageTrayItem = styled.Image`
