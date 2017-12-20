@@ -9,7 +9,7 @@ import styled from 'styled-components/native';
 
 const SCROLLPADDING = 8;
 const TRAYITEMHEIGHT = 80;
-const cloudIcon = (<MaterialIcon name="cloud" size={18} color="white" />)
+const cloudIcon = (<MaterialIcon name="cloud-queue" size={18} color="white" />)
 const cloudOff = (<MaterialIcon name="cloud-off" size={18} color="rgba(255,255,255,0.8)" />)
 
 const ImageTray = styled.View`
