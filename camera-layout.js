@@ -628,7 +628,8 @@ class CameraLayout extends Component {
 
           <CameraTray
             emptyText={PrimaryModeIsScan ? TRAY_EMPTY_TEXT_SCANNER : TRAY_EMPTY_TEXT_CAMERA}
-            imageData={filteredCameraTrayData}
+            trayItems={filteredCameraTrayData}
+            onSelectTrayItem={this.props.onSelectTrayItem}
           />
 
         </LinearGradient>
@@ -660,10 +661,12 @@ CameraLayout.propTypes = {
 
   projectName: PropTypes.string,
   cameraTrayData: PropTypes.array,
+  onSelectTrayItem: PropTypes.func,
 };
 
 CameraLayout.defaultProps = {
   cameraTrayData: [],
+  onSelectTrayItem: () => {},
 };
 
 export default CameraLayout;

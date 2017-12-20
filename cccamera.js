@@ -165,6 +165,7 @@ class CCCamera extends React.Component {
               arModePress={this.props.arModePress}
               baModePress={this.props.baModePress}
               cameraTrayData={this.props.cameraTrayData}
+              onSelectTrayItem={this.props.onSelectTrayItem}
             />
         }
         {this.props.children}
@@ -202,6 +203,7 @@ CCCamera.propTypes = {
   captureButtonPress: PropTypes.func,
 
   cameraTrayData: PropTypes.array,
+  onSelectTrayItem: PropTypes.func,
 };
 
 CCCamera.defaultProps = {
@@ -223,6 +225,7 @@ CCCamera.defaultProps = {
   captureButtonPress: () => {},
 
   cameraTrayData: [],
+  onSelectTrayItem: () => {},
 };
 
 export const constants = CCCamera.constants;

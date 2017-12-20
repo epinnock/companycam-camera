@@ -45,16 +45,16 @@ const styles = StyleSheet.create({
 
 class CameraTray extends Component {
 
-  static renderTrayIconFromData(data) {
+  renderTrayIconFromData = (trayItem) => {
     return (
       <TouchableOpacity
-        onPress={() => {}}
+        onPress={() => { this.props.onSelectTrayItem(trayItem); }}
       >
         {/*<Text>
-          {data.uploaded ? 'DONE' : 'PENDING'}
+          {trayItem.uploaded ? 'DONE' : 'PENDING'}
         </Text>*/}
         <ImageTrayItem
-          source={{ uri: data.url }}
+          source={{ uri: trayItem.url }}
           resizeMode="cover"
         />
       </TouchableOpacity>
@@ -62,9 +62,9 @@ class CameraTray extends Component {
   }
 
   render() {
-    const { imageData, emptyText } = this.props;
+    const { trayItems, emptyText } = this.props;
 
-    const trayIconsEmpty = !imageData || (imageData.length === 0);
+    const trayIconsEmpty = !trayItems || (trayItems.length === 0);
 
     return (
       <ImageTray>
@@ -98,7 +98,7 @@ class CameraTray extends Component {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.itemScroller}
           >
-            {imageData.map(CameraTray.renderTrayIconFromData)}
+            {trayItems.map(this.renderTrayIconFromData)}
           </ScrollView>
 
         )}
@@ -109,8 +109,15 @@ class CameraTray extends Component {
 }
 
 CameraTray.propTypes = {
-  imageData: PropTypes.object,
+  trayItems: PropTypes.object,
   emptyText: PropTypes.string,
+  onSelectTrayItem: PropTypes.func,
+};
+
+CameraTray.defaultProps = {
+  trayItems: [],
+  emptyText: '',
+  onSelectTrayItem: () => {},
 };
 
 export default CameraTray;

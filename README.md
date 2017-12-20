@@ -60,6 +60,9 @@ Array of objects `{ url:string, uploaded:bool, isDocument:bool }`.
 - `uploaded`: Has this image uploaded?
 - `isDocument`: Should this go in the tray for the document scanner, rather than the photos tray?
 
+#### onSelectTrayItem
+Type: `(item) => void`.  Invoked when a camera tray item is clicked.  The value of `item` is one of the elements of the `cameraTrayData` array.
+
 ***
 ## Development
 
