@@ -45,12 +45,6 @@ Type: `(file: string, dims: [w: int, h: int], photoOrigin: string) => void`. Inv
 #### onPhotoAccepted
 Type: `(file: string, dims: [w: int, h: int], photoOrigin: string) => void`. Invoked when a photo is taken and should be immediately uploaded.  Valid photoOrigin values are the same as for `onPhotoTaken`.
 
-#### auxModeCaption
-Type: `string`.  Caption for the 'auxiliary' button at the bottom (e.g. 'AFTER CAM').
-
-#### onAuxModeClicked
-Type: `() => void`. Invoked when the 'auxiliary' button at the bottom is pressed (e.g. launch after cam).
-
 #### hideNativeUI
 Type: `bool`. Determine whether the native UI should be hidden (default is `false`).
 
