@@ -352,6 +352,14 @@ class CameraLayout extends Component {
       data.isDocument === PrimaryModeIsScan
     );
 
+    let trayImageCount = '';
+    let trayMostRecentImage = { uri: 'https://picsum.photos/640/1136/?image=951' };
+    if (filteredCameraTrayData.length > 0) {
+      trayImageCount = filteredCameraTrayData.length;
+      const recentURL = filteredCameraTrayData[0].url;
+      trayMostRecentImage = { uri: recentURL };
+    }
+
     return (
       <View style={styles.cameraUIContainer}>
         <LinearGradient
@@ -462,8 +470,9 @@ class CameraLayout extends Component {
                       borderRadius: 6,
                       borderWidth: 2,
                       borderColor: 'white',
+                      overlayColor: 'white', //fills in rounded corners on Android
                     }}
-                    source={{uri: 'https://picsum.photos/640/1136/?image=0'}}
+                    source={trayMostRecentImage}
                     resizeMode='cover'
                   >
                     <View
@@ -475,7 +484,9 @@ class CameraLayout extends Component {
                         backgroundColor: 'rgba(0,0,0,0.2)',
                       }}
                     >
-                      <Text style={{ color: 'white' }}>2</Text>
+                      <Text style={{ color: 'white' }}>
+                        {trayImageCount}
+                      </Text>
                     </View>
                   </Image>
                 </Animated.View>
@@ -626,7 +637,8 @@ class CameraLayout extends Component {
 
           <CameraTray
             emptyText={PrimaryModeIsScan ? TRAY_EMPTY_TEXT_SCANNER : TRAY_EMPTY_TEXT_CAMERA}
-            imageData={filteredCameraTrayData}
+            trayItems={filteredCameraTrayData}
+            onSelectTrayItem={this.props.onSelectTrayItem}
           />
 
         </LinearGradient>
@@ -658,10 +670,12 @@ CameraLayout.propTypes = {
 
   projectName: PropTypes.string,
   cameraTrayData: PropTypes.array,
+  onSelectTrayItem: PropTypes.func,
 };
 
 CameraLayout.defaultProps = {
   cameraTrayData: [],
+  onSelectTrayItem: () => {},
 };
 
 export default CameraLayout;

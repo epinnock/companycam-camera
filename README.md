@@ -45,12 +45,6 @@ Type: `(file: string, dims: [w: int, h: int], photoOrigin: string) => void`. Inv
 #### onPhotoAccepted
 Type: `(file: string, dims: [w: int, h: int], photoOrigin: string) => void`. Invoked when a photo is taken and should be immediately uploaded.  Valid photoOrigin values are the same as for `onPhotoTaken`.
 
-#### auxModeCaption
-Type: `string`.  Caption for the 'auxiliary' button at the bottom (e.g. 'AFTER CAM').
-
-#### onAuxModeClicked
-Type: `() => void`. Invoked when the 'auxiliary' button at the bottom is pressed (e.g. launch after cam).
-
 #### hideNativeUI
 Type: `bool`. Determine whether the native UI should be hidden (default is `false`).
 
@@ -59,6 +53,9 @@ Array of objects `{ url:string, uploaded:bool, isDocument:bool }`.
 - `url`: Image to show; if local, must have a `file://` prefix
 - `uploaded`: Has this image uploaded?
 - `isDocument`: Should this go in the tray for the document scanner, rather than the photos tray?
+
+#### onSelectTrayItem
+Type: `(item) => void`.  Invoked when a camera tray item is clicked.  The value of `item` is one of the elements of the `cameraTrayData` array.
 
 ***
 ## Development

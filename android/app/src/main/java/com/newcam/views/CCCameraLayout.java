@@ -43,11 +43,6 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
     // The CCCamera object maintains a reference to the camera and implements the necessary camera API methods
     public CCCamera mCamera;
 
-    public interface AuxModeListener{
-        public void onAuxModeClicked();
-    }
-    protected AuxModeListener auxModeListener;
-
     // The mOrientationListener is used to update the UI elements after major device orientation changes
     private OrientationEventListener mOrientationListener;
     private int mLastOrientation = OrientationEventListener.ORIENTATION_UNKNOWN;
@@ -153,16 +148,6 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
     public CCCameraLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context);
-    }
-
-    public void setAuxModeListener(AuxModeListener auxModeListener){
-        this.auxModeListener = auxModeListener;
-    }
-
-    public void setAuxModeCaption(String auxModeCaption){
-        if(mAuxLabel != null){
-            mAuxLabel.setText(auxModeCaption);
-        }
     }
 
     private void setInstructionsText(String text){
@@ -460,9 +445,7 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         mAuxLayout.setOnClickListener(new SingleClickListener(CLICK_REJECTION_INTERVAL) {
             @Override
             public void onSingleClick(View v) {
-                if(thisLayout != null && thisLayout.auxModeListener != null){
-                    thisLayout.auxModeListener.onAuxModeClicked();
-                }
+                System.out.println("[CCCameraLayout] Aux mode clicked");
             }
         });
 
@@ -1106,8 +1089,8 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         if (thisCameraView != null && thisCameraView.placeAddress != null) {
             mPlaceAddress.setText(thisCameraView.placeAddress);
         }
-        if (thisCameraView != null && thisCameraView.propAuxModeCaption != null) {
-            mAuxLabel.setText(thisCameraView.propAuxModeCaption);
+        if (thisCameraView != null) {
+            mAuxLabel.setText("Aux Mode");
         }
         if (mCamera != null && mCamera.mCameraMode != null) {
             setCameraMode(mCamera.mCameraMode);
@@ -1165,8 +1148,8 @@ public class CCCameraLayout extends RelativeLayout implements CCCameraLayoutInte
         if (thisCameraView != null && thisCameraView.placeAddress != null) {
             mPlaceAddress.setText(thisCameraView.placeAddress);
         }
-        if (thisCameraView != null && thisCameraView.propAuxModeCaption != null) {
-            mAuxLabel.setText(thisCameraView.propAuxModeCaption);
+        if (thisCameraView != null) {
+            mAuxLabel.setText("Aux Mode");
         }
         if (mCamera != null && mCamera.mCameraMode != null) {
             setCameraMode(mCamera.mCameraMode);

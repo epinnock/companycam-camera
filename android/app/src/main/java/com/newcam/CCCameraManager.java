@@ -67,11 +67,6 @@ public class CCCameraManager extends ViewGroupManager<CCCameraView> {
         view.setExifLocTimestamp(val);
     }
 
-    @ReactProp(name = "auxModeCaption")
-    public void setAuxModeCaption(CCCameraView view, String val){
-        view.setAuxModeCaption(val);
-    }
-
     @ReactProp(name = "hideNativeUI")
     public void setHideNativeUI(CCCameraView view, boolean val){
         view.setHideNativeUI(val);
@@ -101,9 +96,7 @@ public class CCCameraManager extends ViewGroupManager<CCCameraView> {
             "onPhotoAccepted",
             MapBuilder.of("registrationName", "onPhotoAccepted"),
             "onPhotoTaken",
-            MapBuilder.of("registrationName", "onPhotoTaken"),
-            "onAuxModeClicked",
-            MapBuilder.of("registrationName", "onAuxModeClicked")
+            MapBuilder.of("registrationName", "onPhotoTaken")
         );
     }
 }

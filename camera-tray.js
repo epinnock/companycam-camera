@@ -1,14 +1,20 @@
 import React, { Component, PropTypes } from 'react';
 import {
-  Image, ScrollView, StyleSheet, Text, TouchableOpacity, View,
+  ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View,
 } from 'react-native';
-
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import FeatherIcon from 'react-native-vector-icons/Feather';
 import styled from 'styled-components/native';
 
+const SCROLLPADDING = 8;
 const TRAYITEMHEIGHT = 80;
+const cloudIcon = (<MaterialIcon name="cloud-queue" size={18} color="white" />)
+const cloudOff = (<MaterialIcon name="cloud-off" size={18} color="rgba(255,255,255,0.8)" />)
 
 const ImageTray = styled.View`
-  background-color: #263238;
+  ${'' /* background-color: #263238; */}
+  background-color: rgba(38,50,56, 0.5);
 `;
 
 const ImageTrayActionBar = styled.View`
@@ -18,10 +24,14 @@ const ImageTrayActionBar = styled.View`
   padding-right: 16px;
   padding-bottom: 8px;
   padding-left: 16px;
-  background-color: #37474F;
+  ${'' /* background-color: #37474F; */}
+  background-color: rgba(55,71,79, 0.5);
 `;
 
 const ImageTrayItem = styled.Image`
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-end;
   height: ${TRAYITEMHEIGHT}px;
   width: ${TRAYITEMHEIGHT}px;
   margin-left: 8px;
@@ -33,38 +43,53 @@ const ImageTrayItem = styled.Image`
 const EmptyStateContent = styled.View`
   align-items: center;
   justify-content: center;
-  height: 96px;
+  height: ${TRAYITEMHEIGHT + SCROLLPADDING*2}px;
+`;
+
+const IconContainer = styled.View`
+  align-items: center;
+  justify-content: center;
+  margin-top: 4px;
+  margin-right: 4px;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  background-color: 'rgba(0,0,0,0.3)';
 `;
 
 const styles = StyleSheet.create({
   itemScroller: {
-    paddingVertical: 8,
-    paddingRight: 8,
+    paddingVertical: SCROLLPADDING,
+    paddingRight: SCROLLPADDING,
   },
 });
 
 class CameraTray extends Component {
 
-  static renderTrayIconFromData(data) {
+  renderTrayIconFromData = (trayItem) => {
     return (
       <TouchableOpacity
-        onPress={() => {}}
+        onPress={() => { this.props.onSelectTrayItem(trayItem); }}
       >
-        {/*<Text>
-          {data.uploaded ? 'DONE' : 'PENDING'}
-        </Text>*/}
         <ImageTrayItem
-          source={{ uri: data.url }}
+          source={{ uri: trayItem.url }}
           resizeMode="cover"
-        />
+        >
+          <IconContainer>
+            {
+              trayItem.uploaded ?
+                cloudIcon : cloudOff
+            }
+          </IconContainer>
+        </ImageTrayItem>
       </TouchableOpacity>
     );
   }
 
   render() {
-    const { imageData, emptyText } = this.props;
+    const { trayItems, emptyText } = this.props;
 
-    const trayIconsEmpty = !imageData || (imageData.length === 0);
+    const trayIconsEmpty = !trayItems || (trayItems.length === 0);
 
     return (
       <ImageTray>
@@ -98,7 +123,7 @@ class CameraTray extends Component {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.itemScroller}
           >
-            {imageData.map(CameraTray.renderTrayIconFromData)}
+            {trayItems.map(this.renderTrayIconFromData)}
           </ScrollView>
 
         )}
@@ -109,8 +134,15 @@ class CameraTray extends Component {
 }
 
 CameraTray.propTypes = {
-  imageData: PropTypes.object,
+  trayItems: PropTypes.object,
   emptyText: PropTypes.string,
+  onSelectTrayItem: PropTypes.func,
+};
+
+CameraTray.defaultProps = {
+  trayItems: [],
+  emptyText: '',
+  onSelectTrayItem: () => {},
 };
 
 export default CameraTray;
