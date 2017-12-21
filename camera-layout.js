@@ -466,8 +466,9 @@ class CameraLayout extends Component {
                 >
                   <Image
                     style={{
-                      height: 32, width: 32,
-                      borderRadius: 6,
+                      height: 32,
+                      width: 32,
+                      borderRadius: Platform.OS === 'ios' ? 6 : 0,
                       borderWidth: 2,
                       borderColor: 'white',
                       resizeMode: 'cover',

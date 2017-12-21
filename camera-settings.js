@@ -19,22 +19,21 @@ const RES_MODE_SUPER = 'super';
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    margin: 16,
     backgroundColor: 'white',
     borderRadius: 8,
-    overflow: 'hidden',
   },
   header: {
     width: '100%',
     height: 48,
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#CCC',
+    backgroundColor: '#0277BD',
     flexDirection: 'row',
     paddingHorizontal: 24,
   },
   sectionTitle: {
     fontSize: 20,
+    color: 'black',
     fontWeight: 'bold',
     marginHorizontal: 24,
     marginVertical: 16,
@@ -42,18 +41,19 @@ const styles = StyleSheet.create({
   optionRow: {
     flexDirection: 'row',
     borderBottomWidth: 1,
-    borderColor: '#CCC',
+    borderColor: '#F5F5F5',
     paddingVertical: 8,
     paddingHorizontal: 24,
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   optionText: {
-    fontSize: 18,
+    color: 'black',
+    fontSize: 17,
   },
   optionDescription: {
     color: '#AAA',
-    fontSize: 14,
+    fontSize: 13,
   },
 });
 
@@ -70,18 +70,23 @@ class CameraSettings extends PureComponent {
             hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
             onPress={() => this.props.closeSelf()}
           >
-            <FeatherIcon name="x" size={24} color="black" />
+            <FeatherIcon name="x" size={24} color="white" />
           </TouchableOpacity>
-          <Text style={{ fontSize: 16 }}>Camera Settings</Text>
+          <Text style={{ fontSize: 17, color: 'white' }}>Camera Settings</Text>
           <FeatherIcon name="x" size={24} color="transparent" />
         </View>
 
         {/* Quality Settings group */}
-        <Text style={styles.sectionTitle}>Quality Setting</Text>
+        <Text style={styles.sectionTitle}>Image Quality</Text>
 
         <TouchableOpacity
           onPress={() => this.props.setResolutionMode(RES_MODE_NORMAL)}
-          style={[styles.optionRow, { borderTopWidth: 1 }]}
+          style={[
+            styles.optionRow, {
+              borderTopWidth: 1,
+              borderTopColor: '#EEEEEE',
+            }
+          ]}
         >
           <View style={{ width: '85%' }}>
             <Text style={styles.optionText}>Normal</Text>
@@ -120,7 +125,7 @@ class CameraSettings extends PureComponent {
           <View style={{ width: '85%' }}>
             <Text style={styles.optionText}>Super Fine</Text>
             <Text style={styles.optionDescription}>
-              Best for capturing great details. Largest file size. Uses the most data.
+              Best for capturing details. Largest file size. Uses the most data.
             </Text>
           </View>
           <FeatherIcon

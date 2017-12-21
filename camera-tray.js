@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import {
-  ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View,
+  ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity,
+  View, Platform,
 } from 'react-native';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -35,7 +36,6 @@ const ImageTrayItem = styled.Image`
   height: ${TRAYITEMHEIGHT}px;
   width: ${TRAYITEMHEIGHT}px;
   margin-left: 8px;
-  border-radius: 4px;
   border-width: ${props => props.active ? '2px' : '0'};
   border-color: ${props => props.active ? 'white' : 'transparent'};
 `;
@@ -62,6 +62,12 @@ const styles = StyleSheet.create({
     paddingVertical: SCROLLPADDING,
     paddingRight: SCROLLPADDING,
   },
+  emptyStateText: {
+    textAlign: 'center',
+    color: 'white',
+    fontSize: 17,
+    backgroundColor: 'transparent',
+  },
 });
 
 class CameraTray extends Component {
@@ -73,6 +79,7 @@ class CameraTray extends Component {
       >
         <ImageTrayItem
           source={{ uri: trayItem.url }}
+          style={{ borderRadius: Platform === 'ios' ? 4 : 0 }}
           resizeMode="cover"
         >
           <IconContainer>
@@ -98,7 +105,7 @@ class CameraTray extends Component {
           <TouchableOpacity
             onPress={() => {}}
           >
-            <Text style={{ color: 'white' }}>Cancel</Text>
+            <Text style={{ color: 'white' }}>Hide Tray</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -111,7 +118,7 @@ class CameraTray extends Component {
         {trayIconsEmpty ? (
 
           <EmptyStateContent>
-            <Text style={{ color: 'white', fontSize: 17, backgroundColor: 'transparent' }}>
+            <Text style={styles.emptyStateText}>
               {emptyText}
             </Text>
           </EmptyStateContent>
