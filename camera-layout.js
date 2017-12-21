@@ -470,10 +470,9 @@ class CameraLayout extends Component {
                       borderRadius: 6,
                       borderWidth: 2,
                       borderColor: 'white',
-                      overlayColor: 'white', //fills in rounded corners on Android
+                      resizeMode: 'cover',
                     }}
                     source={trayMostRecentImage}
-                    resizeMode='cover'
                   >
                     <View
                       style={{
