@@ -23,7 +23,6 @@
 @synthesize propExifLocationLatitude;
 @synthesize propExifLocationLongitude;
 @synthesize propExifLocationTimestamp;
-@synthesize propAuxModeCaption;
 @synthesize isActive;
 
 BOOL _multipleTouches;
@@ -306,17 +305,6 @@ BOOL _multipleTouches;
     }
 }
 
-// This method invokes the onAuxModeClicked prop
--(void)propOnAuxModeClicked {
-
-    // Invoke onAuxModeClicked prop
-    id event = @{};
-
-    if (self.onAuxModeClicked) {
-        self.onAuxModeClicked(event);
-    }
-}
-
 // This method can be used to send an event with the given name and body
 -(void)doEvent:(NSString *)eventName :(NSDictionary *)event {
 
@@ -405,11 +393,6 @@ BOOL _multipleTouches;
 
 -(void)setExifLocTimestamp:(double)val {
     self.propExifLocationTimestamp = (long)val;
-}
-
--(void)setAuxModeCaption:(NSString *)val {
-    self.propAuxModeCaption = val;
-    [self.cameraLayout setAuxModeLabelText:self.propAuxModeCaption];
 }
 
 -(void)setHideNativeUI:(BOOL)val {

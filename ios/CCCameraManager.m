@@ -68,11 +68,6 @@ RCT_CUSTOM_VIEW_PROPERTY(exifLocTimestamp, double, CCCameraView) {
     [latestView setExifLocTimestamp:exifLocTimestamp];
 }
 
-RCT_CUSTOM_VIEW_PROPERTY(auxModeCaption, NSString, CCCameraView) {
-    NSString *auxModeCaption = [RCTConvert NSString:json];
-    [latestView setAuxModeCaption:auxModeCaption];
-}
-
 RCT_CUSTOM_VIEW_PROPERTY(hideNativeUI, BOOL, CCCameraView) {
     BOOL hideNativeUI = [RCTConvert BOOL:json];
     [latestView setHideNativeUI:hideNativeUI];
@@ -81,7 +76,6 @@ RCT_CUSTOM_VIEW_PROPERTY(hideNativeUI, BOOL, CCCameraView) {
 RCT_EXPORT_VIEW_PROPERTY(onClose, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onPhotoTaken, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onPhotoAccepted, RCTDirectEventBlock)
-RCT_EXPORT_VIEW_PROPERTY(onAuxModeClicked, RCTDirectEventBlock)
 
 RCT_CUSTOM_VIEW_PROPERTY(flashMode, NSInteger, CCCameraFlashMode) {
     CCCameraFlashMode mode = [RCTConvert NSInteger:json];

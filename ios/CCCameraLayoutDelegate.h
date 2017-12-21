@@ -22,10 +22,6 @@
 @optional
 -(void)setPlaceNameLabel:(NSString *)name;
 
-// This method sets the aux mode label
-@optional
--(void)setAuxModeLabelText:(NSString *)name;
-
 // This method sets the visibility of the flash button
 @optional
 -(void)setFlashButtonVisibility;

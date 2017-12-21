@@ -517,20 +517,6 @@
 //    [self setCameraMode:@"scanner"];
 }
 
--(IBAction)auxModeSubviewClick:(id)sender {
-    
-    // Check if the onAuxModeClicked callback is defined in the CCCameraView
-    CCCameraView *latestView = [CCCameraManager getLatestView];
-    if (latestView.onAuxModeClicked) {
-        [latestView propOnAuxModeClicked];
-    }
-    else {
-        
-        // Set the camera mode
-//        [self setCameraMode:@"aux"];
-    }
-}
-
 #pragma mark CCCameraLayoutDelegate methods
 
 // This method sets the reference to the CCCamera object
@@ -558,13 +544,6 @@
 -(void)setPlaceNameLabel:(NSString *)name {
     if (self.placeName != nil) {
         [self.placeName setText:name];
-    }
-}
-
-// This method sets the aux mode label
--(void)setAuxModeLabelText:(NSString *)name {
-    if (self.auxModeLabel != nil) {
-        [self.auxModeLabel setText:name];
     }
 }
 
