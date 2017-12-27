@@ -375,7 +375,7 @@ class CameraLayout extends Component {
             }]}
           >
             <TouchableOpacity
-              onPress={(e) => this.props.onClose(e)}
+              onPress={() => { this.props.onClose('', 'close'); }}
               style={styles.uiButton}
             >
               <MaterialIcon name="close" size={24} color="white" />

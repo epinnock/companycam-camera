@@ -153,7 +153,10 @@ class CCCamera extends React.Component {
               cameraConstants={constants}
               cameraState={{ ...this.state }}
               setCameraState={(nextState) => this.setState(nextState)}
-              onClose={(e) => this._onClose(e)}
+              onClose={(errmsg, button) => {
+                if (!this.props.onClose) { return; }
+                this.props.onClose(errmsg, button);
+              }}
 
               captureButtonPress={() => {
                 CameraModule.capture();
