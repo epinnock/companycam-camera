@@ -82,6 +82,14 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     backgroundColor: 'transparent',
   },
+  emptyUIbutton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'transparent',
+  },
   captureButton: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -127,6 +135,29 @@ const styles = StyleSheet.create({
   toastMessage: {
     textAlign: 'center',
     color: 'white',
+  },
+  trayMostRecentImage: {
+    height: 32,
+    width: 32,
+    borderRadius: Platform.OS === 'ios' ? 6 : 0,
+    borderWidth: 2,
+    borderColor: 'white',
+    resizeMode: 'cover',
+  },
+  trayMostRecentImageOveraly: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+    width: '100%',
+    backgroundColor: 'rgba(0,0,0,0.2)',
+  },
+  settingsOverlay: {
+    zIndex: 2,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    height: '100%',
+    width: '100%',
   },
 
   // TODO styles for zoom level
@@ -469,25 +500,10 @@ class CameraLayout extends Component {
                   }]}
                 >
                   <Image
-                    style={{
-                      height: 32,
-                      width: 32,
-                      borderRadius: Platform.OS === 'ios' ? 6 : 0,
-                      borderWidth: 2,
-                      borderColor: 'white',
-                      resizeMode: 'cover',
-                    }}
+                    style={styles.trayMostRecentImage}
                     source={trayMostRecentImage}
                   >
-                    <View
-                      style={{
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flex: 1,
-                        width: '100%',
-                        backgroundColor: 'rgba(0,0,0,0.2)',
-                      }}
-                    >
+                    <View style={styles.trayMostRecentImageOveraly}>
                       <Text style={{ color: 'white' }}>
                         {trayImageCount}
                       </Text>
@@ -498,7 +514,7 @@ class CameraLayout extends Component {
 
               {/* Fast cam toggle button */}
               {
-                !PrimaryModeIsScan &&
+                !PrimaryModeIsScan ?
                   <TouchableOpacity
                     onPress={() => {
                       if (cameraMode === constants.CameraMode.fastcam) {
@@ -527,24 +543,29 @@ class CameraLayout extends Component {
                         color="white"
                       />
                     </Animated.View>
-                  </TouchableOpacity>
+                  </TouchableOpacity> :
+                  <View style={styles.emptyUIbutton} />
               }
 
               {/* Capture button */}
               {
-                !PrimaryModeIsScan &&
+                !PrimaryModeIsScan ?
                   <TouchableOpacity
                     onPress={() => {
                       this.doFlashAnimation();
                       this.props.captureButtonPress(this.state.isLandscape);
                     }}
                     style={styles.captureButton}
+                  /> :
+                  <TouchableOpacity
+                    onPress={() => {}}
+                    style={[styles.captureButton, { backgroundColor: 'green'} ]}
                   />
               }
 
               {/* Front/back camera button */}
               {
-                !PrimaryModeIsScan &&
+                !PrimaryModeIsScan ?
                   <TouchableOpacity onPress={() => { this.props.flipCamera(); }}>
                     <Animated.View
                       style={[styles.uiButton, {
@@ -558,13 +579,8 @@ class CameraLayout extends Component {
                     >
                       <FeatherIcon name="repeat" size={24} color="white" />
                     </Animated.View>
-                  </TouchableOpacity>
-              }
-
-              {/* Magic invisible view for when scanner mode is active */}
-              {
-                PrimaryModeIsScan &&
-                  <View style={[styles.captureButton, { opacity: 0 }]} />
+                  </TouchableOpacity> :
+                  <View style={styles.emptyUIbutton} />
               }
 
               {/* Flash mode button */}
@@ -659,15 +675,7 @@ class CameraLayout extends Component {
 
         {
           this.state.showSettings &&
-            <View
-              style={{
-                zIndex: 2,
-                position: 'absolute',
-                top: 0, left: 0,
-                height: '100%',
-                width: '100%',
-              }}
-            >
+            <View style={styles.settingsOverlay}>
               <CameraSettings
                 resolutionModeString={invertedResolutionModes[this.props.cameraState.resolutionMode]}
                 setResolutionMode={(mode) => this.setResolutionMode(mode)}

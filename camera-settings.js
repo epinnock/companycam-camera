@@ -24,12 +24,27 @@ const styles = StyleSheet.create({
   },
   header: {
     width: '100%',
-    height: 48,
+    height: 56,
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#0277BD',
     flexDirection: 'row',
-    paddingHorizontal: 24,
+  },
+  uiButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'transparent',
+  },
+  emptyUIbutton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'transparent',
   },
   sectionTitle: {
     fontSize: 20,
@@ -37,6 +52,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginHorizontal: 24,
     marginVertical: 16,
+  },
+  optionRowContainer: {
+    width: '85%',
   },
   optionRow: {
     flexDirection: 'row',
@@ -67,13 +85,13 @@ class CameraSettings extends PureComponent {
         <View style={styles.header}>
           <TouchableOpacity
             activeOpacity={1}
-            hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+            style={styles.uiButton}
             onPress={() => this.props.closeSelf()}
           >
-            <FeatherIcon name="x" size={24} color="white" />
+            <MaterialIcon name="close" size={24} color="white" />
           </TouchableOpacity>
           <Text style={{ fontSize: 17, color: 'white' }}>Camera Settings</Text>
-          <FeatherIcon name="x" size={24} color="transparent" />
+          <View style={styles.emptyUIbutton} />
         </View>
 
         {/* Quality Settings group */}
@@ -88,7 +106,7 @@ class CameraSettings extends PureComponent {
             }
           ]}
         >
-          <View style={{ width: '85%' }}>
+          <View style={styles.optionRowContainer}>
             <Text style={styles.optionText}>Normal</Text>
             <Text style={styles.optionDescription}>
               Best for everyday use. Smallest file size. Uses the least data.
@@ -105,7 +123,7 @@ class CameraSettings extends PureComponent {
           onPress={() => this.props.setResolutionMode(RES_MODE_HIGH)}
           style={styles.optionRow}
         >
-          <View style={{ width: '85%' }}>
+          <View style={styles.optionRowContainer}>
             <Text style={styles.optionText}>High</Text>
             <Text style={styles.optionDescription}>
               Best for balancing image quality and file size. Uses more data.
@@ -122,7 +140,7 @@ class CameraSettings extends PureComponent {
           onPress={() => this.props.setResolutionMode(RES_MODE_SUPER)}
           style={styles.optionRow}
         >
-          <View style={{ width: '85%' }}>
+          <View style={styles.optionRowContainer}>
             <Text style={styles.optionText}>Super Fine</Text>
             <Text style={styles.optionDescription}>
               Best for capturing details. Largest file size. Uses the most data.
