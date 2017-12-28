@@ -123,14 +123,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: 'rgba(0,0,0,0.7)',
     borderRadius: 8,
-    width: 280,
     padding: 24,
+    width: 280,
   },
   toastTitle: {
     textAlign: 'center',
-    fontSize: 24,
+    fontSize: 20,
     color: 'white',
-    marginBottom: 8,
+    fontWeight: 'bold',
   },
   toastMessage: {
     textAlign: 'center',
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
 });
 
 const TRAY_EMPTY_TEXT_SCANNER = 'Fit document inside screen.\nPlace on contrasting background.';
-const TRAY_EMPTY_TEXT_CAMERA = 'Take some photos!';
+const TRAY_EMPTY_TEXT_CAMERA = 'Photos you take will show in this tray\nand will reset when you close your camera.';
 
 class CameraLayout extends Component {
 
@@ -270,16 +270,16 @@ class CameraLayout extends Component {
       switch (nextMode) {
         case constants.CameraMode.photo:
           if (this.props.cameraState.cameraMode === constants.CameraMode.scanner) {
-            this.displayToast('Photo mode', '');
+            this.displayToast('Take Photos', '');
           } else {
-            this.displayToast('Fastcam disabled', '');
+            this.displayToast('FastCam Off', 'Photos must be confirmed to upload.');
           }
           break;
         case constants.CameraMode.scanner:
-          this.displayToast('Scanner mode', '');
+          this.displayToast('Scan a Document', '');
           break;
         case constants.CameraMode.fastcam:
-          this.displayToast('Fastcam enabled', '');
+          this.displayToast('FastCam On', 'Photos immediately upload when captured.');
           break;
         default: break;
       }
@@ -323,11 +323,11 @@ class CameraLayout extends Component {
     switch (this.props.cameraState.flashMode) {
       case constants.FlashMode.off:
         nextState.flashMode = constants.FlashMode.torch;
-        this.displayToast('Flash enabled', 'Flash is now on');
+        this.displayToast('Flashlight Enabled', '');
         break;
       case constants.FlashMode.torch:
         nextState.flashMode = constants.FlashMode.off;
-        this.displayToast('Flash disabled', 'Flash is now off');
+        this.displayToast('Flashlight Disabled', '');
         break;
       default: break;
     }
