@@ -49,17 +49,17 @@ Type: `(file: string, dims: [w: int, h: int], photoOrigin: string) => void`. Inv
 Type: `bool`. Determine whether the native UI should be hidden (default is `false`).
 
 #### cameraTrayData
-Array of objects `{ url:string, uploaded:bool, isDocument:bool }`.
-- `url`: Image to show; if local, must have a `file://` prefix
-- `uploaded`: Has this image uploaded?
-- `edited`: Has this image been edited?
-- `isDocument`: Should this go in the tray for the document scanner, rather than the photos tray?
+Array of objects with properties:
+- `url:string`: Image to show; if local, must have a `file://` prefix
+- `uploaded:bool`: Has this image uploaded?
+- `edited:bool`: Has this image been edited?
+- `isDocument:bool`: Should this go in the tray for the document scanner, rather than the photos tray?
 
 #### cameraTrayVisible
 Type: `bool`.  Show camera tray?
 
 #### onSelectTrayItem
-Type: `(item) => void`.  Invoked when a camera tray item is clicked.  The value of `item` is one of the elements of the `cameraTrayData` array.
+Type: `(item) => void`.  Invoked when a camera tray item is clicked.  The value of `item` is one of the objects in the `cameraTrayData` array, and retains any extra properties that object might have.
 
 #### setCameraTrayVisible
 Type: `(bool) => void`.  Set visibility of camera tray.
