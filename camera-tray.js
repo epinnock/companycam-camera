@@ -19,6 +19,9 @@ const editedIconOn = (
 const editedIconOff = (
   <MaterialIcon name="create" size={18} color="rgba(255,255,255,0.0)" />
 );
+const chevronDown = (
+  <MaterialIcon name="keyboard-arrow-down" size={18} style={{marginRight: 4}} color="rgba(255,255,255,0.8)" />
+);
 
 const ImageTray = styled.View`
   ${''/* background-color: #263238; */}
@@ -41,6 +44,7 @@ const ImageTrayItem = styled.Image`
   justify-content: space-between;
   height: ${TRAYITEMHEIGHT}px;
   width: ${TRAYITEMHEIGHT}px;
+  margin-left: 8;
   border-width: ${props => props.active ? '2px' : '0'};
   border-color: ${props => props.active ? 'white' : 'transparent'};
 `;
@@ -118,15 +122,18 @@ class CameraTray extends Component {
         <ImageTrayActionBar>
           <TouchableOpacity
             onPress={this.props.onHideTray}
+            style={{ flexDirection: 'row' }}
           >
-            <Text style={{ color: 'white' }}>Hide Tray</Text>
+            {chevronDown}
+            <Text style={{ color: 'white' }}>Hide Session Tray</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
+          {/* TODO will be used for scanner mode */}
+          {/* <TouchableOpacity
             onPress={() => {}}
           >
             <Text style={{ color: 'white' }}>Done</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </ImageTrayActionBar>
 
         {trayIconsEmpty ? (
