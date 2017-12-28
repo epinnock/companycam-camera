@@ -197,40 +197,40 @@ class CameraLayout extends Component {
   }
 
   _orientationChange = (orientation) => {
-      const orientationEnum = Orientation.getOrientations();
+    const orientationEnum = Orientation.getOrientations();
 
-      let nextDegree = 0;
-      let swapHeaderButtons = false;
-      let isLandscape = false;
+    let nextDegree = 0;
+    let swapHeaderButtons = false;
+    let isLandscape = false;
 
-      switch (orientation) {
-        case orientationEnum.portrait:
-          nextDegree = 0;
-          break;
-        case orientationEnum.landscapeleft:
-          nextDegree = 90;
-          swapHeaderButtons = true;
-          isLandscape = true;
-          break;
-        case orientationEnum.landscaperight:
-          nextDegree = -90;
-          isLandscape = true;
-          break;
-        case orientationEnum.portraitupsidedown:
-          nextDegree = 180;
-          break;
-        default: break;
-      }
-
-      Animated.timing(this.state.orientationDegrees, {
-        toValue: nextDegree,
-        duration: 100,
-      }).start();
-      this.setState({ swapHeaderButtons });
+    switch (orientation) {
+      case orientationEnum.portrait:
+        nextDegree = 0;
+        break;
+      case orientationEnum.landscapeleft:
+        nextDegree = 90;
+        swapHeaderButtons = true;
+        isLandscape = true;
+        break;
+      case orientationEnum.landscaperight:
+        nextDegree = -90;
+        isLandscape = true;
+        break;
+      case orientationEnum.portraitupsidedown:
+        nextDegree = 180;
+        break;
+      default: break;
     }
 
+    Animated.timing(this.state.orientationDegrees, {
+      toValue: nextDegree,
+      duration: 100,
+    }).start();
+    this.setState({ swapHeaderButtons });
+  }
+
   setCameraMode = async (nextMode) => {
-    const constants = {...this.props.cameraConstants};
+    const constants = { ...this.props.cameraConstants };
     const nextState = { ...this.props.cameraState };
 
     if (this.props.cameraState.cameraMode !== nextMode) {
@@ -268,7 +268,7 @@ class CameraLayout extends Component {
   }
 
   setResolutionMode = async (nextModeString) => {
-    const constants = {...this.props.cameraConstants};
+    const constants = { ...this.props.cameraConstants };
     const nextState = { ...this.props.cameraState };
 
     const nextMode = constants.ResolutionMode[nextModeString];
@@ -286,7 +286,7 @@ class CameraLayout extends Component {
   }
 
   toggleFlashMode = async () => {
-    const constants = {...this.props.cameraConstants};
+    const constants = { ...this.props.cameraConstants };
     const nextState = { ...this.props.cameraState };
 
     switch (this.props.cameraState.flashMode) {
@@ -340,8 +340,8 @@ class CameraLayout extends Component {
   }
 
   render() {
-    const constants = {...this.props.cameraConstants};
-    const { flashMode, cameraMode, resolutionMode } = this.props.cameraState;
+    const constants = { ...this.props.cameraConstants };
+    const { flashMode, cameraMode } = this.props.cameraState;
 
     const TorchIsOn = flashMode === constants.FlashMode.torch;
     const PrimaryModeIsScan = cameraMode === constants.CameraMode.scanner;
@@ -453,7 +453,11 @@ class CameraLayout extends Component {
             <View style={styles.captureContainer}>
 
               {/* Preview tray */}
-              <TouchableOpacity onPress={() => {}}>
+              <TouchableOpacity
+                onPress={() => {
+                  this.props.setCameraTrayVisible(true);
+                }}
+              >
                 <Animated.View
                   style={[styles.uiButton, {
                     transform: [{
@@ -461,7 +465,7 @@ class CameraLayout extends Component {
                         inputRange: [0, 1],
                         outputRange: ['0deg', '1deg'],
                       }),
-                    }]
+                    }],
                   }]}
                 >
                   <Image
@@ -511,11 +515,14 @@ class CameraLayout extends Component {
                             inputRange: [0, 1],
                             outputRange: ['0deg', '1deg'],
                           }),
-                        }]
+                        }],
                       }]}
                     >
                       <MaterialIcon
-                        name={cameraMode === constants.CameraMode.fastcam ? FASTCAM_ON_ICON : FASTCAM_OFF_ICON}
+                        name={
+                          cameraMode === constants.CameraMode.fastcam ?
+                          FASTCAM_ON_ICON : FASTCAM_OFF_ICON
+                        }
                         size={24}
                         color="white"
                       />
@@ -546,7 +553,7 @@ class CameraLayout extends Component {
                             inputRange: [0, 1],
                             outputRange: ['0deg', '1deg'],
                           }),
-                        }]
+                        }],
                       }]}
                     >
                       <FeatherIcon name="repeat" size={24} color="white" />
@@ -561,7 +568,7 @@ class CameraLayout extends Component {
               }
 
               {/* Flash mode button */}
-              <TouchableOpacity onPress={() => {this.toggleFlashMode(); }}>
+              <TouchableOpacity onPress={() => { this.toggleFlashMode(); }}>
                 <Animated.View
                   style={[styles.uiButton, {
                     transform: [{
@@ -569,7 +576,7 @@ class CameraLayout extends Component {
                         inputRange: [0, 1],
                         outputRange: ['0deg', '1deg'],
                       }),
-                    }]
+                    }],
                   }]}
                 >
                   <MaterialCommunityIcon
@@ -581,71 +588,86 @@ class CameraLayout extends Component {
               </TouchableOpacity>
             </View>
 
-            <View style={styles.modeContainer}>
+            {/* Photo mode buttons */}
+            {this.props.cameraTrayVisible ? null :
+              <View style={styles.modeContainer}>
 
-              {/* Photo mode button */}
-              <TouchableOpacity
-                onPress={() => this.setCameraMode(constants.CameraMode.photo)}
-                style={styles.modeButton}
-              >
-                <ModeTitle isCurrentMode={!PrimaryModeIsScan}>
-                  PHOTO
-                </ModeTitle>
-                <ModeIndicator isCurrentMode={!PrimaryModeIsScan}/>
-              </TouchableOpacity>
+                {/* Photo mode button */}
+                <TouchableOpacity
+                  onPress={() => this.setCameraMode(constants.CameraMode.photo)}
+                  style={styles.modeButton}
+                >
+                  <ModeTitle isCurrentMode={!PrimaryModeIsScan}>
+                    PHOTO
+                  </ModeTitle>
+                  <ModeIndicator isCurrentMode={!PrimaryModeIsScan} />
+                </TouchableOpacity>
 
-              {/* TODO video video video... */}
-              {/* <TouchableOpacity
-                onPress={() => {}}
-                style={styles.modeButton}
-              >
-                <ModeTitle>VIDEO</ModeTitle>
-                <ModeIndicator />
-              </TouchableOpacity> */}
+                {/* TODO video video video... */}
+                {/* <TouchableOpacity
+                  onPress={() => {}}
+                  style={styles.modeButton}
+                >
+                  <ModeTitle>VIDEO</ModeTitle>
+                  <ModeIndicator />
+                </TouchableOpacity> */}
 
-              {/* Scanner mode button */}
-              <TouchableOpacity
-                onPress={() => this.setCameraMode(constants.CameraMode.scanner)}
-                style={styles.modeButton}
-              >
-                <ModeTitle isCurrentMode={PrimaryModeIsScan}>
-                  SCAN
-                </ModeTitle>
-                <ModeIndicator isCurrentMode={PrimaryModeIsScan}/>
-              </TouchableOpacity>
+                {/* Scanner mode button */}
+                <TouchableOpacity
+                  onPress={() => this.setCameraMode(constants.CameraMode.scanner)}
+                  style={styles.modeButton}
+                >
+                  <ModeTitle isCurrentMode={PrimaryModeIsScan}>
+                    SCAN
+                  </ModeTitle>
+                  <ModeIndicator isCurrentMode={PrimaryModeIsScan} />
+                </TouchableOpacity>
 
-              {/* AR mode button */}
-              <TouchableOpacity
-                onPress={() => this.props.arModePress()}
-                style={styles.modeButton}
-              >
-                <ModeTitle>AR</ModeTitle>
-                <ModeIndicator />
-              </TouchableOpacity>
+                {/* AR mode button */}
+                <TouchableOpacity
+                  onPress={() => this.props.arModePress()}
+                  style={styles.modeButton}
+                >
+                  <ModeTitle>AR</ModeTitle>
+                  <ModeIndicator />
+                </TouchableOpacity>
 
-              {/* Before after mode button */}
-              <TouchableOpacity
-                onPress={() => this.props.baModePress()}
-                style={styles.modeButton}
-              >
-                <ModeTitle>B/A</ModeTitle>
-                <ModeIndicator />
-              </TouchableOpacity>
-            </View>
-
+                {/* Before after mode button */}
+                <TouchableOpacity
+                  onPress={() => this.props.baModePress()}
+                  style={styles.modeButton}
+                >
+                  <ModeTitle>B/A</ModeTitle>
+                  <ModeIndicator />
+                </TouchableOpacity>
+              </View>
+          }
           </View>
 
           <CameraTray
+            visible={this.props.cameraTrayVisible}
+            doneButtonVisible
             emptyText={PrimaryModeIsScan ? TRAY_EMPTY_TEXT_SCANNER : TRAY_EMPTY_TEXT_CAMERA}
             trayItems={filteredCameraTrayData}
             onSelectTrayItem={this.props.onSelectTrayItem}
+            onHideTray={() => {
+              this.props.setCameraTrayVisible(false);
+            }}
           />
 
         </LinearGradient>
 
         {
           this.state.showSettings &&
-            <View style={{ zIndex: 2, position: 'absolute', top: 0, left: 0, height: '100%', width: '100%' }}>
+            <View
+              style={{
+                zIndex: 2,
+                position: 'absolute',
+                top: 0, left: 0,
+                height: '100%',
+                width: '100%',
+              }}
+            >
               <CameraSettings
                 resolutionModeString={invertedResolutionModes[this.props.cameraState.resolutionMode]}
                 setResolutionMode={(mode) => this.setResolutionMode(mode)}
@@ -669,13 +691,23 @@ CameraLayout.propTypes = {
   onClose: PropTypes.func,
 
   projectName: PropTypes.string,
+
   cameraTrayData: PropTypes.array,
+  cameraTrayVisible: PropTypes.bool,
   onSelectTrayItem: PropTypes.func,
+  setCameraTrayVisible: PropTypes.func,
+
+  arModePress: PropTypes.func,
+  baModePress: PropTypes.func,
 };
 
 CameraLayout.defaultProps = {
   cameraTrayData: [],
+  cameraTrayVisible: false,
   onSelectTrayItem: () => {},
+  setCameraTrayVisible: () => {},
+  arModePress: () => {},
+  baModePress: () => {},
 };
 
 export default CameraLayout;

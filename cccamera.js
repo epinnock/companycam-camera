@@ -166,10 +166,13 @@ class CCCamera extends React.Component {
 
               projectName={this.props.projectName}
 
+              cameraTrayData={this.props.cameraTrayData}
+              cameraTrayVisible={this.props.cameraTrayVisible}
+              onSelectTrayItem={this.props.onSelectTrayItem}
+              setCameraTrayVisible={this.props.setCameraTrayVisible}
+
               arModePress={this.props.arModePress}
               baModePress={this.props.baModePress}
-              cameraTrayData={this.props.cameraTrayData}
-              onSelectTrayItem={this.props.onSelectTrayItem}
             />
         }
         {this.props.children}
@@ -207,7 +210,9 @@ CCCamera.propTypes = {
   captureButtonPress: PropTypes.func,
 
   cameraTrayData: PropTypes.array,
+  cameraTrayVisible: PropTypes.bool,
   onSelectTrayItem: PropTypes.func,
+  setCameraTrayVisible: PropTypes.func,
 };
 
 CCCamera.defaultProps = {
@@ -229,7 +234,9 @@ CCCamera.defaultProps = {
   captureButtonPress: () => {},
 
   cameraTrayData: [],
+  cameraTrayVisible: false,
   onSelectTrayItem: () => {},
+  setCameraTrayVisible: () => {},
 };
 
 export const constants = CCCamera.constants;
