@@ -52,6 +52,7 @@ Type: `bool`. Determine whether the native UI should be hidden (default is `fals
 Array of objects `{ url:string, uploaded:bool, isDocument:bool }`.
 - `url`: Image to show; if local, must have a `file://` prefix
 - `uploaded`: Has this image uploaded?
+- `edited`: Has this image been edited?
 - `isDocument`: Should this go in the tray for the document scanner, rather than the photos tray?
 
 #### cameraTrayVisible

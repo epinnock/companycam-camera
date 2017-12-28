@@ -7,11 +7,17 @@ import styled from 'styled-components/native';
 
 const SCROLLPADDING = 8;
 const TRAYITEMHEIGHT = 80;
-const cloudIcon = (
+const cloudIconOn = (
   <MaterialIcon name="cloud-queue" size={18} color="white" />
 );
-const cloudOff = (
+const cloudIconOff = (
   <MaterialIcon name="cloud-off" size={18} color="rgba(255,255,255,0.8)" />
+);
+const editedIconOn = (
+  <MaterialIcon name="create" size={18} color="white" />
+);
+const editedIconOff = (
+  <MaterialIcon name="create" size={18} color="rgba(255,255,255,0.0)" />
 );
 
 const ImageTray = styled.View`
@@ -32,11 +38,9 @@ const ImageTrayActionBar = styled.View`
 
 const ImageTrayItem = styled.Image`
   flex-direction: row;
-  align-items: flex-start;
-  justify-content: flex-end;
+  justify-content: space-between;
   height: ${TRAYITEMHEIGHT}px;
   width: ${TRAYITEMHEIGHT}px;
-  margin-left: 8px;
   border-width: ${props => props.active ? '2px' : '0'};
   border-color: ${props => props.active ? 'white' : 'transparent'};
 `;
@@ -51,11 +55,18 @@ const IconContainer = styled.View`
   align-items: center;
   justify-content: center;
   margin-top: 4px;
-  margin-right: 4px;
   width: 32px;
   height: 32px;
   border-radius: 16px;
   background-color: 'rgba(0,0,0,0.3)';
+`;
+
+const IconContainerLeft = IconContainer.extend`
+  margin-left: 4px;
+`;
+
+const IconContainerRight = IconContainer.extend`
+  margin-right: 4px;
 `;
 
 const styles = StyleSheet.create({
@@ -83,12 +94,12 @@ class CameraTray extends Component {
           style={{ borderRadius: Platform === 'ios' ? 4 : 0 }}
           resizeMode="cover"
         >
-          <IconContainer>
-            {
-              trayItem.uploaded ?
-                cloudIcon : cloudOff
-            }
-          </IconContainer>
+          <IconContainerLeft>
+            {trayItem.edited ? editedIconOn : editedIconOff}
+          </IconContainerLeft>
+          <IconContainerRight>
+            {trayItem.uploaded ? cloudIconOn : cloudIconOff}
+          </IconContainerRight>
         </ImageTrayItem>
       </TouchableOpacity>
     );
