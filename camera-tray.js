@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import {
-  ScrollView, StyleSheet, Text, TouchableOpacity, Platform,
+  Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View,
 } from 'react-native';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import styled from 'styled-components/native';
@@ -8,22 +8,23 @@ import styled from 'styled-components/native';
 const SCROLLPADDING = 8;
 const TRAYITEMHEIGHT = 80;
 const cloudIconOn = (
-  <MaterialIcon name="cloud-queue" size={18} color="white" />
+  // <MaterialIcon name="cloud-queue" size={18} color="white" />
+  <MaterialIcon name="check" size={18} color="white" />
 );
 const cloudIconOff = (
   <MaterialIcon name="cloud-off" size={18} color="rgba(255,255,255,0.8)" />
 );
 const editedIconOn = (
-  <MaterialIcon name="create" size={18} color="white" />
+  <MaterialIcon name="create" size={16} color="rgba(255,255,255,0.8)" />
 );
 const hasCommentsIcon = (
-  <MaterialIcon name="chat-bubble-outline" size={18} color="white" />
+  <MaterialIcon name="chat-bubble-outline" size={16} color="rgba(255,255,255,0.8)" />
 );
 const hasTagsIcon = (
-  <MaterialIcon name="bookmark-border" size={18} color="white" />
+  <MaterialIcon name="bookmark-border" size={16} color="rgba(255,255,255,0.8)" />
 );
 const chevronDown = (
-  <MaterialIcon name="keyboard-arrow-down" size={18} style={{marginRight: 4}} color="rgba(255,255,255,0.8)" />
+  <MaterialIcon name="keyboard-arrow-down" size={18} style={{marginRight: 4}} color="white" />
 );
 
 const ImageTray = styled.View`
@@ -43,12 +44,10 @@ const ImageTrayActionBar = styled.View`
 `;
 
 const ImageTrayItem = styled.Image`
-  flex-direction: row;
   justify-content: space-between;
   height: ${TRAYITEMHEIGHT}px;
   width: ${TRAYITEMHEIGHT}px;
   margin-left: 8px;
-  padding: 4px;
   border-width: ${props => props.active ? '2px' : '0'};
   border-color: ${props => props.active ? 'white' : 'transparent'};
 `;
@@ -62,9 +61,13 @@ const EmptyStateContent = styled.View`
 const IconContainer = styled.View`
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 16px;
+  width: 24px;
+  height: 24px;
+`;
+
+const IconContainerCircle = IconContainer.extend`
+  margin: 4px;
+  borderRadius: 12px;
   background-color: 'rgba(0,0,0,0.3)';
 `;
 
@@ -90,33 +93,56 @@ class CameraTray extends Component {
       >
         <ImageTrayItem
           source={{ uri: trayItem.url }}
-          style={{ borderRadius: Platform === 'ios' ? 4 : 0 }}
+          style={{ flexWrap: 'wrap', borderRadius: Platform === 'ios' ? 4 : 0 }}
           resizeMode="cover"
         >
-          <IconContainer>
-            {trayItem.uploaded ? cloudIconOn : cloudIconOff}
-          </IconContainer>
-          {
-            trayItem.edited ?
-              <IconContainer>
-                {editedIconOn}
-              </IconContainer> :
-              null
-          }
-          {
-            trayItem.hasComments ?
-              <IconContainer>
-                {hasCommentsIcon}
-              </IconContainer> :
-              null
-          }
-          {
-            trayItem.hasTags ?
-              <IconContainer>
-                {hasTagsIcon}
-              </IconContainer> :
-              null
-          }
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+            { trayItem.uploaded ?
+                <IconContainerCircle>
+                  {cloudIconOn}
+                </IconContainerCircle> :
+                null
+            }
+          </View>
+
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.2)' }}>
+            {/* <IconContainer style={{ width: '33.33%' }}>
+              {editedIconOn}
+            </IconContainer>
+            <IconContainer style={{ width: '33.33%' }}>
+              {hasCommentsIcon}
+            </IconContainer>
+            <IconContainer style={{ width: '33.33%' }}>
+              {hasTagsIcon}
+            </IconContainer> */}
+            {
+              trayItem.edited ?
+                <IconContainer
+                  style={{ width: '33.33%' }}
+                >
+                  {editedIconOn}
+                </IconContainer> :
+                null
+            }
+            {
+              trayItem.hasComments ?
+                <IconContainer
+                  style={{ width: '33.33%' }}
+                >
+                  {hasCommentsIcon}
+                </IconContainer> :
+                null
+            }
+            {
+              trayItem.hasTags ?
+                <IconContainer
+                  style={{ width: '33.33%' }}
+                >
+                  {hasTagsIcon}
+                </IconContainer> :
+                null
+            }
+          </View>
         </ImageTrayItem>
       </TouchableOpacity>
     );
@@ -138,7 +164,7 @@ class CameraTray extends Component {
             style={{ flexDirection: 'row' }}
           >
             {chevronDown}
-            <Text style={{ color: 'white' }}>Hide Session Tray</Text>
+            <Text style={{ color: 'white' }}>Hide</Text>
           </TouchableOpacity>
 
           {/* TODO will be used for scanner mode */}
@@ -177,7 +203,7 @@ class CameraTray extends Component {
 CameraTray.propTypes = {
   visible: PropTypes.bool,
   doneButtonVisible: PropTypes.bool,
-  trayItems: PropTypes.object,
+  trayItems: PropTypes.array,
   emptyText: PropTypes.string,
   onSelectTrayItem: PropTypes.func,
   onHideTray: PropTypes.func,
