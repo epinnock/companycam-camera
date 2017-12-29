@@ -53,6 +53,8 @@ Array of objects with properties:
 - `url:string`: Image to show; if local, must have a `file://` prefix
 - `uploaded:bool`: Has this image uploaded?
 - `edited:bool`: Has this image been edited?
+- `hasComments:bool`: Have comments been added to this image?
+- `hasTags:bool`: Have tags been added to this image?
 - `isDocument:bool`: Should this go in the tray for the document scanner, rather than the photos tray?
 
 #### cameraTrayVisible

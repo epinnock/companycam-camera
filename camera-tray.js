@@ -16,8 +16,11 @@ const cloudIconOff = (
 const editedIconOn = (
   <MaterialIcon name="create" size={18} color="white" />
 );
-const editedIconOff = (
-  <MaterialIcon name="create" size={18} color="rgba(255,255,255,0.0)" />
+const hasCommentsIcon = (
+  <MaterialIcon name="chat-bubble-outline" size={18} color="white" />
+);
+const hasTagsIcon = (
+  <MaterialIcon name="bookmark-border" size={18} color="white" />
 );
 const chevronDown = (
   <MaterialIcon name="keyboard-arrow-down" size={18} style={{marginRight: 4}} color="rgba(255,255,255,0.8)" />
@@ -95,10 +98,24 @@ class CameraTray extends Component {
           </IconContainer>
           {
             trayItem.edited ?
-            <IconContainer>
-              {editedIconOn}
-            </IconContainer> :
-            null
+              <IconContainer>
+                {editedIconOn}
+              </IconContainer> :
+              null
+          }
+          {
+            trayItem.hasComments ?
+              <IconContainer>
+                {hasCommentsIcon}
+              </IconContainer> :
+              null
+          }
+          {
+            trayItem.hasTags ?
+              <IconContainer>
+                {hasTagsIcon}
+              </IconContainer> :
+              null
           }
         </ImageTrayItem>
       </TouchableOpacity>
