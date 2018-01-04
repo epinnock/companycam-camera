@@ -21,6 +21,7 @@ import {
 } from './cccam-enums';
 
 // TODO remove what we dont use for icons...
+import { blankImage } from './images';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FeatherIcon from 'react-native-vector-icons/Feather';
@@ -382,7 +383,7 @@ class CameraLayout extends Component {
     );
 
     let trayImageCount = '';
-    let trayMostRecentImage = { uri: 'https://picsum.photos/640/1136/?image=951' };
+    let trayMostRecentImage = blankImage;
     if (filteredCameraTrayData.length > 0) {
       trayImageCount = filteredCameraTrayData.length;
       const recentURL = filteredCameraTrayData[0].url;
