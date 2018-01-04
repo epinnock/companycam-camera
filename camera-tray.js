@@ -198,15 +198,19 @@ class CameraTray extends Component {
         </ImageTrayActionBar>
 
         {/* TODO will be used for scanner mode */}
-        <ImageTrayFileControl>
-          <TouchableOpacity
-            onPress={() => {}}
-            style={{ flexDirection: 'row', alignItems: 'center' }}
-          >
-            <Text style={{ color: 'rgba(255,255,255,0.8)' }}>SomeFileName.pdf</Text>
-            {pencilIcon}
-          </TouchableOpacity>
-        </ImageTrayFileControl>
+        {
+          this.props.pdfTitleVisible ?
+            <ImageTrayFileControl>
+              <TouchableOpacity
+                onPress={() => {}}
+                style={{ flexDirection: 'row', alignItems: 'center' }}
+              >
+                <Text style={{ color: 'rgba(255,255,255,0.8)' }}>SomeFileName.pdf</Text>
+                {pencilIcon}
+              </TouchableOpacity>
+            </ImageTrayFileControl>
+            : null
+        }
 
         {trayIconsEmpty ? (
 
@@ -233,7 +237,7 @@ class CameraTray extends Component {
 
 CameraTray.propTypes = {
   visible: PropTypes.bool,
-  doneButtonVisible: PropTypes.bool,
+  pdfTitleVisible: PropTypes.bool,
   trayItems: PropTypes.array,
   emptyText: PropTypes.string,
   onSelectTrayItem: PropTypes.func,
@@ -242,7 +246,7 @@ CameraTray.propTypes = {
 
 CameraTray.defaultProps = {
   visible: true,
-  doneButtonVisible: false,
+  pdfTitleVisible: false,
   trayItems: [],
   emptyText: '',
   onSelectTrayItem: () => {},

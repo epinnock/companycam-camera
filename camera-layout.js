@@ -662,7 +662,7 @@ class CameraLayout extends Component {
 
           <CameraTray
             visible={this.props.cameraTrayVisible}
-            doneButtonVisible
+            pdfTitleVisible={PrimaryModeIsScan}
             emptyText={PrimaryModeIsScan ? TRAY_EMPTY_TEXT_SCANNER : TRAY_EMPTY_TEXT_CAMERA}
             trayItems={filteredCameraTrayData}
             onSelectTrayItem={this.props.onSelectTrayItem}
