@@ -20,9 +20,6 @@ const gestureIcon = (
 const chevronDown = (
   <MaterialIcon name="keyboard-arrow-down" size={18} style={{marginRight: 4}} color="white" />
 );
-const retryIcon = (
-  <MaterialIcon name="sync-problem" size={12} color="white" />
-);
 const pencilIcon = (
   <MaterialIcon name="mode-edit" size={12} style={{marginLeft: 8 }} color="white" />
 );
@@ -66,30 +63,28 @@ const IconContainerCircle = IconContainer.extend`
   borderRadius: 9px;
   width: 18px;
   height: 18px;
-  background-color: ${props => props.waiting ? 'rgba(255,193,7,0.8)' : 'rgba(0,0,0,0.5)'};
+  background-color: rgba(0,0,0,0.5),
+`;
+
+const IconContainerPill = styled.View`
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  height: 18px;
+  border-top-left-radius: 9px;
+  border-bottom-left-radius: 9px;
+  border-top-right-radius: 9px;
+  border-bottom-right-radius: 9px;
+  padding: 2px 4px;
+  background-color: rgba(0,0,0,0.5),
 `;
 
 const styles = StyleSheet.create({
-  iconContainer: {
+  iconContainerOverlay: {
     flex: 1,
-    justifyContent: 'space-between',
-    padding: 4,
-  },
-  iconTray: {
-    alignSelf: 'flex-end',
-  },
-  iconTrayPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'flex-end',
-    height: 18,
-    borderTopLeftRadius: 9,
-    borderBottomLeftRadius: 9,
-    borderTopRightRadius: 9,
-    borderBottomRightRadius: 9,
-    paddingHorizontal: 4,
-    paddingVertical: 2,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 4,
+    backgroundColor: 'transparent',
   },
   itemScroller: {
     paddingVertical: SCROLLPADDING,
@@ -126,14 +121,14 @@ class CameraTray extends Component {
     }
 
     return (
-      <View style={styles.iconTray}>
+      <View style={{ alignSelf: 'flex-end' }}>
         { trayItemIcons.length === 1 ?
           <IconContainerCircle>
             {trayItemIcons}
           </IconContainerCircle> :
-          <View style={styles.iconTrayPill}>
+          <IconContainerPill>
             {trayItemIcons}
-          </View>
+          </IconContainerPill>
         }
       </View>
     );
@@ -151,17 +146,7 @@ class CameraTray extends Component {
           style={{ borderRadius: Platform === 'ios' ? 4 : 0 }}
           resizeMode="cover"
         >
-          <View style={styles.iconContainer}>
-            {/* retryIcon container */}
-            <View>
-              {
-                !trayItem.uploaded ?
-                <IconContainerCircle waiting>
-                  {retryIcon}
-                </IconContainerCircle> :
-                null
-              }
-            </View>
+          <View style={styles.iconContainerOverlay}>
             {/* edits, comments, tags */}
             {this.renderIconTray(trayItem)}
           </View>
