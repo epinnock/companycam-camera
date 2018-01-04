@@ -752,6 +752,33 @@
     [self processPhotoData:latestScanImage];
 }
 
+// This method sets the camera mode
+-(void)changeCameraMode:(CCCameraMode)mode {
+    self.cameraMode = mode;
+    
+    // Set the AVCaptureVideoDataOutputSampleBufferDelegate for the videoOutput if the camera is in scanner mode.
+    if (self.cameraMode == CCCameraModeScanner) {
+        [self.videoOutput setSampleBufferDelegate:self queue:self.captureSessionQueue];
+    }
+    
+    // Otherwise, remove the AVCaptureVideoDataOutputSampleBufferDelegate
+    else {
+        [self.videoOutput setSampleBufferDelegate:nil queue:nil];
+        
+        // Remove the ipDidAllocate flag so that the image processor will get initialized again the next time the scanner mode is selected
+        self.ipDidAllocate = NO;
+        
+        // Clear the visible preview from the image processor
+        CCCameraView *latestView = [CCCameraManager getLatestView];
+        [latestView.cameraLayout clearVisiblePreview];
+    }
+}
+
+// This method sets the camera mode
+-(void)changeResolution:(CCCameraResolutionMode)mode {
+    self.resolutionMode = mode;
+}
+
 #pragma mark CCCameraDelegate methods
 
 // This method starts the camera
