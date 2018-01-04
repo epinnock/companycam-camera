@@ -299,13 +299,11 @@ class CameraLayoutTablet extends Component {
         default: break;
       }
 
-      // if we aren't in scanner mode, store mode to be persisted later
-      if (nextMode !== constants.CameraMode.scanner) {
-        try {
-          await AsyncStorage.setItem(PERSIST_FASTCAM_MODE, nextMode.toString());
-        } catch (error) {
-          console.warn('error storing camera mode', error);
-        }
+      // store mode to be persisted later
+      try {
+        await AsyncStorage.setItem(PERSIST_FASTCAM_MODE, nextMode.toString());
+      } catch (error) {
+        console.warn('error storing camera mode', error);
       }
     }
 
