@@ -5,8 +5,9 @@
 
 cmake_minimum_required(VERSION 3.4.1)
 
-
-SET(OpenCV_DIR $ENV{HOME}/devlib/OpenCV-android-sdk/sdk/native/jni)
+# Before building companycam-camera, you'll need to set the environment variable
+# OPENCV_ANDROID_JNI. It should point to "[opencv android sdk]/sdk/native/jni"
+SET(OpenCV_DIR $ENV{OPENCV_ANDROID_JNI})
 
 find_package(OpenCV REQUIRED)
 message(STATUS "opencv found: ${OpenCV_LIBS}")
