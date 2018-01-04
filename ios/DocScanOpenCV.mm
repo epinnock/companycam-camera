@@ -96,7 +96,7 @@
     self.heightOverlay = heightContainer;
 }
 
--(BOOL)setPreviewBytes:(UIImage *)image {
+-(BOOL)setPreviewBytes:(UIImage *)image :(BOOL)regenerateOutput {
 
     // Reset scanner time if enough time has elapsed since last scan
     long long currentUNIXTimeMS = [[NSDate date] timeIntervalSince1970] * 1000.0;
@@ -138,6 +138,12 @@
 
             // Set the requestNextFrame flag so that the camera will stop sending frames to the scanner
             requestNextFrame = NO;
+            
+            // Ask the scanner to generate a new output image if necessary
+            if (regenerateOutput) {
+                NSLog(@"ScanFocus: The scanner is trying to regenerate the output");
+                self.docScanner->scan(thisMat, YES);
+            }
 
             NSLog(@"The scan was DONE");
             break;
@@ -152,7 +158,6 @@
 
     return requestNextFrame;
 }
-
 
 -(void)clearVisiblePreview {
 
@@ -181,6 +186,26 @@
     else {
         return [[NSData alloc] init];
     }
+}
+
+-(BOOL)isDone {
+    return self.latestStatus == DocScanner::DONE;
+}
+
+// This method returns the center of the perspectiveRect
+-(CGPoint)getPerspectiveRectCenter {
+    
+    // Get the points from the perspectiveRectArray
+    CGPoint point00 = [[self.perspectiveRectArray objectAtIndex:0] CGPointValue];
+    CGPoint point10 = [[self.perspectiveRectArray objectAtIndex:1] CGPointValue];
+    CGPoint point11 = [[self.perspectiveRectArray objectAtIndex:2] CGPointValue];
+    CGPoint point01 = [[self.perspectiveRectArray objectAtIndex:3] CGPointValue];
+    
+    // Find the center of the perspectiveRectArray
+    CGFloat centerx = (point00.x + point10.x + point11.x + point01.x)/4.0;
+    CGFloat centery = (point00.y + point10.y + point11.y + point01.y)/4.0;
+    
+    return CGPointMake(centerx, centery);
 }
 
 #pragma mark Miscellaneous
@@ -318,10 +343,10 @@
     CGPoint point01_t2 = CGPointMake(point01_r1.x + self.widthOverlay/2.0, point01_r1.y + self.heightOverlay/2.0);
 
     // Add the points to the perspectiveRectArray after they've been converted to screen points
-        [self.perspectiveRectArray addObject:[NSValue valueWithCGPoint:point00_t2]];
-        [self.perspectiveRectArray addObject:[NSValue valueWithCGPoint:point10_t2]];
-        [self.perspectiveRectArray addObject:[NSValue valueWithCGPoint:point11_t2]];
-        [self.perspectiveRectArray addObject:[NSValue valueWithCGPoint:point01_t2]];
+    [self.perspectiveRectArray addObject:[NSValue valueWithCGPoint:point00_t2]];
+    [self.perspectiveRectArray addObject:[NSValue valueWithCGPoint:point10_t2]];
+    [self.perspectiveRectArray addObject:[NSValue valueWithCGPoint:point11_t2]];
+    [self.perspectiveRectArray addObject:[NSValue valueWithCGPoint:point01_t2]];
 }
 #endif
 

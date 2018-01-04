@@ -255,7 +255,8 @@
 - (UIImage *)CCMScaledToSize:(CGSize)newSize
 {
     UIGraphicsBeginImageContextWithOptions(newSize, NO, 1.0);
-    [self drawInRect:CGRectMake(0, 0, newSize.width, newSize.height)];
+    CGRect newRect = CGRectMake(0, 0, newSize.width, newSize.height);
+    [self drawInRect:newRect];
     UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     return newImage;

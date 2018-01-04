@@ -50,7 +50,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		0B02877F1F96A64D0078065A /* UIImage+CCMHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+CCMHelper.m"; sourceTree = "<group>"; };
+		0B02877F1F96A64D0078065A /* UIImage+CCMHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+CCMHelper.m"; sourceTree = "<group>"; tabWidth = 4; };
 		0B0287801F96A64E0078065A /* UIImage+CCMHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+CCMHelper.h"; sourceTree = "<group>"; };
 		0B4AD7F71FBCDC6A001C1A5F /* CCCameraModuleIOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CCCameraModuleIOS.m; sourceTree = "<group>"; };
 		0B4AD7F81FBCDC6A001C1A5F /* CCCameraModuleIOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CCCameraModuleIOS.h; sourceTree = "<group>"; };

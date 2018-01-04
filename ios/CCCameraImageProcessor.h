@@ -14,7 +14,7 @@
 -(void)setImageParams:(int)widthOrig :(int)heightOrig :(int)widthContainer :(int)heightContainer :(int)MAX_OUTPUT_DIM;
 
 @required
--(BOOL)setPreviewBytes:(UIImage *)image;
+-(BOOL)setPreviewBytes:(UIImage *)image :(BOOL)regenerateOutput;
 
 @required
 -(void)clearVisiblePreview;
@@ -24,6 +24,12 @@
 
 @required
 -(NSData *)getOutputData;
+
+@required
+-(BOOL)isDone;
+
+@required
+-(CGPoint)getPerspectiveRectCenter;
 
 
 @end

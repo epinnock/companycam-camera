@@ -47,10 +47,18 @@
 
     // The ipDidAllocate flag describes whether or not the image processor has already been initialized for the scanner mode
     BOOL ipDidAllocate;
+    
+    // The foundStableImage and awaitingFocus flag are used in the capture process for scanned images
+    BOOL foundStableImage;
+    BOOL awaitingFocus;
 
     // The currentScaleNumber and startingScaleNumber are used to handle pinch/zoom gestures
     double currentScaleNumber;
     double startingScaleNumber;
+    
+    // The tempFocusFinished and tempExposureFinished flags are used to track the state of the camera throughout the entire autoFocus and autoExposure
+    BOOL tempFocusFinished;
+    BOOL tempExposureFinished;
 }
 
 @property (nonatomic) dispatch_queue_t captureSessionQueue;
@@ -64,6 +72,8 @@
 @property (nonatomic) BOOL ipDidAllocate;
 @property (nonatomic) double currentScaleNumber;
 @property (nonatomic) double startingScaleNumber;
+@property (nonatomic) BOOL tempFocusFinished;
+@property (nonatomic) BOOL tempExposureFinished;
 
 -(void)setupSession;
 -(void)configureSession;
