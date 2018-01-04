@@ -114,12 +114,19 @@
     return self;
 }
 
-// Override layoutSubview to get the initial interface sized correctly
+// Override layoutSubviews to get the initial interface sized correctly
 -(void)layoutSubviews {
     [super layoutSubviews];
+    
+    NSLog(@"bottomSubview: layoutSubviews was called");
+    
+    if (self.motionManager == nil) {
+        // Initialize the motionManager
+        [self initializeMotionManager];
+    }
 
     // Set the layout constraints for the default orientation
-    [self setLayoutConstraintsForOrientation:UIDeviceOrientationPortrait];
+    //[self setLayoutConstraintsForOrientation:self.lastOrientation];
 }
 
 
@@ -130,7 +137,7 @@
     [self enableButtons];
 
     // Initialize the motionManager
-    [self initializeMotionManager];
+    //[self initializeMotionManager];
 
     // Set the multipleTouchEnabled property to enable multiple touches
     self.multipleTouchEnabled = YES;
@@ -204,7 +211,7 @@
 -(void)outputAccelertionData:(CMAcceleration)acceleration {
 
     UIDeviceOrientation orientationNew;
-
+    
     // Determine the device orientation based on the accelerometer data
     if (acceleration.x >= 0.75) {
         orientationNew = UIDeviceOrientationLandscapeRight;
@@ -316,6 +323,8 @@
 
     // Landscape orientation
     if (UIDeviceOrientationIsLandscape(orientation)) {
+        
+        NSLog(@"setLayoutConstraints being called for landscape");
 
         // Set the constraints for the placeLabelView.  The width of the placeLabelView is a function of the width of the resolution and close buttons and their margins all of which are defined in CCCameraLayout.xib.
         int buttonWidth = 40;
@@ -366,6 +375,15 @@
             }
             else {
                 self.buttonViewTopConstraint.constant = self.frame.size.height - self.frame.size.width/2.0 - self.bottomSubview.frame.size.width/2.0;
+                
+                CGFloat bottomConstant = self.frame.size.height - self.frame.size.width/2.0 - self.bottomSubview.frame.size.width/2.0;
+                
+                NSLog([NSString stringWithFormat:@"bottomSubview: self.frame.width = %0.f", self.frame.size.width]);
+                NSLog([NSString stringWithFormat:@"bottomSubview: self.frame.height = %0.f", self.frame.size.height]);
+                NSLog([NSString stringWithFormat:@"bottomSubview width = %0.f", self.bottomSubview.frame.size.width]);
+                NSLog([NSString stringWithFormat:@"bottomSubview height = %0.f", self.bottomSubview.frame.size.height]);
+                NSLog([NSString stringWithFormat:@"Setting the bottomConstant for bottomSubview as %0.f", bottomConstant]);
+                
             }
             self.buttonViewHeightConstraint.constant = self.frame.size.width;
             self.buttonViewRightConstraint.constant = self.frame.size.width/2.0 - self.bottomSubview.frame.size.width/2.0;
@@ -964,8 +982,8 @@
 }
 
 // This method passes an image to the image processor
--(BOOL)setPreviewBytes:(UIImage *)image {
-    return [self.imageProcessorView setPreviewBytes:image];
+-(BOOL)setPreviewBytes:(UIImage *)image :(BOOL)regenerateOutput {
+    return [self.imageProcessorView setPreviewBytes:image :regenerateOutput];
 }
 
 // This method requests the image output from the image processor
@@ -976,6 +994,16 @@
 // This method requests the image data from the image processor
 -(NSData *)getOutputData {
     return [self.imageProcessorView getOutputData];
+}
+
+// This method returns a boolean describing whether or not the image processor status is DONE
+-(BOOL)isDone {
+    return [self.imageProcessorView isDone];
+}
+
+// This method returns the center of the perspectiveRect
+-(CGPoint)getPerspectiveRectCenter {
+    return [self.imageProcessorView getPerspectiveRectCenter];
 }
 
 // This method clears the visible preview from the image processor

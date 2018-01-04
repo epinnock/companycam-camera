@@ -100,7 +100,7 @@
 
 // This method passes an image to the image processor
 @optional
--(BOOL)setPreviewBytes:(UIImage *)image;
+-(BOOL)setPreviewBytes:(UIImage *)image :(BOOL)regenerateOutput;
 
 // This method requests the image output from the image processor
 @optional
@@ -109,6 +109,14 @@
 // This method requests the image data from the image processor
 @required
 -(NSData *)getOutputData;
+
+// This method returns a boolean describing whether or not the image processor status is DONE
+@required
+-(BOOL)isDone;
+
+// This method returns the center of the perspectiveRect
+@required
+-(CGPoint)getPerspectiveRectCenter;
 
 // This method clears the visible preview from the image processor
 @required

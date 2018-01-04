@@ -65,7 +65,7 @@ Download the v3.2.0 `iOS pack` from https://opencv.org/releases.html and put `op
 
 #### Android:
 
-Add NDK via Android SDK manager.  Install OpenCV Android SDK.  In `android/app/CMakeLists.txt`, make sure the line `SET(OpenCV_DIR [...]/OpenCV-android-sdk/sdk/native/jni)` is pointing to the correct path (we should figure out a way to avoid this step).
+Add NDK via Android SDK manager.  Install OpenCV Android SDK.  Set the environment variable `OPENCV_ANDROID_JNI`, which should point to the `sdk/native/jni` folder in your OpenCV Android SDK location.  This is used in `android/app/CMakeLists.txt`.
 
 ### Scanner functionality
 
