@@ -21,6 +21,7 @@ import {
 } from './cccam-enums';
 
 // TODO remove what we dont use for icons...
+import { blankImage } from './images';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FeatherIcon from 'react-native-vector-icons/Feather';
@@ -284,13 +285,11 @@ class CameraLayout extends Component {
         default: break;
       }
 
-      // if we aren't in scanner mode, store mode to be persisted later
-      if (nextMode !== constants.CameraMode.scanner) {
-        try {
-          await AsyncStorage.setItem(PERSIST_FASTCAM_MODE, nextMode.toString());
-        } catch (error) {
-          console.warn('error storing camera mode', error);
-        }
+      // store mode to be persisted later
+      try {
+        await AsyncStorage.setItem(PERSIST_FASTCAM_MODE, nextMode.toString());
+      } catch (error) {
+        console.warn('error storing camera mode', error);
       }
     }
 
@@ -384,7 +383,7 @@ class CameraLayout extends Component {
     );
 
     let trayImageCount = '';
-    let trayMostRecentImage = { uri: 'https://picsum.photos/640/1136/?image=951' };
+    let trayMostRecentImage = blankImage;
     if (filteredCameraTrayData.length > 0) {
       trayImageCount = filteredCameraTrayData.length;
       const recentURL = filteredCameraTrayData[0].url;
@@ -662,7 +661,7 @@ class CameraLayout extends Component {
 
           <CameraTray
             visible={this.props.cameraTrayVisible}
-            doneButtonVisible
+            pdfTitleVisible={PrimaryModeIsScan}
             emptyText={PrimaryModeIsScan ? TRAY_EMPTY_TEXT_SCANNER : TRAY_EMPTY_TEXT_CAMERA}
             trayItems={filteredCameraTrayData}
             onSelectTrayItem={this.props.onSelectTrayItem}

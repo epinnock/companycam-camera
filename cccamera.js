@@ -107,12 +107,6 @@ class CCCamera extends React.Component {
   }
 
   _onPhotoTaken = (event) => {
-    console.log(this.props);
-
-    if (this.state.cameraMode === constants.CameraMode.scanner) {
-      this._persistCameraModes(); // leave scan mode
-    }
-
     if (!this.props.onPhotoTaken) { return; }
 
     const { filename, imgWidth, imgHeight, photoOrigin } = event.nativeEvent;
