@@ -931,12 +931,23 @@
 
 // This method shows the layout view
 -(void)showCameraLayout {
-    [self setHidden:NO];
+    [[self topSubview] setHidden:NO];
+    [[self bottomSubview] setHidden:NO];
+    [[self focusIndicatorView] setHidden:NO];
+    [[self toggleCamera] setHidden:NO];
+    [[self toggleFlash] setHidden:NO];
+    [[self captureButton] setHidden:NO];
 }
 
-// This method hides the layout view
+// This method hides the layout view (but keeps the scanner edges preview)
 -(void)hideCameraLayout {
-    [self setHidden:YES];
+    [[self topSubview] setHidden:YES];
+    [[self bottomSubview] setHidden:YES];
+    [[self focusIndicatorView] setHidden:YES];
+    [[self toggleCamera] setHidden:YES];
+    [[self toggleFlash] setHidden:YES];
+    [[self captureButton] setHidden:YES];
+    [[self scannerMessageLabel] setHidden:YES];
 }
 
 // This method enables all the buttons
