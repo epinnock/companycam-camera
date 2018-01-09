@@ -36,10 +36,9 @@ const ImageTrayActionBar = styled.View`
 `;
 
 const ImageTrayFileControl = styled.View`
-  max-width: 100%;
+  width: 100%;
   flex-direction: row;
   alignItems: center;
-  justifyContent: space-between;
   padding: 16px;
   background-color: rgba(38,50,56, 0.5),
 `;
@@ -176,13 +175,6 @@ class CameraTray extends Component {
             {chevronDown}
             <Text style={{ color: 'white' }}>Hide</Text>
           </TouchableOpacity>
-
-          {/* TODO will be used for scanner mode */}
-          {/* <TouchableOpacity
-            onPress={() => {}}
-          >
-            <Text style={{ color: 'white' }}>Done</Text>
-          </TouchableOpacity> */}
         </ImageTrayActionBar>
 
         {/* TODO will be used for scanner mode */}
@@ -191,18 +183,19 @@ class CameraTray extends Component {
             <ImageTrayFileControl>
               <TouchableOpacity
                 onPress={() => {}}
-                style={{ flex: 1, marginRight: 32, flexDirection: 'row', alignItems: 'center' }}
+                style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}
               >
+                {pencilIcon}
                 <Text
                   style={{
                     color: 'rgba(255,255,255,0.8)',
-                    marginRight: 4,
+                    marginLeft: 4,
                   }}
                   numberOfLines={2}
                 >
                   New Document Name
                 </Text>
-                {pencilIcon}
+
               </TouchableOpacity>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                 <TouchableOpacity
@@ -211,6 +204,7 @@ class CameraTray extends Component {
                     justifyContent: 'center',
                     width: 44,
                     height: 44,
+                    marginHorizontal: 4,
                   }}
                 >
                   {clearTray}
@@ -223,7 +217,7 @@ class CameraTray extends Component {
                     borderRadius: 20,
                   }}
                 >
-                  <Text style={{ fontWeight: 'bold', fontSize: 18 }}>Finish</Text>
+                  <Text style={{ color: 'black', fontWeight: 'bold' }}>Finish</Text>
                 </TouchableOpacity>
               </View>
             </ImageTrayFileControl>

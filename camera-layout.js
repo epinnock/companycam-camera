@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   // },
 });
 
-const TRAY_EMPTY_TEXT_SCANNER = 'Fit document inside screen.\nPlace on contrasting background.';
+const TRAY_EMPTY_TEXT_SCANNER = 'Hold camera steady over document.\nIt will automagically be scanned.';
 const TRAY_EMPTY_TEXT_CAMERA = 'Photos you take will show in this tray\nand will reset when you close your camera.';
 
 class CameraLayout extends Component {
