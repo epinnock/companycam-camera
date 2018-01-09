@@ -495,7 +495,7 @@ class CameraLayout extends Component {
               {/* Preview tray */}
               <TouchableOpacity
                 onPress={() => {
-                  this.props.setCameraTrayVisible(true);
+                  this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
                 }}
               >
                 <Animated.View
