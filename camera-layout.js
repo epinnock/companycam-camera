@@ -100,6 +100,16 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderColor: 'white',
   },
+  emptyCaptureButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 4,
+    borderColor: 'transparent',
+    backgroundColor: 'transparent',
+  },
   footer: {
     paddingBottom: isiPhoneX ? 34 : 4,
   },
@@ -511,6 +521,7 @@ class CameraLayout extends Component {
                 </Animated.View>
               </TouchableOpacity>
 
+
               {/* Fast cam toggle button */}
               {
                 !PrimaryModeIsScan ?
@@ -556,10 +567,7 @@ class CameraLayout extends Component {
                     }}
                     style={styles.captureButton}
                   /> :
-                  <TouchableOpacity
-                    onPress={() => {}}
-                    style={[styles.captureButton, { backgroundColor: 'green'} ]}
-                  />
+                  <View style={styles.emptyCaptureButton} />
               }
 
               {/* Front/back camera button */}

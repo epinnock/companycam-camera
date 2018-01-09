@@ -21,7 +21,10 @@ const chevronDown = (
   <MaterialIcon name="keyboard-arrow-down" size={18} style={{marginRight: 4}} color="white" />
 );
 const pencilIcon = (
-  <MaterialIcon name="mode-edit" size={12} style={{marginLeft: 8 }} color="white" />
+  <MaterialIcon name="mode-edit" size={14}color="white" />
+);
+const clearTray = (
+  <MaterialIcon name="delete-sweep" size={22}color="white" />
 );
 
 const ImageTrayActionBar = styled.View`
@@ -33,11 +36,12 @@ const ImageTrayActionBar = styled.View`
 `;
 
 const ImageTrayFileControl = styled.View`
+  max-width: 100%;
   flex-direction: row;
   alignItems: center;
   justifyContent: space-between;
-  padding: 8px 16px;
-  background-color: rgba(38,50,56, 0.5);
+  padding: 16px;
+  background-color: rgba(38,50,56, 0.5),
 `;
 
 const ImageTrayItem = styled.Image`
@@ -89,7 +93,6 @@ const styles = StyleSheet.create({
   itemScroller: {
     paddingVertical: SCROLLPADDING,
     paddingRight: SCROLLPADDING,
-    backgroundColor: 'rgba(38,50,56, 0.5)',
   },
   emptyStateText: {
     textAlign: 'center',
@@ -188,11 +191,41 @@ class CameraTray extends Component {
             <ImageTrayFileControl>
               <TouchableOpacity
                 onPress={() => {}}
-                style={{ flexDirection: 'row', alignItems: 'center' }}
+                style={{ flex: 1, marginRight: 32, flexDirection: 'row', alignItems: 'center' }}
               >
-                <Text style={{ color: 'rgba(255,255,255,0.8)' }}>SomeFileName.pdf</Text>
+                <Text
+                  style={{
+                    color: 'rgba(255,255,255,0.8)',
+                    marginRight: 4,
+                  }}
+                  numberOfLines={2}
+                >
+                  New Document Name
+                </Text>
                 {pencilIcon}
               </TouchableOpacity>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <TouchableOpacity
+                  style={{
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: 44,
+                    height: 44,
+                  }}
+                >
+                  {clearTray}
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: 'white',
+                    paddingHorizontal: 16,
+                    paddingVertical: 8,
+                    borderRadius: 20,
+                  }}
+                >
+                  <Text style={{ fontWeight: 'bold', fontSize: 18 }}>Finish</Text>
+                </TouchableOpacity>
+              </View>
             </ImageTrayFileControl>
             : null
         }
@@ -207,13 +240,15 @@ class CameraTray extends Component {
 
         ) : (
 
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.itemScroller}
-          >
-            {trayItems.map(this.renderTrayImageFromData)}
-          </ScrollView>
+          <View style={{ backgroundColor: 'rgba(38,50,56, 0.5)' }}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.itemScroller}
+            >
+              {trayItems.map(this.renderTrayImageFromData)}
+            </ScrollView>
+          </View>
         )}
       </View>
     );
