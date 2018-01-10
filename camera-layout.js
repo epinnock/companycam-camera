@@ -43,10 +43,10 @@ const CAMERA_MODE_SCAN = 'scan-mode';
 const isTablet = Math.min(Dimensions.get('window').width, Dimensions.get('window').height) >= 768;
 const isiPhoneX = Platform.OS === 'ios' && DeviceInfo.getDeviceId() === 'iPhone10,3';
 
-// const FASTCAM_ON_ICON = 'burst-mode'; // MaterialIcon set
-// const FASTCAM_OFF_ICON = 'photo'; // MaterialIcon set
-const FASTCAM_ON_ICON = 'visibility'; // MaterialIcon set
-const FASTCAM_OFF_ICON = 'visibility-off'; // MaterialIcon set
+const FASTCAM_ON_ICON = 'burst-mode'; // MaterialIcon set
+const FASTCAM_OFF_ICON = 'photo'; // MaterialIcon set
+// const FASTCAM_ON_ICON = 'visibility'; // MaterialIcon set
+// const FASTCAM_OFF_ICON = 'visibility-off'; // MaterialIcon set
 const FLASH_ON_ICON = 'flashlight'; // MaterialCommunityIcon set
 const FLASH_OFF_ICON = 'flashlight-off'; // MaterialCommunityIcon set
 
@@ -582,25 +582,45 @@ class CameraLayout extends Component {
                   <View style={styles.emptyUIbutton} />
               }
 
-              {/* Flash mode button */}
-              <TouchableOpacity onPress={() => { this.toggleFlashMode(); }}>
-                <Animated.View
-                  style={[styles.uiButton, {
-                    transform: [{
-                      rotate: this.state.orientationDegrees.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['0deg', '1deg'],
-                      }),
-                    }],
-                  }]}
-                >
-                  <MaterialCommunityIcon
-                    name={TorchIsOn ? FLASH_ON_ICON : FLASH_OFF_ICON}
-                    size={24}
-                    color="white"
-                  />
-                </Animated.View>
-              </TouchableOpacity>
+              {
+                !PrimaryModeIsScan ?
+                  <TouchableOpacity
+                    onPress={() => {
+                      if (cameraMode === constants.CameraMode.fastcam) {
+                        this.setCameraMode(constants.CameraMode.photo);
+                      } else {
+                        this.setCameraMode(constants.CameraMode.fastcam);
+                      }
+                    }}
+                  >
+                    <Animated.View
+                      style={[styles.uiButton, {
+                        transform: [{
+                          rotate: this.state.orientationDegrees.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ['0deg', '1deg'],
+                          }),
+                        }],
+                      }]}
+                    >
+                      <MaterialIcon
+                        name={
+                          cameraMode === constants.CameraMode.fastcam ?
+                          FASTCAM_ON_ICON : FASTCAM_OFF_ICON
+                        }
+                        size={24}
+                        color="white"
+                      />
+                      {/* <Text style={{ fontSize: 9, color: 'white', textAlign: 'center' }}>
+                        {
+                          cameraMode === constants.CameraMode.fastcam ?
+                          'Review On' : 'Review Off'
+                        }
+                      </Text> */}
+                    </Animated.View>
+                  </TouchableOpacity> :
+                  <View style={styles.emptyUIbutton} />
+              }
 
               {/* Capture button */}
               {
@@ -635,8 +655,25 @@ class CameraLayout extends Component {
                   <View style={styles.emptyUIbutton} />
               }
 
-              {/* Fast cam toggle button */}
-              <View style={styles.emptyUIbutton} />
+              {/* Flash mode button */}
+              <TouchableOpacity onPress={() => { this.toggleFlashMode(); }}>
+                <Animated.View
+                  style={[styles.uiButton, {
+                    transform: [{
+                      rotate: this.state.orientationDegrees.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['0deg', '1deg'],
+                      }),
+                    }],
+                  }]}
+                >
+                  <MaterialCommunityIcon
+                    name={TorchIsOn ? FLASH_ON_ICON : FLASH_OFF_ICON}
+                    size={24}
+                    color="white"
+                  />
+                </Animated.View>
+              </TouchableOpacity>
 
 
             </View>
