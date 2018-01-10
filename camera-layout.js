@@ -26,6 +26,17 @@ import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 
+const chevronDown = (
+  <MaterialIcon name="keyboard-arrow-down" size={24} style={{marginTop: 2}} color="white" />
+);
+const chevronLeft = (
+  <MaterialIcon name="chevron-left" size={32} color="white" />
+);
+
+const closeIcon = (
+  <MaterialIcon name="close" size={24} color="white" />
+);
+
 const CAMERA_MODE_PHOTO = 'photo-mode';
 const CAMERA_MODE_SCAN = 'scan-mode';
 
@@ -75,6 +86,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingHorizontal: 8,
   },
+  cancelButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   uiButton: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -83,11 +98,20 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     backgroundColor: 'transparent',
   },
+  uiButtonSmall: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 32,
+    height: 32,
+    borderRadius: 32 / 2,
+    borderColor: 'white',
+    borderWidth: 2,
+  },
   emptyUIbutton: {
     alignItems: 'center',
     justifyContent: 'center',
     width: 44,
-    height: 44,
+    height: 32,
     borderRadius: 22,
     backgroundColor: 'transparent',
   },
@@ -104,8 +128,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     width: 72,
-    height: 72,
-    borderRadius: 36,
+    height: 32,
     borderWidth: 4,
     borderColor: 'transparent',
     backgroundColor: 'transparent',
@@ -117,7 +140,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
-    paddingBottom: 24,
     paddingHorizontal: 8,
   },
   modeContainer: {
@@ -287,7 +309,7 @@ class CameraLayout extends Component {
           }
           break;
         case constants.CameraMode.scanner:
-          this.displayToast('Scan a Document', '');
+          this.displayToast('Scan Document', '');
           break;
         case constants.CameraMode.fastcam:
           this.displayToast('FastCam On', 'Photos immediately upload when captured.');
@@ -414,12 +436,34 @@ class CameraLayout extends Component {
               flexDirection: this.state.swapHeaderButtons ? 'row-reverse' : 'row',
             }]}
           >
-            <TouchableOpacity
-              onPress={() => { this.props.onClose('', 'close'); }}
-              style={styles.uiButton}
-            >
-              <MaterialIcon name="close" size={24} color="white" />
-            </TouchableOpacity>
+            {
+              !PrimaryModeIsScan ?
+                <TouchableOpacity
+                  onPress={() => { this.props.onClose('', 'close'); }}
+                  style={styles.uiButton}
+                >
+                  {closeIcon}
+                </TouchableOpacity> :
+                <TouchableOpacity
+                  onPress={() => {
+                    this.setCameraMode(constants.CameraMode.photo);
+                    this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
+                  }}
+                >
+                  <Animated.View
+                    style={[styles.uiButton, {
+                      transform: [{
+                        rotate: this.state.orientationDegrees.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ['0deg', '1deg'],
+                        }),
+                      }],
+                    }]}
+                  >
+                    {chevronLeft}
+                  </Animated.View>
+                </TouchableOpacity>
+            }
 
             <TouchableOpacity
               onPress={() => {}}
@@ -490,36 +534,71 @@ class CameraLayout extends Component {
             </View> */}
 
 
-            <View style={styles.captureContainer}>
+            <View
+              style={[
+                styles.captureContainer,
+                { paddingBottom: this.props.cameraTrayVisible ? 8 : 24 }
+              ]}
+            >
 
               {/* Preview tray */}
-              <TouchableOpacity
-                onPress={() => {
-                  this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
-                }}
-              >
-                <Animated.View
-                  style={[styles.uiButton, {
-                    transform: [{
-                      rotate: this.state.orientationDegrees.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['0deg', '1deg'],
-                      }),
-                    }],
-                  }]}
-                >
-                  <Image
-                    style={styles.trayMostRecentImage}
-                    source={trayMostRecentImage}
+              {
+                !PrimaryModeIsScan ?
+                  <TouchableOpacity
+                    onPress={() => {
+                      this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
+                    }}
                   >
-                    <View style={styles.trayMostRecentImageOveraly}>
-                      <Text style={{ color: 'white' }}>
-                        {trayImageCount}
-                      </Text>
-                    </View>
-                  </Image>
-                </Animated.View>
-              </TouchableOpacity>
+                    {
+                      this.props.cameraTrayVisible ?
+                        <View style={styles.uiButtonSmall}>
+                          {chevronDown}
+                        </View> :
+                        <Animated.View
+                          style={[styles.uiButton, {
+                            transform: [{
+                              rotate: this.state.orientationDegrees.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: ['0deg', '1deg'],
+                              }),
+                            }],
+                          }]}
+                        >
+                          <Image
+                            style={styles.trayMostRecentImage}
+                            source={trayMostRecentImage}
+                          >
+                            <View style={styles.trayMostRecentImageOveraly}>
+                              <Text style={{ color: 'white' }}>
+                                {trayImageCount}
+                              </Text>
+                            </View>
+                          </Image>
+                        </Animated.View>
+                    }
+                  </TouchableOpacity> :
+                  <View style={styles.emptyUIbutton} />
+                  // <TouchableOpacity
+                  //   onPress={() => {
+                  //     this.setCameraMode(constants.CameraMode.photo);
+                  //     this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
+                  //   }}
+                  // >
+                  //   <Animated.View
+                  //     style={[styles.cancelButton, {
+                  //       transform: [{
+                  //         rotate: this.state.orientationDegrees.interpolate({
+                  //           inputRange: [0, 1],
+                  //           outputRange: ['0deg', '1deg'],
+                  //         }),
+                  //       }],
+                  //     }]}
+                  //   >
+                  //     {chevronLeft}
+                  //     <Text style={{ color: 'white' }}>Cancel</Text>
+                  //   </Animated.View>
+                  // </TouchableOpacity>
+              }
 
 
               {/* Fast cam toggle button */}
@@ -637,7 +716,10 @@ class CameraLayout extends Component {
 
                 {/* Scanner mode button */}
                 <TouchableOpacity
-                  onPress={() => this.setCameraMode(constants.CameraMode.scanner)}
+                  onPress={() => {
+                    this.setCameraMode(constants.CameraMode.scanner);
+                    this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
+                  }}
                   style={styles.modeButton}
                 >
                   <ModeTitle isCurrentMode={PrimaryModeIsScan}>

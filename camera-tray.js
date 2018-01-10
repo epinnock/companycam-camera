@@ -167,7 +167,8 @@ class CameraTray extends Component {
     return (
       <View>
 
-        <ImageTrayActionBar>
+        {/* TODO most likely remove this section */}
+        {/* <ImageTrayActionBar>
           <TouchableOpacity
             onPress={this.props.onHideTray}
             style={{ flexDirection: 'row', alignItems: 'center' }}
@@ -175,7 +176,7 @@ class CameraTray extends Component {
             {chevronDown}
             <Text style={{ color: 'white' }}>Hide</Text>
           </TouchableOpacity>
-        </ImageTrayActionBar>
+        </ImageTrayActionBar> */}
 
         {/* TODO will be used for scanner mode */}
         {
