@@ -43,8 +43,10 @@ const CAMERA_MODE_SCAN = 'scan-mode';
 const isTablet = Math.min(Dimensions.get('window').width, Dimensions.get('window').height) >= 768;
 const isiPhoneX = Platform.OS === 'ios' && DeviceInfo.getDeviceId() === 'iPhone10,3';
 
-const FASTCAM_ON_ICON = 'burst-mode'; // MaterialIcon set
-const FASTCAM_OFF_ICON = 'photo'; // MaterialIcon set
+// const FASTCAM_ON_ICON = 'burst-mode'; // MaterialIcon set
+// const FASTCAM_OFF_ICON = 'photo'; // MaterialIcon set
+const FASTCAM_ON_ICON = 'visibility'; // MaterialIcon set
+const FASTCAM_OFF_ICON = 'visibility-off'; // MaterialIcon set
 const FLASH_ON_ICON = 'flashlight'; // MaterialCommunityIcon set
 const FLASH_OFF_ICON = 'flashlight-off'; // MaterialCommunityIcon set
 
@@ -578,28 +580,7 @@ class CameraLayout extends Component {
                     }
                   </TouchableOpacity> :
                   <View style={styles.emptyUIbutton} />
-                  // <TouchableOpacity
-                  //   onPress={() => {
-                  //     this.setCameraMode(constants.CameraMode.photo);
-                  //     this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
-                  //   }}
-                  // >
-                  //   <Animated.View
-                  //     style={[styles.cancelButton, {
-                  //       transform: [{
-                  //         rotate: this.state.orientationDegrees.interpolate({
-                  //           inputRange: [0, 1],
-                  //           outputRange: ['0deg', '1deg'],
-                  //         }),
-                  //       }],
-                  //     }]}
-                  //   >
-                  //     {chevronLeft}
-                  //     <Text style={{ color: 'white' }}>Cancel</Text>
-                  //   </Animated.View>
-                  // </TouchableOpacity>
               }
-
 
               {/* Fast cam toggle button */}
               {
@@ -631,6 +612,12 @@ class CameraLayout extends Component {
                         size={24}
                         color="white"
                       />
+                      <Text>
+                        {
+                          cameraMode === constants.CameraMode.fastcam ?
+                          'Review On' : 'Review Off'
+                        }
+                      </Text>
                     </Animated.View>
                   </TouchableOpacity> :
                   <View style={styles.emptyUIbutton} />
