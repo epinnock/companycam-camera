@@ -545,7 +545,7 @@ class CameraLayout extends Component {
 
               {/* Preview tray */}
               {
-                !PrimaryModeIsScan ?
+                !PrimaryModeIsScan && filteredCameraTrayData.length > 0 ?
                   <TouchableOpacity
                     onPress={() => {
                       this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
@@ -582,46 +582,25 @@ class CameraLayout extends Component {
                   <View style={styles.emptyUIbutton} />
               }
 
-              {/* Fast cam toggle button */}
-              {
-                !PrimaryModeIsScan ?
-                  <TouchableOpacity
-                    onPress={() => {
-                      if (cameraMode === constants.CameraMode.fastcam) {
-                        this.setCameraMode(constants.CameraMode.photo);
-                      } else {
-                        this.setCameraMode(constants.CameraMode.fastcam);
-                      }
-                    }}
-                  >
-                    <Animated.View
-                      style={[styles.uiButton, {
-                        transform: [{
-                          rotate: this.state.orientationDegrees.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: ['0deg', '1deg'],
-                          }),
-                        }],
-                      }]}
-                    >
-                      <MaterialIcon
-                        name={
-                          cameraMode === constants.CameraMode.fastcam ?
-                          FASTCAM_ON_ICON : FASTCAM_OFF_ICON
-                        }
-                        size={24}
-                        color="white"
-                      />
-                      <Text>
-                        {
-                          cameraMode === constants.CameraMode.fastcam ?
-                          'Review On' : 'Review Off'
-                        }
-                      </Text>
-                    </Animated.View>
-                  </TouchableOpacity> :
-                  <View style={styles.emptyUIbutton} />
-              }
+              {/* Flash mode button */}
+              <TouchableOpacity onPress={() => { this.toggleFlashMode(); }}>
+                <Animated.View
+                  style={[styles.uiButton, {
+                    transform: [{
+                      rotate: this.state.orientationDegrees.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['0deg', '1deg'],
+                      }),
+                    }],
+                  }]}
+                >
+                  <MaterialCommunityIcon
+                    name={TorchIsOn ? FLASH_ON_ICON : FLASH_OFF_ICON}
+                    size={24}
+                    color="white"
+                  />
+                </Animated.View>
+              </TouchableOpacity>
 
               {/* Capture button */}
               {
@@ -656,25 +635,10 @@ class CameraLayout extends Component {
                   <View style={styles.emptyUIbutton} />
               }
 
-              {/* Flash mode button */}
-              <TouchableOpacity onPress={() => { this.toggleFlashMode(); }}>
-                <Animated.View
-                  style={[styles.uiButton, {
-                    transform: [{
-                      rotate: this.state.orientationDegrees.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['0deg', '1deg'],
-                      }),
-                    }],
-                  }]}
-                >
-                  <MaterialCommunityIcon
-                    name={TorchIsOn ? FLASH_ON_ICON : FLASH_OFF_ICON}
-                    size={24}
-                    color="white"
-                  />
-                </Animated.View>
-              </TouchableOpacity>
+              {/* Fast cam toggle button */}
+              <View style={styles.emptyUIbutton} />
+
+
             </View>
 
             {/* Photo mode buttons */}
