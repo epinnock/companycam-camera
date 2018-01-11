@@ -143,7 +143,7 @@ class CCCamera extends React.Component {
       >
         {
           !hideCameraLayout &&
-            <CameraLayout
+            <CCCameraLayout
               cameraConstants={constants}
               cameraState={{ ...this.state }}
               setCameraState={(nextState) => this.setState(nextState)}
@@ -162,6 +162,7 @@ class CCCamera extends React.Component {
               flipCamera={() => { CameraModule.flipCamera(); }}
 
               projectName={this.props.projectName}
+              orientation={this.props.orientation}
 
               cameraTrayData={this.props.cameraTrayData}
               cameraTrayVisible={this.props.cameraTrayVisible}
@@ -192,6 +193,7 @@ CCCamera.propTypes = {
 
   hideNativeUI: PropTypes.bool,
   hideCameraLayout: PropTypes.bool,
+  orientation: PropTypes.number,
 
   onClose: PropTypes.func,
   onPhotoAccepted: PropTypes.func,

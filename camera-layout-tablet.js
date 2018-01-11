@@ -22,6 +22,8 @@ import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FeatherIcon from 'react-native-vector-icons/Feather';
 
+import Orientation from 'react-native-orientation';
+
 const CAMERA_MODE_PHOTO = 'photo-mode';
 const CAMERA_MODE_SCAN = 'scan-mode';
 
@@ -198,18 +200,38 @@ class CameraLayoutTablet extends Component {
   }
 
   componentDidMount() {
-    DeviceEventEmitter.addListener('CCCameraOrientationChange', this._orientationChange);
+    const initialDeg = this.getDegreesForOrientation(this.props.orientation);
+    this.state.orientationDegrees.setValue(initialDeg);
   }
 
-  componentWillUnmount() {
-    DeviceEventEmitter.addListener('CCCameraOrientationChange', this._orientationChange);
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.orientation !== this.props.orientation) {
+      this._orientationChange(nextProps.orientation);
+    }
   }
 
-  _orientationChange = (changeEvent) => {
-    const constants = { ...this.props.cameraConstants };
-    const { orientation } = changeEvent;
+  getDegreesForOrientation = (orientation) => {
+    const orientationEnum = Orientation.getOrientations();
+    let deg = 0;
+    switch (orientation) {
+      case orientationEnum.landscapeleft:
+        deg = 90;
+        break;
+      case orientationEnum.landscaperight:
+        deg = -90;
+        break;
+      case orientationEnum.portraitupsidedown:
+        deg = 180;
+        break;
+      case orientationEnum.portrait:
+      default: break;
+    }
+    return deg;
+  }
 
-    let nextDegree = 0;
+  _orientationChange = (orientation) => {
+    const orientationEnum = Orientation.getOrientations();
+
     let swapHeaderButtons = false;
     let swapCameraUI = false;
     let dynamicFooterStyles = {
@@ -223,14 +245,12 @@ class CameraLayoutTablet extends Component {
     };
 
     switch (orientation) {
-      case constants.Orientation.portrait:
-        nextDegree = 0;
+      case orientationEnum.portrait:
         dynamicCaptureContainerStyles = {
           paddingHorizontal: 32,
         };
         break;
-      case constants.Orientation.landscapeleft:
-        nextDegree = 90;
+      case orientationEnum.landscapeleft:
         swapHeaderButtons = true;
         dynamicFooterStyles = {
           alignItems: 'flex-end',
@@ -242,8 +262,7 @@ class CameraLayoutTablet extends Component {
           paddingVertical: 32,
         };
         break;
-      case constants.Orientation.landscaperight:
-        nextDegree = -90;
+      case orientationEnum.landscaperight:
         dynamicFooterStyles = {
           alignItems: 'flex-end',
           flexDirection: 'row-reverse',
@@ -254,8 +273,7 @@ class CameraLayoutTablet extends Component {
           paddingVertical: 32,
         };
         break;
-      case constants.Orientation.portraitupsidedown:
-        nextDegree = 180;
+      case orientationEnum.portraitupsidedown:
         swapCameraUI = true;
         dynamicCaptureContainerStyles = {
           flexDirection: 'column-reverse',
@@ -265,8 +283,9 @@ class CameraLayoutTablet extends Component {
       default: break;
     }
 
+    const nextDeg = this.getDegreesForOrientation(orientation);
     Animated.timing(this.state.orientationDegrees, {
-      toValue: nextDegree,
+      toValue: nextDeg,
       duration: 100,
     }).start();
 

@@ -257,44 +257,45 @@ class CameraLayout extends Component {
   }
 
   componentDidMount() {
-    Orientation.addCCCameraOrientationListener(this._orientationChange);
+    const initialDeg = this.getDegreesForOrientation(this.props.orientation);
+    this.state.orientationDegrees.setValue(initialDeg);
   }
 
-  componentWillUnmount() {
-    Orientation.removeCCCameraOrientationListener(this._orientationChange);
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.orientation !== this.props.orientation) {
+      this._orientationChange(nextProps.orientation);
+    }
+  }
+
+  getDegreesForOrientation = (orientation) => {
+    const orientationEnum = Orientation.getOrientations();
+    let deg = 0;
+    switch (orientation) {
+      case orientationEnum.landscapeleft:
+        deg = 90;
+        break;
+      case orientationEnum.landscaperight:
+        deg = -90;
+        break;
+      case orientationEnum.portraitupsidedown:
+        deg = 180;
+        break;
+      case orientationEnum.portrait:
+      default: break;
+    }
+    return deg;
   }
 
   _orientationChange = (orientation) => {
     const orientationEnum = Orientation.getOrientations();
 
-    let nextDegree = 0;
-    let swapHeaderButtons = false;
-    let isLandscape = false;
+    this.setState({ swapHeaderButtons: orientation === orientationEnum.landscapeleft });
 
-    switch (orientation) {
-      case orientationEnum.portrait:
-        nextDegree = 0;
-        break;
-      case orientationEnum.landscapeleft:
-        nextDegree = 90;
-        swapHeaderButtons = true;
-        isLandscape = true;
-        break;
-      case orientationEnum.landscaperight:
-        nextDegree = -90;
-        isLandscape = true;
-        break;
-      case orientationEnum.portraitupsidedown:
-        nextDegree = 180;
-        break;
-      default: break;
-    }
-
+    const nextDeg = this.getDegreesForOrientation(orientation);
     Animated.timing(this.state.orientationDegrees, {
-      toValue: nextDegree,
+      toValue: nextDeg,
       duration: 100,
     }).start();
-    this.setState({ swapHeaderButtons });
   }
 
   setCameraMode = async (nextMode) => {
