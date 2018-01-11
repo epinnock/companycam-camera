@@ -870,26 +870,6 @@
                      }];
 }
 
-// This method animates the screen flash after capturing a photo
--(void)animateScreenFlash {
-
-    /* http://stackoverflow.com/questions/12924094/simulate-a-picture-taken-screen-flash */
-
-    CAKeyframeAnimation *opacityAnimation = [CAKeyframeAnimation animationWithKeyPath:@"opacity"];
-    NSArray *animationValues = @[ @0.8f, @0.0f ];
-    NSArray *animationTimes = @[ @0.3f, @1.0f ];
-    id timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionLinear];
-    NSArray *animationTimingFunctions = @[ timingFunction, timingFunction ];
-    [opacityAnimation setValues:animationValues];
-    [opacityAnimation setKeyTimes:animationTimes];
-    [opacityAnimation setTimingFunctions:animationTimingFunctions];
-    opacityAnimation.fillMode = kCAFillModeForwards;
-    opacityAnimation.removedOnCompletion = YES;
-    opacityAnimation.duration = 0.4;
-
-    [self.screenFlashView.layer addAnimation:opacityAnimation forKey:@"animation"];
-}
-
 // This method shows an auto focus indicator view at the given position while the camera is focusing and/or exposing
 -(void)showAutoFocusIndicator:(CGPoint)touchPoint :(BOOL)setRepeating {
 
@@ -909,14 +889,14 @@
     self.focusIndicatorTimer = [NSTimer scheduledTimerWithTimeInterval:animationIncrementTime target:self selector:@selector(incrementFocusIndicatorRadius:) userInfo:nil repeats:YES];
 
     // Show the focusIndicatorView
-    [self.focusIndicatorView setHidden:NO];
+//    [self.focusIndicatorView setHidden:NO];
 }
 
 // This method hides the auto focus indicator view
 -(void)hideAutoFocusIndicator {
     [self.focusIndicatorTimer invalidate];
     self.focusIndicatorTimer = nil;
-    [self.focusIndicatorView setHidden:YES];
+//    [self.focusIndicatorView setHidden:YES];
 }
 
 // This method shows the loading view

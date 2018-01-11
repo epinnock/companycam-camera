@@ -154,7 +154,10 @@ class CCCamera extends React.Component {
 
               captureButtonPress={() => {
                 CameraModule.capture();
-                this.props.captureButtonPress();
+
+                if (this.state.cameraMode !== constants.CameraMode.fastcam) {
+                  this.props.cameraModeCapturePress();
+                }
               }}
               flipCamera={() => { CameraModule.flipCamera(); }}
 
@@ -201,7 +204,7 @@ CCCamera.propTypes = {
 
   arModePress: PropTypes.func,
   baModePress: PropTypes.func,
-  captureButtonPress: PropTypes.func,
+  cameraModeCapturePress: PropTypes.func,
 
   cameraTrayData: PropTypes.array,
   cameraTrayVisible: PropTypes.bool,
@@ -225,7 +228,7 @@ CCCamera.defaultProps = {
 
   arModePress: () => {},
   baModePress: () => {},
-  captureButtonPress: () => {},
+  cameraModeCapturePress: () => {},
 
   cameraTrayData: [],
   cameraTrayVisible: false,

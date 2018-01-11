@@ -80,6 +80,7 @@
 -(void)setupView;
 -(void)setCamera:(CCCamera *)thisCamera;
 -(void)finishWithResult:(NSString *)button;
+-(void)animateScreenFlash;
 
 /////////////////////////////////
 // Component props - Functions //

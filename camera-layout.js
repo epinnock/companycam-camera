@@ -392,7 +392,7 @@ class CameraLayout extends Component {
     Animated.sequence([
       Animated.timing(this.state.screenFlashOpacity, {
         toValue: 1,
-        duration: 120,
+        duration: 100,
         // easing: Easing.cubic,
       }),
       Animated.timing(this.state.screenFlashOpacity, {
@@ -628,7 +628,9 @@ class CameraLayout extends Component {
                   <TouchableOpacity
                     onPress={() => {
                       this.doFlashAnimation();
-                      this.props.captureButtonPress(this.state.isLandscape);
+                      setTimeout(() => {
+                        this.props.captureButtonPress(this.state.isLandscape);
+                      }, 350); // flash takes 300ms
                     }}
                     style={styles.captureButton}
                   /> :

@@ -961,15 +961,19 @@
     }
 
      CCCameraView *latestView = [CCCameraManager getLatestView];
-
+    
     // Pause the camera preview while the photo is processing
     if (self.cameraMode == CCCameraModeCamera) {
-     [latestView.previewView.previewLayer.connection setEnabled:NO];
+//        dispatch_time_t delayTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC));
+//        dispatch_after(delayTime, dispatch_get_main_queue(), ^(void){
+            [latestView.previewView.previewLayer.connection setEnabled:NO];
+//        });
     }
 
     // Animate the screen flash
-    // [latestView.cameraLayout animateScreenFlash];
-    //
+    [latestView animateScreenFlash];
+
+    
     // // Show the loading view and disable all the buttons while the photo is processing
     // if (self.cameraMode == CCCameraModeCamera) {
     //     [latestView.cameraLayout showLoadingView];
