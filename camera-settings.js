@@ -51,7 +51,8 @@ const styles = StyleSheet.create({
     color: 'black',
     fontWeight: 'bold',
     marginHorizontal: 24,
-    marginVertical: 16,
+    marginBottom: 16,
+    marginTop: 32,
   },
   optionRowContainer: {
     width: '85%',
@@ -150,6 +151,47 @@ class CameraSettings extends PureComponent {
             name="check"
             size={24}
             color={resolutionModeString === RES_MODE_SUPER ? 'black' : 'transparent'}
+          />
+        </TouchableOpacity>
+
+        <Text style={styles.sectionTitle}>Image Editor</Text>
+
+        <TouchableOpacity
+          onPress={() => {}}
+          style={[
+            styles.optionRow, {
+              borderTopWidth: 1,
+              borderTopColor: '#EEEEEE',
+            }
+          ]}
+        >
+          <View style={styles.optionRowContainer}>
+            <Text style={styles.optionText}>Edit Mode On</Text>
+            <Text style={styles.optionDescription}>
+              Open the editor everytime a photo is taken.
+            </Text>
+          </View>
+          <FeatherIcon
+            name="check"
+            size={24}
+            color={resolutionModeString === RES_MODE_NORMAL ? 'black' : 'transparent'}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => {}}
+          style={styles.optionRow}
+        >
+          <View style={styles.optionRowContainer}>
+            <Text style={styles.optionText}>Edit Mode Off</Text>
+            <Text style={styles.optionDescription}>
+              Do not open the editor when taking photos.
+            </Text>
+          </View>
+          <FeatherIcon
+            name="check"
+            size={24}
+            color={resolutionModeString === RES_MODE_HIGH ? 'black' : 'transparent'}
           />
         </TouchableOpacity>
 

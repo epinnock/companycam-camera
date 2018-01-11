@@ -482,12 +482,13 @@ class CameraLayout extends Component {
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
+            <View style={styles.emptyUIbutton} />
+            {/* <TouchableOpacity
               onPress={() => this.setState({ showSettings: true })}
               style={styles.uiButton}
             >
               <MaterialIcon name="settings" size={24} color="white" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </LinearGradient>
 
@@ -546,62 +547,80 @@ class CameraLayout extends Component {
               ]}
             >
 
-              {/* Preview tray */}
+              {/* show tray */}
               {
-                !PrimaryModeIsScan && filteredCameraTrayData.length > 0 ?
-
-                  <TouchableOpacity
-                    onPress={() => {
-                      this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
-                    }}
-                  >
-                    {
-                      this.props.cameraTrayVisible ?
-                        <View style={styles.uiButtonSmall}>
-                          {chevronDown}
-                        </View> :
-                        <Animated.View
-                          style={[styles.uiButton, {
-                            transform: [{
-                              rotate: this.state.orientationDegrees.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: ['0deg', '1deg'],
-                              }),
-                            }],
-                          }]}
-                        >
-                          <Image
-                            style={styles.trayMostRecentImage}
-                            source={trayMostRecentImage}
-                          >
-                            <View style={styles.trayMostRecentImageOveraly}>
-                              <Text style={{ color: 'white' }}>
-                                {trayImageCount}
-                              </Text>
-                            </View>
-                          </Image>
-                        </Animated.View>
-                    }
-                  </TouchableOpacity> :
-
-                  <TouchableOpacity
-                    onPress={() => {
-                      this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
-                    }}
-                  >
-                    <View style={styles.uiButtonSmall}>
+                !PrimaryModeIsScan ?
+                (
+                  filteredCameraTrayData.length > 0 ?
+                    <TouchableOpacity
+                      onPress={() => {
+                        this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
+                      }}
+                    >
                       {
                         this.props.cameraTrayVisible ?
-                          chevronDown :
-                          chevronUp
+                          <View style={styles.uiButtonSmall}>
+                            {chevronDown}
+                          </View> :
+                          <Animated.View
+                            style={[styles.uiButton, {
+                              transform: [{
+                                rotate: this.state.orientationDegrees.interpolate({
+                                  inputRange: [0, 1],
+                                  outputRange: ['0deg', '1deg'],
+                                }),
+                              }],
+                            }]}
+                          >
+                            <Image
+                              style={styles.trayMostRecentImage}
+                              source={trayMostRecentImage}
+                            >
+                              <View style={styles.trayMostRecentImageOveraly}>
+                                <Text style={{ color: 'white' }}>
+                                  {trayImageCount}
+                                </Text>
+                              </View>
+                            </Image>
+                          </Animated.View>
                       }
-                    </View>
-                  </TouchableOpacity>
+                    </TouchableOpacity> :
 
+                    <TouchableOpacity
+                      onPress={() => {
+                        this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
+                      }}
+                    >
+                      <View style={styles.uiButtonSmall}>
+                        {
+                          this.props.cameraTrayVisible ?
+                            chevronDown :
+                            chevronUp
+                        }
+                      </View>
+                    </TouchableOpacity>
+                ) : null
               }
 
-                  <View style={styles.emptyUIbutton} />
-
+              {/* Flash mode button */}
+              <TouchableOpacity onPress={() => { this.toggleFlashMode(); }}>
+                <Animated.View
+                  style={[styles.uiButton, {
+                    transform: [{
+                      rotate: this.state.orientationDegrees.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['0deg', '1deg'],
+                      }),
+                    }],
+                  }]}
+                >
+                  <MaterialCommunityIcon
+                    name={TorchIsOn ? FLASH_ON_ICON : FLASH_OFF_ICON}
+                    size={24}
+                    color="white"
+                  />
+                </Animated.View>
+              </TouchableOpacity>
 
               {/* Capture button */}
               {
@@ -638,26 +657,12 @@ class CameraLayout extends Component {
                   <View style={styles.emptyUIbutton} />
               }
 
-              {/* Flash mode button */}
-              <TouchableOpacity onPress={() => { this.toggleFlashMode(); }}>
-                <Animated.View
-                  style={[styles.uiButton, {
-                    transform: [{
-                      rotate: this.state.orientationDegrees.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['0deg', '1deg'],
-                      }),
-                    }],
-                  }]}
-                >
-                  <MaterialCommunityIcon
-                    name={TorchIsOn ? FLASH_ON_ICON : FLASH_OFF_ICON}
-                    size={24}
-                    color="white"
-                  />
-                </Animated.View>
+              <TouchableOpacity
+                onPress={() => this.setState({ showSettings: true })}
+                style={styles.uiButton}
+              >
+                <MaterialIcon name="settings" size={24} color="white" />
               </TouchableOpacity>
-
 
             </View>
 
@@ -689,7 +694,7 @@ class CameraLayout extends Component {
                 <TouchableOpacity
                   onPress={() => {
                     this.setCameraMode(constants.CameraMode.scanner);
-                    this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
+                    this.props.setCameraTrayVisible(true);
                   }}
                   style={styles.modeButton}
                 >
