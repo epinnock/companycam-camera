@@ -29,10 +29,12 @@ import FeatherIcon from 'react-native-vector-icons/Feather';
 const chevronDown = (
   <MaterialIcon name="keyboard-arrow-down" size={24} style={{marginTop: 2}} color="white" />
 );
+const chevronUp= (
+  <MaterialIcon name="expand-less" size={24} color="white" />
+);
 const chevronLeft = (
   <MaterialIcon name="chevron-left" size={32} color="white" />
 );
-
 const closeIcon = (
   <MaterialIcon name="close" size={24} color="white" />
 );
@@ -546,6 +548,7 @@ class CameraLayout extends Component {
               {/* Preview tray */}
               {
                 !PrimaryModeIsScan && filteredCameraTrayData.length > 0 ?
+
                   <TouchableOpacity
                     onPress={() => {
                       this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
@@ -579,48 +582,25 @@ class CameraLayout extends Component {
                         </Animated.View>
                     }
                   </TouchableOpacity> :
-                  <View style={styles.emptyUIbutton} />
-              }
 
-              {
-                !PrimaryModeIsScan ?
                   <TouchableOpacity
                     onPress={() => {
-                      if (cameraMode === constants.CameraMode.fastcam) {
-                        this.setCameraMode(constants.CameraMode.photo);
-                      } else {
-                        this.setCameraMode(constants.CameraMode.fastcam);
-                      }
+                      this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
                     }}
                   >
-                    <Animated.View
-                      style={[styles.uiButton, {
-                        transform: [{
-                          rotate: this.state.orientationDegrees.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: ['0deg', '1deg'],
-                          }),
-                        }],
-                      }]}
-                    >
-                      <MaterialIcon
-                        name={
-                          cameraMode === constants.CameraMode.fastcam ?
-                          FASTCAM_ON_ICON : FASTCAM_OFF_ICON
-                        }
-                        size={24}
-                        color="white"
-                      />
-                      {/* <Text style={{ fontSize: 9, color: 'white', textAlign: 'center' }}>
-                        {
-                          cameraMode === constants.CameraMode.fastcam ?
-                          'Review On' : 'Review Off'
-                        }
-                      </Text> */}
-                    </Animated.View>
-                  </TouchableOpacity> :
-                  <View style={styles.emptyUIbutton} />
+                    <View style={styles.uiButtonSmall}>
+                      {
+                        this.props.cameraTrayVisible ?
+                          chevronDown :
+                          chevronUp
+                      }
+                    </View>
+                  </TouchableOpacity>
+
               }
+
+                  <View style={styles.emptyUIbutton} />
+
 
               {/* Capture button */}
               {
