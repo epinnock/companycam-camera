@@ -17,10 +17,15 @@ const RES_MODE_HIGH = 'high';
 const RES_MODE_SUPER = 'super';
 
 const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.8)',
+  },
   container: {
     flex: 1,
     backgroundColor: 'white',
     borderRadius: 8,
+    margin: 24,
   },
   header: {
     width: '100%',
@@ -29,6 +34,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#0277BD',
     flexDirection: 'row',
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
   },
   uiButton: {
     alignItems: 'center',
@@ -82,119 +89,120 @@ class CameraSettings extends PureComponent {
     const { resolutionModeString } = this.props;
 
     return (
-      <View style={styles.container}>
-        <View style={styles.header}>
+      <View style={styles.overlay}>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <TouchableOpacity
+              activeOpacity={1}
+              style={styles.uiButton}
+              onPress={() => this.props.closeSelf()}
+            >
+              <MaterialIcon name="close" size={24} color="white" />
+            </TouchableOpacity>
+            <Text style={{ fontSize: 17, color: 'white' }}>Camera Settings</Text>
+            <View style={styles.emptyUIbutton} />
+          </View>
+
+          {/* Quality Settings group */}
+          <Text style={styles.sectionTitle}>Image Quality</Text>
+
           <TouchableOpacity
-            activeOpacity={1}
-            style={styles.uiButton}
-            onPress={() => this.props.closeSelf()}
+            onPress={() => this.props.setResolutionMode(RES_MODE_NORMAL)}
+            style={[
+              styles.optionRow, {
+                borderTopWidth: 1,
+                borderTopColor: '#EEEEEE',
+              }
+            ]}
           >
-            <MaterialIcon name="close" size={24} color="white" />
+            <View style={styles.optionRowContainer}>
+              <Text style={styles.optionText}>Normal</Text>
+              <Text style={styles.optionDescription}>
+                Best for everyday use. Smallest file size. Uses the least data.
+              </Text>
+            </View>
+            <FeatherIcon
+              name="check"
+              size={24}
+              color={resolutionModeString === RES_MODE_NORMAL ? 'black' : 'transparent'}
+            />
           </TouchableOpacity>
-          <Text style={{ fontSize: 17, color: 'white' }}>Camera Settings</Text>
-          <View style={styles.emptyUIbutton} />
+
+          <TouchableOpacity
+            onPress={() => this.props.setResolutionMode(RES_MODE_HIGH)}
+            style={styles.optionRow}
+          >
+            <View style={styles.optionRowContainer}>
+              <Text style={styles.optionText}>High</Text>
+              <Text style={styles.optionDescription}>
+                Best for balancing image quality and file size. Uses more data.
+              </Text>
+            </View>
+            <FeatherIcon
+              name="check"
+              size={24}
+              color={resolutionModeString === RES_MODE_HIGH ? 'black' : 'transparent'}
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => this.props.setResolutionMode(RES_MODE_SUPER)}
+            style={styles.optionRow}
+          >
+            <View style={styles.optionRowContainer}>
+              <Text style={styles.optionText}>Super Fine</Text>
+              <Text style={styles.optionDescription}>
+                Best for capturing details. Largest file size. Uses the most data.
+              </Text>
+            </View>
+            <FeatherIcon
+              name="check"
+              size={24}
+              color={resolutionModeString === RES_MODE_SUPER ? 'black' : 'transparent'}
+            />
+          </TouchableOpacity>
+
+          <Text style={styles.sectionTitle}>Open in Editor</Text>
+
+          <TouchableOpacity
+            onPress={() => {}}
+            style={[
+              styles.optionRow, {
+                borderTopWidth: 1,
+                borderTopColor: '#EEEEEE',
+              }
+            ]}
+          >
+            <View style={styles.optionRowContainer}>
+              <Text style={styles.optionText}>ON</Text>
+              <Text style={styles.optionDescription}>
+                Open the editor everytime a photo is taken.
+              </Text>
+            </View>
+            <FeatherIcon
+              name="check"
+              size={24}
+              color='transparent'
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => {}}
+            style={styles.optionRow}
+          >
+            <View style={styles.optionRowContainer}>
+              <Text style={styles.optionText}>OFF</Text>
+              <Text style={styles.optionDescription}>
+                Do not open the editor when taking photos.
+              </Text>
+            </View>
+            <FeatherIcon
+              name="check"
+              size={24}
+              color='transparent'
+            />
+          </TouchableOpacity>
         </View>
-
-        {/* Quality Settings group */}
-        <Text style={styles.sectionTitle}>Image Quality</Text>
-
-        <TouchableOpacity
-          onPress={() => this.props.setResolutionMode(RES_MODE_NORMAL)}
-          style={[
-            styles.optionRow, {
-              borderTopWidth: 1,
-              borderTopColor: '#EEEEEE',
-            }
-          ]}
-        >
-          <View style={styles.optionRowContainer}>
-            <Text style={styles.optionText}>Normal</Text>
-            <Text style={styles.optionDescription}>
-              Best for everyday use. Smallest file size. Uses the least data.
-            </Text>
-          </View>
-          <FeatherIcon
-            name="check"
-            size={24}
-            color={resolutionModeString === RES_MODE_NORMAL ? 'black' : 'transparent'}
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => this.props.setResolutionMode(RES_MODE_HIGH)}
-          style={styles.optionRow}
-        >
-          <View style={styles.optionRowContainer}>
-            <Text style={styles.optionText}>High</Text>
-            <Text style={styles.optionDescription}>
-              Best for balancing image quality and file size. Uses more data.
-            </Text>
-          </View>
-          <FeatherIcon
-            name="check"
-            size={24}
-            color={resolutionModeString === RES_MODE_HIGH ? 'black' : 'transparent'}
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => this.props.setResolutionMode(RES_MODE_SUPER)}
-          style={styles.optionRow}
-        >
-          <View style={styles.optionRowContainer}>
-            <Text style={styles.optionText}>Super Fine</Text>
-            <Text style={styles.optionDescription}>
-              Best for capturing details. Largest file size. Uses the most data.
-            </Text>
-          </View>
-          <FeatherIcon
-            name="check"
-            size={24}
-            color={resolutionModeString === RES_MODE_SUPER ? 'black' : 'transparent'}
-          />
-        </TouchableOpacity>
-
-        <Text style={styles.sectionTitle}>Image Editor</Text>
-
-        <TouchableOpacity
-          onPress={() => {}}
-          style={[
-            styles.optionRow, {
-              borderTopWidth: 1,
-              borderTopColor: '#EEEEEE',
-            }
-          ]}
-        >
-          <View style={styles.optionRowContainer}>
-            <Text style={styles.optionText}>Edit Mode On</Text>
-            <Text style={styles.optionDescription}>
-              Open the editor everytime a photo is taken.
-            </Text>
-          </View>
-          <FeatherIcon
-            name="check"
-            size={24}
-            color={resolutionModeString === RES_MODE_NORMAL ? 'black' : 'transparent'}
-          />
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => {}}
-          style={styles.optionRow}
-        >
-          <View style={styles.optionRowContainer}>
-            <Text style={styles.optionText}>Edit Mode Off</Text>
-            <Text style={styles.optionDescription}>
-              Do not open the editor when taking photos.
-            </Text>
-          </View>
-          <FeatherIcon
-            name="check"
-            size={24}
-            color={resolutionModeString === RES_MODE_HIGH ? 'black' : 'transparent'}
-          />
-        </TouchableOpacity>
-
       </View>
     );
   }

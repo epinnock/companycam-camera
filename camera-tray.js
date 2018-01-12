@@ -83,6 +83,14 @@ const IconContainerPill = styled.View`
 `;
 
 const styles = StyleSheet.create({
+  uiButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'transparent',
+  },
   iconContainerOverlay: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -98,6 +106,30 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 17,
     backgroundColor: 'transparent',
+  },
+  documentNameContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  documentName: {
+    color: 'rgba(255,255,255,0.8)',
+    marginLeft: 4,
+  },
+  scanTrayHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  trayAction: {
+    backgroundColor: 'white',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginLeft: 4,
+  },
+  trayActionText: {
+    color: 'black',
+    fontWeight: 'bold',
   },
 });
 
@@ -182,47 +214,51 @@ class CameraTray extends Component {
         {
           this.props.pdfTitleVisible ?
             <ImageTrayFileControl>
+
               <TouchableOpacity
                 onPress={() => {}}
-                style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}
+                style={styles.documentNameContainer}
               >
                 {pencilIcon}
                 <Text
-                  style={{
-                    color: 'rgba(255,255,255,0.8)',
-                    marginLeft: 4,
-                  }}
+                  style={styles.documentName}
                   numberOfLines={2}
                 >
                   New Document Name
                 </Text>
-
               </TouchableOpacity>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <TouchableOpacity
-                  style={{
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: 44,
-                    height: 44,
-                    marginHorizontal: 4,
-                  }}
-                >
-                  {clearTray}
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: 'white',
-                    paddingHorizontal: 16,
-                    paddingVertical: 8,
-                    borderRadius: 20,
-                  }}
-                >
-                  <Text style={{ color: 'black', fontWeight: 'bold' }}>Finish</Text>
-                </TouchableOpacity>
-              </View>
-            </ImageTrayFileControl>
-            : null
+
+              {trayIconsEmpty ? (
+                <View style={styles.scanTrayHeader}>
+                  <TouchableOpacity
+                    style={styles.trayAction}
+                  >
+                    <Text style={styles.trayActionText}>
+                      Cancel
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+              ) : (
+
+                <View style={styles.scanTrayHeader}>
+                  <TouchableOpacity
+                    style={styles.uiButton}
+                  >
+                    {clearTray}
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.trayAction}
+                  >
+                    <Text style={styles.trayActionText}>
+                      Finish
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+            </ImageTrayFileControl> :
+            null
         }
 
         {trayIconsEmpty ? (
