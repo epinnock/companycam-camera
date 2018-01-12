@@ -116,7 +116,7 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.8)',
     marginLeft: 4,
   },
-  scanTrayHeader: {
+  documentTrayHeaderRightContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -189,16 +189,59 @@ class CameraTray extends Component {
     );
   }
 
+  renderDocumentTrayHeader = () => {
+    if (!this.props.documentTrayHeaderVisible) { return null; }
+
+    const { trayItems, emptyText, setToPhotoMode } = this.props;
+    const trayEmpty = !trayItems || (trayItems.length === 0);
+
+    return (
+      <ImageTrayFileControl>
+        <TouchableOpacity
+          onPress={() => {}}
+          style={styles.documentNameContainer}
+        >
+          {pencilIcon}
+          <Text
+            style={styles.documentName}
+            numberOfLines={2}
+          >
+            New Document Name
+          </Text>
+        </TouchableOpacity>
+
+        <View style={styles.documentTrayHeaderRightContainer}>
+          {
+            !trayEmpty &&
+              <TouchableOpacity
+                style={styles.uiButton}
+              >
+                {clearTray}
+              </TouchableOpacity>
+          }
+          <TouchableOpacity
+            onPress={() => {
+              if (trayEmpty) { setToPhotoMode(); return; }
+            }}
+            style={styles.trayAction}
+          >
+            <Text style={styles.trayActionText}>
+              {trayEmpty ? 'Cancel' : 'Finish'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ImageTrayFileControl>
+    )
+  }
+
   render() {
     if (!this.props.visible) { return null; }
 
     const { trayItems, emptyText } = this.props;
-
-    const trayIconsEmpty = !trayItems || (trayItems.length === 0);
+    const trayEmpty = !trayItems || (trayItems.length === 0);
 
     return (
       <View>
-
         {/* TODO most likely remove this section */}
         {/* <ImageTrayActionBar>
           <TouchableOpacity
@@ -210,77 +253,25 @@ class CameraTray extends Component {
           </TouchableOpacity>
         </ImageTrayActionBar> */}
 
-        {/* TODO will be used for scanner mode */}
+        {this.renderDocumentTrayHeader()}
+
         {
-          this.props.pdfTitleVisible ?
-            <ImageTrayFileControl>
-
-              <TouchableOpacity
-                onPress={() => {}}
-                style={styles.documentNameContainer}
+          trayEmpty ?
+            <EmptyStateContent>
+              <Text style={styles.emptyStateText}>
+                {emptyText}
+              </Text>
+            </EmptyStateContent> :
+            <View style={{ backgroundColor: 'rgba(38,50,56, 0.5)' }}>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.itemScroller}
               >
-                {pencilIcon}
-                <Text
-                  style={styles.documentName}
-                  numberOfLines={2}
-                >
-                  New Document Name
-                </Text>
-              </TouchableOpacity>
-
-              {trayIconsEmpty ? (
-                <View style={styles.scanTrayHeader}>
-                  <TouchableOpacity
-                    style={styles.trayAction}
-                  >
-                    <Text style={styles.trayActionText}>
-                      Cancel
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-              ) : (
-
-                <View style={styles.scanTrayHeader}>
-                  <TouchableOpacity
-                    style={styles.uiButton}
-                  >
-                    {clearTray}
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.trayAction}
-                  >
-                    <Text style={styles.trayActionText}>
-                      Finish
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-
-            </ImageTrayFileControl> :
-            null
+                {trayItems.map(this.renderTrayImageFromData)}
+              </ScrollView>
+            </View>
         }
-
-        {trayIconsEmpty ? (
-
-          <EmptyStateContent>
-            <Text style={styles.emptyStateText}>
-              {emptyText}
-            </Text>
-          </EmptyStateContent>
-
-        ) : (
-
-          <View style={{ backgroundColor: 'rgba(38,50,56, 0.5)' }}>
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.itemScroller}
-            >
-              {trayItems.map(this.renderTrayImageFromData)}
-            </ScrollView>
-          </View>
-        )}
       </View>
     );
   }
@@ -288,7 +279,8 @@ class CameraTray extends Component {
 
 CameraTray.propTypes = {
   visible: PropTypes.bool,
-  pdfTitleVisible: PropTypes.bool,
+  documentTrayHeaderVisible: PropTypes.bool,
+  primaryModeIsScan: PropTypes.bool,
   trayItems: PropTypes.array,
   emptyText: PropTypes.string,
   onSelectTrayItem: PropTypes.func,
@@ -302,6 +294,7 @@ CameraTray.defaultProps = {
   emptyText: '',
   onSelectTrayItem: () => {},
   onHideTray: () => {},
+  setToPhotoMode: () => {},
 };
 
 export default CameraTray;

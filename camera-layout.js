@@ -406,6 +406,12 @@ class CameraLayout extends Component {
     ]).start();
   }
 
+  setToPhotoMode = () => {
+    const constants = { ...this.props.cameraConstants };
+    this.setCameraMode(constants.CameraMode.photo);
+    this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
+  }
+
   render() {
     const constants = { ...this.props.cameraConstants };
     const { flashMode, cameraMode } = this.props.cameraState;
@@ -449,12 +455,7 @@ class CameraLayout extends Component {
                 >
                   {closeIcon}
                 </TouchableOpacity> :
-                <TouchableOpacity
-                  onPress={() => {
-                    this.setCameraMode(constants.CameraMode.photo);
-                    this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
-                  }}
-                >
+                <TouchableOpacity onPress={this.setToPhotoMode}>
                   <Animated.View
                     style={[styles.uiButton, {
                       transform: [{
@@ -730,13 +731,15 @@ class CameraLayout extends Component {
 
           <CameraTray
             visible={this.props.cameraTrayVisible}
-            pdfTitleVisible={PrimaryModeIsScan}
+            documentTrayHeaderVisible={PrimaryModeIsScan}
+            primaryModeIsScan={PrimaryModeIsScan}
             emptyText={PrimaryModeIsScan ? TRAY_EMPTY_TEXT_SCANNER : TRAY_EMPTY_TEXT_CAMERA}
             trayItems={filteredCameraTrayData}
             onSelectTrayItem={this.props.onSelectTrayItem}
             onHideTray={() => {
               this.props.setCameraTrayVisible(false);
             }}
+            setToPhotoMode={this.setToPhotoMode}
           />
 
         </LinearGradient>
