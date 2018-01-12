@@ -42,7 +42,6 @@ const closeIcon = (
 const CAMERA_MODE_PHOTO = 'photo-mode';
 const CAMERA_MODE_SCAN = 'scan-mode';
 
-const isTablet = Math.min(Dimensions.get('window').width, Dimensions.get('window').height) >= 768;
 const isiPhoneX = Platform.OS === 'ios' && DeviceInfo.getDeviceId() === 'iPhone10,3';
 
 const FASTCAM_ON_ICON = 'burst-mode'; // MaterialIcon set
@@ -153,6 +152,7 @@ const styles = StyleSheet.create({
   },
   modeButton: {
     alignItems: 'center',
+    flex: 1,
   },
   toast: {
     alignSelf: 'center',
@@ -705,13 +705,16 @@ class CameraLayout extends Component {
                 </TouchableOpacity>
 
                 {/* AR mode button */}
-                <TouchableOpacity
-                  onPress={() => this.props.arModePress()}
-                  style={styles.modeButton}
-                >
-                  <ModeTitle>AR</ModeTitle>
-                  <ModeIndicator />
-                </TouchableOpacity>
+                {
+                  this.props.deviceSupportsARCam &&
+                    <TouchableOpacity
+                      onPress={() => this.props.arModePress()}
+                      style={styles.modeButton}
+                    >
+                      <ModeTitle>AR</ModeTitle>
+                      <ModeIndicator />
+                    </TouchableOpacity>
+                }
 
                 {/* Before after mode button */}
                 <TouchableOpacity
@@ -764,6 +767,8 @@ CameraLayout.propTypes = {
   onClose: PropTypes.func,
 
   projectName: PropTypes.string,
+  orientation: PropTypes.number,
+  deviceSupportsARCam: PropTypes.bool,
 
   cameraTrayData: PropTypes.array,
   cameraTrayVisible: PropTypes.bool,

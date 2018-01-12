@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import CameraLayout from './camera-layout';
 import CameraLayoutTablet from './camera-layout-tablet';
+import { isTablet, deviceSupportsARCam } from './device-info-helper';
 
 import {
   PERSIST_FASTCAM_MODE,
@@ -16,7 +17,6 @@ import {
 } from './cccam-enums';
 
 const CameraModule = NativeModules.CCCameraModuleIOS || NativeModules.CCCameraModule;
-const isTablet = Math.min(Dimensions.get('window').width, Dimensions.get('window').height) >= 768;
 
 const normalizePhotoOrigin = (photoOrigin) => {
   const validPhotoOrigin = (
@@ -163,6 +163,7 @@ class CCCamera extends React.Component {
 
               projectName={this.props.projectName}
               orientation={this.props.orientation}
+              deviceSupportsARCam={deviceSupportsARCam()}
 
               cameraTrayData={this.props.cameraTrayData}
               cameraTrayVisible={this.props.cameraTrayVisible}
