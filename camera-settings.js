@@ -1,6 +1,12 @@
 import React, { PureComponent, PropTypes } from 'react';
 
-import { View, Text, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Platform,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 
 // TODO remove what we dont use for icons...
@@ -15,6 +21,9 @@ import FeatherIcon from 'react-native-vector-icons/Feather';
 const RES_MODE_NORMAL = 'normal';
 const RES_MODE_HIGH = 'high';
 const RES_MODE_SUPER = 'super';
+
+const CAMERA_MODE_FASTCAM = 'fastcam';
+const CAMERA_MODE_REVIEW_MODE = 'photo';
 
 const styles = StyleSheet.create({
   overlay: {
@@ -84,9 +93,8 @@ const styles = StyleSheet.create({
 });
 
 class CameraSettings extends PureComponent {
-
   render() {
-    const { resolutionModeString } = this.props;
+    const { cameraModeString, resolutionModeString } = this.props;
 
     return (
       <View style={styles.overlay}>
@@ -99,7 +107,9 @@ class CameraSettings extends PureComponent {
             >
               <MaterialIcon name="close" size={24} color="white" />
             </TouchableOpacity>
-            <Text style={{ fontSize: 17, color: 'white' }}>Camera Settings</Text>
+            <Text style={{ fontSize: 17, color: 'white' }}>
+              Camera Settings
+            </Text>
             <View style={styles.emptyUIbutton} />
           </View>
 
@@ -109,10 +119,11 @@ class CameraSettings extends PureComponent {
           <TouchableOpacity
             onPress={() => this.props.setResolutionMode(RES_MODE_NORMAL)}
             style={[
-              styles.optionRow, {
+              styles.optionRow,
+              {
                 borderTopWidth: 1,
                 borderTopColor: '#EEEEEE',
-              }
+              },
             ]}
           >
             <View style={styles.optionRowContainer}>
@@ -121,11 +132,9 @@ class CameraSettings extends PureComponent {
                 Best for everyday use. Smallest file size. Uses the least data.
               </Text>
             </View>
-            <FeatherIcon
-              name="check"
-              size={24}
-              color={resolutionModeString === RES_MODE_NORMAL ? 'black' : 'transparent'}
-            />
+            {resolutionModeString === RES_MODE_NORMAL && (
+              <FeatherIcon name="check" size={24} color="black" />
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -138,11 +147,9 @@ class CameraSettings extends PureComponent {
                 Best for balancing image quality and file size. Uses more data.
               </Text>
             </View>
-            <FeatherIcon
-              name="check"
-              size={24}
-              color={resolutionModeString === RES_MODE_HIGH ? 'black' : 'transparent'}
-            />
+            {resolutionModeString === RES_MODE_HIGH && (
+              <FeatherIcon name="check" size={24} color="black" />
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -152,55 +159,55 @@ class CameraSettings extends PureComponent {
             <View style={styles.optionRowContainer}>
               <Text style={styles.optionText}>Super Fine</Text>
               <Text style={styles.optionDescription}>
-                Best for capturing details. Largest file size. Uses the most data.
+                Best for capturing details. Largest file size. Uses the most
+                data.
               </Text>
             </View>
-            <FeatherIcon
-              name="check"
-              size={24}
-              color={resolutionModeString === RES_MODE_SUPER ? 'black' : 'transparent'}
-            />
+            {resolutionModeString === RES_MODE_SUPER && (
+              <FeatherIcon name="check" size={24} color="black" />
+            )}
           </TouchableOpacity>
 
-          <Text style={styles.sectionTitle}>Open in Editor</Text>
+          <Text style={styles.sectionTitle}>Review Mode</Text>
 
           <TouchableOpacity
-            onPress={() => {}}
+            onPress={() => {
+              this.props.setCameraMode(CAMERA_MODE_REVIEW_MODE);
+            }}
             style={[
-              styles.optionRow, {
+              styles.optionRow,
+              {
                 borderTopWidth: 1,
                 borderTopColor: '#EEEEEE',
-              }
+              },
             ]}
           >
             <View style={styles.optionRowContainer}>
-              <Text style={styles.optionText}>ON</Text>
+              <Text style={styles.optionText}>On</Text>
               <Text style={styles.optionDescription}>
-                Open the editor everytime a photo is taken.
+                Every time a photo is captured, review and edit before uploading
               </Text>
             </View>
-            <FeatherIcon
-              name="check"
-              size={24}
-              color='transparent'
-            />
+            {cameraModeString === CAMERA_MODE_REVIEW_MODE && (
+              <FeatherIcon name="check" size={24} color="black" />
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() => {}}
+            onPress={() => {
+              this.props.setCameraMode(CAMERA_MODE_FASTCAM);
+            }}
             style={styles.optionRow}
           >
             <View style={styles.optionRowContainer}>
-              <Text style={styles.optionText}>OFF</Text>
+              <Text style={styles.optionText}>Off</Text>
               <Text style={styles.optionDescription}>
-                Do not open the editor when taking photos.
+                Captured photos will immediately upload to CompanyCam
               </Text>
             </View>
-            <FeatherIcon
-              name="check"
-              size={24}
-              color='transparent'
-            />
+            {cameraModeString === CAMERA_MODE_FASTCAM && (
+              <FeatherIcon name="check" size={24} color="black" />
+            )}
           </TouchableOpacity>
         </View>
       </View>
