@@ -6,11 +6,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
 
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.LifecycleEventListener;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.WritableMap;
 import com.newcam.enums.CameraMode;
 import com.newcam.enums.FlashMode;
 import com.newcam.enums.ResolutionMode;
@@ -42,6 +45,29 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
         mContext = reactContext;
         reactContext.addLifecycleEventListener(this);
     }
+
+    // ==============================================================================================
+    // These are utility functions to use OpenCV to do some image processing.
+    // They are used in the editor.  So why are they here in the camera project?
+    //   1. The camera project already has OpenCV in it
+    //   2. The functionality might be used directly in the scanner
+    // ==============================================================================================
+    @ReactMethod
+    public void imageprocFourPoint(Promise promise) {
+        // TODO: Just returning a test object for the moment
+        WritableMap map = Arguments.createMap();
+        map.putInt("test", 78);
+        promise.resolve(map);
+    }
+
+    @ReactMethod
+    public void imageprocMagicColor(Promise promise) {
+        // TODO: Just returning a test object for the moment
+        WritableMap map = Arguments.createMap();
+        map.putInt("test", 42);
+        promise.resolve(map);
+    }
+    // ==============================================================================================
 
     @Override
     public String getName() {
