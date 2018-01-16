@@ -359,6 +359,12 @@ BOOL _multipleTouches;
     }
 }
 
+-(void)doFlashAvailabilityChange:(BOOL)hasFlash {
+    if (self.onFlashAvailabilityChange) {
+        self.onFlashAvailabilityChange(@{ @"hasFlash": [NSNumber numberWithBool:hasFlash]});
+    }
+}
+
 -(CLLocation *)getExifLocation {
 
     CLLocationCoordinate2D locCoordinate = CLLocationCoordinate2DMake(self.propExifLocationLatitude, self.propExifLocationLongitude);

@@ -783,7 +783,7 @@
 
 // This method starts the camera
 -(void)startCamera {
-    
+    NSLog(@"start camera");
     dispatch_async( self.captureSessionQueue, ^{
         
         NSArray<AVCaptureDevice *> *devices = [AVCaptureDevice devices];
@@ -835,6 +835,8 @@
             // Set the initial values for the tempFocusFinished and tempExposureFinished flags
             tempFocusFinished = YES;
             tempExposureFinished = YES;
+            
+            [latestView doFlashAvailabilityChange:self.hasFlash];
         }
     });
 }

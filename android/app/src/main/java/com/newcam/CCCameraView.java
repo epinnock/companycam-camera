@@ -60,10 +60,8 @@ public class CCCameraView extends RelativeLayout {
     public boolean hideNativeUI;
 
     // Permissions required to take a picture
-    private static final String[] CAMERA_PERMISSIONS = {
-            Manifest.permission.CAMERA,
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-    };
+    private static final String[] CAMERA_PERMISSIONS = { Manifest.permission.CAMERA,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE, };
 
     // Common layout features
     protected TextView mPlaceName;
@@ -76,7 +74,7 @@ public class CCCameraView extends RelativeLayout {
         super(context);
 
         // Request/verify permissions before initializing
-        if(checkCameraPermissions()){
+        if (checkCameraPermissions()) {
             inflate(context, R.layout.view_cccamera, this);
 
             // Get references to the subviews
@@ -84,7 +82,8 @@ public class CCCameraView extends RelativeLayout {
             mPreviewLayout = (RelativeLayout) findViewById(R.id.camera_preview);
 
             mCameraLayout = new CCCameraLayout(context);
-            RelativeLayout.LayoutParams newParams = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            RelativeLayout.LayoutParams newParams = new RelativeLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT);
             this.addView(mCameraLayout, newParams);
 
             DocScanOpenCV dso = new DocScanOpenCV(context);
@@ -95,7 +94,7 @@ public class CCCameraView extends RelativeLayout {
             ccImageProcessor = dso;
 
             init(context);
-        }else{
+        } else {
             System.err.println("No camera permissions");
 
             // TODO: the props don't seem to be set at this point (no @ReactProp method for callbacks...)
@@ -119,8 +118,7 @@ public class CCCameraView extends RelativeLayout {
         // Create the appropriate CCCamera class according to the device's version and available cameras
         if (!forceCamera1 && camera2Available) {
             mCamera = new CCCamera2(context, this);
-        }
-        else {
+        } else {
             mCamera = new CCCamera1(context, this, ccImageProcessor);
         }
 
@@ -144,7 +142,7 @@ public class CCCameraView extends RelativeLayout {
     }
 
     public Activity getActivity() {
-        ThemedReactContext context = (ThemedReactContext)this.getContext();
+        ThemedReactContext context = (ThemedReactContext) this.getContext();
 
         // TODO: For some reason getCurrentActivity no longer exists?
         //return context.getCurrentActivity();
@@ -169,7 +167,7 @@ public class CCCameraView extends RelativeLayout {
 
     // This method releases the camera based on the camera API being implemented
     public void releaseCamera() {
-        if (mCamera != null){
+        if (mCamera != null) {
             mCamera.releaseCamera();
         }
     }
@@ -191,17 +189,17 @@ public class CCCameraView extends RelativeLayout {
         //finishWithResult("label"); //TODO: temporarily disabled
     }
 
-    public void finishWithError(String errmsg){
+    public void finishWithError(String errmsg) {
         releaseCamera();
         propOnClose(errmsg, "error");
     }
 
-    public void finishWithResult(String button){
+    public void finishWithResult(String button) {
         releaseCamera();
         propOnClose("", button);
     }
 
-    public Location getExifLocation(){
+    public Location getExifLocation() {
         Location loc = new Location("Component props");
         loc.setLongitude(this.propExifLocationLongitude);
         loc.setLatitude(this.propExifLocationLatitude);
@@ -216,8 +214,7 @@ public class CCCameraView extends RelativeLayout {
     private final Runnable measureAndLayout = new Runnable() {
         @Override
         public void run() {
-            measure(
-                    MeasureSpec.makeMeasureSpec(getWidth(), MeasureSpec.EXACTLY),
+            measure(MeasureSpec.makeMeasureSpec(getWidth(), MeasureSpec.EXACTLY),
                     MeasureSpec.makeMeasureSpec(getHeight(), MeasureSpec.EXACTLY));
             layout(getLeft(), getTop(), getRight(), getBottom());
         }
@@ -234,14 +231,14 @@ public class CCCameraView extends RelativeLayout {
 
     //component props: functions
     //-------------------------------------
-    private void _doEvent(String eventName, WritableMap event){
-        ReactContext reactContext = (ReactContext)getContext();
+    private void _doEvent(String eventName, WritableMap event) {
+        ReactContext reactContext = (ReactContext) getContext();
         RCTEventEmitter rctEventEmitter = reactContext.getJSModule(RCTEventEmitter.class);
         rctEventEmitter.receiveEvent(getId(), eventName, event);
     }
 
-    public void doPhotoTaken(File imgFile, int imgWidth, int imgHeight, PhotoOrigin origin){
-        if(!imgFile.exists()) {
+    public void doPhotoTaken(File imgFile, int imgWidth, int imgHeight, PhotoOrigin origin) {
+        if (!imgFile.exists()) {
             propOnClose("There was an error saving the photo file.", "error");
             return;
         }
@@ -252,11 +249,12 @@ public class CCCameraView extends RelativeLayout {
         event.putInt("imgWidth", imgWidth);
         event.putInt("imgHeight", imgHeight);
         event.putString("photoOrigin", origin.toString());
+        _doEvent("onFlashAvailabilityChange", event);
         _doEvent("onPhotoTaken", event);
     }
 
-    public void doPhotoAccepted(File imgFile, int imgWidth, int imgHeight, PhotoOrigin origin){
-        if(!imgFile.exists()) {
+    public void doPhotoAccepted(File imgFile, int imgWidth, int imgHeight, PhotoOrigin origin) {
+        if (!imgFile.exists()) {
             propOnClose("There was an error saving the photo file.", "error");
             return;
         }
@@ -270,6 +268,13 @@ public class CCCameraView extends RelativeLayout {
         _doEvent("onPhotoAccepted", event);
     }
 
+    public void doFlashAvailabilityChange(boolean hasFlash) {
+        // Invoke onFlashAvailabilityChange prop
+        WritableMap event = Arguments.createMap();
+        event.putInt("hasFlash", hasFlash ? 1 : 0);
+        _doEvent("onFlashAvailabilityChange", event);
+    }
+
     private void propOnClose(String errmsg, String button) {
         // Invoke onClose prop
         WritableMap event = Arguments.createMap();
@@ -281,11 +286,11 @@ public class CCCameraView extends RelativeLayout {
 
     //component props: values
     //-------------------------------------
-    public void setStoragePath(String str){
+    public void setStoragePath(String str) {
         this.appPhotoDirectory = new File(str);
 
         // Quit with error if invalid path
-        if(!appPhotoDirectory.exists()){
+        if (!appPhotoDirectory.exists()) {
             finishWithError("Photo directory does not exist");
         }
     }
@@ -294,7 +299,7 @@ public class CCCameraView extends RelativeLayout {
         return this.appPhotoDirectory;
     }
 
-    public void setProjectName(String str){
+    public void setProjectName(String str) {
         placeName = str;
 
         // Set the mPlaceName label
@@ -303,7 +308,7 @@ public class CCCameraView extends RelativeLayout {
         }
     }
 
-    public void setProjectAddress(String str){
+    public void setProjectAddress(String str) {
         placeAddress = str;
 
         // Set the mPlaceAddress label
@@ -312,30 +317,30 @@ public class CCCameraView extends RelativeLayout {
         }
     }
 
-    public void setExifLat(double val){
+    public void setExifLat(double val) {
         this.propExifLocationLatitude = val;
     }
 
-    public void setExifLon(double val){
+    public void setExifLon(double val) {
         this.propExifLocationLongitude = val;
     }
 
-    public void setExifLocTimestamp(double val){
-        this.propExifLocationTimestamp = (long)val;
+    public void setExifLocTimestamp(double val) {
+        this.propExifLocationTimestamp = (long) val;
     }
 
-    public void setHideNativeUI(boolean val){
-      hideNativeUI = val;
+    public void setHideNativeUI(boolean val) {
+        hideNativeUI = val;
 
-      if (hideNativeUI) {
-        if (mCameraLayout.getVisibility() == View.VISIBLE) {
-            mCameraLayout.setVisibility(View.GONE);
+        if (hideNativeUI) {
+            if (mCameraLayout.getVisibility() == View.VISIBLE) {
+                mCameraLayout.setVisibility(View.GONE);
+            }
+        } else {
+            if (mCameraLayout.getVisibility() == View.GONE) {
+                mCameraLayout.setVisibility(View.VISIBLE);
+            }
         }
-      } else {
-        if (mCameraLayout.getVisibility() == View.GONE) {
-            mCameraLayout.setVisibility(View.VISIBLE);
-        }
-      }
     }
 
     public void setFlashMode(FlashMode mode) {

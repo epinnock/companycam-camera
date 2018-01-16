@@ -101,8 +101,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
     protected boolean ipCancelCapturing = false;
 
-
-    protected void ipDebugLog(String msg){
+    protected void ipDebugLog(String msg) {
         Log.d(TAG, "[image processing] " + msg);
     }
 
@@ -110,15 +109,18 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
      * Simple wrapper for getOutputImage with some logging.
      * @return A Bitmap if there is an output image, otherwise null.
      */
-    protected Bitmap ipInterceptPhotoCapture(){
+    protected Bitmap ipInterceptPhotoCapture() {
         ipDebugLog("[ipInterceptPhotoCapture]");
 
-        if (ccImageProcessor == null) { ipDebugLog("No ccImageProcessor!"); return null; }
+        if (ccImageProcessor == null) {
+            ipDebugLog("No ccImageProcessor!");
+            return null;
+        }
 
         Bitmap ipOutput = ccImageProcessor.getOutputImage();
-        if(ipOutput != null){
+        if (ipOutput != null) {
             ipDebugLog("Image processor output found!");
-        }else{
+        } else {
             ipDebugLog("Image processor output not found!");
         }
         return ipOutput;
@@ -129,11 +131,14 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
      * Should not allocate any bitmaps or add any camera preview callbacks.
      * @param ccImageProcessor
      */
-    protected void ipInitialize(final CCCameraImageProcessor ccImageProcessor){
+    protected void ipInitialize(final CCCameraImageProcessor ccImageProcessor) {
         ipDebugLog("[ipInitialize]");
 
         this.ccImageProcessor = ccImageProcessor;
-        if (ccImageProcessor == null) { ipDebugLog("No ccImageProcessor!"); return; }
+        if (ccImageProcessor == null) {
+            ipDebugLog("No ccImageProcessor!");
+            return;
+        }
 
         ccImageProcessor.setListener(new CCCameraImageProcessor.ImageProcessorListener() {
             @Override
@@ -141,7 +146,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 ipStopCapturing();
 
                 Bitmap bPhoto = ccImageProcessor.getOutputImage();
-                if(bPhoto != null) {
+                if (bPhoto != null) {
                     forceNormalPhotoCapture(bPhoto);
                 }
             }
@@ -153,22 +158,25 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
      * Does nothing if allocation already occurred with the current mPreviewWidth and mPreviewHeight.
      * @return True if the allocation was successful, false otherwise.
      */
-    protected boolean ipAllocate(){
+    protected boolean ipAllocate() {
         ipDebugLog("[ipAllocate]");
 
-        if (ccImageProcessor == null) { ipDebugLog("No ccImageProcessor!"); return false; }
-        if (mCamera == null) { ipDebugLog("mCamera is null!"); return false; }
-        if (mPreviewWidth == 0 || mPreviewHeight == 0){
+        if (ccImageProcessor == null) {
+            ipDebugLog("No ccImageProcessor!");
+            return false;
+        }
+        if (mCamera == null) {
+            ipDebugLog("mCamera is null!");
+            return false;
+        }
+        if (mPreviewWidth == 0 || mPreviewHeight == 0) {
             ipDebugLog("mPreviewWidth or mPreviewHeight is 0!");
             return false;
         }
 
-        boolean alreadyDone = (
-            ipDidAllocate &&
-            (ipAllocatedPreviewWidth == mPreviewWidth) &&
-            (ipAllocatedPreviewHeight == mPreviewHeight)
-        );
-        if(alreadyDone){
+        boolean alreadyDone = (ipDidAllocate && (ipAllocatedPreviewWidth == mPreviewWidth)
+                && (ipAllocatedPreviewHeight == mPreviewHeight));
+        if (alreadyDone) {
             ipDebugLog("Already allocated with preview size (" + mPreviewWidth + ", " + mPreviewHeight + ")");
             return true;
         }
@@ -176,16 +184,18 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         int containerWidth = mCameraView.getWidth();
         int containerHeight = mCameraView.getHeight();
         ipDebugLog("Container size: (" + containerWidth + ", " + containerHeight + ")");
-        if(containerWidth == 0 || containerHeight == 0){
+        if (containerWidth == 0 || containerHeight == 0) {
             ipDebugLog("containerWidth or containerHeight is 0!");
             return false;
         }
 
         Camera.Parameters param = safeGetParameters(mCamera, "ipAllocate()");
-        int videoBufferSize = mPreviewWidth * mPreviewHeight * ImageFormat.getBitsPerPixel(param.getPreviewFormat()) / 8;
+        int videoBufferSize = mPreviewWidth * mPreviewHeight * ImageFormat.getBitsPerPixel(param.getPreviewFormat())
+                / 8;
 
         try {
-            ccImageProcessor.setImageParams(mPreviewWidth, mPreviewHeight, containerWidth, containerHeight, MAX_DIM_PROCESSING_OUTPUT);
+            ccImageProcessor.setImageParams(mPreviewWidth, mPreviewHeight, containerWidth, containerHeight,
+                    MAX_DIM_PROCESSING_OUTPUT);
             ipAllocatedBytes = new byte[videoBufferSize];
             ipDidAllocate = true;
             ipAllocatedPreviewWidth = mPreviewWidth;
@@ -203,11 +213,14 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
      * Uses setPreviewCallbackWithBuffer to start streaming preview frames to the image processor.
      * Allocates before setting the callback, if necessary.
      */
-    protected void ipStartCapturing(){
+    protected void ipStartCapturing() {
         ipDebugLog("[ipStartCapturing]");
 
         boolean allocationSuccessful = ipAllocate();
-        if(!allocationSuccessful){ ipDebugLog("Allocation failed!"); return; }
+        if (!allocationSuccessful) {
+            ipDebugLog("Allocation failed!");
+            return;
+        }
 
         ipCancelCapturing = false;
 
@@ -216,7 +229,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         mCamera.setPreviewCallbackWithBuffer(new Camera.PreviewCallback() {
             public void onPreviewFrame(byte[] data, Camera camera) {
                 boolean requestNextFrame = ccImageProcessor.setPreviewBytes(data, _this.getCameraDisplayOrientation());
-                if(requestNextFrame && !ipCancelCapturing && mCamera != null) {
+                if (requestNextFrame && !ipCancelCapturing && mCamera != null) {
                     mCamera.addCallbackBuffer(data);
                 }
             }
@@ -226,7 +239,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
     /**
      * Will cause the callback set via setPreviewCallbackWithBuffer to stop requesting the next frame.
      */
-    protected void ipStopCapturing(){
+    protected void ipStopCapturing() {
         ipCancelCapturing = true;
         if (mCamera != null) {
             mCamera.setPreviewCallbackWithBuffer(null);
@@ -238,11 +251,11 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         super.persistCameraMode(mode);
 
         ipDebugLog("[persistCameraMode] " + mode.toString());
-        if(mode == CameraMode.SCANNER){
+        if (mode == CameraMode.SCANNER) {
             ipStartCapturing();
-        }else{
+        } else {
             ipStopCapturing();
-            if(ccImageProcessor != null){
+            if (ccImageProcessor != null) {
                 ccImageProcessor.clearVisiblePreview();
             }
         }
@@ -272,7 +285,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             mCamera.release();
             mCamera = null;
             System.err.println("[CCCamera1] Success!");
-        }else {
+        } else {
             System.err.println("[CCCamera1] Nothing to release!");
         }
     }
@@ -296,8 +309,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                     mDefaultParams = c.getParameters();
 
                     return c;
-                }
-                catch (Exception e){
+                } catch (Exception e) {
                     // Camera is not available (in use or does not exist)
                 }
             }
@@ -314,25 +326,33 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
     public int getCameraDisplayOrientation(int cameraId, Camera camera) {
 
-        android.hardware.Camera.CameraInfo info =
-                new android.hardware.Camera.CameraInfo();
+        android.hardware.Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
         android.hardware.Camera.getCameraInfo(cameraId, info);
 
         Activity activity = mCameraView.getActivity();
-        int rotation = (activity == null) ? Surface.ROTATION_0 : activity.getWindowManager().getDefaultDisplay().getRotation();
+        int rotation = (activity == null) ? Surface.ROTATION_0
+                : activity.getWindowManager().getDefaultDisplay().getRotation();
         int degrees = 0;
         switch (rotation) {
-            case Surface.ROTATION_0: degrees = 0; break;
-            case Surface.ROTATION_90: degrees = 90; break;
-            case Surface.ROTATION_180: degrees = 180; break;
-            case Surface.ROTATION_270: degrees = 270; break;
+        case Surface.ROTATION_0:
+            degrees = 0;
+            break;
+        case Surface.ROTATION_90:
+            degrees = 90;
+            break;
+        case Surface.ROTATION_180:
+            degrees = 180;
+            break;
+        case Surface.ROTATION_270:
+            degrees = 270;
+            break;
         }
 
         int result;
         if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
             result = (info.orientation + degrees) % 360;
-            result = (360 - result) % 360;  // compensate the mirror
-        } else {  // back-facing
+            result = (360 - result) % 360; // compensate the mirror
+        } else { // back-facing
             result = (info.orientation - degrees + 360) % 360;
         }
 
@@ -374,17 +394,22 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
         // Check the available focus modes
         List<String> supportedFocusModes = params.getSupportedFocusModes();
-        boolean hasContinuousFocus = supportedFocusModes != null && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+        boolean hasContinuousFocus = supportedFocusModes != null
+                && supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
         if (hasContinuousFocus) {
             params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
         }
 
         // Check the available scene modes
         List<String> supportedSceneModes = params.getSupportedSceneModes();
-        boolean hasSteadyPhotoMode = supportedSceneModes != null && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_STEADYPHOTO);
+        boolean hasSteadyPhotoMode = supportedSceneModes != null
+                && supportedSceneModes.contains(Camera.Parameters.SCENE_MODE_STEADYPHOTO);
         if (hasSteadyPhotoMode) {
             //params.setSceneMode(Camera.Parameters.SCENE_MODE_STEADYPHOTO);
         }
+
+        // invoke flash availability prop
+        mCameraView.doFlashAvailabilityChange(hasFlash());
 
         // Set the parameters for the focus mode and scene mode
         safeSetParameters(mCamera, params, "initializeCameraForPreview()");
@@ -394,8 +419,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             mPreview = new CameraPreview(mContext);
             mPreview.getHolder().addCallback(this);
             mCameraView.mPreviewLayout.addView(mPreview);
-        }
-        else {
+        } else {
             if (mCamera != null) {
                 try {
 
@@ -412,8 +436,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                     // Start the camera preview
                     mCamera.setPreviewDisplay(mPreview.getHolder());
                     mCamera.startPreview();
-                }
-                catch (IOException ioe) {
+                } catch (IOException ioe) {
                 }
             }
         }
@@ -434,8 +457,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         try {
             camera.setParameters(params);
             safelySetParameters = true;
-        }
-        catch (RuntimeException rte) {
+        } catch (RuntimeException rte) {
             // If any of the parameters are invalid, trying to call setParameters will throw a RuntimeException.  The error doesn't
             // provide any information about which parameter was invalid.
             Log.d(TAG, "mCamera.setParameters failed when called from " + message);
@@ -453,8 +475,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         // Try to get the camera parameters
         try {
             params = camera.getParameters();
-        }
-        catch (RuntimeException rte) {
+        } catch (RuntimeException rte) {
             // If getParameters fails for any reason, it will throw a RuntimeException.
             Log.d(TAG, "mCamera.getParameters failed when called from " + message);
         }
@@ -479,8 +500,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             Camera.Size optimalSize;
             if (this.hasShortAspectRatio()) {
                 optimalSize = chooseOptimalSize(lsps, MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT, 4, 3);
-            }
-            else {
+            } else {
                 optimalSize = chooseOptimalSize(lsps, MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT, 16, 9);
             }
 
@@ -495,9 +515,9 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
             // Initialize the camera for the preview
             initializeCameraForPreview();
+
             System.err.println("[CCCamera1] Success!");
-        }
-        else {
+        } else {
 
             // Finish with an error describing that the camera is already in use
             mCameraView.finishWithError("camera in use");
@@ -515,7 +535,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             mgr.playSoundEffect(AudioManager.FLAG_PLAY_SOUND);
 
             // Animate the screen flash when the image is captured
-            mCameraView.post(new Runnable(){
+            mCameraView.post(new Runnable() {
                 @Override
                 public void run() {
                     mCameraView.mCameraLayout.animateScreenFlash();
@@ -588,12 +608,12 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             Bitmap bPhoto = null;
             try {
                 // In scanner mode only, try grabbing image processing output
-                if(mCameraMode == CameraMode.SCANNER) {
+                if (mCameraMode == CameraMode.SCANNER) {
                     bPhoto = ipInterceptPhotoCapture();
                 }
 
                 // Only process photo data if the image processor did not succeed in supplying output
-                if(bPhoto == null) {
+                if (bPhoto == null) {
                     BitmapFactory.Options options = new BitmapFactory.Options();
 
                     // Decoding the data with inJustDecodeBounds = true returns a null bitmap, but it decodes the size without having to
@@ -612,9 +632,8 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                     // The attempt to decode the data can sometimes fail and return null.  If that happens, display a message to the user and restart the camera preview..
                     if (bPhoto == null) {
 
-                        new AlertDialog.Builder(mContext)
-                                .setTitle("Error")
-                                .setMessage("Something went wrong while taking this photo. Try taking a picture with your camera app and uploading it.")
+                        new AlertDialog.Builder(mContext).setTitle("Error").setMessage(
+                                "Something went wrong while taking this photo. Try taking a picture with your camera app and uploading it.")
                                 .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
@@ -711,7 +730,8 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
      * @param aspectHeight      The height of the container view
      * @return The optimal {@code Camera.Size}, or an arbitrary one if none were big enough
      */
-    private Camera.Size chooseOptimalSize(List<Camera.Size> choices, int maxWidth, int maxHeight, int aspectWidth, int aspectHeight) {
+    private Camera.Size chooseOptimalSize(List<Camera.Size> choices, int maxWidth, int maxHeight, int aspectWidth,
+            int aspectHeight) {
 
         // Collect the supported resolutions that are at least as big as the preview Surface
         List<Camera.Size> bigEnough = new ArrayList<>();
@@ -728,7 +748,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
             // Check if this preview size is no bigger than the max allowed width and height and that its aspect ratio matches the aspect ratio
             // of the reference size.
-            if ((option.width <= maxWidth) && (option.height <= maxHeight) && (option.height*w == option.width*h)) {
+            if ((option.width <= maxWidth) && (option.height <= maxHeight) && (option.height * w == option.width * h)) {
 
                 // Ignore any preview sizes that are exactly square
                 if (option.width == option.height) {
@@ -739,8 +759,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 // resolution selection
                 if (Math.max(option.width, option.height) >= getDesiredImageHeightForResolution(mResolutionMode)) {
                     bigEnough.add(option);
-                }
-                else {
+                } else {
                     notBigEnough.add(option);
                 }
             }
@@ -749,11 +768,9 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         // Pick the smallest preview size of those big enough. If there is none big enough, pick the largest of those not big enough.
         if (bigEnough.size() > 0) {
             return Collections.min(bigEnough, new CCCamera1.CompareSizesByArea());
-        }
-        else if (notBigEnough.size() > 0) {
+        } else if (notBigEnough.size() > 0) {
             return Collections.max(notBigEnough, new CCCamera1.CompareSizesByArea());
-        }
-        else {
+        } else {
             Log.e(TAG, "Couldn't find any suitable preview size");
             return choices.get(0);
         }
@@ -781,16 +798,15 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         int screenHeight = Math.max(mCameraView.getWidth(), mCameraView.getHeight());
 
         // Calculate the aspect ratio of the screen
-        double screenAspectRatio = (double)screenHeight/(double)screenWidth;
+        double screenAspectRatio = (double) screenHeight / (double) screenWidth;
 
         // Determine if the screen's aspect ratio is closer to 4x3 or 16x9
-        double aspect4x3 = 4.0/3.0;
-        double aspect16x9 = 16.0/9.0;
+        double aspect4x3 = 4.0 / 3.0;
+        double aspect16x9 = 16.0 / 9.0;
         boolean hasShortAspect = false;
         if (Math.abs(screenAspectRatio - aspect4x3) < Math.abs(screenAspectRatio - aspect16x9)) {
             hasShortAspect = true;
-        }
-        else {
+        } else {
             hasShortAspect = false;
         }
 
@@ -855,8 +871,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             Camera.Size optimalSize;
             if (this.hasShortAspectRatio()) {
                 optimalSize = chooseOptimalSize(lsps, MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT, 4, 3);
-            }
-            else {
+            } else {
                 optimalSize = chooseOptimalSize(lsps, MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT, 16, 9);
             }
 
@@ -865,7 +880,8 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             param.setJpegQuality(100);
             safeSetParameters(mCamera, param, "setResolution()");
 
-            LogUtil.e(TAG, "Width is " + safeGetParameters(mCamera, "").getPictureSize().width + " height is " + safeGetParameters(mCamera, "").getPictureSize().height);
+            LogUtil.e(TAG, "Width is " + safeGetParameters(mCamera, "").getPictureSize().width + " height is "
+                    + safeGetParameters(mCamera, "").getPictureSize().height);
         }
     }
 
@@ -908,8 +924,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
         if (mCameraType == Camera.CameraInfo.CAMERA_FACING_BACK) {
             mCameraType = Camera.CameraInfo.CAMERA_FACING_FRONT;
-        }
-        else {
+        } else {
             mCameraType = Camera.CameraInfo.CAMERA_FACING_BACK;
         }
 
@@ -938,7 +953,8 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         }
 
         List<String> supportedFlashModes = parameters.getSupportedFlashModes();
-        if (supportedFlashModes == null || supportedFlashModes.isEmpty() || supportedFlashModes.size() == 1 && supportedFlashModes.get(0).equals(Camera.Parameters.FLASH_MODE_OFF)) {
+        if (supportedFlashModes == null || supportedFlashModes.isEmpty() || supportedFlashModes.size() == 1
+                && supportedFlashModes.get(0).equals(Camera.Parameters.FLASH_MODE_OFF)) {
             return false;
         }
 
@@ -1018,8 +1034,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                     }
 
                     handleZoom(event, params);
-                }
-                else if (action == MotionEvent.ACTION_UP) {
+                } else if (action == MotionEvent.ACTION_UP) {
                     // Reset the mMultiTouchDetected flag
                     mMultiTouchDetected = false;
 
@@ -1067,16 +1082,16 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         List<Integer> zoomRatios = params.getZoomRatios();
         int startingZoomValue = 0;
         if (mStartingZoomLevel < zoomRatios.size()) {
-            startingZoomValue = zoomRatios.get((int)mStartingZoomLevel);
+            startingZoomValue = zoomRatios.get((int) mStartingZoomLevel);
         }
 
         if (fingerSpacing != 0) {
 
             // Calculate the ratio of the finger spacing at the beginning of this touch event to this finger spacing
-            double fingerRatio = mStartingFingerSpacing/fingerSpacing;
+            double fingerRatio = mStartingFingerSpacing / fingerSpacing;
 
             // Calculate a new zoom level that's a multiple of the zoom level at the beginning of this touch event
-            double newZoomValue = startingZoomValue/fingerRatio;
+            double newZoomValue = startingZoomValue / fingerRatio;
             double newZoom = 1.0;
             for (int i = 0; i < zoomRatios.size(); i++) {
                 if (zoomRatios.get(i) < newZoomValue) {
@@ -1088,13 +1103,15 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             newZoom = Math.min(newZoom, maxZoom);
             newZoom = Math.max(newZoom, 1.0);
 
-            System.out.println("mStartingFingerSpacing = " + mStartingFingerSpacing + " and fingerSpacing = " + fingerSpacing);
+            System.out.println(
+                    "mStartingFingerSpacing = " + mStartingFingerSpacing + " and fingerSpacing = " + fingerSpacing);
             System.out.println("fingerRatio = " + fingerRatio + " and newZoom = " + newZoom);
-            System.out.println("mStaringZoomLevel = " + mStartingZoomLevel + " and mCurrentZoomLevel = " + mCurrentZoomLevel);
+            System.out.println(
+                    "mStaringZoomLevel = " + mStartingZoomLevel + " and mCurrentZoomLevel = " + mCurrentZoomLevel);
 
             // Set the new zoom level and update the camera preview
             mCurrentZoomLevel = newZoom;
-            params.setZoom((int)newZoom);
+            params.setZoom((int) newZoom);
             safeSetParameters(mCamera, params, "handleZoom()");
         }
     }
@@ -1111,7 +1128,8 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             System.err.println("In onPreviewFrame width = " + width + " and height = " + height);
 
             // Calculate the metering rect around the touch point by using the saved normalized coordinates
-            Rect rect = CCCamera1.exposureRegionForNormalizedCoord(mLastNormalizedTouchPoint.x, mLastNormalizedTouchPoint.y, width, height);
+            Rect rect = CCCamera1.exposureRegionForNormalizedCoord(mLastNormalizedTouchPoint.x,
+                    mLastNormalizedTouchPoint.y, width, height);
 
             // Calculate the average luminosity over the metering rect
             int averageLuminosity = getLuminosityInRect(rect, data, width);
@@ -1128,7 +1146,8 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
             System.err.println("In onPreviewFrame minExposure = " + minExposure + ", maxExposure = " + maxExposure);
 
-            int newExposure = (int)( maxExposure - ((float)(maxExposure - minExposure)/256.0f)*((float)averageLuminosity) );
+            int newExposure = (int) (maxExposure
+                    - ((float) (maxExposure - minExposure) / 256.0f) * ((float) averageLuminosity));
 
             System.err.println("In onPreviewFrame newExposure = " + newExposure);
 
@@ -1140,13 +1159,12 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 lastExposureValue = newExposure;
                 numExposureAttempts++;
                 mCamera.setOneShotPreviewCallback(mPreviewCallback);
-            }
-            else {
+            } else {
                 // Start the auto focus after the exposure is complete.
                 mCamera.autoFocus(mAutoFocusCallback);
 
                 // Restart the scanner if necessary (one shot preview callback drops the scanner's callback)
-                if(mCameraMode == CameraMode.SCANNER) {
+                if (mCameraMode == CameraMode.SCANNER) {
                     ipStartCapturing();
                 }
             }
@@ -1166,7 +1184,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             if (mPreview != null && mPreview.mSurfaceCreated) {
 
                 // Check if the camera supports metering areas for focus and/or exposure
-                if (params.getMaxNumFocusAreas() > 0 || params.getMaxNumMeteringAreas() > 0){
+                if (params.getMaxNumFocusAreas() > 0 || params.getMaxNumMeteringAreas() > 0) {
 
                     int pointerId = event.getPointerId(0);
                     int pointerIndex = event.findPointerIndex(pointerId);
@@ -1180,13 +1198,14 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                     int previewHeight = mCameraView.mPreviewLayout.getHeight();
 
                     // The x and y coordinates from the touch event need to be converted to normalized portrait coordinates in order to calculate the metering region
-                    float n_y = y/previewHeight;
-                    float n_x = x/previewWidth;
+                    float n_y = y / previewHeight;
+                    float n_x = x / previewWidth;
 
                     // n_x, n_y are normalized coordinates in the screen reference frame.
                     // The metering region is expressed in the camera sensor reference frame.
                     // Calculate the point nsc which is (n_x, n_y) expressed in the camera sensor reference frame.
-                    PointF nsc = convertNormalizedCoords(n_x, n_y, this.getCameraDisplayOrientation(mCameraId, mCamera));
+                    PointF nsc = convertNormalizedCoords(n_x, n_y,
+                            this.getCameraDisplayOrientation(mCameraId, mCamera));
                     Rect rect = regionsForNormalizedCoord(nsc.x, nsc.y);
 
                     // Set the focus mode to FOCUS_MODE_AUTO
@@ -1267,13 +1286,13 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         // Calculate the metering rect for this touch point.  The rect can't extend outside the range of -1000 to 1000, so if the touch
         // point is near the edge of the view, then shift the center of the rect accordingly
         int meteringAreaSize = (int) (2000.0f * METERING_AREA_FRACTION);
-        region_x = Math.min(1000.0f - meteringAreaSize/2.0f, region_x);
-        region_x = Math.max(-1000.0f + meteringAreaSize/2.0f, region_x);
-        region_y = Math.min(1000.0f - meteringAreaSize/2.0f, region_y);
-        region_y = Math.max(-1000.0f + meteringAreaSize/2.0f, region_y);
+        region_x = Math.min(1000.0f - meteringAreaSize / 2.0f, region_x);
+        region_x = Math.max(-1000.0f + meteringAreaSize / 2.0f, region_x);
+        region_y = Math.min(1000.0f - meteringAreaSize / 2.0f, region_y);
+        region_y = Math.max(-1000.0f + meteringAreaSize / 2.0f, region_y);
 
-        int left = (int)(region_x - meteringAreaSize/2.0f);
-        int top = (int)(region_y - meteringAreaSize/2.0f);
+        int left = (int) (region_x - meteringAreaSize / 2.0f);
+        int top = (int) (region_y - meteringAreaSize / 2.0f);
 
         return new Rect(left, top, left + meteringAreaSize, top + meteringAreaSize);
     }
@@ -1288,13 +1307,13 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         // Calculate the metering rect for this touch point.  The rect can't extend outside the range of the preview width and height,
         // so if the touch point is near the edge of the view, then shift the center of the rect accordingly.
         int meteringAreaSize = (int) ((Math.min(previewWidth, previewHeight)) * EXPOSURE_AREA_FRACTION);
-        region_x = Math.min(previewWidth - meteringAreaSize/2.0f, region_x);
-        region_x = Math.max(meteringAreaSize/2.0f, region_x);
-        region_y = Math.min(previewHeight - meteringAreaSize/2.0f, region_y);
-        region_y = Math.max(meteringAreaSize/2.0f, region_y);
+        region_x = Math.min(previewWidth - meteringAreaSize / 2.0f, region_x);
+        region_x = Math.max(meteringAreaSize / 2.0f, region_x);
+        region_y = Math.min(previewHeight - meteringAreaSize / 2.0f, region_y);
+        region_y = Math.max(meteringAreaSize / 2.0f, region_y);
 
-        int left = (int)(region_x - meteringAreaSize/2.0f);
-        int top = (int)(region_y - meteringAreaSize/2.0f);
+        int left = (int) (region_x - meteringAreaSize / 2.0f);
+        int top = (int) (region_y - meteringAreaSize / 2.0f);
 
         return new Rect(left, top, left + meteringAreaSize, top + meteringAreaSize);
     }
@@ -1307,7 +1326,8 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         int rectHeight = rect.height();
         int size = rectWidth * rectHeight;
 
-        System.err.println("onPreviewFrame calculated a rect of width " + rectWidth + " and height " + rectHeight + ". size = " + size);
+        System.err.println("onPreviewFrame calculated a rect of width " + rectWidth + " and height " + rectHeight
+                + ". size = " + size);
 
         // Iterate through the given rect and sum all the luminosity values
         int totalLuminosity = 0;
@@ -1326,7 +1346,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         }
 
         // Return the average luminosity over the rect
-        return totalLuminosity/size;
+        return totalLuminosity / size;
     }
 
     private Camera.AutoFocusCallback mAutoFocusCallback = new Camera.AutoFocusCallback() {
@@ -1334,10 +1354,10 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         public void onAutoFocus(boolean success, Camera camera) {
             if (success) {
                 // do something...
-                Log.i("tap_to_focus","success!");
+                Log.i("tap_to_focus", "success!");
             } else {
                 // do something...
-                Log.i("tap_to_focus","fail!");
+                Log.i("tap_to_focus", "fail!");
             }
 
             // Hide the mFocusIndicatorView
@@ -1374,8 +1394,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             Camera.Size optimalSize;
             if (this.hasShortAspectRatio()) {
                 optimalSize = chooseOptimalSize(lsps, MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT, 4, 3);
-            }
-            else {
+            } else {
                 optimalSize = chooseOptimalSize(lsps, MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT, 16, 9);
             }
 
@@ -1407,16 +1426,16 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 mCamera.startPreview();
             }
             else {
-
+            
                 if (mCamera != null) {
-
+            
                     // Set the camera display orientation
                     setCameraDisplayOrientation(0, mCamera);
-
+            
                     // Set the visibility of the flash button
                     mCameraView.mCameraLayout.setFlashButtonVisibility();
                     updateFlashSetting(mFlashMode);
-
+            
                     // Set the resolution mode
                     setResolution(mResolutionMode);
                 }
@@ -1446,7 +1465,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         // If your preview can change or rotate, take care of those events here.
         // Make sure to stop the preview before resizing or reformatting it.
 
-        if (mPreview.getHolder().getSurface() == null){
+        if (mPreview.getHolder().getSurface() == null) {
             // preview surface does not exist
             return;
         }
@@ -1454,7 +1473,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         // stop preview before making changes
         try {
             mCamera.stopPreview();
-        } catch (Exception e){
+        } catch (Exception e) {
             // ignore: tried to stop a non-existent preview
         }
 
@@ -1464,12 +1483,12 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
         // start preview with new settings
         try {
             mCamera.setPreviewDisplay(mPreview.getHolder());
-            if(mCameraMode == CameraMode.SCANNER) {
+            if (mCameraMode == CameraMode.SCANNER) {
                 ipStartCapturing();
             }
             mCamera.startPreview();
 
-        } catch (Exception e){
+        } catch (Exception e) {
             Log.d(TAG, "Error starting camera preview: " + e.getMessage());
         }
     }

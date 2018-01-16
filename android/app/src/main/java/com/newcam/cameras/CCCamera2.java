@@ -149,7 +149,7 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
     private boolean mManualAutoFocus = false;
 
     // The mMeteringRect is the metering rectangle to be used for auto focus and auto exposure based on the user's touch point
-    private MeteringRectangle[] mMeteringRect = {new MeteringRectangle(0,0,0,0,0)};
+    private MeteringRectangle[] mMeteringRect = { new MeteringRectangle(0, 0, 0, 0, 0) };
 
     // The mBackgroundThread is an additional thread for running tasks that shouldn't block the UI.
     private HandlerThread mBackgroundThread;
@@ -202,7 +202,7 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
                 mCameraOpenCloseLock.release();
 
                 // If there's a callback to execute after the camera is closed, then execute it and reset the mCameraClosedCallback string
-                if(mCameraClosedCallback != null){
+                if (mCameraClosedCallback != null) {
                     if (mCameraClosedCallback.equals("openCamera")) {
                         mCameraClosedCallback = "";
                         openCamera(mPreview.getHolder());
@@ -215,21 +215,21 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
 
                 String errorMsg = "Unknown camera error";
                 switch (error) {
-                    case CameraDevice.StateCallback.ERROR_CAMERA_IN_USE:
-                        errorMsg = "Camera is already in use.";
-                        break;
-                    case CameraDevice.StateCallback.ERROR_MAX_CAMERAS_IN_USE:
-                        errorMsg = "Max number of cameras are open, close previous cameras first.";
-                        break;
-                    case CameraDevice.StateCallback.ERROR_CAMERA_DISABLED:
-                        errorMsg = "Camera is disabled, e.g. due to device policies.";
-                        break;
-                    case CameraDevice.StateCallback.ERROR_CAMERA_DEVICE:
-                        errorMsg = "Camera device has encountered a fatal error, please try again.";
-                        break;
-                    case CameraDevice.StateCallback.ERROR_CAMERA_SERVICE:
-                        errorMsg = "Camera service has encountered a fatal error, please try again.";
-                        break;
+                case CameraDevice.StateCallback.ERROR_CAMERA_IN_USE:
+                    errorMsg = "Camera is already in use.";
+                    break;
+                case CameraDevice.StateCallback.ERROR_MAX_CAMERAS_IN_USE:
+                    errorMsg = "Max number of cameras are open, close previous cameras first.";
+                    break;
+                case CameraDevice.StateCallback.ERROR_CAMERA_DISABLED:
+                    errorMsg = "Camera is disabled, e.g. due to device policies.";
+                    break;
+                case CameraDevice.StateCallback.ERROR_CAMERA_DEVICE:
+                    errorMsg = "Camera device has encountered a fatal error, please try again.";
+                    break;
+                case CameraDevice.StateCallback.ERROR_CAMERA_SERVICE:
+                    errorMsg = "Camera service has encountered a fatal error, please try again.";
+                    break;
                 }
                 System.out.println("mStateCallback onError called (" + errorMsg + ")");
 
@@ -252,152 +252,155 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
             // Check the current camera state whenever the capture has progressed or completed to determine the correct behavior
             private void process(CaptureResult result) {
                 switch (mState) {
-                    case STATE_PREVIEW: {
+                case STATE_PREVIEW: {
 
-                        // Simply make sure the that AF and AE state tracking variables are set to 0 before any auto focus event starts
+                    // Simply make sure the that AF and AE state tracking variables are set to 0 before any auto focus event starts
+                    numConsecutiveAFLockStates = 0;
+                    numConsecutiveAFInactiveStates = 0;
+                    numConsecutiveAFScanStates = 0;
+
+                    break;
+                }
+                case STATE_WAITING_LOCK: {
+
+                    System.out.println("mCaptureCallback: STATE_WAITING_LOCK");
+
+                    // Check the auto focus state and auto exposure state
+                    Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
+                    Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
+
+                    if (afState != null) {
+                        System.out.println(
+                                "auto focus state was " + getAFStateString(afState) + " in STATE_WAITING_LOCK");
+                    }
+                    if (aeState != null) {
+                        System.out.println(
+                                "auto exposure state was " + getAEStateString(aeState) + " in STATE_WAITING_LOCK");
+                    }
+
+                    // If the auto focus state is null or INACTIVE, then the auto focus completion handler can be called.
+                    if (afState == null || afState == 0) {
+
+                        if (afState == null) {
+                            System.out.println("auto focus state was null in STATE_WAITING_LOCK");
+                        } else if (afState == 0) {
+                            System.out.println("auto focus state was zero in STATE_WAITING_LOCK");
+                        }
+
+                        // Reset the numConsecutiveAFLockStates and numConsecutiveAFScanState since the auto focus isn't locked or scanning
                         numConsecutiveAFLockStates = 0;
+                        numConsecutiveAFScanStates = 0;
+
+                        // Increment the numConsecutiveAFInactiveStates
+                        numConsecutiveAFInactiveStates++;
+
+                        // If there have been at least three consecutive callbacks where the auto focus state is null or INACTIVE, then the
+                        // onAutoFocusComplete function can be called.  If there haven't been at least three consecutive callbacks, then this
+                        // auto focus state may be transient.
+                        if (numConsecutiveAFInactiveStates >= 3) {
+                            onAutoFocusComplete();
+                            return;
+                        }
+                    }
+
+                    // If the auto focus state is in a scan mode, then monitor the number of consecutive callbacks.  Some devices seems to
+                    // get stuck in scan modes and never finish
+                    else if (CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN == afState
+                            || CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN == afState) {
+
+                        // Reset the numConsecutiveAFLockState and numConsecutiveAFInactiveState since the auto focus is scanning
+                        numConsecutiveAFLockStates = 0;
+                        numConsecutiveAFInactiveStates = 0;
+
+                        // Increment the numConsecutiveAFScanStates
+                        numConsecutiveAFScanStates++;
+
+                        // If there have been at least 30 consecutive scan states, then the device may not ever find focus, so call the
+                        // onAutoFocusComplete function
+                        if (numConsecutiveAFScanStates >= 30) {
+                            onAutoFocusComplete();
+                            return;
+                        }
+
+                    }
+
+                    // If the auto focus is locked, then the photo can be captured if the auto exposure has finished
+                    else if (CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED == afState
+                            || CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED == afState) {
+
+                        // Reset the numConsecutiveAFInactiveStates since the auto focus is locked
                         numConsecutiveAFInactiveStates = 0;
                         numConsecutiveAFScanStates = 0;
 
-                        break;
-                    }
-                    case STATE_WAITING_LOCK: {
+                        // Increment the numConsecutiveAFLockStates
+                        numConsecutiveAFLockStates++;
 
-                        System.out.println("mCaptureCallback: STATE_WAITING_LOCK");
-
-                        // Check the auto focus state and auto exposure state
-                        Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
-                        Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-
-                        if (afState != null) {
-                            System.out.println("auto focus state was " + getAFStateString(afState) + " in STATE_WAITING_LOCK");
-                        }
-                        if (aeState != null) {
-                            System.out.println("auto exposure state was " + getAEStateString(aeState) + " in STATE_WAITING_LOCK");
+                        // If there have been at least three consecutive callbacks where the auto focus is locked, then the onAutoFocusComplete
+                        // function can be called for normal Camera mode.  If there haven't been at least three consecutive callbacks, then this
+                        // auto focus state may be transient.
+                        if (numConsecutiveAFLockStates >= 3 && (mCameraMode != CameraMode.FASTCAM)
+                                && (mFlashMode != FlashMode.AUTO)) {
+                            onAutoFocusComplete();
+                            return;
                         }
 
-                        // If the auto focus state is null or INACTIVE, then the auto focus completion handler can be called.
-                        if (afState == null || afState == 0) {
+                        // Check the CONTROL_AE_STATE to see if the auto exposure has finished.  It can be null on some devices.
+                        if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
 
-                            if (afState == null) {
-                                System.out.println("auto focus state was null in STATE_WAITING_LOCK");
-                            }
-                            else if (afState == 0) {
-                                System.out.println("auto focus state was zero in STATE_WAITING_LOCK");
-                            }
+                            System.out.println(
+                                    "auto focus state was locked and ae state was converged in STATE_WAITING_LOCK");
 
-                            // Reset the numConsecutiveAFLockStates and numConsecutiveAFScanState since the auto focus isn't locked or scanning
-                            numConsecutiveAFLockStates = 0;
-                            numConsecutiveAFScanStates = 0;
-
-                            // Increment the numConsecutiveAFInactiveStates
-                            numConsecutiveAFInactiveStates++;
-
-                            // If there have been at least three consecutive callbacks where the auto focus state is null or INACTIVE, then the
+                            // If there have been at least three consecutive callbacks where the auto focus state is locked, then the
                             // onAutoFocusComplete function can be called.  If there haven't been at least three consecutive callbacks, then this
                             // auto focus state may be transient.
-                            if (numConsecutiveAFInactiveStates >= 3) {
+                            if (numConsecutiveAFLockStates >= 3) {
                                 onAutoFocusComplete();
                                 return;
                             }
                         }
 
-                        // If the auto focus state is in a scan mode, then monitor the number of consecutive callbacks.  Some devices seems to
-                        // get stuck in scan modes and never finish
-                        else if (CaptureResult.CONTROL_AF_STATE_ACTIVE_SCAN == afState || CaptureResult.CONTROL_AF_STATE_PASSIVE_SCAN == afState) {
-
-                            // Reset the numConsecutiveAFLockState and numConsecutiveAFInactiveState since the auto focus is scanning
-                            numConsecutiveAFLockStates = 0;
-                            numConsecutiveAFInactiveStates = 0;
-
-                            // Increment the numConsecutiveAFScanStates
-                            numConsecutiveAFScanStates++;
-
-                            // If there have been at least 30 consecutive scan states, then the device may not ever find focus, so call the
-                            // onAutoFocusComplete function
-                            if (numConsecutiveAFScanStates >= 30) {
-                                onAutoFocusComplete();
-                                return;
-                            }
-
-                        }
-
-                        // If the auto focus is locked, then the photo can be captured if the auto exposure has finished
-                        else if (CaptureResult.CONTROL_AF_STATE_FOCUSED_LOCKED == afState ||
-                                CaptureResult.CONTROL_AF_STATE_NOT_FOCUSED_LOCKED == afState) {
-
-                            // Reset the numConsecutiveAFInactiveStates since the auto focus is locked
-                            numConsecutiveAFInactiveStates = 0;
-                            numConsecutiveAFScanStates = 0;
-
-                            // Increment the numConsecutiveAFLockStates
-                            numConsecutiveAFLockStates++;
-
-                            // If there have been at least three consecutive callbacks where the auto focus is locked, then the onAutoFocusComplete
-                            // function can be called for normal Camera mode.  If there haven't been at least three consecutive callbacks, then this
-                            // auto focus state may be transient.
-                            if (numConsecutiveAFLockStates >= 3 && (mCameraMode != CameraMode.FASTCAM) && (mFlashMode != FlashMode.AUTO)) {
-                                onAutoFocusComplete();
-                                return;
-                            }
-
-                            // Check the CONTROL_AE_STATE to see if the auto exposure has finished.  It can be null on some devices.
-                            if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_CONVERGED) {
-
-                                System.out.println("auto focus state was locked and ae state was converged in STATE_WAITING_LOCK");
-
-                                // If there have been at least three consecutive callbacks where the auto focus state is locked, then the
-                                // onAutoFocusComplete function can be called.  If there haven't been at least three consecutive callbacks, then this
-                                // auto focus state may be transient.
-                                if (numConsecutiveAFLockStates >= 3) {
-                                    onAutoFocusComplete();
-                                    return;
-                                }
-                            }
-
-                            // If the auto exposure hasn't started, then run the precapture sequence.
-                            else {
-                                runPrecaptureSequence();
-                            }
-                        }
+                        // If the auto exposure hasn't started, then run the precapture sequence.
                         else {
-
-                            // If the auto focus and auto exposure fall into any other category, reset all the lock states
-                            numConsecutiveAFLockStates = 0;
-                            numConsecutiveAFInactiveStates = 0;
-                            numConsecutiveAFScanStates = 0;
+                            runPrecaptureSequence();
                         }
-                        break;
+                    } else {
+
+                        // If the auto focus and auto exposure fall into any other category, reset all the lock states
+                        numConsecutiveAFLockStates = 0;
+                        numConsecutiveAFInactiveStates = 0;
+                        numConsecutiveAFScanStates = 0;
                     }
-                    case STATE_WAITING_PRECAPTURE: {
+                    break;
+                }
+                case STATE_WAITING_PRECAPTURE: {
 
-                        System.out.println("mCaptureCallback: STATE_WAITING_PRECAPTURE");
+                    System.out.println("mCaptureCallback: STATE_WAITING_PRECAPTURE");
 
-                        // Check the CONTROL_AE_STATE to see if the auto exposure has finished.  It can be null on some devices.
-                        Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-                        if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_PRECAPTURE ||
-                                aeState == CaptureRequest.CONTROL_AE_STATE_FLASH_REQUIRED) {
+                    // Check the CONTROL_AE_STATE to see if the auto exposure has finished.  It can be null on some devices.
+                    Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
+                    if (aeState == null || aeState == CaptureResult.CONTROL_AE_STATE_PRECAPTURE
+                            || aeState == CaptureRequest.CONTROL_AE_STATE_FLASH_REQUIRED) {
 
-                            // Update the camera state to reflect that the precapture sequence is complete
-                            mState = STATE_WAITING_NON_PRECAPTURE;
-                        }
-                        break;
+                        // Update the camera state to reflect that the precapture sequence is complete
+                        mState = STATE_WAITING_NON_PRECAPTURE;
                     }
-                    case STATE_WAITING_NON_PRECAPTURE: {
+                    break;
+                }
+                case STATE_WAITING_NON_PRECAPTURE: {
 
-                        System.out.println("mCaptureCallback: STATE_WAITING_NON_PRECAPTURE");
+                    System.out.println("mCaptureCallback: STATE_WAITING_NON_PRECAPTURE");
 
-                        // Check the CONTROL_AE_STATE to see if the auto exposure has finished.  It can be null on some devices.
-                        Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-                        if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE) {
+                    // Check the CONTROL_AE_STATE to see if the auto exposure has finished.  It can be null on some devices.
+                    Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
+                    if (aeState == null || aeState != CaptureResult.CONTROL_AE_STATE_PRECAPTURE) {
 
-                            // Call onAutoFocusComplete to capture the still photo
-                            onAutoFocusComplete();
-                        }
-                        break;
+                        // Call onAutoFocusComplete to capture the still photo
+                        onAutoFocusComplete();
                     }
-                    default:
-                        break;
+                    break;
+                }
+                default:
+                    break;
                 }
             }
 
@@ -414,8 +417,7 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
                     // If this was a tap-to-autofocus event, then reset the mManualAutoFocus and unlock the focus again
                     mManualAutoFocus = false;
                     unlockFocus();
-                }
-                else {
+                } else {
 
                     // If this wasn't a tap-to-autofocus event, then capture the photo
                     mState = STATE_PICTURE_TAKEN;
@@ -424,24 +426,22 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
             }
 
             @Override
-            public void onCaptureProgressed(@NonNull CameraCaptureSession session,
-                                            @NonNull CaptureRequest request,
-                                            @NonNull CaptureResult partialResult) {
+            public void onCaptureProgressed(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request,
+                    @NonNull CaptureResult partialResult) {
                 //System.out.println("onCaptureProgressed for tag = " + request.getTag());
 
                 //process(partialResult);
             }
 
             @Override
-            public void onCaptureCompleted(@NonNull CameraCaptureSession session,
-                                           @NonNull CaptureRequest request,
-                                           @NonNull TotalCaptureResult result) {
+            public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request,
+                    @NonNull TotalCaptureResult result) {
 
                 //System.out.println("onCaptureCompleted for tag = " + request.getTag());
 
                 /*Integer afState = result.get(CaptureResult.CONTROL_AF_STATE);
                 Integer aeState = result.get(CaptureResult.CONTROL_AE_STATE);
-
+                
                 if (afState != null) {
                     System.out.println("auto focus state was " + getAFStateString(afState) + " in onCaptureCompleted");
                 }
@@ -496,14 +496,11 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
 
             //manager.openCamera(mCameraId, mStateCallback, mBackgroundHandler);
             manager.openCamera(mCameraId, mStateCallback, null);
-        }
-        catch (CameraAccessException e) {
+        } catch (CameraAccessException e) {
             e.printStackTrace();
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             throw new RuntimeException("Interrupted while trying to lock camera opening.", e);
-        }
-        catch (SecurityException e) {
+        } catch (SecurityException e) {
         }
     }
 
@@ -523,11 +520,9 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
                 mJPEGReader.close();
                 mJPEGReader = null;
             }
-        }
-        catch (InterruptedException e) {
+        } catch (InterruptedException e) {
             throw new RuntimeException("Interrupted while trying to lock camera closing.", e);
-        }
-        finally {
+        } finally {
             mCameraOpenCloseLock.release();
         }
     }
@@ -543,8 +538,7 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
         // Setup the outputs for the chosen camera
         try {
             setupCameraOutputs();
-        }
-        catch (CameraAccessException cae) {
+        } catch (CameraAccessException cae) {
         }
 
         // If necessary, create the preview view and set it as the content of the activity.  Set the size of the SurfaceHolder to the chosen preview size
@@ -553,8 +547,7 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
             mPreview.getHolder().setFixedSize(mPreviewSize.getWidth(), mPreviewSize.getHeight());
             mPreview.getHolder().addCallback(this);
             mCameraView.mPreviewLayout.addView(mPreview);
-        }
-        else {
+        } else {
 
             // TODO: Are the two calls necessary right here?
             // Set the flash mode and resolution mode images
@@ -579,8 +572,8 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
         for (String id : cameraIDs) {
             cc = cm.getCameraCharacteristics(id);
             int deviceLevel = cc.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
-            if (cc.get(CameraCharacteristics.LENS_FACING) == mCameraType &&
-                    deviceLevel != CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
+            if (cc.get(CameraCharacteristics.LENS_FACING) == mCameraType
+                    && deviceLevel != CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
                 mCameraId = id;
                 break;
             }
@@ -591,7 +584,8 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
 
         // Save the camera characteristics for the chosen camera
         mCharacteristics = cc;
-        StreamConfigurationMap streamConfigs = mCharacteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
+        StreamConfigurationMap streamConfigs = mCharacteristics
+                .get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
 
         // Double check to make sure the chosen camera can output JPEGs.
         boolean supportsJpeg = false;
@@ -601,7 +595,8 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
             }
         }
         if (!supportsJpeg) {
-            throw new CameraAccessException(CameraAccessException.CAMERA_ERROR, "Could not find supported image format.");
+            throw new CameraAccessException(CameraAccessException.CAMERA_ERROR,
+                    "Could not find supported image format.");
         }
 
         // Find the largest preview size that will fit the aspect ratio of the preview layout.
@@ -612,21 +607,21 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
         int screenHeight = mCameraView.getHeight(); //CompanyCamApplication.getInstance().getScreenPortraitPixelHeight();
 
         // Calculate the aspect ratio of the screen
-        double screenAspectRatio = (double)screenHeight/(double)screenWidth;
+        double screenAspectRatio = (double) screenHeight / (double) screenWidth;
 
         // Determine if the screen's aspect ratio is closer to 4x3 or 16x9
-        double aspect4x3 = 4.0/3.0;
-        double aspect16x9 = 16.0/9.0;
+        double aspect4x3 = 4.0 / 3.0;
+        double aspect16x9 = 16.0 / 9.0;
         Size nearestAspect;
         if (Math.abs(screenAspectRatio - aspect4x3) < Math.abs(screenAspectRatio - aspect16x9)) {
             nearestAspect = new Size(4, 3);
-        }
-        else {
+        } else {
             nearestAspect = new Size(16, 9);
         }
 
         // Choose the optimal preview size based on the available output sizes, the screen size, and the preview layout size.
-        mPreviewSize = chooseOptimalSize(streamConfigs.getOutputSizes(SurfaceHolder.class), MAX_PREVIEW_WIDTH, MAX_PREVIEW_HEIGHT, nearestAspect);
+        mPreviewSize = chooseOptimalSize(streamConfigs.getOutputSizes(SurfaceHolder.class), MAX_PREVIEW_WIDTH,
+                MAX_PREVIEW_HEIGHT, nearestAspect);
     }
 
     // This method initializes the camera object and sets the preview layout size once the mPreviewSurface is ready.
@@ -713,7 +708,8 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
             mCameraView.mCameraLayout.setFlashButtonVisibility();
 
             // Set a continuous auto focus for the camera preview
-            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,
+                    CameraMetadata.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
 
             setFlashModeForRequest(mPreviewRequestBuilder);
 
@@ -766,14 +762,15 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
 
             // Check if this preview size is no bigger than the max allowed width and height and that its aspect ratio matches the aspect ratio
             // of the reference size.
-            if ((option.getWidth() <= maxWidth) && (option.getHeight() <= maxHeight) && (option.getHeight()*w == option.getWidth()*h)) {
+            if ((option.getWidth() <= maxWidth) && (option.getHeight() <= maxHeight)
+                    && (option.getHeight() * w == option.getWidth() * h)) {
 
                 // Check if the largest dimension of this preview size is at least as large as the minimum requirement for the current
                 // resolution selection
-                if (Math.max(option.getWidth(), option.getHeight()) >= getDesiredImageHeightForResolution(mResolutionMode)) {
+                if (Math.max(option.getWidth(),
+                        option.getHeight()) >= getDesiredImageHeightForResolution(mResolutionMode)) {
                     bigEnough.add(option);
-                }
-                else {
+                } else {
                     notBigEnough.add(option);
                 }
             }
@@ -782,11 +779,9 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
         // Pick the smallest preview size of those big enough. If there is none big enough, pick the largest of those not big enough.
         if (bigEnough.size() > 0) {
             return Collections.min(bigEnough, new CCCamera2.CompareSizesByArea());
-        }
-        else if (notBigEnough.size() > 0) {
+        } else if (notBigEnough.size() > 0) {
             return Collections.max(notBigEnough, new CCCamera2.CompareSizesByArea());
-        }
-        else {
+        } else {
             Log.e(TAG, "Couldn't find any suitable preview size");
             return choices[0];
         }
@@ -813,19 +808,19 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
     // This method sets the flash mode for the given CaptureRequestBuilder
     private void setFlashModeForRequest(CaptureRequest.Builder builder) {
         switch (mFlashMode) {
-            case AUTO:
-                setAutoFlash(builder);
-                break;
-            case ON:
-                builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_SINGLE);
-                break;
-            case TORCH:
-                builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
-                builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
-                break;
-            case OFF:
-                builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
-            default:
+        case AUTO:
+            setAutoFlash(builder);
+            break;
+        case ON:
+            builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_SINGLE);
+            break;
+        case TORCH:
+            builder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
+            builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_TORCH);
+            break;
+        case OFF:
+            builder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
+        default:
         }
     }
 
@@ -859,7 +854,8 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
     private void setJPEGImageReader(final Size jpegSize) {
 
         // Initiate the ImageReader object
-        Log.d(TAG, "ImageReader getting sized with width = " + jpegSize.getWidth() + " and height = " + jpegSize.getHeight());
+        Log.d(TAG, "ImageReader getting sized with width = " + jpegSize.getWidth() + " and height = "
+                + jpegSize.getHeight());
         mJPEGReader = ImageReader.newInstance(jpegSize.getWidth(), jpegSize.getHeight(), ImageFormat.JPEG, 2);
 
         // Set the listener for the mJPEGReader
@@ -892,45 +888,49 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
             setFlashModeForRequest(builder);
 
             // Set the orientation of the JPEG based on the current camera
-            setJpegOrientationForRequest(builder, mCameraView.getActivity().getResources().getConfiguration().orientation);
+            setJpegOrientationForRequest(builder,
+                    mCameraView.getActivity().getResources().getConfiguration().orientation);
 
             // Set the zoom level for the request
             Rect zoomRect = getCurrentZoomRect();
             builder.set(CaptureRequest.SCALER_CROP_REGION, zoomRect);
 
-            builder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, CameraMetadata.LENS_OPTICAL_STABILIZATION_MODE_ON);
+            builder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE,
+                    CameraMetadata.LENS_OPTICAL_STABILIZATION_MODE_ON);
 
             builder.addTarget(mJpegCaptureSurface);
             builder.set(CaptureRequest.JPEG_QUALITY, (byte) 100); // TODO: use the user set quality
 
             mCaptureSession.capture(builder.build(), new CameraCaptureSession.CaptureCallback() {
                 @Override
-                public void onCaptureStarted(CameraCaptureSession session, CaptureRequest request, long timestamp, long framNumber) {
+                public void onCaptureStarted(CameraCaptureSession session, CaptureRequest request, long timestamp,
+                        long framNumber) {
 
                 }
 
                 @Override
-                public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
+                public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request,
+                        TotalCaptureResult result) {
 
                     // Play the shutter click sound effect as long as the device ringer is turned on
                     AudioManager mgr = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
                     switch (mgr.getRingerMode()) {
-                        case AudioManager.RINGER_MODE_NORMAL:
-                            MediaActionSound sound = new MediaActionSound();
-                            sound.play(MediaActionSound.SHUTTER_CLICK);
-                            break;
-                        default:
-                            break;
+                    case AudioManager.RINGER_MODE_NORMAL:
+                        MediaActionSound sound = new MediaActionSound();
+                        sound.play(MediaActionSound.SHUTTER_CLICK);
+                        break;
+                    default:
+                        break;
                     }
                 }
 
                 @Override
-                public void onCaptureFailed(CameraCaptureSession session, CaptureRequest request, CaptureFailure failure) {
+                public void onCaptureFailed(CameraCaptureSession session, CaptureRequest request,
+                        CaptureFailure failure) {
                     super.onCaptureFailed(session, request, failure);
                     Log.e(TAG, "Image capture failed.");
                 }
             }, null);
-
 
         } catch (CameraAccessException e) {
             Log.e(TAG, "Image capture failed.", e);
@@ -972,18 +972,20 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
         if (fingerSpacing != 0) {
 
             // Calculate the ratio of the finger spacing at the beginning of this touch event to this finger spacing
-            double fingerRatio = mStartingFingerSpacing/fingerSpacing;
+            double fingerRatio = mStartingFingerSpacing / fingerSpacing;
 
             // Calculate a new zoom level that's a multiple of the zoom level at the beginning of this touch event
-            double newZoom = mStartingZoomLevel/fingerRatio;
+            double newZoom = mStartingZoomLevel / fingerRatio;
 
             // Bound the new zoom level by the minimum and maximum zoom levels
             newZoom = Math.min(newZoom, maxZoom);
             newZoom = Math.max(newZoom, 1.0);
 
-            System.out.println("mStartingFingerSpacing = " + mStartingFingerSpacing + " and fingerSpacing = " + fingerSpacing);
+            System.out.println(
+                    "mStartingFingerSpacing = " + mStartingFingerSpacing + " and fingerSpacing = " + fingerSpacing);
             System.out.println("fingerRatio = " + fingerRatio + " and newZoom = " + newZoom);
-            System.out.println("mStaringZoomLevel = " + mStartingZoomLevel + " and mCurrentZoomLevel = " + mCurrentZoomLevel);
+            System.out.println(
+                    "mStaringZoomLevel = " + mStartingZoomLevel + " and mCurrentZoomLevel = " + mCurrentZoomLevel);
 
             // Set the new zoom level and update the camera preview
             mCurrentZoomLevel = newZoom;
@@ -1010,22 +1012,22 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
         double delta_z = maxZoom - minZoom;
 
         // Calculate the width and height of the cropped region at the maximum zoom level
-        double w_zmax = m.width()/maxZoom;
-        double h_zmax = m.height()/maxZoom;
+        double w_zmax = m.width() / maxZoom;
+        double h_zmax = m.height() / maxZoom;
 
         // Calculate the delta width and height between the minimum and maximum zoom levels
         double delta_w = m.width() - w_zmax;
         double delta_h = m.height() - h_zmax;
 
         // Calculate the cropped width and height at the current zoom level
-        double w_z = ((minZoom - zoom)/(delta_z)) * delta_w + m.width();
-        double h_z = ((minZoom - zoom)/(delta_z)) * delta_h + m.height();
+        double w_z = ((minZoom - zoom) / (delta_z)) * delta_w + m.width();
+        double h_z = ((minZoom - zoom) / (delta_z)) * delta_h + m.height();
 
         // Calculate the offset of the cropped region
-        int centerX = m.width()/2;
-        int centerY = m.height()/2;
-        int deltaX = (int)(0.5f * w_z);
-        int deltaY = (int)(0.5f * h_z);
+        int centerX = m.width() / 2;
+        int centerY = m.height() / 2;
+        int deltaX = (int) (0.5f * w_z);
+        int deltaY = (int) (0.5f * h_z);
         int offsetX = centerX - deltaX;
         int offsetY = centerY - deltaY;
 
@@ -1046,7 +1048,8 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
         LogUtil.e(TAG, "handleFocus was called");
 
         // Define the size of the FocusIndicatorView as 80dp
-        float focusIndicatorSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 80, mCameraView.getActivity().getResources().getDisplayMetrics());
+        float focusIndicatorSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 80,
+                mCameraView.getActivity().getResources().getDisplayMetrics());
 
         // Get the first pointer for this event
         int pointerId = event.getPointerId(0);
@@ -1061,14 +1064,15 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
         int previewHeight = mCameraView.mPreviewLayout.getHeight();
 
         // The x and y coordinates from the touch event need to be converted to normalized portrait coordinates for the regionsForNormalizedCoord() method.
-        float n_y = y/previewHeight;
-        float n_x = x/previewWidth;
+        float n_y = y / previewHeight;
+        float n_x = x / previewWidth;
         if (mCameraType == CameraMetadata.LENS_FACING_FRONT) {
-            n_x = 1.0f - x/previewWidth;
+            n_x = 1.0f - x / previewWidth;
         }
 
         System.out.println("handleFocus called and n_x = " + n_x + " n_y = " + n_y);
-        System.out.println("handleFocus called and previewWidth = " + previewWidth + " previewHeight = " + previewHeight);
+        System.out
+                .println("handleFocus called and previewWidth = " + previewWidth + " previewHeight = " + previewHeight);
 
         // Get the auto focus region for this touch point
         int sensorOrientation = mCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
@@ -1096,7 +1100,8 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
      * @param sensorOrientation sensor orientation as defined by
      *             CameraCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION).
      */
-    private static MeteringRectangle[] regionsForNormalizedCoord(float n_x, float n_y, float fraction, final Rect cropRegion, int sensorOrientation) {
+    private static MeteringRectangle[] regionsForNormalizedCoord(float n_x, float n_y, float fraction,
+            final Rect cropRegion, int sensorOrientation) {
 
         // Calculate half of the side length of the metering square based on the smaller of the cropRegion width or height
         int minCropEdge = Math.min(cropRegion.width(), cropRegion.height());
@@ -1109,11 +1114,12 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
         PointF nsc = convertNormalizedCoords(n_x, n_y, sensorOrientation);
 
         // Calculate the touch point represented in the camera sensor frame.
-        int xCenterSensor = (int)(cropRegion.left + nsc.x * cropRegion.width());
-        int yCenterSensor = (int)(cropRegion.top + nsc.y * cropRegion.height());
+        int xCenterSensor = (int) (cropRegion.left + nsc.x * cropRegion.width());
+        int yCenterSensor = (int) (cropRegion.top + nsc.y * cropRegion.height());
 
         // Calculate the metering region that's centered at the touch point and has a side length of 2*halfSideLength
-        Rect meteringRegion = new Rect(xCenterSensor - halfSideLength, yCenterSensor - halfSideLength, xCenterSensor + halfSideLength, yCenterSensor + halfSideLength);
+        Rect meteringRegion = new Rect(xCenterSensor - halfSideLength, yCenterSensor - halfSideLength,
+                xCenterSensor + halfSideLength, yCenterSensor + halfSideLength);
 
         // Make sure that the meteringRegion to isn't outside the cropRegion.
         meteringRegion.left = Math.max(meteringRegion.left, cropRegion.left);
@@ -1128,7 +1134,7 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
         System.out.println("The metering region is " + meteringRegion.toString());
 
         // Return a new MeteringRectangle array
-        return new MeteringRectangle[]{new MeteringRectangle(meteringRegion, 800)};
+        return new MeteringRectangle[] { new MeteringRectangle(meteringRegion, 800) };
     }
 
     // This method locks the focus to a particular metering rectangle based on the user's touch point.  The metering rectangle must be expressed
@@ -1155,7 +1161,8 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
             // Start the auto focus
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
 
-            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
+                    CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_START);
 
             // Start the capture sequence and set the state to STATE_WAITING_LOCK
             mState = STATE_WAITING_LOCK;
@@ -1164,8 +1171,7 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
 
             // Call update preview to start the preview again
             updatePreview();
-        }
-        catch (CameraAccessException e) {
+        } catch (CameraAccessException e) {
             // error handling
         }
     }
@@ -1203,12 +1209,13 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
             });
 
             // Reset the auto focus trigger
-            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER,CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
+            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);
             setAutoFlash(mPreviewRequestBuilder);
 
             // Reset the auto exposure trigger
-            if(android.os.Build.VERSION.SDK_INT >= 23) {
-                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL);
+            if (android.os.Build.VERSION.SDK_INT >= 23) {
+                mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
+                        CameraMetadata.CONTROL_AE_PRECAPTURE_TRIGGER_CANCEL);
             }
 
             // Set the camera state back to the default preview state
@@ -1219,8 +1226,7 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
                 mCaptureSession.capture(mPreviewRequestBuilder.build(), mCaptureCallback, null);
                 mCaptureSession.setRepeatingRequest(mPreviewRequest, mCaptureCallback, null);
             }
-        }
-        catch (CameraAccessException e) {
+        } catch (CameraAccessException e) {
             e.printStackTrace();
         }
     }
@@ -1253,12 +1259,14 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
 
             System.out.println("runPrecaptureSequence was called");
 
-            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE,
+                    CameraMetadata.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
 
             // Set the states in the request builder to initiate the auto exposure.
             mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON);
             mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE, CameraMetadata.FLASH_MODE_OFF);
-            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER,
+                    CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
 
             // Add the metering region to the request if the mManualAutoFocus flag is set
             if (mManualAutoFocus) {
@@ -1270,7 +1278,6 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
 
             // Use the mCaptureSession to initiate the auto exposure
             mCaptureSession.capture(mPreviewRequestBuilder.build(), mCaptureCallback, null);
-
 
         } catch (CameraAccessException e) {
             e.printStackTrace();
@@ -1288,7 +1295,8 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
             }
 
             // Create a CaptureRequest.Builder to use to take the photo.
-            final CaptureRequest.Builder captureBuilder = mCamera.createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
+            final CaptureRequest.Builder captureBuilder = mCamera
+                    .createCaptureRequest(CameraDevice.TEMPLATE_STILL_CAPTURE);
             captureBuilder.addTarget(mJpegCaptureSurface);
 
             // Use the same auto exposure and auto focus modes as the preview.
@@ -1300,29 +1308,28 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
             // Set the zoom level for the request
             Rect zoomRect = getCurrentZoomRect();
             captureBuilder.set(CaptureRequest.SCALER_CROP_REGION, zoomRect);
-            captureBuilder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, CameraMetadata.LENS_OPTICAL_STABILIZATION_MODE_ON);
+            captureBuilder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE,
+                    CameraMetadata.LENS_OPTICAL_STABILIZATION_MODE_ON);
 
             // Set the orientation for the JPEG
             int rotation = mCameraView.getActivity().getWindowManager().getDefaultDisplay().getRotation();
             captureBuilder.set(CaptureRequest.JPEG_ORIENTATION, getOrientation(rotation));
 
-            CameraCaptureSession.CaptureCallback CaptureCallback
-                    = new CameraCaptureSession.CaptureCallback() {
+            CameraCaptureSession.CaptureCallback CaptureCallback = new CameraCaptureSession.CaptureCallback() {
 
                 @Override
-                public void onCaptureCompleted(@NonNull CameraCaptureSession session,
-                                               @NonNull CaptureRequest request,
-                                               @NonNull TotalCaptureResult result) {
+                public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request,
+                        @NonNull TotalCaptureResult result) {
 
                     // Play the shutter click sound effect as long as the device ringer is turned on
                     AudioManager mgr = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
                     switch (mgr.getRingerMode()) {
-                        case AudioManager.RINGER_MODE_NORMAL:
-                            MediaActionSound sound = new MediaActionSound();
-                            sound.play(MediaActionSound.SHUTTER_CLICK);
-                            break;
-                        default:
-                            break;
+                    case AudioManager.RINGER_MODE_NORMAL:
+                        MediaActionSound sound = new MediaActionSound();
+                        sound.play(MediaActionSound.SHUTTER_CLICK);
+                        break;
+                    default:
+                        break;
                     }
 
                     // Animate the screen flash when the image is captured if the camera is in FastCam mode.
@@ -1340,8 +1347,7 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
 
             mCaptureSession.stopRepeating();
             mCaptureSession.capture(captureBuilder.build(), CaptureCallback, null);
-        }
-        catch (CameraAccessException e) {
+        } catch (CameraAccessException e) {
             e.printStackTrace();
         }
     }
@@ -1358,7 +1364,8 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
         // For devices with orientation of 90, we simply return our mapping from ORIENTATIONS.
         // For devices with orientation of 270, we need to rotate the JPEG 180 degrees.
         int sensorOrientation = mCharacteristics.get(CameraCharacteristics.SENSOR_ORIENTATION);
-        System.out.println("in getOrientation rotation = " + rotation + " and sensorOrientation = " + sensorOrientation);
+        System.out
+                .println("in getOrientation rotation = " + rotation + " and sensorOrientation = " + sensorOrientation);
 
         // Per the Google example project Camera2Basic, the angle at which the JPEG needs to be rotated is a function of the device orientation
         // and the sensor orientation + 270.  However, implementing this resulted in images being upside down for any sensors that have an
@@ -1405,9 +1412,8 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
                 // The attempt to decode the data can sometimes fail and return null.  If that happens, display a message to the user and restart the camera preview..
                 if (bPhoto == null) {
 
-                    new AlertDialog.Builder(mContext)
-                            .setTitle("Error")
-                            .setMessage("Something went wrong while taking this photo. Try taking a picture with your camera app and uploading it.")
+                    new AlertDialog.Builder(mContext).setTitle("Error").setMessage(
+                            "Something went wrong while taking this photo. Try taking a picture with your camera app and uploading it.")
                             .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
@@ -1448,8 +1454,7 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
                     if (theH > theW) {
                         rotation = (rotation - 270) % 360;
                     }
-                }
-                else if (theH > theW) {
+                } else if (theH > theW) {
                     rotation = (rotation - 90) % 360;
                 }
 
@@ -1538,8 +1543,7 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
                 setupCameraOutputs();
                 initCamera(mPreview.getHolder());
                 initPreview();
-            }
-            catch (CameraAccessException cae) {
+            } catch (CameraAccessException cae) {
             }
 
         }
@@ -1556,13 +1560,12 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
             for (String id : cameraIDs) {
                 CameraCharacteristics cc = cm.getCameraCharacteristics(id);
                 int deviceLevel = cc.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
-                if (cc.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT &&
-                        deviceLevel != CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
+                if (cc.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_FRONT
+                        && deviceLevel != CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
                     foundFrontCamera = true;
                 }
             }
-        }
-        catch (CameraAccessException cae) {
+        } catch (CameraAccessException cae) {
         }
 
         return foundFrontCamera;
@@ -1579,13 +1582,12 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
             for (String id : cameraIDs) {
                 CameraCharacteristics cc = cm.getCameraCharacteristics(id);
                 int deviceLevel = cc.get(CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL);
-                if (cc.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_BACK &&
-                        deviceLevel != CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
+                if (cc.get(CameraCharacteristics.LENS_FACING) == CameraCharacteristics.LENS_FACING_BACK
+                        && deviceLevel != CameraCharacteristics.INFO_SUPPORTED_HARDWARE_LEVEL_LEGACY) {
                     foundRearCamera = true;
                 }
             }
-        }
-        catch (CameraAccessException cae) {
+        } catch (CameraAccessException cae) {
         }
 
         return foundRearCamera;
@@ -1596,8 +1598,7 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
 
         if (mCameraType == CameraCharacteristics.LENS_FACING_BACK) {
             mCameraType = CameraCharacteristics.LENS_FACING_FRONT;
-        }
-        else {
+        } else {
             mCameraType = CameraCharacteristics.LENS_FACING_BACK;
         }
 
@@ -1667,8 +1668,7 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
             }
             if (action == MotionEvent.ACTION_DOWN) {
 
-            }
-            else if (action == MotionEvent.ACTION_MOVE) {
+            } else if (action == MotionEvent.ACTION_MOVE) {
 
                 // Check if this is a multi-touch event
                 if (event.getPointerCount() > 1) {
@@ -1692,8 +1692,7 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
                 // Trigger the tap-to-autofocus if this was a single tap
                 if (event.getPointerCount() == 1 && !mMultiTouchDetected) {
                     handleFocus(event);
-                }
-                else {
+                } else {
 
                     // Reset the mMultiTouchDetected flag
                     mMultiTouchDetected = false;
@@ -1702,8 +1701,7 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
                 // Reset the mStartingFingerSpacing
                 mStartingFingerSpacing = -1.0;
             }
-        }
-        else {
+        } else {
             LogUtil.e(TAG, "Unable to retrieve camera instance in the touch listener.");
             return false;
         }
@@ -1720,7 +1718,7 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
 
         Log.d(TAG, "surfaceCreated");
 
-        if(mCaptureSession != null) {
+        if (mCaptureSession != null) {
             mCaptureSession.close();
         }
 
@@ -1768,7 +1766,7 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
         if (mPreview.getHolder().getSurface() == null) {
 
             Log.d(TAG, "the surface was null in surfaceChanged");
-            // preview surface does not exist
+            // preview surface flaes not exist
             return;
         }
 
@@ -1781,42 +1779,42 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
     // This is a helper method for logging the auto focus state
     private static String getAFStateString(int afState) {
         switch (afState) {
-            case 0:
-                return "CONTROL_AF_STATE_INACTIVE";
-            case 1:
-                return "CONTROL_AF_STATE_PASSIVE_SCAN";
-            case 2:
-                return "CONTROL_AF_STATE_PASSIVE_FOCUSED";
-            case 3:
-                return "CONTROL_AF_STATE_ACTIVE_SCAN";
-            case 4:
-                return "CONTROL_AF_STATE_FOCUSED_LOCKED";
-            case 5:
-                return "CONTROL_AF_STATE_NOT_FOCUSED_LOCKED";
-            case 6:
-                return "CONTROL_AF_STATE_PASSIVE_UNFOCUSED";
-            default:
-                return "Unknown";
+        case 0:
+            return "CONTROL_AF_STATE_INACTIVE";
+        case 1:
+            return "CONTROL_AF_STATE_PASSIVE_SCAN";
+        case 2:
+            return "CONTROL_AF_STATE_PASSIVE_FOCUSED";
+        case 3:
+            return "CONTROL_AF_STATE_ACTIVE_SCAN";
+        case 4:
+            return "CONTROL_AF_STATE_FOCUSED_LOCKED";
+        case 5:
+            return "CONTROL_AF_STATE_NOT_FOCUSED_LOCKED";
+        case 6:
+            return "CONTROL_AF_STATE_PASSIVE_UNFOCUSED";
+        default:
+            return "Unknown";
         }
     }
 
     // This is a helper method for logging the auto exposure state
     private static String getAEStateString(int aeState) {
         switch (aeState) {
-            case 0:
-                return "CONTROL_AE_STATE_INACTIVE";
-            case 1:
-                return "CONTROL_AE_STATE_SEARCHING";
-            case 2:
-                return "CONTROL_AE_STATE_CONVERGED";
-            case 3:
-                return "CONTROL_AE_STATE_LOCKED";
-            case 4:
-                return "CONTROL_AE_STATE_FLASH_REQUIRED";
-            case 5:
-                return "CONTROL_AE_STATE_PRECAPTURE";
-            default:
-                return "Unknown";
+        case 0:
+            return "CONTROL_AE_STATE_INACTIVE";
+        case 1:
+            return "CONTROL_AE_STATE_SEARCHING";
+        case 2:
+            return "CONTROL_AE_STATE_CONVERGED";
+        case 3:
+            return "CONTROL_AE_STATE_LOCKED";
+        case 4:
+            return "CONTROL_AE_STATE_FLASH_REQUIRED";
+        case 5:
+            return "CONTROL_AE_STATE_PRECAPTURE";
+        default:
+            return "Unknown";
         }
     }
 }

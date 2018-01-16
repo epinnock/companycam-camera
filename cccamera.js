@@ -40,6 +40,7 @@ class CCCamera extends React.Component {
     this.state = {
       hasPersistedModes: false,
       reviewModeOn: true,
+      hasFlash: false,
     };
   }
 
@@ -95,6 +96,12 @@ class CCCamera extends React.Component {
         resolutionMode: constants.ResolutionMode.normal,
       });
     }
+  };
+
+  _onFlashAvailabilityChange = (event) => {
+    // const { hasFlash } = event.nativeEvent;
+    // this.setState({ hasFlash });
+    console.log('bob', event.nativeEvent);
   };
 
   _onClose = (event) => {
@@ -156,7 +163,7 @@ class CCCamera extends React.Component {
         onClose={this._onClose}
         onPhotoAccepted={this._onPhotoAccepted}
         onPhotoTaken={this._onPhotoTaken}
-        onAuxModeClicked={this._onAuxModeClicked}
+        onFlashAvailabilityChange={this._onFlashAvailabilityChange}
         flashMode={this.state.flashMode}
         cameraMode={this.state.cameraMode}
         resolutionMode={this.state.resolutionMode}
@@ -179,9 +186,8 @@ class CCCamera extends React.Component {
                 this.props.cameraModeCapturePress();
               }
             }}
-            flipCamera={() => {
-              CameraModule.flipCamera();
-            }}
+            flipCamera={() => CameraModule.flipCamera()}
+            hasFlash={this.state.hasFlash}
             projectName={this.props.projectName}
             orientation={this.props.orientation}
             deviceSupportsARCam={deviceSupportsARCam()}
@@ -218,6 +224,7 @@ CCCamera.propTypes = {
   onClose: PropTypes.func,
   onPhotoAccepted: PropTypes.func,
   onPhotoTaken: PropTypes.func,
+  onFlashAvailabilityChange: PropTypes.func,
   ...View.propTypes,
 
   flashMode: PropTypes.number,

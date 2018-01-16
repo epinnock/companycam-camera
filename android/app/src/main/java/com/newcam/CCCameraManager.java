@@ -33,70 +33,66 @@ public class CCCameraManager extends ViewGroupManager<CCCameraView> {
         return latestView;
     }
 
-    public static CCCameraView getLatestView(){
+    public static CCCameraView getLatestView() {
         return latestView;
     }
 
     @ReactProp(name = "storagePath")
-    public void setStoragePath(CCCameraView view, String str){
+    public void setStoragePath(CCCameraView view, String str) {
         view.setStoragePath(str);
     }
 
     @ReactProp(name = "projectName")
-    public void setProjectName(CCCameraView view, String str){
+    public void setProjectName(CCCameraView view, String str) {
         view.setProjectName(str);
     }
 
     @ReactProp(name = "projectAddress")
-    public void setProjectAddress(CCCameraView view, String str){
+    public void setProjectAddress(CCCameraView view, String str) {
         view.setProjectAddress(str);
     }
 
     @ReactProp(name = "exifLat")
-    public void setExifLat(CCCameraView view, double val){
+    public void setExifLat(CCCameraView view, double val) {
         view.setExifLat(val);
     }
 
     @ReactProp(name = "exifLon")
-    public void setExifLon(CCCameraView view, double val){
+    public void setExifLon(CCCameraView view, double val) {
         view.setExifLon(val);
     }
 
     @ReactProp(name = "exifLocTimestamp")
-    public void setExifLocTimestamp(CCCameraView view, double val){
+    public void setExifLocTimestamp(CCCameraView view, double val) {
         view.setExifLocTimestamp(val);
     }
 
     @ReactProp(name = "hideNativeUI")
-    public void setHideNativeUI(CCCameraView view, boolean val){
+    public void setHideNativeUI(CCCameraView view, boolean val) {
         view.setHideNativeUI(val);
     }
 
     @ReactProp(name = "flashMode")
-    public void setFlashMode(CCCameraView view, int val){
+    public void setFlashMode(CCCameraView view, int val) {
         view.setFlashMode(FlashMode.fromInt(val));
     }
 
     @ReactProp(name = "cameraMode")
-    public void setCameraMode(CCCameraView view, int val){
+    public void setCameraMode(CCCameraView view, int val) {
         view.setCameraMode(CameraMode.fromInt(val));
     }
 
     @ReactProp(name = "resolutionMode")
-    public void setResolutionMode(CCCameraView view, int val){
+    public void setResolutionMode(CCCameraView view, int val) {
         view.setResolutionMode(ResolutionMode.fromInt(val));
     }
 
     @Override
     @Nullable
     public Map getExportedCustomDirectEventTypeConstants() {
-        return MapBuilder.of(
-            "onClose",
-            MapBuilder.of("registrationName", "onClose"),
-            "onPhotoAccepted",
-            MapBuilder.of("registrationName", "onPhotoAccepted"),
-            "onPhotoTaken",
-            MapBuilder.of("registrationName", "onPhotoTaken")
-        );
+        return MapBuilder.of("onClose", MapBuilder.of("registrationName", "onClose"), "onPhotoAccepted",
+                MapBuilder.of("registrationName", "onPhotoAccepted"), "onPhotoTaken",
+                MapBuilder.of("registrationName", "onPhotoTaken"), "onFlashAvailabilityChange",
+                MapBuilder.of("registrationName", "onFlashAvailabilityChange"));
     }
 }

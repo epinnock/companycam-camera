@@ -8,6 +8,8 @@
 
 #import "CCCameraModuleIOS.h"
 #import "CCCameraEnums.h"
+#import "CCCameraManager.h"
+#import <AVFoundation/AVFoundation.h>
 
 @implementation CCCameraModuleIOS
 
@@ -18,7 +20,7 @@ RCT_EXPORT_MODULE(CCCameraModuleIOS);
 #pragma mark RCTBridgeModule protocol methods
 
 -(NSArray<NSString *> *)supportedEvents {
-    return @[@"onClose", @"onError", @"onPhotoTaken", @"onPhotoAccepted"];
+    return @[@"onClose", @"onError", @"onPhotoTaken", @"onPhotoAccepted", @"onFlashAvailabilityChange"];
 }
 
 - (NSDictionary *)constantsToExport

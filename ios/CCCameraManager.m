@@ -76,6 +76,7 @@ RCT_CUSTOM_VIEW_PROPERTY(hideNativeUI, BOOL, CCCameraView) {
 RCT_EXPORT_VIEW_PROPERTY(onClose, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onPhotoTaken, RCTDirectEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onPhotoAccepted, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(onFlashAvailabilityChange, RCTDirectEventBlock)
 
 RCT_CUSTOM_VIEW_PROPERTY(flashMode, NSInteger, CCCameraFlashMode) {
     CCCameraFlashMode mode = [RCTConvert NSInteger:json];

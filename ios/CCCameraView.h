@@ -74,6 +74,7 @@
 @property (nonatomic, copy) RCTDirectEventBlock onClose;
 @property (nonatomic, copy) RCTDirectEventBlock onPhotoTaken;
 @property (nonatomic, copy) RCTDirectEventBlock onPhotoAccepted;
+@property (nonatomic, copy) RCTDirectEventBlock onFlashAvailabilityChange;
 
 
 -(id)initWithManager:(CCCameraManager*)_manager bridge:(RCTBridge *)_bridge;
@@ -90,6 +91,7 @@
 -(void)doEvent:(NSString *)eventName :(NSDictionary *)event;
 -(void)doPhotoTaken:(NSString *)imgFile :(int)imgWidth :(int)imgHeight :(NSString *)photoOrigin completion:(void(^)(void))callback;
 -(void)doPhotoAccepted:(NSString *)imgFile :(int)imgWidth :(int)imgHeight :(NSString *)photoOrigin;
+-(void)doFlashAvailabilityChange:(BOOL)hasFlash;
 -(CLLocation *)getExifLocation;
 
 //////////////////////////////

@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
   },
   optionDescription: {
     color: '#AAA',
-    fontSize: 13,
+    fontSize: 11,
   },
 });
 

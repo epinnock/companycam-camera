@@ -650,33 +650,37 @@ class CameraLayout extends Component {
               ) : null}
 
               {/* Flash mode button */}
-              <TouchableOpacity
-                onPress={() => {
-                  this.toggleFlashMode();
-                }}
-              >
-                <Animated.View
-                  style={[
-                    styles.uiButton,
-                    {
-                      transform: [
-                        {
-                          rotate: this.state.orientationDegrees.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: ['0deg', '1deg'],
-                          }),
-                        },
-                      ],
-                    },
-                  ]}
+              {this.props.hasFlash ? (
+                <TouchableOpacity
+                  onPress={() => {
+                    this.toggleFlashMode();
+                  }}
                 >
-                  <MaterialCommunityIcon
-                    name={TorchIsOn ? FLASH_ON_ICON : FLASH_OFF_ICON}
-                    size={24}
-                    color="white"
-                  />
-                </Animated.View>
-              </TouchableOpacity>
+                  <Animated.View
+                    style={[
+                      styles.uiButton,
+                      {
+                        transform: [
+                          {
+                            rotate: this.state.orientationDegrees.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: ['0deg', '1deg'],
+                            }),
+                          },
+                        ],
+                      },
+                    ]}
+                  >
+                    <MaterialCommunityIcon
+                      name={TorchIsOn ? FLASH_ON_ICON : FLASH_OFF_ICON}
+                      size={24}
+                      color="white"
+                    />
+                  </Animated.View>
+                </TouchableOpacity>
+              ) : (
+                <View style={styles.uiButton} />
+              )}
 
               {/* Capture button */}
               {!PrimaryModeIsScan ? (
@@ -698,6 +702,7 @@ class CameraLayout extends Component {
                 <TouchableOpacity
                   onPress={() => {
                     this.props.flipCamera();
+                    this.forceUpdate();
                   }}
                 >
                   <Animated.View
