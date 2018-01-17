@@ -241,8 +241,6 @@ bool DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
     //--------------------------------
     // Only carry out this final step if requested
     if (!doGenerateOutput) { return false; }
-  
-    std::cout << " ScanFocus: Generated image" << std::endl;
 
     // Don't bother creating image bigger than the bounding box; also limit to optMaxOutputDim
     cv::Rect rectBounds = perspectiveRectBoundingBox(pRect);

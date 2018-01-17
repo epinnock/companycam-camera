@@ -46,12 +46,12 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
         reactContext.addLifecycleEventListener(this);
     }
 
-    // ==============================================================================================
+    // =============================================================================================
     // These are utility functions to use OpenCV to do some image processing.
     // They are used in the editor.  So why are they here in the camera project?
     //   1. The camera project already has OpenCV in it
     //   2. The functionality might be used directly in the scanner
-    // ==============================================================================================
+    // =============================================================================================
     @ReactMethod
     public void imageprocFourPoint(Promise promise) {
         // TODO: Just returning a test object for the moment
@@ -67,7 +67,7 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
         map.putInt("test", 42);
         promise.resolve(map);
     }
-    // ==============================================================================================
+    // =============================================================================================
 
     @Override
     public String getName() {
