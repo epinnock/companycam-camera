@@ -234,9 +234,14 @@ public class CCCameraView extends RelativeLayout {
     //component props: functions
     //-------------------------------------
     private void _doEvent(String eventName, WritableMap event) {
+        int id = getId();
+        if (id == -1) {
+            System.err.println("[CCCameraView] _doEvent for " + eventName + " will fail because id is -1!");
+        }
+
         ReactContext reactContext = (ReactContext) getContext();
         RCTEventEmitter rctEventEmitter = reactContext.getJSModule(RCTEventEmitter.class);
-        rctEventEmitter.receiveEvent(getId(), eventName, event);
+        rctEventEmitter.receiveEvent(id, eventName, event);
     }
 
     public void doPhotoTaken(File imgFile, int imgWidth, int imgHeight, PhotoOrigin origin) {
@@ -272,7 +277,7 @@ public class CCCameraView extends RelativeLayout {
     public void doFlashAvailabilityChange(boolean hasFlash) {
         // Invoke onFlashAvailabilityChange prop
         WritableMap event = Arguments.createMap();
-        event.putInt("hasFlash", hasFlash ? 1 : 0);
+        event.putBoolean("hasFlash", hasFlash);
         _doEvent("onFlashAvailabilityChange", event);
     }
 

@@ -90,9 +90,15 @@ public class CCCameraManager extends ViewGroupManager<CCCameraView> {
     @Override
     @Nullable
     public Map getExportedCustomDirectEventTypeConstants() {
-        return MapBuilder.of("onClose", MapBuilder.of("registrationName", "onClose"), "onPhotoAccepted",
-                MapBuilder.of("registrationName", "onPhotoAccepted"), "onPhotoTaken",
-                MapBuilder.of("registrationName", "onPhotoTaken"), "onFlashAvailabilityChange",
-                MapBuilder.of("registrationName", "onFlashAvailabilityChange"));
+        return MapBuilder.of(
+            "onClose",
+                MapBuilder.of("registrationName", "onClose"),
+            "onPhotoAccepted",
+                MapBuilder.of("registrationName", "onPhotoAccepted"),
+            "onPhotoTaken",
+                MapBuilder.of("registrationName", "onPhotoTaken"),
+            "onFlashAvailabilityChange",
+                MapBuilder.of("registrationName", "onFlashAvailabilityChange")
+        );
     }
 }

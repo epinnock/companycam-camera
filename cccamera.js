@@ -99,9 +99,10 @@ class CCCamera extends React.Component {
   };
 
   _onFlashAvailabilityChange = (event) => {
-    // const { hasFlash } = event.nativeEvent;
-    // this.setState({ hasFlash });
-    console.log('bob', event.nativeEvent);
+    const { hasFlash } = event.nativeEvent;
+    console.log(`_onFlashAvailabilityChange called in cccamera.js (${hasFlash})`);
+
+    this.setState({ hasFlash });
   };
 
   _onClose = (event) => {
@@ -224,7 +225,6 @@ CCCamera.propTypes = {
   onClose: PropTypes.func,
   onPhotoAccepted: PropTypes.func,
   onPhotoTaken: PropTypes.func,
-  onFlashAvailabilityChange: PropTypes.func,
   ...View.propTypes,
 
   flashMode: PropTypes.number,

@@ -408,9 +408,6 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             //params.setSceneMode(Camera.Parameters.SCENE_MODE_STEADYPHOTO);
         }
 
-        // invoke flash availability prop
-        mCameraView.doFlashAvailabilityChange(hasFlash());
-
         // Set the parameters for the focus mode and scene mode
         safeSetParameters(mCamera, params, "initializeCameraForPreview()");
 
@@ -515,6 +512,9 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
             // Initialize the camera for the preview
             initializeCameraForPreview();
+
+            // invoke flash availability prop
+            mCameraView.doFlashAvailabilityChange(hasFlash());
 
             System.err.println("[CCCamera1] Success!");
         } else {
@@ -1373,6 +1373,11 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
     public void surfaceCreated(SurfaceHolder holder) {
 
         Log.d(TAG, "surfaceCreated");
+
+        // NOTE: This is called in startPreview, hence on initial load and any time the camera is flipped.
+        // But the call on initial load fails because getId() is -1 in CCCameraView.
+        // Seems like at this point getId() is OK and the event will go through correctly.
+        mCameraView.doFlashAvailabilityChange(hasFlash());
 
         // Set the SurfaceCreated flag
         mPreview.mSurfaceCreated = true;
