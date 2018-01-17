@@ -27,6 +27,7 @@ import com.newcam.enums.PhotoOrigin;
 import com.newcam.enums.ResolutionMode;
 import com.newcam.imageprocessing.CCCameraImageProcessor;
 import com.newcam.imageprocessing.DocScanOpenCV;
+import com.newcam.imageprocessing.ImageProcOpenCV;
 import com.newcam.utils.AppPreferences;
 import com.newcam.utils.CameraCheck;
 import com.newcam.views.CCCameraLayout;
@@ -86,12 +87,13 @@ public class CCCameraView extends RelativeLayout {
                     ViewGroup.LayoutParams.MATCH_PARENT);
             this.addView(mCameraLayout, newParams);
 
-            DocScanOpenCV dso = new DocScanOpenCV(context);
-            dso.setLayoutParams(newParams);
-            dso.bringToFront();
-            this.addView(dso);
+            DocScanOpenCV ccipImpl = new DocScanOpenCV(context);
+//            ImageProcOpenCV ccipImpl = new ImageProcOpenCV(context);
+            ccipImpl.setLayoutParams(newParams);
+            ccipImpl.bringToFront();
+            this.addView(ccipImpl);
 
-            ccImageProcessor = dso;
+            ccImageProcessor = ccipImpl;
 
             init(context);
         } else {

@@ -10,6 +10,8 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.view.View;
 
+import com.newcam.jniexports.JNIExports;
+
 /**
  * Created by dan on 5/1/17.
  */
@@ -18,27 +20,6 @@ import android.view.View;
 //"The jnigraphics library exposes a C-based interface that allows native code to reliably access the pixel buffers of Java bitmap objects"
 
 public class DocScanOpenCV extends View implements CCCameraImageProcessor {
-
-    // Native stuff
-    //--------------------------------------
-    // Used to load the 'native-lib' library on application startup.
-    static {
-        System.loadLibrary("native-lib");
-    }
-
-    public native long newScanner();
-    public native void deleteScanner(long ptr);
-    public native void resetScanner(long ptr);
-
-    // NOTE: In initializing imageBGRA and imageOutput: Java int is 4 bytes, so each int corresponds to one BGRA pixel
-    public native void nativeScan(long ptr,
-        /* Image to be scanned */
-        int width, int height, byte imageYUV[], int[] imageBGRA,
-        /* Image returned by the scanner, if any */
-        int[] dimsImageOutput, int maxOutputPixels, int[] imageOutput,
-        /* Info about most recent scan */
-        int[] scanStatus, float pRect[]);
-    //--------------------------------------
 
     // Listeners for auto-capture
     //--------------------------------------
@@ -102,7 +83,7 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
         super(context);
 
         this.setBackgroundColor(COLOR_0000);
-        docScanPtr = newScanner();
+        docScanPtr = JNIExports.newScanner();
     }
 
     @Override
@@ -181,7 +162,7 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
         final long curTimeMS = System.currentTimeMillis();
         if(curTimeMS - lastScanTimestampMS > 500){
             lastScanTimestampMS = curTimeMS;
-            resetScanner(docScanPtr);
+            JNIExports.resetScanner(docScanPtr);
         }
         lastScanTimestampMS = curTimeMS;
 
@@ -190,7 +171,7 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
         int[] scanStatus = new int[1];
         float[] pRect = new float[8];
 
-        nativeScan(docScanPtr,
+        JNIExports.nativeScan(docScanPtr,
             /* Image to be scanned */
             widthOrig, heightOrig, data, imageBGRA,
             /* Image returned by the scanner, if any */

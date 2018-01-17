@@ -263,7 +263,7 @@ namespace geom
         }
 
         // If not successful, return 'invalid' PerspectiveRect
-        if (!xValid || !yValid || (lineX0 == lineX1) && (lineY0 == lineY1)) {
+        if (!xValid || !yValid || ((lineX0 == lineX1) && (lineY0 == lineY1))) {
             return invalidPerspectiveRect();
         }
 

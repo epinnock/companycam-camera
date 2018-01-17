@@ -5,25 +5,60 @@
 #include <opencv2/imgproc/imgproc.hpp>
 
 #include "docscan.hpp"
+#include "imageproc.hpp"
 
 extern "C" {
 
+JNIEXPORT void JNICALL
+Java_com_newcam_jniexports_JNIExports_magicColor(
+    JNIEnv *env, jobject thiz,
+    /* Input image */
+    jint width, jint height, jbyteArray imageYUV, jintArray imageBGRA,
+    /* Output image */
+    jintArray imageOutput)
+{
+    // Get pointers to array data
+    jbyte *_imageYUV = env->GetByteArrayElements(imageYUV, 0);
+    jint *_imageBGRA = env->GetIntArrayElements(imageBGRA, 0);
+
+    jint *_imageOutput = env->GetIntArrayElements(imageOutput, 0);
+
+    // Convert input image to Mat
+    cv::Mat matYUV(height + height / 2, width, CV_8UC1, (unsigned char *) _imageYUV);
+    cv::Mat matBGRA(height, width, CV_8UC4, (unsigned char *) _imageBGRA);
+    cvtColor(matYUV, matBGRA, CV_YUV420sp2BGR, 4);
+
+    // Main functionality
+    //-----------------------------------------------
+    cv::Mat matResult = imageproc::magicColor(matBGRA);
+
+    cv::Mat matOutput(matResult.rows, matResult.cols, CV_8UC4, (unsigned char *) _imageOutput);
+    matResult.copyTo(matOutput);
+    //-----------------------------------------------
+
+    // Release array data
+    env->ReleaseByteArrayElements(imageYUV, _imageYUV, 0);
+    env->ReleaseIntArrayElements(imageBGRA, _imageBGRA, 0);
+
+    env->ReleaseIntArrayElements(imageOutput, _imageOutput, 0);
+}
+
 JNIEXPORT jlong JNICALL
-Java_com_newcam_imageprocessing_DocScanOpenCV_newScanner(JNIEnv *env, jobject thiz)
+Java_com_newcam_jniexports_JNIExports_newScanner(JNIEnv *env, jobject thiz)
 {
     DocScanner* docScanPtr = new DocScanner();
     return (jlong) docScanPtr;
 }
 
 JNIEXPORT void JNICALL
-Java_com_newcam_imageprocessing_DocScanOpenCV_deleteScanner(JNIEnv *env, jobject thiz, jlong ptr)
+Java_com_newcam_jniexports_JNIExports_deleteScanner(JNIEnv *env, jobject thiz, jlong ptr)
 {
     DocScanner* docScanPtr = (DocScanner*)ptr;
     delete docScanPtr;
 }
 
 JNIEXPORT void JNICALL
-Java_com_newcam_imageprocessing_DocScanOpenCV_resetScanner(JNIEnv *env, jobject thiz, jlong ptr)
+Java_com_newcam_jniexports_JNIExports_resetScanner(JNIEnv *env, jobject thiz, jlong ptr)
 {
     DocScanner* docScanPtr = (DocScanner*)ptr;
     docScanPtr->reset();
@@ -32,7 +67,7 @@ Java_com_newcam_imageprocessing_DocScanOpenCV_resetScanner(JNIEnv *env, jobject 
 //Basic method for converting YUV->RGB and returning image data:
 //https://stackoverflow.com/questions/12695232/using-native-functions-in-android-with-opencv
 JNIEXPORT void JNICALL
-Java_com_newcam_imageprocessing_DocScanOpenCV_nativeScan(
+Java_com_newcam_jniexports_JNIExports_nativeScan(
     JNIEnv *env, jobject thiz,
     jlong ptr,
     /* Image to be scanned */
@@ -44,6 +79,7 @@ Java_com_newcam_imageprocessing_DocScanOpenCV_nativeScan(
 {
     if (!ptr) { return; }
 
+    // Get pointers to array data
     jbyte *_imageYUV = env->GetByteArrayElements(imageYUV, 0);
     jint *_imageBGRA = env->GetIntArrayElements(imageBGRA, 0);
 
@@ -56,11 +92,10 @@ Java_com_newcam_imageprocessing_DocScanOpenCV_nativeScan(
     // Convert input image to Mat
     cv::Mat matYUV(height + height / 2, width, CV_8UC1, (unsigned char *) _imageYUV);
     cv::Mat matBGRA(height, width, CV_8UC4, (unsigned char *) _imageBGRA);
-
-    //Please make attention about BGRA byte order
-    //ARGB stored in java as int array becomes BGRA at native level
     cvtColor(matYUV, matBGRA, CV_YUV420sp2BGR, 4);
 
+    // Main functionality
+    //-----------------------------------------------
     DocScanner* docScanPtr = (DocScanner*)ptr;
     DocScanner::ScanStatus status = docScanPtr->smartScan(matBGRA);
     switch(status){
@@ -90,7 +125,9 @@ Java_com_newcam_imageprocessing_DocScanOpenCV_nativeScan(
         _dimsImageOutput[0] = 0;
         _dimsImageOutput[1] = 0;
     }
+    //-----------------------------------------------
 
+    // Release array data
     env->ReleaseByteArrayElements(imageYUV, _imageYUV, 0);
     env->ReleaseIntArrayElements(imageBGRA, _imageBGRA, 0);
 
