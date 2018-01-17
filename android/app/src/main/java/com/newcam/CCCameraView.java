@@ -249,7 +249,6 @@ public class CCCameraView extends RelativeLayout {
         event.putInt("imgWidth", imgWidth);
         event.putInt("imgHeight", imgHeight);
         event.putString("photoOrigin", origin.toString());
-        _doEvent("onFlashAvailabilityChange", event);
         _doEvent("onPhotoTaken", event);
     }
 
