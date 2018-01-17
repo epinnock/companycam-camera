@@ -48,6 +48,9 @@ const ModeIndicator = styled.View`
 
 const ModeTitle = styled.Text`
   background-color: transparent;
+  font-size: 16;
+  margin-top: 2;
+  margin-bottom: 2;
 
   ${'' /* with color.... */} color: ${(props) =>
       props.isCurrentMode ? '#FFB300' : 'white'};
@@ -66,6 +69,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     height: 56,
     marginTop: 0,
+    backgroundColor: 'purple',
   },
   headerTitle: {
     color: 'white',
@@ -103,7 +107,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderTopColor: 'red',
     borderTopWidth: 1,
-    maxHeight: '50%',
   },
   captureContainer: {
     alignItems: 'center',
@@ -114,6 +117,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'palevioletred',
+    height: 144,
+    width: 144,
   },
   modeButton: {
     flexDirection: 'row-reverse',
@@ -259,7 +264,7 @@ class CameraLayoutTablet extends Component {
         swapHeaderButtons = true;
         dynamicFooterStyles = {
           alignItems: 'flex-end',
-          flexDirection: 'row',
+          flexDirection: 'row-reverse',
           justifyContent: 'center',
         };
         dynamicCaptureContainerStyles = {
@@ -268,9 +273,10 @@ class CameraLayoutTablet extends Component {
         };
         break;
       case orientationEnum.landscaperight:
+        swapCameraUI = true;
         dynamicFooterStyles = {
-          alignItems: 'flex-end',
-          flexDirection: 'row-reverse',
+          alignItems: 'flex-start',
+          flexDirection: 'row',
           justifyContent: 'center',
         };
         dynamicCaptureContainerStyles = {
@@ -280,6 +286,11 @@ class CameraLayoutTablet extends Component {
         break;
       case orientationEnum.portraitupsidedown:
         swapCameraUI = true;
+        dynamicFooterStyles = {
+          alignItems: 'flex-start',
+          justifyContent: 'center',
+          flexDirection: 'column-reverse',
+        };
         dynamicCaptureContainerStyles = {
           flexDirection: 'column-reverse',
           paddingHorizontal: 32,
@@ -517,7 +528,10 @@ class CameraLayoutTablet extends Component {
           }}
         />
 
-        <View style={[styles.footer, this.state.dynamicFooterStyles]}>
+        <View
+          style={[styles.footer, this.state.dynamicFooterStyles]}
+          pointerEvents="box-none"
+        >
           {/*
             TODO eventually would be nice to track if zoomed in...
             + pinch to zoom would update the magnification (ie 2.8x etc)
@@ -538,83 +552,6 @@ class CameraLayoutTablet extends Component {
               this.state.dynamicCaptureContainerStyles,
             ]}
           >
-            {/* Preview tray */}
-            {!PrimaryModeIsScan && (
-              <TouchableOpacity
-                onPress={() => {
-                  this.props.setCameraTrayVisible(true);
-                }}
-              >
-                <Animated.View
-                  style={[
-                    styles.uiButton,
-                    {
-                      transform: [
-                        {
-                          rotate: this.state.orientationDegrees.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: ['0deg', '1deg'],
-                          }),
-                        },
-                      ],
-                    },
-                  ]}
-                >
-                  <MaterialIcon name="crop-portrait" size={32} color="white" />
-                </Animated.View>
-              </TouchableOpacity>
-            )}
-
-            {/* Fast cam toggle button */}
-            {!PrimaryModeIsScan && (
-              <TouchableOpacity
-                onPress={() => {
-                  if (cameraMode === constants.CameraMode.fastcam) {
-                    this.setCameraMode(constants.CameraMode.photo);
-                  } else {
-                    this.setCameraMode(constants.CameraMode.fastcam);
-                  }
-                }}
-              >
-                <Animated.View
-                  style={[
-                    styles.uiButton,
-                    {
-                      transform: [
-                        {
-                          rotate: this.state.orientationDegrees.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: ['0deg', '1deg'],
-                          }),
-                        },
-                      ],
-                    },
-                  ]}
-                >
-                  <MaterialIcon
-                    name={
-                      cameraMode === constants.CameraMode.fastcam
-                        ? FASTCAM_ON_ICON
-                        : FASTCAM_OFF_ICON
-                    }
-                    size={24}
-                    color="white"
-                  />
-                </Animated.View>
-              </TouchableOpacity>
-            )}
-
-            {/* Capture button */}
-            {!PrimaryModeIsScan && (
-              <TouchableOpacity
-                onPress={() => {
-                  this.doFlashAnimation();
-                  this.props.captureButtonPress();
-                }}
-                style={styles.captureButton}
-              />
-            )}
-
             {/* Front/back camera button */}
             {!PrimaryModeIsScan && (
               <TouchableOpacity
@@ -641,12 +578,6 @@ class CameraLayoutTablet extends Component {
                 </Animated.View>
               </TouchableOpacity>
             )}
-
-            {/* Magic invisible view for when scanner mode is active */}
-            {/* {
-              PrimaryModeIsScan &&
-                <View style={[styles.captureButton, { opacity: 0 }]} />
-            } */}
 
             {/* Flash mode button */}
             <TouchableOpacity
@@ -676,11 +607,69 @@ class CameraLayoutTablet extends Component {
                 />
               </Animated.View>
             </TouchableOpacity>
+
+            {/* Preview tray */}
+            {!PrimaryModeIsScan && (
+              <TouchableOpacity
+                onPress={() => {
+                  this.props.setCameraTrayVisible(true);
+                }}
+              >
+                <Animated.View
+                  style={[
+                    styles.uiButton,
+                    {
+                      transform: [
+                        {
+                          rotate: this.state.orientationDegrees.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: ['0deg', '1deg'],
+                          }),
+                        },
+                      ],
+                    },
+                  ]}
+                >
+                  <MaterialIcon name="crop-portrait" size={32} color="white" />
+                </Animated.View>
+              </TouchableOpacity>
+            )}
+
+            {/* Capture button */}
+            {!PrimaryModeIsScan && (
+              <TouchableOpacity
+                onPress={() => {
+                  this.doFlashAnimation();
+                  this.props.captureButtonPress();
+                }}
+                style={styles.captureButton}
+              />
+            )}
+
+            {/* Magic invisible view for when scanner mode is active */}
+            {/* {
+              PrimaryModeIsScan &&
+                <View style={[styles.captureButton, { opacity: 0 }]} />
+            } */}
           </View>
 
           {/* Photo mode buttons */}
           {this.props.cameraTrayVisible ? null : (
-            <View style={styles.modeContainer}>
+            <Animated.View
+              style={[
+                styles.modeContainer,
+                {
+                  transform: [
+                    {
+                      rotate: this.state.orientationDegrees.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: ['0deg', '1deg'],
+                      }),
+                    },
+                  ],
+                },
+              ]}
+            >
               {/* Photo mode button */}
               <TouchableOpacity
                 onPress={() => this.setCameraMode(constants.CameraMode.photo)}
@@ -725,7 +714,7 @@ class CameraLayoutTablet extends Component {
                 <ModeTitle>B/A</ModeTitle>
                 {/* <ModeIndicator /> */}
               </TouchableOpacity>
-            </View>
+            </Animated.View>
           )}
         </View>
 
