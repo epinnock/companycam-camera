@@ -1,12 +1,14 @@
 import React, { Component, PropTypes } from 'react';
 import {
+  Animated,
+  Dimensions,
+  Easing,
   Platform,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-  Dimensions,
 } from 'react-native';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import styled from 'styled-components/native';
@@ -59,7 +61,7 @@ const ImageTrayActionBar = styled.View`
 const ImageTrayFileControl = styled.View`
   width: 100%;
   flex-direction: row;
-  alignitems: center;
+  align-items: center;
   padding: 16px;
   background-color: rgba(38, 50, 56, 0.5);
 `;
@@ -153,6 +155,23 @@ const styles = StyleSheet.create({
 });
 
 class CameraTray extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      visibility: new Animated.Value(props.visible ? 1 : 0),
+    };
+  }
+
+  componentWillUpdate(nextProps) {
+    if (nextProps.visible !== this.props.visible) {
+      Animated.timing(this.state.visibility, {
+        toValue: nextProps.visible ? 1 : 0,
+        duration: 200,
+      }).start();
+    }
+  }
+
   renderIconTray = (trayItem) => {
     const trayItemIcons = [];
 
@@ -257,15 +276,22 @@ class CameraTray extends Component {
   };
 
   render() {
-    if (!this.props.visible) {
-      return null;
-    }
-
+    const trayHeight = TRAYITEMHEIGHT + SCROLLPADDING * 4;
     const { trayItems, emptyText, isLandscape } = this.props;
     const trayEmpty = !trayItems || trayItems.length === 0;
 
+    const heightInterpolation = this.state.visibility.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, trayHeight],
+    });
+
     return (
-      <View>
+      <Animated.View
+        style={{
+          height: isLandscape ? null : heightInterpolation,
+          width: isLandscape ? heightInterpolation : null,
+        }}
+      >
         {/* TODO most likely remove this section */}
         {/* <ImageTrayActionBar>
           <TouchableOpacity
@@ -282,8 +308,8 @@ class CameraTray extends Component {
         {trayEmpty ? (
           <EmptyStateContent
             style={{
-              height: isLandscape ? null : TRAYITEMHEIGHT + SCROLLPADDING * 2,
-              width: isLandscape ? TRAYITEMHEIGHT + SCROLLPADDING * 2 : null,
+              height: isLandscape ? null : trayHeight,
+              width: isLandscape ? trayHeight : null,
               flexGrow: 1,
             }}
           >
@@ -318,7 +344,7 @@ class CameraTray extends Component {
             </ScrollView>
           </View>
         )}
-      </View>
+      </Animated.View>
     );
   }
 }

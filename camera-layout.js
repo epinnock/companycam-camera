@@ -119,6 +119,7 @@ const styles = StyleSheet.create({
     borderRadius: 32 / 2,
     borderColor: 'white',
     borderWidth: 2,
+    overflow: 'hidden',
   },
   emptyUIbutton: {
     alignItems: 'center',
@@ -261,15 +262,10 @@ class CameraLayout extends Component {
       toastMessageText: '',
       showSettings: false,
       screenFlashOpacity: new Animated.Value(0),
-      orientationDegrees: new Animated.Value(0),
+      rotationDeg: this.getDegreesForOrientation(props.orientation),
       swapHeaderButtons: false,
       isLandscape: false,
     };
-  }
-
-  componentDidMount() {
-    const initialDeg = this.getDegreesForOrientation(this.props.orientation);
-    this.state.orientationDegrees.setValue(initialDeg);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -280,16 +276,16 @@ class CameraLayout extends Component {
 
   getDegreesForOrientation = (orientation) => {
     const orientationEnum = Orientation.getOrientations();
-    let deg = 0;
+    let deg = '0deg';
     switch (orientation) {
       case orientationEnum.landscapeleft:
-        deg = 90;
+        deg = '90deg';
         break;
       case orientationEnum.landscaperight:
-        deg = -90;
+        deg = '-90deg';
         break;
       case orientationEnum.portraitupsidedown:
-        deg = 180;
+        deg = '180deg';
         break;
       case orientationEnum.portrait:
       default:
@@ -303,13 +299,8 @@ class CameraLayout extends Component {
 
     this.setState({
       swapHeaderButtons: orientation === orientationEnum.landscapeleft,
+      rotationDeg: this.getDegreesForOrientation(orientation),
     });
-
-    const nextDeg = this.getDegreesForOrientation(orientation);
-    Animated.timing(this.state.orientationDegrees, {
-      toValue: nextDeg,
-      duration: 100,
-    }).start();
   };
 
   setCameraMode = async (nextMode) => {
@@ -450,6 +441,7 @@ class CameraLayout extends Component {
   render() {
     const constants = { ...this.props.cameraConstants };
     const { flashMode, cameraMode } = this.props.cameraState;
+    const { rotationDeg } = this.state;
 
     const TorchIsOn = flashMode === constants.FlashMode.torch;
     const PrimaryModeIsScan = cameraMode === constants.CameraMode.scanner;
@@ -499,23 +491,20 @@ class CameraLayout extends Component {
               </TouchableOpacity>
             ) : (
               <TouchableOpacity onPress={this.setToPhotoMode}>
-                <Animated.View
+                <View
                   style={[
                     styles.uiButton,
                     {
                       transform: [
                         {
-                          rotate: this.state.orientationDegrees.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: ['0deg', '1deg'],
-                          }),
+                          rotate: rotationDeg,
                         },
                       ],
                     },
                   ]}
                 >
                   {chevronLeft}
-                </Animated.View>
+                </View>
               </TouchableOpacity>
             )}
 
@@ -604,18 +593,13 @@ class CameraLayout extends Component {
                     {this.props.cameraTrayVisible ? (
                       <View style={styles.uiButtonSmall}>{chevronDown}</View>
                     ) : (
-                      <Animated.View
+                      <View
                         style={[
                           styles.uiButton,
                           {
                             transform: [
                               {
-                                rotate: this.state.orientationDegrees.interpolate(
-                                  {
-                                    inputRange: [0, 1],
-                                    outputRange: ['0deg', '1deg'],
-                                  }
-                                ),
+                                rotate: rotationDeg,
                               },
                             ],
                           },
@@ -631,7 +615,7 @@ class CameraLayout extends Component {
                             </Text>
                           </View>
                         </Image>
-                      </Animated.View>
+                      </View>
                     )}
                   </TouchableOpacity>
                 ) : (
@@ -662,10 +646,7 @@ class CameraLayout extends Component {
                       {
                         transform: [
                           {
-                            rotate: this.state.orientationDegrees.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: ['0deg', '1deg'],
-                            }),
+                            rotate: rotationDeg,
                           },
                         ],
                       },
@@ -705,23 +686,20 @@ class CameraLayout extends Component {
                     this.forceUpdate();
                   }}
                 >
-                  <Animated.View
+                  <View
                     style={[
                       styles.uiButton,
                       {
                         transform: [
                           {
-                            rotate: this.state.orientationDegrees.interpolate({
-                              inputRange: [0, 1],
-                              outputRange: ['0deg', '1deg'],
-                            }),
+                            rotate: rotationDeg,
                           },
                         ],
                       },
                     ]}
                   >
                     <FeatherIcon name="repeat" size={24} color="white" />
-                  </Animated.View>
+                  </View>
                 </TouchableOpacity>
               ) : (
                 <View style={styles.emptyUIbutton} />
