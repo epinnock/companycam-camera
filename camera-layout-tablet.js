@@ -8,7 +8,8 @@ import {
   AsyncStorage,
   Animated,
   Easing,
-  DeviceEventEmitter,
+  Image,
+  Platform,
 } from 'react-native';
 import styled from 'styled-components/native';
 import CameraSettings from './camera-settings';
@@ -29,6 +30,19 @@ import FeatherIcon from 'react-native-vector-icons/Feather';
 
 import Orientation from 'react-native-orientation';
 
+const chevronDown = (
+  <MaterialIcon
+    name="keyboard-arrow-down"
+    size={24}
+    style={{ marginTop: 2 }}
+    color="white"
+  />
+);
+const chevronUp = <MaterialIcon name="expand-less" size={24} color="white" />;
+const chevronLeft = (
+  <MaterialIcon name="chevron-left" size={32} color="white" />
+);
+
 const CAMERA_MODE_PHOTO = 'photo-mode';
 const CAMERA_MODE_SCAN = 'scan-mode';
 
@@ -36,6 +50,11 @@ const FASTCAM_ON_ICON = 'burst-mode'; // MaterialIcon set
 const FASTCAM_OFF_ICON = 'photo'; // MaterialIcon set
 const FLASH_ON_ICON = 'flashlight'; // MaterialCommunityIcon set
 const FLASH_OFF_ICON = 'flashlight-off'; // MaterialCommunityIcon set
+
+const TRAY_EMPTY_TEXT_SCANNER =
+  'Hold camera steady over document.\nIt will automagically be scanned.';
+const TRAY_EMPTY_TEXT_CAMERA =
+  'Photos you take will show in this tray\nand will reset when you close your camera.';
 
 const ModeIndicator = styled.View`
   margin-top: 4;
@@ -71,11 +90,16 @@ const styles = StyleSheet.create({
     marginTop: 0,
     backgroundColor: 'purple',
   },
+  headerTitleWrapper: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
   headerTitle: {
     color: 'white',
     backgroundColor: 'transparent',
     textAlign: 'center',
-    flex: 1,
   },
   headerTitleButton: {
     flex: 1,
@@ -90,6 +114,32 @@ const styles = StyleSheet.create({
     margin: 8,
     borderRadius: 22,
     backgroundColor: 'blue',
+  },
+  uiButtonSmall: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 32,
+    height: 32,
+    borderRadius: 32 / 2,
+    borderColor: 'white',
+    borderWidth: 2,
+  },
+  emptyUIbutton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 44,
+    height: 32,
+    borderRadius: 22,
+    backgroundColor: 'transparent',
+  },
+  emptyCaptureButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 72,
+    height: 32,
+    borderWidth: 4,
+    borderColor: 'transparent',
+    backgroundColor: 'transparent',
   },
   captureButton: {
     alignItems: 'center',
@@ -143,6 +193,21 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: 'white',
   },
+  trayMostRecentImage: {
+    height: 32,
+    width: 32,
+    borderRadius: Platform.OS === 'ios' ? 6 : 0,
+    borderWidth: 2,
+    borderColor: 'white',
+    resizeMode: 'cover',
+  },
+  trayMostRecentImageOveraly: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+    width: '100%',
+    backgroundColor: 'rgba(0,0,0,0.2)',
+  },
 
   // TODO styles for zoom level
   // zoomContainer: {
@@ -185,6 +250,7 @@ class CameraLayoutTablet extends Component {
     super(props);
 
     this.toastTimer = null;
+    const orientationEnum = Orientation.getOrientations();
 
     this.state = {
       author: 'Jared Goertzen',
@@ -193,24 +259,22 @@ class CameraLayoutTablet extends Component {
       toastMessageText: '',
       showSettings: false,
       screenFlashOpacity: new Animated.Value(0),
-      orientationDegrees: new Animated.Value(0),
+      rotationDeg: this.getDegreesForOrientation(props.orientation),
       swapHeaderButtons: false,
       swapCameraUI: false,
       dynamicFooterStyles: {
         alignItems: 'flex-end',
         flexDirection: 'column',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
       },
       dynamicCaptureContainerStyles: {
         alignItems: 'center',
         justifyContent: 'space-around',
       },
+      isLandscape:
+        props.orientation === orientationEnum.landscapeleft ||
+        props.orientation === orientationEnum.landscaperight,
     };
-  }
-
-  componentDidMount() {
-    const initialDeg = this.getDegreesForOrientation(this.props.orientation);
-    this.state.orientationDegrees.setValue(initialDeg);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -221,16 +285,16 @@ class CameraLayoutTablet extends Component {
 
   getDegreesForOrientation = (orientation) => {
     const orientationEnum = Orientation.getOrientations();
-    let deg = 0;
+    let deg = '0deg';
     switch (orientation) {
       case orientationEnum.landscapeleft:
-        deg = 90;
+        deg = '90deg';
         break;
       case orientationEnum.landscaperight:
-        deg = -90;
+        deg = '-90deg';
         break;
       case orientationEnum.portraitupsidedown:
-        deg = 180;
+        deg = '180deg';
         break;
       case orientationEnum.portrait:
       default:
@@ -244,6 +308,8 @@ class CameraLayoutTablet extends Component {
 
     let swapHeaderButtons = false;
     let swapCameraUI = false;
+    let isLandscape = false;
+    let outermostContainerFlex = 'column';
     let dynamicFooterStyles = {
       alignItems: 'flex-end',
       flexDirection: 'column',
@@ -262,6 +328,8 @@ class CameraLayoutTablet extends Component {
         break;
       case orientationEnum.landscapeleft:
         swapHeaderButtons = true;
+        isLandscape = true;
+        outermostContainerFlex = 'row-reverse';
         dynamicFooterStyles = {
           alignItems: 'flex-end',
           flexDirection: 'row-reverse',
@@ -274,6 +342,7 @@ class CameraLayoutTablet extends Component {
         break;
       case orientationEnum.landscaperight:
         swapCameraUI = true;
+        isLandscape = true;
         dynamicFooterStyles = {
           alignItems: 'flex-start',
           flexDirection: 'row',
@@ -283,6 +352,7 @@ class CameraLayoutTablet extends Component {
           flexDirection: 'row',
           paddingVertical: 32,
         };
+        outermostContainerFlex = 'row';
         break;
       case orientationEnum.portraitupsidedown:
         swapCameraUI = true;
@@ -295,22 +365,20 @@ class CameraLayoutTablet extends Component {
           flexDirection: 'column-reverse',
           paddingHorizontal: 32,
         };
+        outermostContainerFlex = 'column-reverse';
         break;
       default:
         break;
     }
-
-    const nextDeg = this.getDegreesForOrientation(orientation);
-    Animated.timing(this.state.orientationDegrees, {
-      toValue: nextDeg,
-      duration: 100,
-    }).start();
 
     this.setState({
       swapHeaderButtons,
       swapCameraUI,
       dynamicCaptureContainerStyles,
       dynamicFooterStyles,
+      outermostContainerFlex,
+      isLandscape,
+      rotationDeg: this.getDegreesForOrientation(orientation),
     });
   };
 
@@ -439,6 +507,8 @@ class CameraLayoutTablet extends Component {
     const constants = { ...this.props.cameraConstants };
     const { flashMode, cameraMode } = this.props.cameraState;
 
+    const { isLandscape } = this.state;
+
     const TorchIsOn = flashMode === constants.FlashMode.torch;
     const PrimaryModeIsScan = cameraMode === constants.CameraMode.scanner;
 
@@ -461,9 +531,7 @@ class CameraLayoutTablet extends Component {
         style={[
           styles.cameraUIContainer,
           {
-            flexDirection: this.state.swapCameraUI
-              ? 'column-reverse'
-              : 'column',
+            flexDirection: this.state.outermostContainerFlex,
           },
         ]}
       >
@@ -471,12 +539,12 @@ class CameraLayoutTablet extends Component {
           style={[
             styles.header,
             {
-              flexDirection: this.state.swapHeaderButtons
-                ? 'row-reverse'
-                : 'row',
+              flexDirection: isLandscape ? 'column' : 'row',
               transform: [
                 { rotate: this.state.swapCameraUI ? '180deg' : '0deg' },
               ],
+              height: isLandscape ? null : 56,
+              width: isLandscape ? 56 : null,
             },
           ]}
         >
@@ -490,9 +558,28 @@ class CameraLayoutTablet extends Component {
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => {}} style={styles.headerTitleButton}>
-            <Text numberOfLines={1} style={styles.headerTitle}>
-              {this.props.projectName || ''}
-            </Text>
+            <View
+              style={[
+                styles.headerTitleWrapper,
+                {
+                  height: isLandscape ? null : 44,
+                  width: isLandscape ? 44 : null,
+                },
+              ]}
+            >
+              <Text
+                numberOfLines={1}
+                style={[
+                  styles.headerTitle,
+                  {
+                    transform: [{ rotate: isLandscape ? '90deg' : '0deg' }],
+                    width: 400,
+                  },
+                ]}
+              >
+                {this.props.projectName || ''}
+              </Text>
+            </View>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -565,10 +652,7 @@ class CameraLayoutTablet extends Component {
                     {
                       transform: [
                         {
-                          rotate: this.state.orientationDegrees.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: ['0deg', '1deg'],
-                          }),
+                          rotate: this.state.rotationDeg,
                         },
                       ],
                     },
@@ -580,59 +664,33 @@ class CameraLayoutTablet extends Component {
             )}
 
             {/* Flash mode button */}
-            <TouchableOpacity
-              onPress={() => {
-                this.toggleFlashMode();
-              }}
-            >
-              <Animated.View
-                style={[
-                  styles.uiButton,
-                  {
-                    transform: [
-                      {
-                        rotate: this.state.orientationDegrees.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: ['0deg', '1deg'],
-                        }),
-                      },
-                    ],
-                  },
-                ]}
-              >
-                <MaterialCommunityIcon
-                  name={TorchIsOn ? FLASH_ON_ICON : FLASH_OFF_ICON}
-                  size={24}
-                  color="white"
-                />
-              </Animated.View>
-            </TouchableOpacity>
-
-            {/* Preview tray */}
-            {!PrimaryModeIsScan && (
+            {this.props.hasFlash ? (
               <TouchableOpacity
                 onPress={() => {
-                  this.props.setCameraTrayVisible(true);
+                  this.toggleFlashMode();
                 }}
               >
-                <Animated.View
+                <View
                   style={[
                     styles.uiButton,
                     {
                       transform: [
                         {
-                          rotate: this.state.orientationDegrees.interpolate({
-                            inputRange: [0, 1],
-                            outputRange: ['0deg', '1deg'],
-                          }),
+                          rotate: this.state.rotationDeg,
                         },
                       ],
                     },
                   ]}
                 >
-                  <MaterialIcon name="crop-portrait" size={32} color="white" />
-                </Animated.View>
+                  <MaterialCommunityIcon
+                    name={TorchIsOn ? FLASH_ON_ICON : FLASH_OFF_ICON}
+                    size={24}
+                    color="white"
+                  />
+                </View>
               </TouchableOpacity>
+            ) : (
+              <View style={styles.uiButton} />
             )}
 
             {/* Capture button */}
@@ -651,6 +709,58 @@ class CameraLayoutTablet extends Component {
               PrimaryModeIsScan &&
                 <View style={[styles.captureButton, { opacity: 0 }]} />
             } */}
+
+            {!PrimaryModeIsScan ? (
+              filteredCameraTrayData.length > 0 ? (
+                <TouchableOpacity
+                  onPress={() => {
+                    this.props.setCameraTrayVisible(
+                      !this.props.cameraTrayVisible
+                    );
+                  }}
+                >
+                  {this.props.cameraTrayVisible ? (
+                    <View style={styles.uiButtonSmall}>{chevronDown}</View>
+                  ) : (
+                    <Animated.View
+                      style={[
+                        styles.uiButton,
+                        {
+                          transform: [
+                            {
+                              rotate: this.state.rotationDeg,
+                            },
+                          ],
+                        },
+                      ]}
+                    >
+                      <Image
+                        style={styles.trayMostRecentImage}
+                        source={trayMostRecentImage}
+                      >
+                        <View style={styles.trayMostRecentImageOveraly}>
+                          <Text style={{ color: 'white' }}>
+                            {trayImageCount}
+                          </Text>
+                        </View>
+                      </Image>
+                    </Animated.View>
+                  )}
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  onPress={() => {
+                    this.props.setCameraTrayVisible(
+                      !this.props.cameraTrayVisible
+                    );
+                  }}
+                >
+                  <View style={styles.uiButtonSmall}>
+                    {this.props.cameraTrayVisible ? chevronDown : chevronUp}
+                  </View>
+                </TouchableOpacity>
+              )
+            ) : null}
           </View>
 
           {/* Photo mode buttons */}
@@ -661,10 +771,7 @@ class CameraLayoutTablet extends Component {
                 {
                   transform: [
                     {
-                      rotate: this.state.orientationDegrees.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: ['0deg', '1deg'],
-                      }),
+                      rotate: this.state.rotationDeg,
                     },
                   ],
                 },
@@ -717,6 +824,24 @@ class CameraLayoutTablet extends Component {
             </Animated.View>
           )}
         </View>
+
+        <CameraTray
+          visible={this.props.cameraTrayVisible}
+          documentTrayHeaderVisible={PrimaryModeIsScan}
+          primaryModeIsScan={PrimaryModeIsScan}
+          emptyText={
+            PrimaryModeIsScan ? TRAY_EMPTY_TEXT_SCANNER : TRAY_EMPTY_TEXT_CAMERA
+          }
+          trayItems={filteredCameraTrayData}
+          onSelectTrayItem={this.props.onSelectTrayItem}
+          onHideTray={() => {
+            this.props.setCameraTrayVisible(false);
+          }}
+          setToPhotoMode={this.setToPhotoMode}
+          isLandscape={isLandscape}
+          rotation={this.state.rotationDeg}
+          swapCameraUI={this.state.swapCameraUI}
+        />
 
         {this.state.showSettings && (
           <View

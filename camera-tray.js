@@ -1,6 +1,12 @@
 import React, { Component, PropTypes } from 'react';
 import {
-  Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Dimensions,
 } from 'react-native';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import styled from 'styled-components/native';
@@ -9,52 +15,66 @@ const SCROLLPADDING = 8;
 const TRAYITEMHEIGHT = 80;
 
 const hasCommentsIcon = (
-  <MaterialIcon name="chat-bubble" size={11} style={{marginHorizontal: 2}} color="white" />
+  <MaterialIcon
+    name="chat-bubble"
+    size={11}
+    style={{ marginHorizontal: 2 }}
+    color="white"
+  />
 );
 const hasTagsIcon = (
-  <MaterialIcon name="local-offer" size={11} style={{marginHorizontal: 2}} color="white" />
+  <MaterialIcon
+    name="local-offer"
+    size={11}
+    style={{ marginHorizontal: 2 }}
+    color="white"
+  />
 );
 const gestureIcon = (
-  <MaterialIcon name="gesture" size={11} style={{marginHorizontal: 2}} color="white" />
+  <MaterialIcon
+    name="gesture"
+    size={11}
+    style={{ marginHorizontal: 2 }}
+    color="white"
+  />
 );
 const chevronDown = (
-  <MaterialIcon name="keyboard-arrow-down" size={18} style={{marginRight: 4}} color="white" />
+  <MaterialIcon
+    name="keyboard-arrow-down"
+    size={18}
+    style={{ marginRight: 4 }}
+    color="white"
+  />
 );
-const pencilIcon = (
-  <MaterialIcon name="mode-edit" size={14}color="white" />
-);
-const clearTray = (
-  <MaterialIcon name="delete-sweep" size={22}color="white" />
-);
+const pencilIcon = <MaterialIcon name="mode-edit" size={14} color="white" />;
+const clearTray = <MaterialIcon name="delete-sweep" size={22} color="white" />;
 
 const ImageTrayActionBar = styled.View`
   flex-direction: row;
   justify-content: space-between;
   padding: 0px 16px 8px 16px;
-  ${''/* background-color: #37474F; */}
-  ${''/* background-color: rgba(55,71,79, 0.5); */}
+  ${'' /* background-color: #37474F; */} ${'' /* background-color: rgba(55,71,79, 0.5); */};
 `;
 
 const ImageTrayFileControl = styled.View`
   width: 100%;
   flex-direction: row;
-  alignItems: center;
+  alignitems: center;
   padding: 16px;
-  background-color: rgba(38,50,56, 0.5),
+  background-color: rgba(38, 50, 56, 0.5);
 `;
 
 const ImageTrayItem = styled.Image`
   justify-content: space-between;
   height: ${TRAYITEMHEIGHT}px;
   width: ${TRAYITEMHEIGHT}px;
-  margin-left: 8px;
+  margin: 8px;
 `;
 
 const EmptyStateContent = styled.View`
   align-items: center;
   justify-content: center;
-  background-color: rgba(38,50,56, 0.5),
-  height: ${TRAYITEMHEIGHT + SCROLLPADDING * 2}px;
+  background-color: rgba(38, 50, 56, 0.5);
 `;
 
 const IconContainer = styled.View`
@@ -63,10 +83,10 @@ const IconContainer = styled.View`
 `;
 
 const IconContainerCircle = IconContainer.extend`
-  borderRadius: 9px;
+  border-radius: 9px;
   width: 18px;
   height: 18px;
-  background-color: rgba(0,0,0,0.5),
+  background-color: rgba(0, 0, 0, 0.5);
 `;
 
 const IconContainerPill = styled.View`
@@ -79,7 +99,7 @@ const IconContainerPill = styled.View`
   border-top-right-radius: 9px;
   border-bottom-right-radius: 9px;
   padding: 2px 4px;
-  background-color: rgba(0,0,0,0.5),
+  background-color: rgba(0, 0, 0, 0.5);
 `;
 
 const styles = StyleSheet.create({
@@ -98,8 +118,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   itemScroller: {
-    paddingVertical: SCROLLPADDING,
-    paddingRight: SCROLLPADDING,
+    padding: SCROLLPADDING,
   },
   emptyStateText: {
     textAlign: 'center',
@@ -134,7 +153,6 @@ const styles = StyleSheet.create({
 });
 
 class CameraTray extends Component {
-
   renderIconTray = (trayItem) => {
     const trayItemIcons = [];
 
@@ -156,26 +174,31 @@ class CameraTray extends Component {
 
     return (
       <View style={{ alignSelf: 'flex-end' }}>
-        { trayItemIcons.length === 1 ?
-          <IconContainerCircle>
-            {trayItemIcons}
-          </IconContainerCircle> :
-          <IconContainerPill>
-            {trayItemIcons}
-          </IconContainerPill>
-        }
+        {trayItemIcons.length === 1 ? (
+          <IconContainerCircle>{trayItemIcons}</IconContainerCircle>
+        ) : (
+          <IconContainerPill>{trayItemIcons}</IconContainerPill>
+        )}
       </View>
     );
-  }
-
+  };
 
   renderTrayImageFromData = (trayItem) => {
     return (
       <TouchableOpacity
-        onPress={() => { this.props.onSelectTrayItem(trayItem); }}
+        style={{
+          transform: [
+            {
+              rotate: this.props.isLandscape ? '90deg' : '0deg',
+            },
+          ],
+        }}
+        onPress={() => {
+          this.props.onSelectTrayItem(trayItem);
+        }}
       >
         <ImageTrayItem
-          failure={ !trayItem.uploaded }
+          failure={!trayItem.uploaded}
           source={{ uri: trayItem.url }}
           style={{ borderRadius: Platform === 'ios' ? 4 : 0 }}
           resizeMode="cover"
@@ -187,13 +210,15 @@ class CameraTray extends Component {
         </ImageTrayItem>
       </TouchableOpacity>
     );
-  }
+  };
 
   renderDocumentTrayHeader = () => {
-    if (!this.props.documentTrayHeaderVisible) { return null; }
+    if (!this.props.documentTrayHeaderVisible) {
+      return null;
+    }
 
     const { trayItems, emptyText, setToPhotoMode } = this.props;
-    const trayEmpty = !trayItems || (trayItems.length === 0);
+    const trayEmpty = !trayItems || trayItems.length === 0;
 
     return (
       <ImageTrayFileControl>
@@ -202,26 +227,23 @@ class CameraTray extends Component {
           style={styles.documentNameContainer}
         >
           {pencilIcon}
-          <Text
-            style={styles.documentName}
-            numberOfLines={2}
-          >
+          <Text style={styles.documentName} numberOfLines={2}>
             New Document Name
           </Text>
         </TouchableOpacity>
 
         <View style={styles.documentTrayHeaderRightContainer}>
-          {
-            !trayEmpty &&
-              <TouchableOpacity
-                style={styles.uiButton}
-              >
-                {clearTray}
-              </TouchableOpacity>
-          }
+          {!trayEmpty && (
+            <TouchableOpacity style={styles.uiButton}>
+              {clearTray}
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             onPress={() => {
-              if (trayEmpty) { setToPhotoMode(); return; }
+              if (trayEmpty) {
+                setToPhotoMode();
+                return;
+              }
             }}
             style={styles.trayAction}
           >
@@ -231,14 +253,16 @@ class CameraTray extends Component {
           </TouchableOpacity>
         </View>
       </ImageTrayFileControl>
-    )
-  }
+    );
+  };
 
   render() {
-    if (!this.props.visible) { return null; }
+    if (!this.props.visible) {
+      return null;
+    }
 
-    const { trayItems, emptyText } = this.props;
-    const trayEmpty = !trayItems || (trayItems.length === 0);
+    const { trayItems, emptyText, isLandscape } = this.props;
+    const trayEmpty = !trayItems || trayItems.length === 0;
 
     return (
       <View>
@@ -255,23 +279,45 @@ class CameraTray extends Component {
 
         {this.renderDocumentTrayHeader()}
 
-        {
-          trayEmpty ?
-            <EmptyStateContent>
-              <Text style={styles.emptyStateText}>
-                {emptyText}
-              </Text>
-            </EmptyStateContent> :
-            <View style={{ backgroundColor: 'rgba(38,50,56, 0.5)' }}>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.itemScroller}
-              >
-                {trayItems.map(this.renderTrayImageFromData)}
-              </ScrollView>
-            </View>
-        }
+        {trayEmpty ? (
+          <EmptyStateContent
+            style={{
+              height: isLandscape ? null : TRAYITEMHEIGHT + SCROLLPADDING * 2,
+              width: isLandscape ? TRAYITEMHEIGHT + SCROLLPADDING * 2 : null,
+              flexGrow: 1,
+            }}
+          >
+            <Text
+              style={[
+                styles.emptyStateText,
+                {
+                  transform: [{ rotate: this.props.rotation }],
+                  width: Math.min(400, Dimensions.get('window').width),
+                },
+              ]}
+            >
+              {emptyText}
+            </Text>
+          </EmptyStateContent>
+        ) : (
+          <View
+            style={{
+              backgroundColor: 'rgba(38,50,56, 0.5)',
+              transform: [
+                { rotate: this.props.swapCameraUI ? '180deg' : '0deg' },
+              ],
+              flexGrow: 1,
+            }}
+          >
+            <ScrollView
+              horizontal={!isLandscape}
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.itemScroller}
+            >
+              {trayItems.map(this.renderTrayImageFromData)}
+            </ScrollView>
+          </View>
+        )}
       </View>
     );
   }
@@ -285,6 +331,9 @@ CameraTray.propTypes = {
   emptyText: PropTypes.string,
   onSelectTrayItem: PropTypes.func,
   onHideTray: PropTypes.func,
+  isLandscape: PropTypes.bool,
+  rotation: PropTypes.string,
+  swapCameraUI: PropTypes.bool,
 };
 
 CameraTray.defaultProps = {
@@ -295,6 +344,9 @@ CameraTray.defaultProps = {
   onSelectTrayItem: () => {},
   onHideTray: () => {},
   setToPhotoMode: () => {},
+  isLandscape: false,
+  rotation: '0deg',
+  swapCameraUI: false,
 };
 
 export default CameraTray;
