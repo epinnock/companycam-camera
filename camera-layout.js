@@ -22,12 +22,6 @@ import CameraSettings from './camera-settings';
 import CameraTray from './camera-tray';
 import { invert } from 'lodash';
 
-import {
-  PERSIST_FASTCAM_MODE,
-  PERSIST_FLASH_MODE,
-  PERSIST_RESOLUTION_MODE,
-} from './cccam-enums';
-
 // TODO remove what we dont use for icons...
 import { blankImage } from './images';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
@@ -303,101 +297,64 @@ class CameraLayout extends Component {
     });
   };
 
-  setCameraMode = async (nextMode) => {
+  setCameraMode = (nextMode) => {
     const constants = { ...this.props.cameraConstants };
-    const nextState = { ...this.props.cameraState };
+    const nextOpts = { ...this.props.cameraOpts };
 
-    if (this.props.cameraState.cameraMode !== nextMode) {
-      nextState.cameraMode = nextMode;
+    if (this.props.cameraOpts.cameraMode !== nextMode) {
+      nextOpts.cameraMode = nextMode;
 
       switch (nextMode) {
         case constants.CameraMode.photo:
+        case constants.CameraMode.fastcam:
           if (
-            this.props.cameraState.cameraMode === constants.CameraMode.scanner
+            this.props.cameraOpts.cameraMode === constants.CameraMode.scanner
           ) {
             this.displayToast('Take Photos', '');
-          } else {
-            this.displayToast(
-              'FastCam Off',
-              'Photos must be confirmed to upload.'
-            );
           }
           break;
         case constants.CameraMode.scanner:
           this.displayToast('Scan Document', '');
           break;
-        case constants.CameraMode.fastcam:
-          this.displayToast(
-            'FastCam On',
-            'Photos immediately upload when captured.'
-          );
-          break;
         default:
           break;
       }
-
-      if (nextMode !== constants.CameraMode.scanner) {
-        // store mode to be persisted later
-        try {
-          await AsyncStorage.setItem(PERSIST_FASTCAM_MODE, nextMode.toString());
-        } catch (error) {
-          console.warn('error storing camera mode', error);
-        }
-      }
     }
 
-    this.props.setCameraState(nextState);
+    this.props.updateCameraOpts(nextOpts);
     this.forceUpdate(); // since the state is in the parent, we need this to rerender icons
   };
 
-  setResolutionMode = async (nextModeString) => {
+  setResolutionMode = (nextModeString) => {
     const constants = { ...this.props.cameraConstants };
-    const nextState = { ...this.props.cameraState };
+    const nextOpts = { ...this.props.cameraOpts };
 
     const nextMode = constants.ResolutionMode[nextModeString];
 
-    if (this.props.cameraState.resolutionMode !== nextMode) {
-      nextState.resolutionMode = nextMode;
-      this.props.setCameraState(nextState);
-
-      try {
-        await AsyncStorage.setItem(
-          PERSIST_RESOLUTION_MODE,
-          nextMode.toString()
-        );
-      } catch (error) {
-        console.warn('error storing resolution mode', error);
-      }
+    if (this.props.cameraOpts.resolutionMode !== nextMode) {
+      nextOpts.resolutionMode = nextMode;
+      this.props.updateCameraOpts(nextOpts);
     }
   };
 
   toggleFlashMode = async () => {
     const constants = { ...this.props.cameraConstants };
-    const nextState = { ...this.props.cameraState };
+    const nextOpts = { ...this.props.cameraOpts };
 
-    switch (this.props.cameraState.flashMode) {
+    switch (this.props.cameraOpts.flashMode) {
       case constants.FlashMode.off:
-        nextState.flashMode = constants.FlashMode.torch;
+        nextOpts.flashMode = constants.FlashMode.torch;
         this.displayToast('Flashlight Enabled', '');
         break;
       case constants.FlashMode.torch:
-        nextState.flashMode = constants.FlashMode.off;
+        nextOpts.flashMode = constants.FlashMode.off;
         this.displayToast('Flashlight Disabled', '');
         break;
       default:
         break;
     }
 
-    try {
-      await AsyncStorage.setItem(
-        PERSIST_FLASH_MODE,
-        nextState.flashMode.toString()
-      );
-    } catch (error) {
-      console.warn('error storing flash mode', error);
-    }
-
-    this.props.setCameraState(nextState);
+    this.props.updateCameraOpts(nextOpts);
     this.forceUpdate(); // since the state is in the parent, we need this to rerender icons
   };
 
@@ -440,7 +397,7 @@ class CameraLayout extends Component {
 
   render() {
     const constants = { ...this.props.cameraConstants };
-    const { flashMode, cameraMode } = this.props.cameraState;
+    const { flashMode, cameraMode } = this.props.cameraOpts;
     const { rotationDeg } = this.state;
 
     const TorchIsOn = flashMode === constants.FlashMode.torch;
@@ -793,10 +750,10 @@ class CameraLayout extends Component {
           <View style={styles.settingsOverlay}>
             <CameraSettings
               cameraModeString={
-                invertedCameraModes[this.props.cameraState.cameraMode]
+                invertedCameraModes[this.props.cameraOpts.cameraMode]
               }
               resolutionModeString={
-                invertedResolutionModes[this.props.cameraState.resolutionMode]
+                invertedResolutionModes[this.props.cameraOpts.resolutionMode]
               }
               setCameraMode={(mode) => {
                 const nextMode = constants.CameraMode[mode];
@@ -815,7 +772,7 @@ class CameraLayout extends Component {
 CameraLayout.propTypes = {
   cameraConstants: PropTypes.object,
   cameraState: PropTypes.object,
-  setCameraState: PropTypes.func,
+  updateCameraOpts: PropTypes.func,
 
   captureButtonPress: PropTypes.func,
   flipCamera: PropTypes.func,
