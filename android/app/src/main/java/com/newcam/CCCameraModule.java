@@ -4,6 +4,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v4.content.LocalBroadcastManager;
 
 import com.facebook.react.bridge.Arguments;
@@ -17,9 +19,13 @@ import com.facebook.react.bridge.WritableMap;
 import com.newcam.enums.CameraMode;
 import com.newcam.enums.FlashMode;
 import com.newcam.enums.ResolutionMode;
+import com.newcam.jniexports.JNIExports;
 import com.newcam.utils.AppPreferences;
 import com.newcam.utils.CameraCheck;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -61,10 +67,51 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
     }
 
     @ReactMethod
-    public void imageprocMagicColor(Promise promise) {
-        // TODO: Just returning a test object for the moment
+    public void imageprocMagicColor(String inputAbsolutePath, String outputAbsolutePath, Promise promise) {
+
+        // Read input file; prepare arrays and bitmaps
+        Bitmap bitmapInput = BitmapFactory.decodeFile(inputAbsolutePath);
+        if (bitmapInput == null) {
+            promise.reject("CCCameraModule", "BitmapFactory.decodeFile returned null");
+            return;
+        }
+
+        int imgW = bitmapInput.getWidth();
+        int imgH = bitmapInput.getHeight();
+
+        int[] imageInputBGRA = new int[imgW * imgH];
+        int[] imageOutputBGRA = new int[imgW * imgH];
+        Bitmap bitmapOutput = Bitmap.createBitmap(imgW, imgH, Bitmap.Config.ARGB_8888);
+
+        // Perform magic color
+        try {
+            bitmapInput.getPixels(imageInputBGRA, 0, imgW, 0, 0, imgW, imgH);
+            JNIExports.magicColor(imgW, imgH, imageInputBGRA, imageOutputBGRA);
+            bitmapOutput.setPixels(imageOutputBGRA, 0, imgW, 0, 0, imgW, imgH);
+        } catch (Exception e) {
+            promise.reject("CCCameraModule", e.getMessage(), e);
+            return;
+        }
+
+        // Write bitmapOutput to the target file
+        int jpgQuality = 80;
+        try {
+            File outFile = new File(outputAbsolutePath);
+            FileOutputStream fos = new FileOutputStream(outFile);
+            BufferedOutputStream bos = new BufferedOutputStream(fos);
+            bitmapOutput.compress(Bitmap.CompressFormat.JPEG, jpgQuality, bos);
+
+            bos.flush();
+            bos.close();
+            fos.close();
+        } catch (Exception e) {
+            promise.reject("CCCameraModule", e.getMessage(), e);
+            return;
+        }
+
+        // Resolve
         WritableMap map = Arguments.createMap();
-        map.putInt("test", 42);
+        map.putString("outputAbsolutePath", outputAbsolutePath);
         promise.resolve(map);
     }
     // =============================================================================================
