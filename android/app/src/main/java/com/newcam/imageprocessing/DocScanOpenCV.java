@@ -171,9 +171,10 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
         int[] scanStatus = new int[1];
         float[] pRect = new float[8];
 
+        JNIExports.convertYUVtoBGRA(widthOrig, heightOrig, data, imageBGRA);
         JNIExports.nativeScan(docScanPtr,
             /* Image to be scanned */
-            widthOrig, heightOrig, data, imageBGRA,
+            widthOrig, heightOrig, imageBGRA,
             /* Image returned by the scanner, if any */
             dimsImageOutput, MAX_OUTPUT_PIXELS, dataOutput,
             /* Info about most recent scan */

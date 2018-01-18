@@ -106,7 +106,8 @@ public class ImageProcOpenCV extends View implements CCCameraImageProcessor  {
     @Override
     public boolean setPreviewBytes(byte[] data, int rotation) {
 
-        JNIExports.magicColor(widthOrig, heightOrig, data, imageBGRA, dataOutput);
+        JNIExports.convertYUVtoBGRA(widthOrig, heightOrig, data, imageBGRA);
+        JNIExports.magicColor(widthOrig, heightOrig, imageBGRA, dataOutput);
 
         bitmapOutput.setPixels(dataOutput, 0, widthOrig, 0, 0, widthOrig, heightOrig);
 
