@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Platform,
+  ScrollView,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 
@@ -32,12 +33,13 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.8)',
+    padding: 24,
   },
   container: {
     flex: 1,
     backgroundColor: 'white',
-    borderRadius: 8,
-    margin: 24,
+    borderBottomLeftRadius: 8,
+    borderBottomRightRadius: 8,
   },
   header: {
     width: '100%',
@@ -111,22 +113,21 @@ class CameraSettings extends PureComponent {
 
     return (
       <View style={styles.overlay}>
-        <View style={styles.container}>
-
-          <View style={styles.header}>
-            <TouchableOpacity
-              activeOpacity={1}
-              style={styles.uiButton}
-              onPress={() => this.props.closeSelf()}
-            >
-              <MaterialIcon name="close" size={24} color="white" />
-            </TouchableOpacity>
-            <Text style={{ fontSize: 17, color: 'white' }}>
-              Camera Settings
+        <View style={styles.header}>
+          <TouchableOpacity
+            activeOpacity={1}
+            style={styles.uiButton}
+            onPress={() => this.props.closeSelf()}
+          >
+            <MaterialIcon name="close" size={24} color="white" />
+          </TouchableOpacity>
+          <Text style={{ fontSize: 17, color: 'white' }}>
+            Camera Settings
             </Text>
-            <View style={styles.emptyUIbutton} />
-          </View>
+          <View style={styles.emptyUIbutton} />
+        </View>
 
+        <ScrollView style={styles.container}>
           {/* Image Quality */}
           <CameraSetting title='Image Quality'>
             <CameraSettingOption
@@ -287,7 +288,7 @@ class CameraSettings extends PureComponent {
             )}
           </TouchableOpacity> */}
 
-        </View>
+        </ScrollView>
       </View>
     );
   }

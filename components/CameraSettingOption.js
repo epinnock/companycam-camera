@@ -51,10 +51,6 @@ const CameraSettingOption = (props) => (
   </TouchableOpacity>
 );
 
-CameraSettingOption.defaultProps = {
-
-}
-
 CameraSettingOption.propTypes = {
   isSelected: React.PropTypes.bool,
   title: React.PropTypes.string,

@@ -22,10 +22,6 @@ const CameraSetting = (props) => (
   </View>
 );
 
-CameraSetting.defaultProps = {
-   
-}
-
 CameraSetting.propTypes = {
   title: React.PropTypes.string,
   description: React.PropTypes.string,
