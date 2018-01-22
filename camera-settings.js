@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#F5F5F5',
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
   },
@@ -121,8 +121,8 @@ class CameraSettings extends PureComponent {
           >
             <MaterialIcon name="close" size={24} color="white" />
           </TouchableOpacity>
-          <Text style={{ fontSize: 17, color: 'white' }}>
-            Camera Settings
+            <Text style={{ fontSize: 17, color: 'white' }}>
+              Camera Settings
             </Text>
           <View style={styles.emptyUIbutton} />
         </View>
@@ -132,20 +132,20 @@ class CameraSettings extends PureComponent {
           <CameraSetting title='Image Quality'>
             <CameraSettingOption
               onPress={() => { this.setState({ resolutionMode: 1 }) }}
-              title="1"
-              description='Option 1 description.'
+              title="Normal"
+              description='Best fore everyday use. Smallest file size. Uses the least data.'
               isSelected={this.state.resolutionMode === 1}
             />
             <CameraSettingOption
               onPress={() => { this.setState({ resolutionMode: 2 }) }}
-              title="2"
-              description='Option 2 description.'
+              title="High"
+              description='Best for balancing image quality and file size. Uses more data.'
               isSelected={this.state.resolutionMode === 2}
             />
             <CameraSettingOption
               onPress={() => { this.setState({ resolutionMode: 3 }) }}
-              title="3"
-              description='Option 3 description.'
+              title="Super Fine"
+              description='Best for capturing great details. Lartest file size. Uses the most data.'
               isSelected={this.state.resolutionMode === 3}
             />
           </CameraSetting>
@@ -153,30 +153,33 @@ class CameraSettings extends PureComponent {
           {/* Review Mode */}
           <CameraSetting
             title='Review Mode'
-            description='Sometimes you just need a description'
+            description='Review photos before the upload.'
           >
             <CameraSettingOption
               onPress={() => { this.setState({ reviewMode: 1 }) }}
-              title="On"
+              title="Off"
               isSelected={this.state.reviewMode === 1}
             />
             <CameraSettingOption
               onPress={() => { this.setState({ reviewMode: 2 }) }}
-              title="Off"
+              title="On"
               isSelected={this.state.reviewMode === 2}
             />
           </CameraSetting>
 
           {/* Open to Camera */}
-          <CameraSetting title='Open to Camera'>
+          <CameraSetting
+            title='Open to Camera'
+            description='Open the camera when you load the app.b'
+          >
             <CameraSettingOption
               onPress={() => { this.setState({ openToCamera: 1 }) }}
-              title="On"
+              title="Off"
               isSelected={this.state.openToCamera === 1}
             />
             <CameraSettingOption
               onPress={() => { this.setState({ openToCamera: 2 }) }}
-              title="Off"
+              title="On"
               isSelected={this.state.openToCamera === 2}
             />
           </CameraSetting>
