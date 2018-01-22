@@ -15,6 +15,7 @@ import styled from 'styled-components/native';
 import CameraSettings from './camera-settings';
 import CameraTray from './camera-tray';
 import { invert } from 'lodash';
+import LinearGradient from 'react-native-linear-gradient';
 
 // TODO remove what we dont use for icons...
 import { blankImage } from './images';
@@ -80,7 +81,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     height: 56,
     marginTop: 0,
-    backgroundColor: 'purple',
+    backgroundColor: 'transparent',
   },
   headerTitleWrapper: {
     flex: 1,
@@ -105,16 +106,17 @@ const styles = StyleSheet.create({
     height: 44,
     margin: 8,
     borderRadius: 22,
-    backgroundColor: 'blue',
+    // backgroundColor: 'blue',
   },
   uiButtonSmall: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 32,
-    height: 32,
-    borderRadius: 32 / 2,
+    width: 38,
+    height: 38,
+    borderRadius: 38 / 2,
     borderColor: 'white',
     borderWidth: 2,
+    margin: 8,
   },
   emptyUIbutton: {
     alignItems: 'center',
@@ -140,25 +142,31 @@ const styles = StyleSheet.create({
     height: 72,
     borderRadius: 36,
     borderWidth: 4,
-    borderColor: 'red',
+    borderColor: 'white',
   },
   footer: {
     flex: 1,
-    backgroundColor: 'rgba(0,200,0,0.4)',
-    borderBottomColor: 'red',
-    borderBottomWidth: 1,
-    borderTopColor: 'red',
-    borderTopWidth: 1,
+    // backgroundColor: 'rgba(0,200,0,0.4)',
+    // borderBottomColor: 'red',
+    // borderBottomWidth: 1,
+    // borderTopColor: 'red',
+    // borderTopWidth: 1,
   },
   captureContainer: {
     alignItems: 'center',
     justifyContent: 'space-around',
-    backgroundColor: 'orange',
+    // backgroundColor: 'orange',
+    width: 144,
   },
   modeContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'palevioletred',
+    // backgroundColor: 'palevioletred',
+    height: 144,
+    width: 144,
+  },
+  emptyModeContainer: {
+    backgroundColor: 'red',
     height: 144,
     width: 144,
   },
@@ -407,7 +415,27 @@ class CameraLayoutTablet extends Component {
           },
         ]}
       >
-        <View
+        <LinearGradient
+          // portrait
+          colors={['rgba(0,0,0,0.4)', 'transparent']}
+          locations={[0, 1]}
+          start={{ x: 0.0, y: 0.0 }} end={{ x: 0.0, y: 1.0 }}
+
+          // landscape right
+          // colors={['rgba(0,0,0,0.4)', 'transparent']}
+          // locations={[0, 1]}
+          // start={{ x: 0.0, y: 0.0 }} end={{ x: 1.0, y: 0.0 }}
+
+          // portrait upside down
+          // colors={['rgba(0,0,0,0.4)', 'transparent']}
+          // locations={[0, 0.2]}
+          // start={{ x: 0.0, y: 1.0 }} end={{ x: 0.0, y: 0.0 }}
+
+          // landscape left
+          // colors={['rgba(0,0,0,0.4)', 'transparent']}
+          // locations={[0, 1]}
+          // start={{ x: 1.0, y: 0.0 }} end={{ x: 0.0, y: 0.0 }}
+
           style={[
             styles.header,
             {
@@ -458,7 +486,7 @@ class CameraLayoutTablet extends Component {
           >
             <MaterialIcon name="settings" size={24} color="white" />
           </TouchableOpacity>
-        </View>
+        </LinearGradient>
 
         {this.props.renderToast()}
 
@@ -478,7 +506,12 @@ class CameraLayoutTablet extends Component {
           }}
         />
 
-        <View
+        <LinearGradient
+          // portrait
+          colors={['rgba(0,0,0,0.4)', 'transparent']}
+          locations={[0, 0.2]}
+          start={{ x: 1.0, y: 0.0 }} end={{ x: 0.0, y: 0.0 }}
+
           style={[styles.footer, this.state.dynamicFooterStyles]}
           pointerEvents="box-none"
         >
@@ -611,7 +644,9 @@ class CameraLayoutTablet extends Component {
           </View>
 
           {/* Photo mode buttons */}
-          {this.props.cameraTrayVisible ? null : (
+          {this.props.cameraTrayVisible ? (
+            <View style={styles.emptyModeContainer} />
+            ) : (
             <Animated.View
               style={[
                 styles.modeContainer,
@@ -673,7 +708,7 @@ class CameraLayoutTablet extends Component {
               </TouchableOpacity>
             </Animated.View>
           )}
-        </View>
+        </LinearGradient>
 
         <CameraTray
           visible={this.props.cameraTrayVisible}
