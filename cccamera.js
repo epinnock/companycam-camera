@@ -248,6 +248,7 @@ class CCCamera extends React.Component {
             settingsComponent={this.props.settingsComponent}
           />
         )}
+        {this.props.children}
       </RNCCCamera>
     );
   }
