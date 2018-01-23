@@ -60,8 +60,9 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
     //   1. The camera project already has OpenCV in it
     //   2. The functionality might be used directly in the scanner
     // =============================================================================================
-    @ReactMethod void imageprocRender(ReadableMap options, Promise promise)
-    {
+    @ReactMethod
+    void imageprocRender(ReadableMap options, Promise promise) {
+
         // Read the ReadableMap
         //----------------------------------------------
         boolean readableMapValid = true;
@@ -75,7 +76,7 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
         // Points are read in order from 'fourPointLocations', which is required if
         // fourPointApplied == true. Values are in image coordinates, normalized to [0,1]^2
         boolean fourPointApplied = false; // Optional
-        double x1=0, y1=0, x2=0, y2=0, x3=0, y3=0, x4=0, y4=0;
+        float[] pRect = new float[8];
 
         if (options.hasKey("inputAbsolutePath")) {
             inputAbsolutePath = options.getString("inputAbsolutePath");
@@ -101,14 +102,9 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
             if (options.hasKey("fourPointLocations")) {
                 ReadableArray fourPointLocations = options.getArray("fourPointLocations");
                 if (fourPointLocations.size() == 8) {
-                    x1 = fourPointLocations.getDouble(0);
-                    y1 = fourPointLocations.getDouble(1);
-                    x2 = fourPointLocations.getDouble(2);
-                    y2 = fourPointLocations.getDouble(3);
-                    x3 = fourPointLocations.getDouble(4);
-                    y3 = fourPointLocations.getDouble(5);
-                    x4 = fourPointLocations.getDouble(6);
-                    y4 = fourPointLocations.getDouble(7);
+                    for (int k=0; k<8; k++) {
+                        pRect[k] = (float)fourPointLocations.getDouble(k);
+                    }
                 } else {
                     readableMapValid = false;
                     invalidReason = "Field 'fourPointLocations' must be [x1, y1, ..., x4, y4]";
@@ -131,48 +127,69 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
         System.out.println("[CCCameraModule] - magicColor enabled?: " + (magicColor ? "Yes" : "No") + "");
         System.out.println("[CCCameraModule] - fourPoint enabled?: " + (fourPointApplied ? "Yes" : "No") + "");
         if (fourPointApplied) {
-            System.out.println("[CCCameraModule] - fourPoint locations: (" + x1 + ", " + y1 + "), (" + x2 + ", " + y2 + "), (" + x3 + ", " + y3 + "), (" + x4 + ", " + y4 + ")");
+            System.out.println("[CCCameraModule] - fourPoint locations: " +
+                "(" + pRect[0] + ", " + pRect[1] + "), " +
+                "(" + pRect[2] + ", " + pRect[3] + "), " +
+                "(" + pRect[4] + ", " + pRect[5] + "), " +
+                "(" + pRect[6] + ", " + pRect[7] + ")");
         }
         //----------------------------------------------
 
-        // Read input file; prepare arrays and bitmaps
+        // Prepare input and current Bitmaps
+        // Each step will apply an effect to bitmapCurrent and set bitmapCurrent to the new result.
         Bitmap bitmapInput = BitmapFactory.decodeFile(inputAbsolutePath);
         if (bitmapInput == null) {
             promise.reject("CCCameraModule", "BitmapFactory.decodeFile returned null");
             return;
         }
-
-        // Each step will apply an effect to bitmapCurrent and set bitmapCurrent to the new result.
-
-        // 1. Original image
         Bitmap bitmapCurrent = bitmapInput;
 
-        // 2. Magic color
+        // Magic color (if applicable)
         if (magicColor) {
+            // Prepare input data
             int imgW = bitmapCurrent.getWidth();
             int imgH = bitmapCurrent.getHeight();
-
             int[] imageInputBGRA = new int[imgW * imgH];
+            bitmapCurrent.getPixels(imageInputBGRA, 0, imgW, 0, 0, imgW, imgH);
+
+            // Allocate output image
             int[] imageOutputBGRA = new int[imgW * imgH];
-            Bitmap bitmapOutput = Bitmap.createBitmap(imgW, imgH, Bitmap.Config.ARGB_8888);
 
             // Perform magic color
-            try {
-                bitmapCurrent.getPixels(imageInputBGRA, 0, imgW, 0, 0, imgW, imgH);
-                JNIExports.magicColor(imgW, imgH, imageInputBGRA, imageOutputBGRA);
-                bitmapOutput.setPixels(imageOutputBGRA, 0, imgW, 0, 0, imgW, imgH);
-            } catch (Exception e) {
-                promise.reject("CCCameraModule", e.getMessage(), e);
-                return;
-            }
+            JNIExports.magicColor(imgW, imgH, imageInputBGRA, imageOutputBGRA);
 
+            // Get Bitmap from output data
+            Bitmap bitmapOutput = Bitmap.createBitmap(imgW, imgH, Bitmap.Config.ARGB_8888);
+            bitmapOutput.setPixels(imageOutputBGRA, 0, imgW, 0, 0, imgW, imgH);
+
+            // Update current Bitmap
             bitmapCurrent = bitmapOutput;
         }
 
-        // 3. Four point transformation
+        // Four point transformation (if applicable)
         if (fourPointApplied) {
-            // TODO
+            // Prepare input data
+            int imgInputW = bitmapCurrent.getWidth();
+            int imgInputH = bitmapCurrent.getHeight();
+            int[] imageInputBGRA = new int[imgInputW * imgInputH];
+            bitmapCurrent.getPixels(imageInputBGRA, 0, imgInputW, 0, 0, imgInputW, imgInputH);
 
+            // Allocate output container
+            int[] dimsImageOutput = new int[2];
+            int MAX_OUTPUT_PIXELS = 1024*1024;
+            int[] dataOutput = new int[MAX_OUTPUT_PIXELS];
+
+            // Do the transformation
+            JNIExports.fourPoint(imgInputW, imgInputH, imageInputBGRA, dimsImageOutput, MAX_OUTPUT_PIXELS, dataOutput, pRect);
+
+            // Get Bitmap from relevant region of output container
+            int outputImageW = dimsImageOutput[0];
+            int outputImageH = dimsImageOutput[1];
+            Bitmap bitmapOutput = Bitmap.createBitmap(outputImageW, outputImageH, Bitmap.Config.ARGB_8888);
+            bitmapOutput.setPixels(dataOutput, 0, outputImageW, 0, 0, outputImageW, outputImageH);
+
+            // Update current Bitmap
+            bitmapCurrent = bitmapOutput;
         }
 
         // Write bitmapOutput to the target file
@@ -181,6 +198,7 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
             File outFile = new File(outputAbsolutePath);
             FileOutputStream fos = new FileOutputStream(outFile);
             BufferedOutputStream bos = new BufferedOutputStream(fos);
+
             bitmapCurrent.compress(Bitmap.CompressFormat.JPEG, jpgQuality, bos);
 
             bos.flush();

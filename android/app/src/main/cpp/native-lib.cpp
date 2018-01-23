@@ -1,5 +1,6 @@
 #include <jni.h>
 #include <sstream>
+#include <vector>
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -59,6 +60,57 @@ Java_com_newcam_jniexports_JNIExports_magicColor(
     // Release array data
     env->ReleaseIntArrayElements(imageInputBGRA, _imageInputBGRA, 0);
     env->ReleaseIntArrayElements(imageOutputBGRA, _imageOutputBGRA, 0);
+}
+
+JNIEXPORT void JNICALL
+Java_com_newcam_jniexports_JNIExports_fourPoint(
+    JNIEnv *env, jobject thiz,
+    /* Input image */
+    jint width, jint height, jintArray imageInputBGRA,
+    /* Output image */
+    jintArray dimsImageOutput, jint maxOutputPixels, jintArray imageOutputBGRA,
+    /* Source perspective rect points */
+    jfloatArray pRectRaw)
+{
+    // Get pointers to array data
+    jint *_imageInputBGRA = env->GetIntArrayElements(imageInputBGRA, 0);
+
+    jint *_dimsImageOutput = env->GetIntArrayElements(dimsImageOutput, 0);
+    jint *_imageOutputBGRA = env->GetIntArrayElements(imageOutputBGRA, 0);
+
+    jfloat *_pRectRaw = env->GetFloatArrayElements(pRectRaw, 0);
+
+    // Convert input image to Mat
+    cv::Mat matInputBGRA(height, width, CV_8UC4, (unsigned char *) _imageInputBGRA);
+
+    // Main functionality
+    //-----------------------------------------------
+    std::vector<cv::Point2f> pRectPoints = {
+        cv::Point2f(_pRectRaw[0], _pRectRaw[1]),
+        cv::Point2f(_pRectRaw[2], _pRectRaw[3]),
+        cv::Point2f(_pRectRaw[4], _pRectRaw[5]),
+        cv::Point2f(_pRectRaw[6], _pRectRaw[7])
+    };
+    cv::Mat matResult = imageproc::fourPoint(matInputBGRA, pRectPoints);
+
+    _dimsImageOutput[0] = matResult.cols;
+    _dimsImageOutput[1] = matResult.rows;
+
+    if (matResult.rows*matResult.cols > maxOutputPixels) {
+        //TODO: Image doesn't fit!
+    } else {
+        cv::Mat matOutput(matResult.rows, matResult.cols, CV_8UC4, (unsigned char *) _imageOutputBGRA);
+        matResult.copyTo(matOutput);
+    }
+    //-----------------------------------------------
+
+    // Release array data
+    env->ReleaseIntArrayElements(imageInputBGRA, _imageInputBGRA, 0);
+
+    env->ReleaseIntArrayElements(dimsImageOutput, _dimsImageOutput, 0);
+    env->ReleaseIntArrayElements(imageOutputBGRA, _imageOutputBGRA, 0);
+
+    env->ReleaseFloatArrayElements(pRectRaw, _pRectRaw, 0);
 }
 
 JNIEXPORT jlong JNICALL
