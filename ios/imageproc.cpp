@@ -7,7 +7,6 @@
 #include "imageproc.hpp"
 
 const int DEFAULT_MIN_OUTPUT_DIM = 100;
-const int DEFAULT_MAX_OUTPUT_DIM = 1024;
 
 /** Assorted image processing functions. */
 namespace imageproc
@@ -36,9 +35,9 @@ namespace imageproc
      */
     cv::Mat fourPoint(
         const cv::Mat& imageIn,
-        const std::vector<cv::Point2f>& points)
+        const std::vector<cv::Point2f>& points,
+        const float optMaxOutputDim)
     {
-        const float optMaxOutputDim = DEFAULT_MAX_OUTPUT_DIM;
         const float optMinOutputDim = DEFAULT_MIN_OUTPUT_DIM;
 
         // Find top-left point and re-order

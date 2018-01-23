@@ -177,11 +177,11 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
 
             // Allocate output container
             int[] dimsImageOutput = new int[2];
-            int MAX_OUTPUT_PIXELS = 1024*1024;
-            int[] dataOutput = new int[MAX_OUTPUT_PIXELS];
+            int MAX_OUTPUT_DIM = 2880;
+            int[] dataOutput = new int[MAX_OUTPUT_DIM*MAX_OUTPUT_DIM]; // TODO this might be too big...
 
             // Do the transformation
-            JNIExports.fourPoint(imgInputW, imgInputH, imageInputBGRA, dimsImageOutput, MAX_OUTPUT_PIXELS, dataOutput, pRect);
+            JNIExports.fourPoint(imgInputW, imgInputH, imageInputBGRA, dimsImageOutput, MAX_OUTPUT_DIM, dataOutput, pRect);
 
             // Get Bitmap from relevant region of output container
             int outputImageW = dimsImageOutput[0];

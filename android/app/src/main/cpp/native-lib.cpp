@@ -68,7 +68,7 @@ Java_com_newcam_jniexports_JNIExports_fourPoint(
     /* Input image */
     jint width, jint height, jintArray imageInputBGRA,
     /* Output image */
-    jintArray dimsImageOutput, jint maxOutputPixels, jintArray imageOutputBGRA,
+    jintArray dimsImageOutput, jint maxOutputDim, jintArray imageOutputBGRA,
     /* Source perspective rect points */
     jfloatArray pRectRaw)
 {
@@ -91,12 +91,12 @@ Java_com_newcam_jniexports_JNIExports_fourPoint(
         cv::Point2f(_pRectRaw[4], _pRectRaw[5]),
         cv::Point2f(_pRectRaw[6], _pRectRaw[7])
     };
-    cv::Mat matResult = imageproc::fourPoint(matInputBGRA, pRectPoints);
+    cv::Mat matResult = imageproc::fourPoint(matInputBGRA, pRectPoints, maxOutputDim);
 
     _dimsImageOutput[0] = matResult.cols;
     _dimsImageOutput[1] = matResult.rows;
 
-    if (matResult.rows*matResult.cols > maxOutputPixels) {
+    if (matResult.rows > maxOutputDim || matResult.cols > maxOutputDim) {
         //TODO: Image doesn't fit!
     } else {
         cv::Mat matOutput(matResult.rows, matResult.cols, CV_8UC4, (unsigned char *) _imageOutputBGRA);
@@ -116,7 +116,7 @@ Java_com_newcam_jniexports_JNIExports_fourPoint(
 JNIEXPORT jlong JNICALL
 Java_com_newcam_jniexports_JNIExports_newScanner(JNIEnv *env, jobject thiz)
 {
-    DocScanner* docScanPtr = new DocScanner();
+    DocScanner* docScanPtr = new DocScanner(384, 1024);
     return (jlong) docScanPtr;
 }
 

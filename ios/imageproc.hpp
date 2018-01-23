@@ -8,7 +8,8 @@ namespace imageproc
     cv::Mat magicColor(const cv::Mat& imageIn);
     cv::Mat fourPoint(
         const cv::Mat& imageIn,
-        const std::vector<cv::Point2f>& points);
+        const std::vector<cv::Point2f>& points,
+        const float optMaxOutputDim);
 }
 
 #endif
