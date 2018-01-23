@@ -1,13 +1,5 @@
-import React, { Component, PropTypes } from 'react';
-import {
-  NativeModules,
-  requireNativeComponent,
-  View,
-  AsyncStorage,
-  Dimensions,
-  StyleSheet,
-  Text,
-} from 'react-native';
+import React, { PropTypes } from 'react';
+import { NativeModules, requireNativeComponent, View, StyleSheet, Text } from 'react-native';
 import CameraLayout from './camera-layout';
 import CameraLayoutTablet from './camera-layout-tablet';
 import { isTablet, deviceSupportsARCam } from './device-info-helper';
@@ -94,10 +86,7 @@ class CCCamera extends React.Component {
     return (
       <View style={styles.toast}>
         <Text style={styles.toastTitle}>{toastTitleText}</Text>
-        { toastMessageText ?
-          <Text style={styles.toastMessage}>{toastMessageText}</Text> :
-          null
-        }
+        {toastMessageText ? <Text style={styles.toastMessage}>{toastMessageText}</Text> : null}
       </View>
     );
   };
@@ -256,6 +245,7 @@ class CCCamera extends React.Component {
             setResolutionMode={this._setResolutionMode}
             toggleFlashMode={this._toggleFlashMode}
             renderToast={this._renderToast}
+            settingsComponent={this.props.settingsComponent}
           />
         )}
       </RNCCCamera>
@@ -295,6 +285,8 @@ CCCamera.propTypes = {
   cameraTrayVisible: PropTypes.bool,
   onSelectTrayItem: PropTypes.func,
   setCameraTrayVisible: PropTypes.func,
+
+  settingsComponent: PropTypes.func,
 
   // duplicated from above to make RN happy. not happy myself
   projectName: PropTypes.string,
