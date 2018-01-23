@@ -149,12 +149,12 @@ const styles = StyleSheet.create({
     left: 0,
     height: '100%',
     width: '100%',
-    backgroundColor: 'rgba(0,0,0,0.2)',
+    backgroundColor: 'rgba(0,0,0,0.8)',
   },
   settingsWrapper: {
     flex: 1,
     margin: 16,
-    borderRadius: 4,
+    borderRadius: 8,
     overflow: 'hidden',
   },
   settingsHeader: {
