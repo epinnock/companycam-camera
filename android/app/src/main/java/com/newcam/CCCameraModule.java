@@ -17,6 +17,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
+import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.newcam.enums.CameraMode;
 import com.newcam.enums.FlashMode;
@@ -210,8 +211,13 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
         }
 
         // Resolve
+        WritableArray waOutputDims = Arguments.createArray();
+        waOutputDims.pushInt(bitmapCurrent.getWidth());
+        waOutputDims.pushInt(bitmapCurrent.getHeight());
+
         WritableMap map = Arguments.createMap();
         map.putString("outputAbsolutePath", outputAbsolutePath);
+        map.putArray("outputDims", waOutputDims);
         promise.resolve(map);
     }
     // =============================================================================================
