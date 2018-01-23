@@ -12,9 +12,10 @@ import {
   Platform,
 } from 'react-native';
 import styled from 'styled-components/native';
+import { invert } from 'lodash';
 import CameraSettings from './camera-settings';
 import CameraTray from './camera-tray';
-import { invert } from 'lodash';
+import UIButton from './components/UIButton';
 import LinearGradient from 'react-native-linear-gradient';
 
 // TODO remove what we dont use for icons...
@@ -49,23 +50,15 @@ const TRAY_EMPTY_TEXT_SCANNER =
 const TRAY_EMPTY_TEXT_CAMERA =
   'Photos you take will show in this tray\nand will reset when you close your camera.';
 
-const ModeIndicator = styled.View`
-  margin-top: 4;
-  margin-bottom: 4;
-  height: 4;
-  width: ${(props) => (props.isCurrentMode ? '16' : '0')};
-  border-radius: 2;
-  background-color: #ffb300;
+const CameraMode = styled.View`
+  padding: 4px 12px;
+  border-radius: 8px;
+  background-color: ${(props) => (props.isCurrentMode ? 'rgba(0,0,0,0.1)' : 'transparent')};
 `;
 
 const ModeTitle = styled.Text`
-  background-color: transparent;
-  font-size: 16;
-  margin-top: 2;
-  margin-bottom: 2;
-
-  ${'' /* with color.... */} color: ${(props) =>
-      props.isCurrentMode ? '#FFB300' : 'white'};
+  font-size: 16px;
+  color: ${(props) => props.isCurrentMode ? '#FFB300' : 'white'};
 `;
 
 const styles = StyleSheet.create({
@@ -81,42 +74,47 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     height: 56,
     marginTop: 0,
-    backgroundColor: 'transparent',
   },
-  headerTitleWrapper: {
+  headerTitle: {
     flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitleTextWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'transparent',
   },
-  headerTitle: {
+  headerTitleText: {
     color: 'white',
     backgroundColor: 'transparent',
     textAlign: 'center',
+    alignSelf: 'center',
   },
   headerTitleButton: {
-    flex: 1,
     flexDirection: 'row',
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    borderRadius: 50,
   },
   uiButton: {
     alignItems: 'center',
     justifyContent: 'center',
     width: 44,
     height: 44,
-    margin: 8,
+    margin: 16,
     borderRadius: 22,
-    // backgroundColor: 'blue',
   },
   uiButtonSmall: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: 38,
-    height: 38,
-    borderRadius: 38 / 2,
+    width: 44,
+    height: 44,
+    borderRadius: 44 / 2,
     borderColor: 'white',
     borderWidth: 2,
-    margin: 8,
+    margin: 16,
   },
   emptyUIbutton: {
     alignItems: 'center',
@@ -134,6 +132,7 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderColor: 'transparent',
     backgroundColor: 'transparent',
+    margin: 16,
   },
   captureButton: {
     alignItems: 'center',
@@ -143,40 +142,36 @@ const styles = StyleSheet.create({
     borderRadius: 36,
     borderWidth: 4,
     borderColor: 'white',
+    margin: 16,
   },
   footer: {
     flex: 1,
-    // backgroundColor: 'rgba(0,200,0,0.4)',
-    // borderBottomColor: 'red',
-    // borderBottomWidth: 1,
-    // borderTopColor: 'red',
-    // borderTopWidth: 1,
+    // backgroundColor: 'blue',
   },
   captureContainer: {
     alignItems: 'center',
     justifyContent: 'space-around',
-    // backgroundColor: 'orange',
-    width: 144,
+    // backgroundColor: 'yellow',
   },
   modeContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    // backgroundColor: 'palevioletred',
-    height: 144,
-    width: 144,
+    backgroundColor: 'red',
+    width: 112,
+    height: 112,
   },
   emptyModeContainer: {
     backgroundColor: 'red',
-    height: 144,
-    width: 144,
+    width: 112,
+    height: 112,
   },
   modeButton: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
   },
   trayMostRecentImage: {
-    height: 32,
-    width: 32,
+    height: 44,
+    width: 44,
     borderRadius: Platform.OS === 'ios' ? 6 : 0,
     borderWidth: 2,
     borderColor: 'white',
@@ -197,41 +192,6 @@ const styles = StyleSheet.create({
     height: '100%',
     width: '100%',
   },
-
-  // TODO styles for zoom level
-  // zoomContainer: {
-  //   alignItems: 'center',
-  //   justifyContent: 'center',
-  //   marginBottom: 8,
-  // },
-  // zoomButton: {
-  //   alignItems: 'center',
-  //   justifyContent: 'center',
-  //   width: 40,
-  //   height: 40,
-  //   borderRadius: 20,
-  //   borderWidth: 1,
-  //   borderColor: 'white',
-  // },
-  // zoomText: {
-  //   backgroundColor: 'transparent',
-  //   color: 'white',
-  // },
-
-  // TODO delete if we dont use the triangle indicator
-  // modeSelectTriangle: {
-  //   marginTop: 4,
-  //   width: 0,
-  //   height: 0,
-  //   backgroundColor: 'transparent',
-  //   borderStyle: 'solid',
-  //   borderLeftWidth: 6,
-  //   borderRightWidth: 6,
-  //   borderBottomWidth: 6,
-  //   borderLeftColor: 'transparent',
-  //   borderRightColor: 'transparent',
-  //   borderBottomColor: 'white',
-  // },
 });
 
 class CameraLayoutTablet extends Component {
@@ -255,6 +215,8 @@ class CameraLayoutTablet extends Component {
       dynamicCaptureContainerStyles: {
         alignItems: 'center',
         justifyContent: 'space-around',
+        paddingVertical: 32,
+        backgroundColor: 'papayawhip',
       },
       isLandscape:
         props.orientation === orientationEnum.landscapeleft ||
@@ -302,13 +264,16 @@ class CameraLayoutTablet extends Component {
     };
     let dynamicCaptureContainerStyles = {
       alignItems: 'center',
-      // justifyContent: 'space-around',
+      justifyContent: 'space-around',
+      paddingVertical: 32,
+      backgroundColor: 'papayawhip',
     };
 
     switch (orientation) {
       case orientationEnum.portrait:
         dynamicCaptureContainerStyles = {
-          paddingHorizontal: 32,
+          paddingVertical: 32,
+          backgroundColor: 'purple',
         };
         break;
       case orientationEnum.landscapeleft:
@@ -322,7 +287,8 @@ class CameraLayoutTablet extends Component {
         };
         dynamicCaptureContainerStyles = {
           flexDirection: 'row-reverse',
-          paddingVertical: 32,
+          paddingHorizontal: 32,
+          backgroundColor: 'yellow',
         };
         break;
       case orientationEnum.landscaperight:
@@ -335,7 +301,8 @@ class CameraLayoutTablet extends Component {
         };
         dynamicCaptureContainerStyles = {
           flexDirection: 'row',
-          paddingVertical: 32,
+          paddingHorizontal: 32,
+          backgroundColor: 'green',
         };
         outermostContainerFlex = 'row';
         break;
@@ -348,7 +315,8 @@ class CameraLayoutTablet extends Component {
         };
         dynamicCaptureContainerStyles = {
           flexDirection: 'column-reverse',
-          paddingHorizontal: 32,
+          paddingVertical: 32,
+          backgroundColor: 'pink',
         };
         outermostContainerFlex = 'column-reverse';
         break;
@@ -405,9 +373,31 @@ class CameraLayoutTablet extends Component {
       const recentURL = filteredCameraTrayData[0].url;
       trayMostRecentImage = { uri: recentURL };
     }
+    
+    // default bg gradient in portrait
+    let gradientStartX = 1.0;
+    let gradientStartY = 0.0;
+    let gradientEndX = 0.0;
+    let gradientEndY = 0.0;
+    let gradientLocationStart = 0;
+    let gradientLocationEnd = 0.18;
+
+    if (isLandscape) {
+      gradientStartX = 0.0;
+      gradientStartY = 0.0;
+      gradientEndX = 0.0;
+      gradientEndY = 1.0;
+      gradientLocationStart = 0;
+      gradientLocationEnd = 0.15;
+    }
 
     return (
-      <View
+      <LinearGradient
+        colors={['rgba(0,0,0,0.4)', 'transparent']}
+        locations={[gradientLocationStart, gradientLocationEnd]}
+        start={{ x:gradientStartX, y:gradientStartY }}
+        end={{ x:gradientEndX, y:gradientEndY }}
+
         style={[
           styles.cameraUIContainer,
           {
@@ -415,27 +405,7 @@ class CameraLayoutTablet extends Component {
           },
         ]}
       >
-        <LinearGradient
-          // portrait
-          colors={['rgba(0,0,0,0.4)', 'transparent']}
-          locations={[0, 1]}
-          start={{ x: 0.0, y: 0.0 }} end={{ x: 0.0, y: 1.0 }}
-
-          // landscape right
-          // colors={['rgba(0,0,0,0.4)', 'transparent']}
-          // locations={[0, 1]}
-          // start={{ x: 0.0, y: 0.0 }} end={{ x: 1.0, y: 0.0 }}
-
-          // portrait upside down
-          // colors={['rgba(0,0,0,0.4)', 'transparent']}
-          // locations={[0, 0.2]}
-          // start={{ x: 0.0, y: 1.0 }} end={{ x: 0.0, y: 0.0 }}
-
-          // landscape left
-          // colors={['rgba(0,0,0,0.4)', 'transparent']}
-          // locations={[0, 1]}
-          // start={{ x: 1.0, y: 0.0 }} end={{ x: 0.0, y: 0.0 }}
-
+        <View
           style={[
             styles.header,
             {
@@ -446,47 +416,51 @@ class CameraLayoutTablet extends Component {
             },
           ]}
         >
-          <TouchableOpacity
-            onPress={() => {
-              this.props.onClose('', 'close');
-            }}
-            style={styles.uiButton}
+          <UIButton
+            onPress={() => { this.props.onClose('', 'close'); }}
+            bgColor='rgba(0,0,0,0.1)'
           >
             <MaterialIcon name="close" size={24} color="white" />
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => {}} style={styles.headerTitleButton}>
-            <View
+          </UIButton>
+          
+          <View
+            style={[
+              styles.headerTitle,
+              {
+                height: isLandscape ? null : 44,
+                width: isLandscape ? 44 : null,
+              }
+            ]}
+          >
+            <TouchableOpacity
+              onPress={() => {}}
               style={[
-                styles.headerTitleWrapper,
-                {
-                  height: isLandscape ? null : 44,
-                  width: isLandscape ? 44 : null,
-                },
+                styles.headerTitleButton,
+                { transform: [{ rotate: isLandscape ? '90deg' : '0deg' }] },
               ]}
             >
-              <Text
-                numberOfLines={1}
-                style={[
-                  styles.headerTitle,
-                  {
-                    transform: [{ rotate: isLandscape ? '90deg' : '0deg' }],
-                    width: 400,
-                  },
-                ]}
-              >
-                {this.props.projectName || ''}
-              </Text>
-            </View>
-          </TouchableOpacity>
+              <View style={styles.headerTitleTextWrapper}>
+                <Text
+                  numberOfLines={1}
+                  style={[
+                    styles.headerTitleText,
+                    // TODO make this better, preferrably not set width for landscape
+                    { width: isLandscape ? 200 : null },
+                  ]}
+                >
+                  {this.props.projectName || ''}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
 
-          <TouchableOpacity
+          <UIButton
             onPress={() => this.setState({ showSettings: true })}
-            style={styles.uiButton}
+            bgColor='rgba(0,0,0,0.1)'
           >
             <MaterialIcon name="settings" size={24} color="white" />
-          </TouchableOpacity>
-        </LinearGradient>
+          </UIButton>
+        </View>
 
         {this.props.renderToast()}
 
@@ -506,77 +480,51 @@ class CameraLayoutTablet extends Component {
           }}
         />
 
-        <LinearGradient
-          // portrait
-          colors={['rgba(0,0,0,0.4)', 'transparent']}
-          locations={[0, 0.2]}
-          start={{ x: 1.0, y: 0.0 }} end={{ x: 0.0, y: 0.0 }}
-
+        <View
           style={[styles.footer, this.state.dynamicFooterStyles]}
           pointerEvents="box-none"
         >
-          {/*
-            TODO eventually would be nice to track if zoomed in...
-            + pinch to zoom would update the magnification (ie 2.8x etc)
-            + would be cool if you had two lenses you could tap on icon
-              to switch them
-          */}
-          {/* <View style={styles.zoomContainer}>
-            <TouchableOpacity
-              style={styles.zoomButton}
-            >
-              <Text style={styles.zoomText}>1x</Text>
-            </TouchableOpacity>
-          </View> */}
-
           <View
-            style={[styles.captureContainer, this.state.dynamicCaptureContainerStyles]}
+            style={[
+              styles.captureContainer,
+              this.state.dynamicCaptureContainerStyles,
+              {
+                height: isLandscape ? 112 : null,
+                width: isLandscape ? null : 112,
+              }
+            ]}
           >
             {/* Front/back camera button */}
             {!PrimaryModeIsScan && (
-              <TouchableOpacity onPress={this.props.flipCamera}>
+              <UIButton
+                onPress={this.props.flipCamera}
+                bgColor='rgba(0,0,0,0.1)'
+              >
                 <Animated.View
-                  style={[
-                    styles.uiButton,
-                    {
-                      transform: [
-                        {
-                          rotate: rotationDeg,
-                        },
-                      ],
-                    },
-                  ]}
+                  style={{ transform: [{rotate: rotationDeg}] }}
                 >
                   <FeatherIcon name="repeat" size={24} color="white" />
                 </Animated.View>
-              </TouchableOpacity>
+              </UIButton>
             )}
 
             {/* Flash mode button */}
-            {this.props.hasFlash ? (
-              <TouchableOpacity onPress={this.props.toggleFlashMode}>
-                <View
-                  style={[
-                    styles.uiButton,
-                    {
-                      transform: [
-                        {
-                          rotate: rotationDeg,
-                        },
-                      ],
-                    },
-                  ]}
+            
+              <UIButton
+                onPress={this.props.toggleFlashMode}
+                bgColor='rgba(0,0,0,0.1)'
+              >
+                <Animated.View
+                  style={{ transform: [{ rotate: rotationDeg }] }}
                 >
                   <MaterialCommunityIcon
                     name={TorchIsOn ? FLASH_ON_ICON : FLASH_OFF_ICON}
                     size={24}
                     color="white"
                   />
-                </View>
-              </TouchableOpacity>
-            ) : (
-              <View style={styles.uiButton} />
-            )}
+                </Animated.View>
+              </UIButton>
+            
 
             {/* Capture button */}
             {!PrimaryModeIsScan && (
@@ -604,8 +552,11 @@ class CameraLayoutTablet extends Component {
                   }}
                 >
                   {this.props.cameraTrayVisible ? (
+
                     <View style={styles.uiButtonSmall}>{chevronDown}</View>
+
                   ) : (
+
                     <Animated.View
                       style={[
                         styles.uiButton,
@@ -623,29 +574,34 @@ class CameraLayoutTablet extends Component {
                         source={trayMostRecentImage}
                       >
                         <View style={styles.trayMostRecentImageOveraly}>
-                          <Text style={{ color: 'white' }}>{trayImageCount}</Text>
+                          <Text style={{ color: 'white', fontSize: 17 }}>{trayImageCount}</Text>
                         </View>
                       </Image>
                     </Animated.View>
+
                   )}
                 </TouchableOpacity>
               ) : (
+                
                 <TouchableOpacity
                   onPress={() => {
                     this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
                   }}
                 >
-                  <View style={styles.uiButtonSmall}>
+                  <UIButton>
                     {this.props.cameraTrayVisible ? chevronDown : chevronUp}
-                  </View>
+                  </UIButton>
                 </TouchableOpacity>
+
               )
             ) : null}
           </View>
 
           {/* Photo mode buttons */}
           {this.props.cameraTrayVisible ? (
-            <View style={styles.emptyModeContainer} />
+            <View
+              style={styles.emptyModeContainer}
+            />
             ) : (
             <Animated.View
               style={[
@@ -664,8 +620,9 @@ class CameraLayoutTablet extends Component {
                 onPress={() => this.props.setCameraMode(constants.CameraMode.photo)}
                 style={styles.modeButton}
               >
-                <ModeTitle isCurrentMode={!PrimaryModeIsScan}>PHOTO</ModeTitle>
-                {/* <ModeIndicator isCurrentMode={!PrimaryModeIsScan}/> */}
+                  <CameraMode isCurrentMode={!PrimaryModeIsScan}>
+                  <ModeTitle isCurrentMode={!PrimaryModeIsScan}>PHOTO</ModeTitle>
+                </CameraMode>
               </TouchableOpacity>
 
               {/* TODO video video video... */}
@@ -685,8 +642,9 @@ class CameraLayoutTablet extends Component {
                 }}
                 style={styles.modeButton}
               >
-                <ModeTitle isCurrentMode={PrimaryModeIsScan}>SCAN</ModeTitle>
-                {/* <ModeIndicator isCurrentMode={PrimaryModeIsScan}/> */}
+                <CameraMode>
+                  <ModeTitle isCurrentMode={PrimaryModeIsScan}>SCAN</ModeTitle>
+                </CameraMode>
               </TouchableOpacity>
 
               {/* AR mode button */}
@@ -694,8 +652,9 @@ class CameraLayoutTablet extends Component {
                 onPress={() => this.props.arModePress()}
                 style={styles.modeButton}
               >
-                <ModeTitle>AR</ModeTitle>
-                {/* <ModeIndicator /> */}
+                <CameraMode>
+                  <ModeTitle>AR</ModeTitle>
+                </CameraMode>
               </TouchableOpacity>
 
               {/* Before after mode button */}
@@ -703,12 +662,13 @@ class CameraLayoutTablet extends Component {
                 onPress={() => this.props.baModePress()}
                 style={styles.modeButton}
               >
-                <ModeTitle>B/A</ModeTitle>
-                {/* <ModeIndicator /> */}
+                <CameraMode>
+                  <ModeTitle>B/A</ModeTitle>
+                </CameraMode>
               </TouchableOpacity>
             </Animated.View>
           )}
-        </LinearGradient>
+        </View>
 
         <CameraTray
           visible={this.props.cameraTrayVisible}
@@ -736,7 +696,7 @@ class CameraLayoutTablet extends Component {
             />
           </View>
         )}
-      </View>
+      </LinearGradient>
     );
   }
 }
