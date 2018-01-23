@@ -509,7 +509,7 @@ class CameraLayoutTablet extends Component {
             )}
 
             {/* Flash mode button */}
-            
+            {this.props.hasFlash ? (
               <UIButton
                 onPress={this.props.toggleFlashMode}
                 bgColor='rgba(0,0,0,0.1)'
@@ -524,6 +524,10 @@ class CameraLayoutTablet extends Component {
                   />
                 </Animated.View>
               </UIButton>
+            ) : (
+              // <View style={styles.uiButton} />
+              null
+            )}
             
 
             {/* Capture button */}
