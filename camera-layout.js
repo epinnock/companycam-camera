@@ -1,24 +1,11 @@
 import React, { Component, PropTypes } from 'react';
 
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Platform,
-  AsyncStorage,
-  Animated,
-  Easing,
-  Dimensions,
-  DeviceEventEmitter,
-  Image,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Platform, Animated, Image } from 'react-native';
 
 import LinearGradient from 'react-native-linear-gradient';
 import Orientation from 'react-native-orientation';
 import DeviceInfo from 'react-native-device-info';
 import styled from 'styled-components/native';
-import CameraSettings from './camera-settings';
 import CameraTray from './camera-tray';
 import { invert } from 'lodash';
 
@@ -29,12 +16,7 @@ import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIc
 import FeatherIcon from 'react-native-vector-icons/Feather';
 
 const chevronDown = (
-  <MaterialIcon
-    name="keyboard-arrow-down"
-    size={24}
-    style={{ marginTop: 2 }}
-    color="white"
-  />
+  <MaterialIcon name="keyboard-arrow-down" size={24} style={{ marginTop: 2 }} color="white" />
 );
 const chevronUp = <MaterialIcon name="expand-less" size={24} color="white" />;
 const chevronLeft = <MaterialIcon name="chevron-left" size={32} color="white" />;
@@ -82,10 +64,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     paddingHorizontal: 8,
-  },
-  cancelButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
   },
   uiButton: {
     alignItems: 'center',
@@ -171,6 +149,23 @@ const styles = StyleSheet.create({
     left: 0,
     height: '100%',
     width: '100%',
+    backgroundColor: 'rgba(0,0,0,0.2)',
+  },
+  settingsWrapper: {
+    flex: 1,
+    margin: 16,
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  settingsHeader: {
+    width: '100%',
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#0277BD',
+    flexDirection: 'row',
+    borderTopLeftRadius: 8,
+    borderTopRightRadius: 8,
   },
 
   // TODO styles for zoom level
@@ -285,6 +280,8 @@ class CameraLayout extends Component {
     const constants = { ...this.props.cameraConstants };
     const { flashMode, cameraMode, resolutionMode } = this.props.cameraOpts;
     const { rotationDeg } = this.state;
+
+    const CameraSettings = this.props.settingsComponent;
 
     const TorchIsOn = flashMode === constants.FlashMode.torch;
     const PrimaryModeIsScan = cameraMode === constants.CameraMode.scanner;
@@ -434,10 +431,7 @@ class CameraLayout extends Component {
                           },
                         ]}
                       >
-                        <Image
-                          style={styles.trayMostRecentImage}
-                          source={trayMostRecentImage}
-                        >
+                        <Image style={styles.trayMostRecentImage} source={trayMostRecentImage}>
                           <View style={styles.trayMostRecentImageOveraly}>
                             <Text style={{ color: 'white' }}>{trayImageCount}</Text>
                           </View>
@@ -587,9 +581,7 @@ class CameraLayout extends Component {
             visible={this.props.cameraTrayVisible}
             documentTrayHeaderVisible={PrimaryModeIsScan}
             primaryModeIsScan={PrimaryModeIsScan}
-            emptyText={
-              PrimaryModeIsScan ? TRAY_EMPTY_TEXT_SCANNER : TRAY_EMPTY_TEXT_CAMERA
-            }
+            emptyText={PrimaryModeIsScan ? TRAY_EMPTY_TEXT_SCANNER : TRAY_EMPTY_TEXT_CAMERA}
             trayItems={filteredCameraTrayData}
             onSelectTrayItem={this.props.onSelectTrayItem}
             onHideTray={() => {
@@ -601,15 +593,22 @@ class CameraLayout extends Component {
 
         {this.state.showSettings && (
           <View style={styles.settingsOverlay}>
-            <CameraSettings
-              cameraModeString={invertedCameraModes[cameraMode]}
-              resolutionModeString={invertedResolutionModes[resolutionMode]}
-              setCameraMode={(nextMode) => {
-                this.props.setCameraMode(constants.CameraMode[nextMode]);
-              }}
-              setResolutionMode={this.props.setResolutionMode}
-              closeSelf={() => this.setState({ showSettings: false })}
-            />
+            <View style={styles.settingsWrapper}>
+              {/* settings header*/}
+              <View style={styles.settingsHeader}>
+                <TouchableOpacity
+                  activeOpacity={1}
+                  style={styles.uiButton}
+                  onPress={() => this.setState({ showSettings: false })}
+                >
+                  <MaterialIcon name="close" size={24} color="white" />
+                </TouchableOpacity>
+                <Text style={{ fontSize: 17, color: 'white' }}>Camera Settings</Text>
+                <View style={styles.emptyUIbutton} />
+              </View>
+              {/* settings components from this.props */}
+              <CameraSettings />
+            </View>
           </View>
         )}
       </View>
@@ -639,8 +638,10 @@ CameraLayout.propTypes = {
   setCameraMode: PropTypes.func,
   setResolutionMode: PropTypes.func,
   toggleFlashMode: PropTypes.func,
+  hasFlash: PropTypes.bool,
 
   renderToast: PropTypes.func,
+  settingsComponent: PropTypes.func,
 };
 
 CameraLayout.defaultProps = {
