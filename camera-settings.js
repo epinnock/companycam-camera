@@ -133,7 +133,7 @@ class CameraSettings extends PureComponent {
             <CameraSettingOption
               onPress={() => { this.setState({ resolutionMode: 1 }) }}
               title="Normal"
-              description='Best fore everyday use. Smallest file size. Uses the least data.'
+              description='Best for everyday use. Smallest file size. Uses the least data.'
               isSelected={this.state.resolutionMode === 1}
             />
             <CameraSettingOption
@@ -145,7 +145,7 @@ class CameraSettings extends PureComponent {
             <CameraSettingOption
               onPress={() => { this.setState({ resolutionMode: 3 }) }}
               title="Super Fine"
-              description='Best for capturing great details. Lartest file size. Uses the most data.'
+              description='Best for capturing great details. Largest file size. Uses the most data.'
               isSelected={this.state.resolutionMode === 3}
             />
           </CameraSetting>

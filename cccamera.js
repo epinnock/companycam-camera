@@ -94,7 +94,10 @@ class CCCamera extends React.Component {
     return (
       <View style={styles.toast}>
         <Text style={styles.toastTitle}>{toastTitleText}</Text>
-        <Text style={styles.toastMessage}>{toastMessageText}</Text>
+        { toastMessageText ?
+          <Text style={styles.toastMessage}>{toastMessageText}</Text> :
+          null
+        }
       </View>
     );
   };
