@@ -17,6 +17,9 @@ namespace geom
         cv::Point2f p01;
     };
 
+    float clamp(const float v, const float a, const float b);
+    cv::Point2f scaleElementwise(const cv::Point2f& p, const float sx, const float sy);
+
     enum LineOrientation { VERTICAL, HORIZONTAL, NEITHER };
     LineOrientation getLineOrientation(const cv::Vec4i& l);
 

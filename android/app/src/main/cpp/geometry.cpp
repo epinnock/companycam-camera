@@ -10,6 +10,16 @@ namespace geom
     const float ORIENTATION_THRESHOLD = 0.5;
     const float CAM_FOVY_DEG = 50;
 
+    /** Clamp v to the interval [a,b] */
+    float clamp(const float v, const float a, const float b){
+        return (v < a) ? a : ((v > b) ? b : v);
+    }
+
+    /** Return the point (sx * p.x, sy * p.y) */
+    cv::Point2f scaleElementwise(const cv::Point2f& p, const float sx, const float sy) {
+        return cv::Point2f(sx * p.x, sy * p.y);
+    }
+
     /** Determines whether a line is vertical or horizontal.
      * The x-value (resp. y-value) of the unit tangent vector must be less than
      * {@link ORIENTATION_THRESHOLD} to be considered vertical (resp. horizontal).
