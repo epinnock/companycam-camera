@@ -140,6 +140,7 @@ const styles = StyleSheet.create({
     width: 44,
     borderRadius: Platform.OS === 'ios' ? 6 : 0,
     borderWidth: 2,
+    margin: 16,
     borderColor: 'white',
     resizeMode: 'cover',
   },
