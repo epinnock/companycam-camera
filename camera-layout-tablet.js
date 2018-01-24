@@ -26,22 +26,14 @@ import FeatherIcon from 'react-native-vector-icons/Feather';
 
 import Orientation from 'react-native-orientation';
 
+import { PRIMARY_MODE_PHOTO, PRIMARY_MODE_SCAN } from './cccam-enums';
+
 const chevronDown = (
-  <MaterialIcon
-    name="keyboard-arrow-down"
-    size={24}
-    style={{ marginTop: 2 }}
-    color="white"
-  />
+  <MaterialIcon name="keyboard-arrow-down" size={24} style={{ marginTop: 2 }} color="white" />
 );
 const chevronUp = <MaterialIcon name="expand-less" size={24} color="white" />;
-const chevronLeft = <MaterialIcon name="chevron-left" size={32} color="white" />;
+// const chevronLeft = <MaterialIcon name="chevron-left" size={32} color="white" />;
 
-const CAMERA_MODE_PHOTO = 'photo-mode';
-const CAMERA_MODE_SCAN = 'scan-mode';
-
-const FASTCAM_ON_ICON = 'burst-mode'; // MaterialIcon set
-const FASTCAM_OFF_ICON = 'photo'; // MaterialIcon set
 const FLASH_ON_ICON = 'flashlight'; // MaterialCommunityIcon set
 const FLASH_OFF_ICON = 'flashlight-off'; // MaterialCommunityIcon set
 
@@ -58,7 +50,7 @@ const CameraMode = styled.View`
 
 const ModeTitle = styled.Text`
   font-size: 16px;
-  color: ${(props) => props.isCurrentMode ? '#FFB300' : 'white'};
+  color: ${(props) => (props.isCurrentMode ? '#FFB300' : 'white')};
 `;
 
 const styles = StyleSheet.create({
@@ -116,24 +108,24 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     margin: 16,
   },
-  emptyUIbutton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 44,
-    height: 32,
-    borderRadius: 22,
-    backgroundColor: 'transparent',
-  },
-  emptyCaptureButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 72,
-    height: 32,
-    borderWidth: 4,
-    borderColor: 'transparent',
-    backgroundColor: 'transparent',
-    margin: 16,
-  },
+  // emptyUIbutton: {
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  //   width: 44,
+  //   height: 32,
+  //   borderRadius: 22,
+  //   backgroundColor: 'transparent',
+  // },
+  // emptyCaptureButton: {
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  //   width: 72,
+  //   height: 32,
+  //   borderWidth: 4,
+  //   borderColor: 'transparent',
+  //   backgroundColor: 'transparent',
+  //   margin: 16,
+  // },
   captureButton: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -373,7 +365,7 @@ class CameraLayoutTablet extends Component {
       const recentURL = filteredCameraTrayData[0].url;
       trayMostRecentImage = { uri: recentURL };
     }
-    
+
     // default bg gradient in portrait
     let gradientStartX = 1.0;
     let gradientStartY = 0.0;
@@ -395,9 +387,8 @@ class CameraLayoutTablet extends Component {
       <LinearGradient
         colors={['rgba(0,0,0,0.4)', 'transparent']}
         locations={[gradientLocationStart, gradientLocationEnd]}
-        start={{ x:gradientStartX, y:gradientStartY }}
-        end={{ x:gradientEndX, y:gradientEndY }}
-
+        start={{ x: gradientStartX, y: gradientStartY }}
+        end={{ x: gradientEndX, y: gradientEndY }}
         style={[
           styles.cameraUIContainer,
           {
@@ -417,19 +408,21 @@ class CameraLayoutTablet extends Component {
           ]}
         >
           <UIButton
-            onPress={() => { this.props.onClose('', 'close'); }}
-            bgColor='rgba(0,0,0,0.1)'
+            onPress={() => {
+              this.props.onClose('', 'close');
+            }}
+            bgColor="rgba(0,0,0,0.1)"
           >
             <MaterialIcon name="close" size={24} color="white" />
           </UIButton>
-          
+
           <View
             style={[
               styles.headerTitle,
               {
                 height: isLandscape ? null : 44,
                 width: isLandscape ? 44 : null,
-              }
+              },
             ]}
           >
             <TouchableOpacity
@@ -454,10 +447,7 @@ class CameraLayoutTablet extends Component {
             </TouchableOpacity>
           </View>
 
-          <UIButton
-            onPress={() => this.setState({ showSettings: true })}
-            bgColor='rgba(0,0,0,0.1)'
-          >
+          <UIButton onPress={() => this.setState({ showSettings: true })} bgColor="rgba(0,0,0,0.1)">
             <MaterialIcon name="settings" size={24} color="white" />
           </UIButton>
         </View>
@@ -480,10 +470,7 @@ class CameraLayoutTablet extends Component {
           }}
         />
 
-        <View
-          style={[styles.footer, this.state.dynamicFooterStyles]}
-          pointerEvents="box-none"
-        >
+        <View style={[styles.footer, this.state.dynamicFooterStyles]} pointerEvents="box-none">
           <View
             style={[
               styles.captureContainer,
@@ -491,18 +478,13 @@ class CameraLayoutTablet extends Component {
               {
                 height: isLandscape ? 112 : null,
                 width: isLandscape ? null : 112,
-              }
+              },
             ]}
           >
             {/* Front/back camera button */}
             {!PrimaryModeIsScan && (
-              <UIButton
-                onPress={this.props.flipCamera}
-                bgColor='rgba(0,0,0,0.1)'
-              >
-                <Animated.View
-                  style={{ transform: [{rotate: rotationDeg}] }}
-                >
+              <UIButton onPress={this.props.flipCamera} bgColor="rgba(0,0,0,0.1)">
+                <Animated.View style={{ transform: [{ rotate: rotationDeg }] }}>
                   <FeatherIcon name="repeat" size={24} color="white" />
                 </Animated.View>
               </UIButton>
@@ -510,13 +492,8 @@ class CameraLayoutTablet extends Component {
 
             {/* Flash mode button */}
             {this.props.hasFlash ? (
-              <UIButton
-                onPress={this.props.toggleFlashMode}
-                bgColor='rgba(0,0,0,0.1)'
-              >
-                <Animated.View
-                  style={{ transform: [{ rotate: rotationDeg }] }}
-                >
+              <UIButton onPress={this.props.toggleFlashMode} bgColor="rgba(0,0,0,0.1)">
+                <Animated.View style={{ transform: [{ rotate: rotationDeg }] }}>
                   <MaterialCommunityIcon
                     name={TorchIsOn ? FLASH_ON_ICON : FLASH_OFF_ICON}
                     size={24}
@@ -524,11 +501,8 @@ class CameraLayoutTablet extends Component {
                   />
                 </Animated.View>
               </UIButton>
-            ) : (
-              // <View style={styles.uiButton} />
-              null
-            )}
-            
+            ) : // <View style={styles.uiButton} />
+            null}
 
             {/* Capture button */}
             {!PrimaryModeIsScan && (
@@ -556,11 +530,8 @@ class CameraLayoutTablet extends Component {
                   }}
                 >
                   {this.props.cameraTrayVisible ? (
-
                     <View style={styles.uiButtonSmall}>{chevronDown}</View>
-
                   ) : (
-
                     <Animated.View
                       style={[
                         styles.uiButton,
@@ -573,40 +544,30 @@ class CameraLayoutTablet extends Component {
                         },
                       ]}
                     >
-                      <Image
-                        style={styles.trayMostRecentImage}
-                        source={trayMostRecentImage}
-                      >
+                      <Image style={styles.trayMostRecentImage} source={trayMostRecentImage}>
                         <View style={styles.trayMostRecentImageOveraly}>
                           <Text style={{ color: 'white', fontSize: 17 }}>{trayImageCount}</Text>
                         </View>
                       </Image>
                     </Animated.View>
-
                   )}
                 </TouchableOpacity>
               ) : (
-                
                 <TouchableOpacity
                   onPress={() => {
                     this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
                   }}
                 >
-                  <UIButton>
-                    {this.props.cameraTrayVisible ? chevronDown : chevronUp}
-                  </UIButton>
+                  <UIButton>{this.props.cameraTrayVisible ? chevronDown : chevronUp}</UIButton>
                 </TouchableOpacity>
-
               )
             ) : null}
           </View>
 
           {/* Photo mode buttons */}
           {this.props.cameraTrayVisible ? (
-            <View
-              style={styles.emptyModeContainer}
-            />
-            ) : (
+            <View style={styles.emptyModeContainer} />
+          ) : (
             <Animated.View
               style={[
                 styles.modeContainer,
@@ -621,10 +582,10 @@ class CameraLayoutTablet extends Component {
             >
               {/* Photo mode button */}
               <TouchableOpacity
-                onPress={() => this.props.setCameraMode(constants.CameraMode.photo)}
+                onPress={() => this.props.setPrimaryCameraMode(PRIMARY_MODE_PHOTO)}
                 style={styles.modeButton}
               >
-                  <CameraMode isCurrentMode={!PrimaryModeIsScan}>
+                <CameraMode isCurrentMode={!PrimaryModeIsScan}>
                   <ModeTitle isCurrentMode={!PrimaryModeIsScan}>PHOTO</ModeTitle>
                 </CameraMode>
               </TouchableOpacity>
@@ -641,7 +602,7 @@ class CameraLayoutTablet extends Component {
               {/* Scanner mode button */}
               <TouchableOpacity
                 onPress={() => {
-                  this.props.setCameraMode(constants.CameraMode.scanner);
+                  this.props.setPrimaryCameraMode(PRIMARY_MODE_SCAN);
                   this.props.setCameraTrayVisible(true);
                 }}
                 style={styles.modeButton}
@@ -652,20 +613,14 @@ class CameraLayoutTablet extends Component {
               </TouchableOpacity>
 
               {/* AR mode button */}
-              <TouchableOpacity
-                onPress={() => this.props.arModePress()}
-                style={styles.modeButton}
-              >
+              <TouchableOpacity onPress={() => this.props.arModePress()} style={styles.modeButton}>
                 <CameraMode>
                   <ModeTitle>AR</ModeTitle>
                 </CameraMode>
               </TouchableOpacity>
 
               {/* Before after mode button */}
-              <TouchableOpacity
-                onPress={() => this.props.baModePress()}
-                style={styles.modeButton}
-              >
+              <TouchableOpacity onPress={() => this.props.baModePress()} style={styles.modeButton}>
                 <CameraMode>
                   <ModeTitle>B/A</ModeTitle>
                 </CameraMode>
@@ -724,11 +679,24 @@ CameraLayoutTablet.propTypes = {
   baModePress: PropTypes.func,
   captureButtonPress: PropTypes.func,
 
-  setCameraMode: PropTypes.func,
+  setPrimaryCameraMode: PropTypes.func,
   setResolutionMode: PropTypes.func,
   toggleFlashMode: PropTypes.func,
 
   renderToast: PropTypes.func,
+
+  cameraOpts: PropTypes.shape({
+    projectName: PropTypes.string,
+    projectAddress: PropTypes.string,
+    exifLat: PropTypes.number,
+    exifLon: PropTypes.number,
+    exifLocTimestamp: PropTypes.number,
+    hideCameraLayout: PropTypes.bool,
+    orientation: PropTypes.number,
+    flashMode: PropTypes.number,
+    cameraMode: PropTypes.number,
+    resolutionMode: PropTypes.number,
+  }),
 };
 
 CameraLayoutTablet.defaultProps = {

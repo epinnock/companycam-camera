@@ -4,6 +4,8 @@ import CameraLayout from './camera-layout';
 import CameraLayoutTablet from './camera-layout-tablet';
 import { isTablet, deviceSupportsARCam } from './device-info-helper';
 
+import { PRIMARY_MODE_PHOTO, PRIMARY_MODE_SCAN } from './cccam-enums';
+
 const CameraModule = NativeModules.CCCameraModuleIOS || NativeModules.CCCameraModule;
 
 const normalizePhotoOrigin = (photoOrigin) => {
@@ -60,6 +62,13 @@ class CCCamera extends React.Component {
     console.disableYellowBox = true;
   }
 
+  componentDidUpdate(prevProps) {
+    if (prevProps.reviewModeOn !== this.props.reviewModeOn) {
+      const isInScanMode = this.props.cameraOpts.cameraMode === constants.CameraMode.scanner;
+      this._setCameraMode(isInScanMode ? PRIMARY_MODE_SCAN : PRIMARY_MODE_PHOTO);
+    }
+  }
+
   _displayToast = (title, message) => {
     this.setState(
       {
@@ -91,20 +100,27 @@ class CCCamera extends React.Component {
     );
   };
 
-  _setCameraMode = (nextMode) => {
+  _setCameraMode = (nextModeEnum) => {
     const nextOpts = { ...this.props.cameraOpts };
+    const { CameraMode } = constants;
+
+    let nextMode = CameraMode.scanner;
+    if (nextModeEnum === PRIMARY_MODE_PHOTO) {
+      nextMode = this.props.reviewModeOn ? CameraMode.photo : CameraMode.fastcam;
+    }
 
     if (this.props.cameraOpts.cameraMode !== nextMode) {
       nextOpts.cameraMode = nextMode;
 
       switch (nextMode) {
-        case constants.CameraMode.photo:
-        case constants.CameraMode.fastcam:
-          if (this.props.cameraOpts.cameraMode === constants.CameraMode.scanner) {
+        case CameraMode.photo:
+        case CameraMode.fastcam:
+          // don't show toast switching between fastcam & photo
+          if (this.props.cameraOpts.cameraMode === CameraMode.scanner) {
             this._displayToast('Take Photos', '');
           }
           break;
-        case constants.CameraMode.scanner:
+        case CameraMode.scanner:
           this._displayToast('Scan Document', '');
           break;
         default:
@@ -118,14 +134,15 @@ class CCCamera extends React.Component {
   // in the future it could be changed to setFlashMode if we allow multiple types
   _toggleFlashMode = () => {
     const nextOpts = { ...this.props.cameraOpts };
+    const { FlashMode } = constants;
 
     switch (this.props.cameraOpts.flashMode) {
-      case constants.FlashMode.off:
-        nextOpts.flashMode = constants.FlashMode.torch;
+      case FlashMode.off:
+        nextOpts.flashMode = FlashMode.torch;
         this._displayToast('Flashlight Enabled', '');
         break;
-      case constants.FlashMode.torch:
-        nextOpts.flashMode = constants.FlashMode.off;
+      case FlashMode.torch:
+        nextOpts.flashMode = FlashMode.off;
         this._displayToast('Flashlight Disabled', '');
         break;
       default:
@@ -241,7 +258,7 @@ class CCCamera extends React.Component {
               CameraModule.capture();
               this.props.captureButtonPress();
             }}
-            setCameraMode={this._setCameraMode}
+            setPrimaryCameraMode={this._setCameraMode}
             setResolutionMode={this._setResolutionMode}
             toggleFlashMode={this._toggleFlashMode}
             renderToast={this._renderToast}
@@ -258,6 +275,7 @@ CCCamera.propTypes = {
   storagePath: PropTypes.string,
   hideNativeUI: PropTypes.bool,
   hideCameraLayout: PropTypes.bool,
+  reviewModeOn: PropTypes.bool,
 
   cameraOpts: PropTypes.shape({
     projectName: PropTypes.string,
@@ -303,6 +321,7 @@ CCCamera.propTypes = {
 
 CCCamera.defaultProps = {
   hideNativeUI: true,
+  reviewModeOn: false,
 
   cameraOpts: {
     projectName: '',
