@@ -371,18 +371,15 @@ class CameraLayoutTablet extends Component {
 
     // default bg gradient in portrait
     let gradientStartX = 1.0;
-    // let gradientStartY = 0.0;
-    // let gradientEndX = 0.0;
+    let gradientStartY = 0.0;
+    let gradientEndX = 0.0;
     let gradientEndY = 0.0;
-    // let gradientLocationStart = 0;
+    let gradientLocationStart = 0;
     let gradientLocationEnd = 0.18;
 
     if (isLandscape) {
       gradientStartX = 0.0;
-      // gradientStartY = 0.0;
-      // gradientEndX = 0.0;
       gradientEndY = 1.0;
-      // gradientLocationStart = 0;
       gradientLocationEnd = 0.15;
     }
 
