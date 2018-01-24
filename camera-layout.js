@@ -7,13 +7,14 @@ import Orientation from 'react-native-orientation';
 import DeviceInfo from 'react-native-device-info';
 import styled from 'styled-components/native';
 import CameraTray from './camera-tray';
-import { invert } from 'lodash';
 
 // TODO remove what we dont use for icons...
 import { blankImage } from './images';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import FeatherIcon from 'react-native-vector-icons/Feather';
+
+import { PRIMARY_MODE_PHOTO, PRIMARY_MODE_SCAN } from './cccam-enums';
 
 const chevronDown = (
   <MaterialIcon name="keyboard-arrow-down" size={24} style={{ marginTop: 2 }} color="white" />
@@ -272,22 +273,19 @@ class CameraLayout extends Component {
 
   setToPhotoMode = () => {
     const constants = { ...this.props.cameraConstants };
-    this.props.setCameraMode(constants.CameraMode.photo);
+    this.props.setPrimaryCameraMode(constants.CameraMode.photo);
     this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
   };
 
   render() {
     const constants = { ...this.props.cameraConstants };
-    const { flashMode, cameraMode, resolutionMode } = this.props.cameraOpts;
+    const { flashMode, cameraMode } = this.props.cameraOpts;
     const { rotationDeg } = this.state;
 
     const CameraSettings = this.props.settingsComponent;
 
     const TorchIsOn = flashMode === constants.FlashMode.torch;
     const PrimaryModeIsScan = cameraMode === constants.CameraMode.scanner;
-
-    const invertedResolutionModes = invert(constants.ResolutionMode);
-    const invertedCameraModes = invert(constants.CameraMode);
 
     const filteredCameraTrayData = this.props.cameraTrayData.filter(
       (data) => data.isDocument === PrimaryModeIsScan
@@ -526,7 +524,7 @@ class CameraLayout extends Component {
               <View style={styles.modeContainer}>
                 {/* Photo mode button */}
                 <TouchableOpacity
-                  onPress={() => this.props.setCameraMode(constants.CameraMode.photo)}
+                  onPress={() => this.props.setPrimaryCameraMode(PRIMARY_MODE_PHOTO)}
                   style={styles.modeButton}
                 >
                   <ModeTitle isCurrentMode={!PrimaryModeIsScan}>PHOTO</ModeTitle>
@@ -545,7 +543,7 @@ class CameraLayout extends Component {
                 {/* Scanner mode button */}
                 <TouchableOpacity
                   onPress={() => {
-                    this.props.setCameraMode(constants.CameraMode.scanner);
+                    this.props.setPrimaryCameraMode(PRIMARY_MODE_SCAN);
                     this.props.setCameraTrayVisible(true);
                   }}
                   style={styles.modeButton}
@@ -635,13 +633,26 @@ CameraLayout.propTypes = {
   baModePress: PropTypes.func,
   captureButtonPress: PropTypes.func,
 
-  setCameraMode: PropTypes.func,
+  setPrimaryCameraMode: PropTypes.func,
   setResolutionMode: PropTypes.func,
   toggleFlashMode: PropTypes.func,
   hasFlash: PropTypes.bool,
 
   renderToast: PropTypes.func,
   settingsComponent: PropTypes.func,
+
+  cameraOpts: PropTypes.shape({
+    projectName: PropTypes.string,
+    projectAddress: PropTypes.string,
+    exifLat: PropTypes.number,
+    exifLon: PropTypes.number,
+    exifLocTimestamp: PropTypes.number,
+    hideCameraLayout: PropTypes.bool,
+    orientation: PropTypes.number,
+    flashMode: PropTypes.number,
+    cameraMode: PropTypes.number,
+    resolutionMode: PropTypes.number,
+  }),
 };
 
 CameraLayout.defaultProps = {
@@ -651,7 +662,7 @@ CameraLayout.defaultProps = {
   setCameraTrayVisible: () => {},
   arModePress: () => {},
   baModePress: () => {},
-  setCameraMode: () => {},
+  setPrimaryCameraMode: () => {},
 };
 
 export default CameraLayout;
