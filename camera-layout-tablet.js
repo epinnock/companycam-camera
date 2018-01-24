@@ -65,7 +65,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    height: 56,
+    borderTopWidth: 1,
+    borderTopColor: 'red',
     marginTop: 0,
   },
   headerTitle: {
@@ -91,15 +92,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.1)',
     borderRadius: 50,
   },
-  uiButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 44,
-    height: 44,
-    margin: 16,
-    borderRadius: 22,
-  },
-  uiButtonSmall: {
+  closeImageTray: {
     alignItems: 'center',
     justifyContent: 'center',
     width: 44,
@@ -108,25 +101,8 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     borderWidth: 2,
     margin: 16,
+    backgroundColor: 'rgba(0,0,0,0.1)',
   },
-  // emptyUIbutton: {
-  //   alignItems: 'center',
-  //   justifyContent: 'center',
-  //   width: 44,
-  //   height: 32,
-  //   borderRadius: 22,
-  //   backgroundColor: 'transparent',
-  // },
-  // emptyCaptureButton: {
-  //   alignItems: 'center',
-  //   justifyContent: 'center',
-  //   width: 72,
-  //   height: 32,
-  //   borderWidth: 4,
-  //   borderColor: 'transparent',
-  //   backgroundColor: 'transparent',
-  //   margin: 16,
-  // },
   captureButton: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -207,7 +183,6 @@ class CameraLayoutTablet extends Component {
         alignItems: 'center',
         justifyContent: 'space-around',
         paddingVertical: 32,
-        // backgroundColor: 'papayawhip',
       },
       isLandscape:
         props.orientation === orientationEnum.landscapeleft ||
@@ -258,14 +233,12 @@ class CameraLayoutTablet extends Component {
       alignItems: 'center',
       justifyContent: 'space-around',
       paddingVertical: 32,
-      backgroundColor: 'papayawhip',
     };
 
     switch (orientation) {
       case orientationEnum.portrait:
         dynamicCaptureContainerStyles = {
           paddingVertical: 32,
-          // backgroundColor: 'purple',
         };
         break;
       case orientationEnum.landscapeleft:
@@ -281,7 +254,6 @@ class CameraLayoutTablet extends Component {
         dynamicCaptureContainerStyles = {
           flexDirection: 'row-reverse',
           paddingHorizontal: 32,
-          // backgroundColor: 'yellow',
         };
         break;
       case orientationEnum.landscaperight:
@@ -295,7 +267,6 @@ class CameraLayoutTablet extends Component {
         dynamicCaptureContainerStyles = {
           flexDirection: 'row',
           paddingHorizontal: 32,
-          // backgroundColor: 'green',
         };
         outermostContainerFlex = 'row';
         break;
@@ -310,7 +281,6 @@ class CameraLayoutTablet extends Component {
         dynamicCaptureContainerStyles = {
           flexDirection: 'column-reverse',
           paddingVertical: 32,
-          // backgroundColor: 'pink',
         };
         outermostContainerFlex = 'column-reverse';
         break;
@@ -403,8 +373,8 @@ class CameraLayoutTablet extends Component {
             {
               flexDirection: isLandscape ? 'column' : 'row',
               transform: [{ rotate: swapCameraUI ? '180deg' : '0deg' }],
-              height: isLandscape ? null : 56,
-              width: isLandscape ? 56 : null,
+              height: isLandscape ? null : 76,
+              width: isLandscape ? 76 : null,
             },
           ]}
         >
@@ -502,7 +472,7 @@ class CameraLayoutTablet extends Component {
                   />
                 </Animated.View>
               </UIButton>
-            ) : // <View style={styles.uiButton} />
+            ) : // <UIButton empty />
             null}
 
             {/* Capture button */}
@@ -516,12 +486,6 @@ class CameraLayoutTablet extends Component {
               />
             )}
 
-            {/* Magic invisible view for when scanner mode is active */}
-            {/* {
-              PrimaryModeIsScan &&
-                <View style={[styles.captureButton, { opacity: 0 }]} />
-            } */}
-
             {/* show tray */}
             {!PrimaryModeIsScan ? (
               filteredCameraTrayData.length > 0 ? (
@@ -531,19 +495,17 @@ class CameraLayoutTablet extends Component {
                   }}
                 >
                   {this.props.cameraTrayVisible ? (
-                    <View style={styles.uiButtonSmall}>{chevronDown}</View>
+                    <View
+                      style={[
+                        styles.closeImageTray,
+                        { transform: [{ rotate: rotationDeg, }] },
+                      ]}
+                    >
+                      {chevronDown}
+                    </View>
                   ) : (
                     <Animated.View
-                      style={[
-                        styles.uiButton,
-                        {
-                          transform: [
-                            {
-                              rotate: rotationDeg,
-                            },
-                          ],
-                        },
-                      ]}
+                      style={{ transform: [{ rotate: rotationDeg }] }}
                     >
                       <Image style={styles.trayMostRecentImage} source={trayMostRecentImage}>
                         <View style={styles.trayMostRecentImageOveraly}>
@@ -554,13 +516,15 @@ class CameraLayoutTablet extends Component {
                   )}
                 </TouchableOpacity>
               ) : (
-                <TouchableOpacity
+                <UIButton
                   onPress={() => {
                     this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
                   }}
+                  bgColor='rgba(0,0,0,0.1)'
+                  style={{ transform: [{ rotate: rotationDeg }] }}
                 >
-                  <UIButton>{this.props.cameraTrayVisible ? chevronDown : chevronUp}</UIButton>
-                </TouchableOpacity>
+                   {this.props.cameraTrayVisible ? chevronDown : chevronUp}
+                </UIButton>
               )
             ) : null}
           </View>
@@ -572,13 +536,7 @@ class CameraLayoutTablet extends Component {
             <Animated.View
               style={[
                 styles.modeContainer,
-                {
-                  transform: [
-                    {
-                      rotate: rotationDeg,
-                    },
-                  ],
-                },
+                { transform: [{ rotate: rotationDeg }] },
               ]}
             >
               {/* Photo mode button */}
@@ -590,15 +548,6 @@ class CameraLayoutTablet extends Component {
                   <ModeTitle isCurrentMode={!PrimaryModeIsScan}>PHOTO</ModeTitle>
                 </CameraMode>
               </TouchableOpacity>
-
-              {/* TODO video video video... */}
-              {/* <TouchableOpacity
-                onPress={() => {}}
-                style={styles.modeButton}
-              >
-                <ModeTitle>VIDEO</ModeTitle>
-                <ModeIndicator />
-              </TouchableOpacity> */}
 
               {/* Scanner mode button */}
               <TouchableOpacity
