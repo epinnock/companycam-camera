@@ -36,10 +36,8 @@ const chevronDown = (
 );
 const chevronUp = <MaterialIcon name="expand-less" size={24} color="white" />;
 const chevronLeft = <MaterialIcon name="chevron-left" size={32} color="white" />;
-
 const CAMERA_MODE_PHOTO = 'photo-mode';
 const CAMERA_MODE_SCAN = 'scan-mode';
-
 const FASTCAM_ON_ICON = 'burst-mode'; // MaterialIcon set
 const FASTCAM_OFF_ICON = 'photo'; // MaterialIcon set
 const FLASH_ON_ICON = 'flashlight'; // MaterialCommunityIcon set
@@ -51,8 +49,9 @@ const TRAY_EMPTY_TEXT_CAMERA =
   'Photos you take will show in this tray\nand will reset when you close your camera.';
 
 const CameraMode = styled.View`
+  margin-bottom: 16px;
   padding: 4px 12px;
-  border-radius: 8px;
+  border-radius: 50px;
   background-color: ${(props) => (props.isCurrentMode ? 'rgba(0,0,0,0.1)' : 'transparent')};
 `;
 
@@ -146,24 +145,21 @@ const styles = StyleSheet.create({
   },
   footer: {
     flex: 1,
-    // backgroundColor: 'blue',
   },
   captureContainer: {
     alignItems: 'center',
     justifyContent: 'space-around',
-    // backgroundColor: 'yellow',
   },
   modeContainer: {
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'red',
-    width: 112,
-    height: 112,
+    justifyContent: 'flex-start',
+    width: 120,
+    height: 120,
+    overflow: 'visible', // this is a bit hacky
   },
   emptyModeContainer: {
-    backgroundColor: 'red',
-    width: 112,
-    height: 112,
+    width: 120,
+    height: 120,
   },
   modeButton: {
     flexDirection: 'row-reverse',
@@ -205,6 +201,7 @@ class CameraLayoutTablet extends Component {
       showSettings: false,
       screenFlashOpacity: new Animated.Value(0),
       rotationDeg: this.getDegreesForOrientation(props.orientation),
+      swapGradient: false,
       swapHeaderButtons: false,
       swapCameraUI: false,
       dynamicFooterStyles: {
@@ -216,7 +213,7 @@ class CameraLayoutTablet extends Component {
         alignItems: 'center',
         justifyContent: 'space-around',
         paddingVertical: 32,
-        backgroundColor: 'papayawhip',
+        // backgroundColor: 'papayawhip',
       },
       isLandscape:
         props.orientation === orientationEnum.landscapeleft ||
@@ -255,6 +252,7 @@ class CameraLayoutTablet extends Component {
 
     let swapHeaderButtons = false;
     let swapCameraUI = false;
+    let swapGradient = false;
     let isLandscape = false;
     let outermostContainerFlex = 'column';
     let dynamicFooterStyles = {
@@ -273,10 +271,11 @@ class CameraLayoutTablet extends Component {
       case orientationEnum.portrait:
         dynamicCaptureContainerStyles = {
           paddingVertical: 32,
-          backgroundColor: 'purple',
+          // backgroundColor: 'purple',
         };
         break;
       case orientationEnum.landscapeleft:
+        swapGradient = true;
         swapHeaderButtons = true;
         isLandscape = true;
         outermostContainerFlex = 'row-reverse';
@@ -288,7 +287,7 @@ class CameraLayoutTablet extends Component {
         dynamicCaptureContainerStyles = {
           flexDirection: 'row-reverse',
           paddingHorizontal: 32,
-          backgroundColor: 'yellow',
+          // backgroundColor: 'yellow',
         };
         break;
       case orientationEnum.landscaperight:
@@ -302,12 +301,13 @@ class CameraLayoutTablet extends Component {
         dynamicCaptureContainerStyles = {
           flexDirection: 'row',
           paddingHorizontal: 32,
-          backgroundColor: 'green',
+          // backgroundColor: 'green',
         };
         outermostContainerFlex = 'row';
         break;
       case orientationEnum.portraitupsidedown:
         swapCameraUI = true;
+        swapGradient = true;
         dynamicFooterStyles = {
           alignItems: 'flex-start',
           justifyContent: 'center',
@@ -316,7 +316,7 @@ class CameraLayoutTablet extends Component {
         dynamicCaptureContainerStyles = {
           flexDirection: 'column-reverse',
           paddingVertical: 32,
-          backgroundColor: 'pink',
+          // backgroundColor: 'pink',
         };
         outermostContainerFlex = 'column-reverse';
         break;
@@ -327,6 +327,7 @@ class CameraLayoutTablet extends Component {
     this.setState({
       swapHeaderButtons,
       swapCameraUI,
+      swapGradient,
       dynamicCaptureContainerStyles,
       dynamicFooterStyles,
       outermostContainerFlex,
@@ -354,7 +355,7 @@ class CameraLayoutTablet extends Component {
     const constants = { ...this.props.cameraConstants };
     const { flashMode, cameraMode, resolutionMode } = this.props.cameraOpts;
 
-    const { isLandscape, rotationDeg, swapCameraUI } = this.state;
+    const { isLandscape, rotationDeg, swapCameraUI, swapGradient } = this.state;
 
     const TorchIsOn = flashMode === constants.FlashMode.torch;
     const PrimaryModeIsScan = cameraMode === constants.CameraMode.scanner;
@@ -376,18 +377,18 @@ class CameraLayoutTablet extends Component {
     
     // default bg gradient in portrait
     let gradientStartX = 1.0;
-    let gradientStartY = 0.0;
-    let gradientEndX = 0.0;
+    // let gradientStartY = 0.0;
+    // let gradientEndX = 0.0;
     let gradientEndY = 0.0;
-    let gradientLocationStart = 0;
+    // let gradientLocationStart = 0;
     let gradientLocationEnd = 0.18;
 
     if (isLandscape) {
       gradientStartX = 0.0;
-      gradientStartY = 0.0;
-      gradientEndX = 0.0;
+      // gradientStartY = 0.0;
+      // gradientEndX = 0.0;
       gradientEndY = 1.0;
-      gradientLocationStart = 0;
+      // gradientLocationStart = 0;
       gradientLocationEnd = 0.15;
     }
 
@@ -395,8 +396,8 @@ class CameraLayoutTablet extends Component {
       <LinearGradient
         colors={['rgba(0,0,0,0.4)', 'transparent']}
         locations={[gradientLocationStart, gradientLocationEnd]}
-        start={{ x:gradientStartX, y:gradientStartY }}
-        end={{ x:gradientEndX, y:gradientEndY }}
+        start={{ x:swapGradient ? gradientEndX : gradientStartX, y:swapGradient ? gradientEndY : gradientStartY }}
+        end={{ x:swapGradient ? gradientStartX : gradientEndX, y:swapGradient ? gradientStartY : gradientEndY }}
 
         style={[
           styles.cameraUIContainer,
@@ -489,8 +490,8 @@ class CameraLayoutTablet extends Component {
               styles.captureContainer,
               this.state.dynamicCaptureContainerStyles,
               {
-                height: isLandscape ? 112 : null,
-                width: isLandscape ? null : 112,
+                height: isLandscape ? 120 : null,
+                width: isLandscape ? null : 120,
               }
             ]}
           >
