@@ -1,5 +1,8 @@
 import React, { PropTypes } from 'react';
-import { NativeModules, requireNativeComponent, View, StyleSheet, Text } from 'react-native';
+import {
+  Animated, NativeModules, requireNativeComponent,
+  View, StyleSheet, Text, Easing,
+} from 'react-native';
 import CameraLayout from './camera-layout';
 import CameraLayoutTablet from './camera-layout-tablet';
 import { isTablet, deviceSupportsARCam } from './device-info-helper';
@@ -55,6 +58,7 @@ class CCCamera extends React.Component {
       showToast: false,
       toastTitleText: '',
       toastMessageText: '',
+      screenFlashOpacity: new Animated.Value(0),
     };
   }
 
@@ -162,6 +166,21 @@ class CCCamera extends React.Component {
     }
   };
 
+  _doScreenFlashAnimation = () => {
+    Animated.sequence([
+      Animated.timing(this.state.screenFlashOpacity, {
+        toValue: 1,
+        duration: 100,
+        easing: Easing.cubic,
+      }),
+      Animated.timing(this.state.screenFlashOpacity, {
+        toValue: 0,
+        duration: 120,
+        easing: Easing.cubic,
+      }),
+    ]).start();
+  };
+
   _onFlashAvailabilityChange = (event) => {
     const { hasFlash } = event.nativeEvent;
     console.log(`_onFlashAvailabilityChange called in cccamera.js (${hasFlash})`);
@@ -256,6 +275,7 @@ class CCCamera extends React.Component {
             baModePress={this.props.baModePress}
             captureButtonPress={() => {
               CameraModule.capture();
+              this._doScreenFlashAnimation();
               this.props.captureButtonPress();
             }}
             setPrimaryCameraMode={this._setCameraMode}
@@ -265,6 +285,21 @@ class CCCamera extends React.Component {
             settingsComponent={this.props.settingsComponent}
           />
         )}
+        {/* flash animation */}
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            backgroundColor: 'white',
+            height: '100%',
+            width: '100%',
+            opacity: this.state.screenFlashOpacity.interpolate({
+              inputRange: [0, 1],
+              outputRange: [0, 1],
+              extrapolate: 'clamp',
+            }),
+          }}
+        />
         {this.props.children}
       </RNCCCamera>
     );
@@ -305,7 +340,7 @@ CCCamera.propTypes = {
   onSelectTrayItem: PropTypes.func,
   setCameraTrayVisible: PropTypes.func,
 
-  settingsComponent: PropTypes.func,
+  settingsComponent: PropTypes.any,
 
   // duplicated from above to make RN happy. not happy myself
   projectName: PropTypes.string,
@@ -336,14 +371,14 @@ CCCamera.defaultProps = {
     resolutionMode: CameraModule.ResolutionMode.normal,
   },
 
-  arModePress: () => {},
-  baModePress: () => {},
-  captureButtonPress: () => {},
+  arModePress: () => { },
+  baModePress: () => { },
+  captureButtonPress: () => { },
 
   cameraTrayData: [],
   cameraTrayVisible: false,
-  onSelectTrayItem: () => {},
-  setCameraTrayVisible: () => {},
+  onSelectTrayItem: () => { },
+  setCameraTrayVisible: () => { },
 };
 
 export const constants = CCCamera.constants;

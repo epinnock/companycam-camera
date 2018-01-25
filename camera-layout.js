@@ -17,7 +17,7 @@ import FeatherIcon from 'react-native-vector-icons/Feather';
 import { PRIMARY_MODE_PHOTO, PRIMARY_MODE_SCAN } from './cccam-enums';
 
 const chevronDown = (
-  <MaterialIcon name="keyboard-arrow-down" size={24} style={{ marginTop: 2 }} color="white" />
+  <FeatherIcon name="chevron-down" size={24} style={{ marginTop: 2 }} color="white" />
 );
 const chevronUp = <MaterialIcon name="expand-less" size={24} color="white" />;
 const chevronLeft = <MaterialIcon name="chevron-left" size={32} color="white" />;
@@ -217,7 +217,6 @@ class CameraLayout extends Component {
     this.state = {
       author: 'Jared Goertzen',
       showSettings: false,
-      screenFlashOpacity: new Animated.Value(0),
       rotationDeg: this.getDegreesForOrientation(props.orientation),
       swapHeaderButtons: false,
       isLandscape: false,
@@ -256,24 +255,8 @@ class CameraLayout extends Component {
     return deg;
   };
 
-  doFlashAnimation = () => {
-    Animated.sequence([
-      Animated.timing(this.state.screenFlashOpacity, {
-        toValue: 1,
-        duration: 100,
-        // easing: Easing.cubic,
-      }),
-      Animated.timing(this.state.screenFlashOpacity, {
-        toValue: 0,
-        duration: 120,
-        // easing: Easing.cubic,
-      }),
-    ]).start();
-  };
-
   setToPhotoMode = () => {
-    const constants = { ...this.props.cameraConstants };
-    this.props.setPrimaryCameraMode(constants.CameraMode.photo);
+    this.props.setPrimaryCameraMode(PRIMARY_MODE_PHOTO);
     this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
   };
 
@@ -282,13 +265,11 @@ class CameraLayout extends Component {
     const { flashMode, cameraMode } = this.props.cameraOpts;
     const { rotationDeg } = this.state;
 
-    const CameraSettings = this.props.settingsComponent;
-
     const TorchIsOn = flashMode === constants.FlashMode.torch;
     const PrimaryModeIsScan = cameraMode === constants.CameraMode.scanner;
 
     const filteredCameraTrayData = this.props.cameraTrayData.filter(
-      (data) => data.isDocument === PrimaryModeIsScan
+      data => data.isDocument === PrimaryModeIsScan
     );
 
     let trayImageCount = '';
@@ -326,25 +307,25 @@ class CameraLayout extends Component {
                 {closeIcon}
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity onPress={this.setToPhotoMode}>
-                <View
-                  style={[
-                    styles.uiButton,
-                    {
-                      transform: [
-                        {
-                          rotate: rotationDeg,
-                        },
-                      ],
-                    },
-                  ]}
-                >
-                  {chevronLeft}
-                </View>
-              </TouchableOpacity>
-            )}
+                <TouchableOpacity onPress={this.setToPhotoMode}>
+                  <View
+                    style={[
+                      styles.uiButton,
+                      {
+                        transform: [
+                          {
+                            rotate: rotationDeg,
+                          },
+                        ],
+                      },
+                    ]}
+                  >
+                    {chevronLeft}
+                  </View>
+                </TouchableOpacity>
+              )}
 
-            <TouchableOpacity onPress={() => {}} style={styles.headerTitleButton}>
+            <TouchableOpacity onPress={() => { }} style={styles.headerTitleButton}>
               <Text numberOfLines={1} style={styles.headerTitle}>
                 {this.props.projectName || ''}
               </Text>
@@ -361,22 +342,6 @@ class CameraLayout extends Component {
         </LinearGradient>
 
         {this.props.renderToast()}
-
-        {/* flash animation */}
-        <Animated.View
-          pointerEvents="none"
-          style={{
-            position: 'absolute',
-            backgroundColor: 'white',
-            height: '100%',
-            width: '100%',
-            opacity: this.state.screenFlashOpacity.interpolate({
-              inputRange: [0, 1],
-              outputRange: [0, 1],
-              extrapolate: 'clamp',
-            }),
-          }}
-        />
 
         <LinearGradient
           colors={
@@ -417,37 +382,31 @@ class CameraLayout extends Component {
                     {this.props.cameraTrayVisible ? (
                       <View style={styles.uiButtonSmall}>{chevronDown}</View>
                     ) : (
-                      <View
-                        style={[
-                          styles.uiButton,
-                          {
-                            transform: [
-                              {
-                                rotate: rotationDeg,
-                              },
-                            ],
-                          },
-                        ]}
-                      >
-                        <Image style={styles.trayMostRecentImage} source={trayMostRecentImage}>
-                          <View style={styles.trayMostRecentImageOveraly}>
-                            <Text style={{ color: 'white' }}>{trayImageCount}</Text>
-                          </View>
-                        </Image>
-                      </View>
-                    )}
+                        <View
+                          style={[
+                            styles.uiButton,
+                            { transform: [{ rotate: rotationDeg }] },
+                          ]}
+                        >
+                          <Image style={styles.trayMostRecentImage} source={trayMostRecentImage}>
+                            <View style={styles.trayMostRecentImageOveraly}>
+                              <Text style={{ color: 'white' }}>{trayImageCount}</Text>
+                            </View>
+                          </Image>
+                        </View>
+                      )}
                   </TouchableOpacity>
                 ) : (
-                  <TouchableOpacity
-                    onPress={() => {
-                      this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
-                    }}
-                  >
-                    <View style={styles.uiButtonSmall}>
-                      {this.props.cameraTrayVisible ? chevronDown : chevronUp}
-                    </View>
-                  </TouchableOpacity>
-                )
+                    <TouchableOpacity
+                      onPress={() => {
+                        this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
+                      }}
+                    >
+                      <View style={[styles.uiButtonSmall, { backgroundColor: 'transparent' }]}>
+                        {this.props.cameraTrayVisible ? chevronDown : chevronUp}
+                      </View>
+                    </TouchableOpacity>
+                  )
               ) : null}
 
               {/* Flash mode button */}
@@ -456,13 +415,7 @@ class CameraLayout extends Component {
                   <Animated.View
                     style={[
                       styles.uiButton,
-                      {
-                        transform: [
-                          {
-                            rotate: rotationDeg,
-                          },
-                        ],
-                      },
+                      { transform: [{ rotate: rotationDeg }] },
                     ]}
                   >
                     <MaterialCommunityIcon
@@ -473,8 +426,8 @@ class CameraLayout extends Component {
                   </Animated.View>
                 </TouchableOpacity>
               ) : (
-                <View style={styles.uiButton} />
-              )}
+                  <View style={styles.uiButton} />
+                )}
 
               {/* Capture button */}
               {!PrimaryModeIsScan ? (
@@ -486,8 +439,8 @@ class CameraLayout extends Component {
                   style={styles.captureButton}
                 />
               ) : (
-                <View style={styles.emptyCaptureButton} />
-              )}
+                  <View style={styles.emptyCaptureButton} />
+                )}
 
               {/* Front/back camera button */}
               {!PrimaryModeIsScan ? (
@@ -508,8 +461,8 @@ class CameraLayout extends Component {
                   </View>
                 </TouchableOpacity>
               ) : (
-                <View style={styles.emptyUIbutton} />
-              )}
+                  <View style={styles.emptyUIbutton} />
+                )}
 
               <TouchableOpacity
                 onPress={() => this.setState({ showSettings: true })}
@@ -605,7 +558,7 @@ class CameraLayout extends Component {
                 <View style={styles.emptyUIbutton} />
               </View>
               {/* settings components from this.props */}
-              <CameraSettings />
+              {this.props.settingsComponent}
             </View>
           </View>
         )}
@@ -639,7 +592,7 @@ CameraLayout.propTypes = {
   hasFlash: PropTypes.bool,
 
   renderToast: PropTypes.func,
-  settingsComponent: PropTypes.func,
+  settingsComponent: PropTypes.any,
 
   cameraOpts: PropTypes.shape({
     projectName: PropTypes.string,
@@ -658,11 +611,11 @@ CameraLayout.propTypes = {
 CameraLayout.defaultProps = {
   cameraTrayData: [],
   cameraTrayVisible: false,
-  onSelectTrayItem: () => {},
-  setCameraTrayVisible: () => {},
-  arModePress: () => {},
-  baModePress: () => {},
-  setPrimaryCameraMode: () => {},
+  onSelectTrayItem: () => { },
+  setCameraTrayVisible: () => { },
+  arModePress: () => { },
+  baModePress: () => { },
+  setPrimaryCameraMode: () => { },
 };
 
 export default CameraLayout;

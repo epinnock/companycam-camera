@@ -60,9 +60,11 @@ const ImageTrayActionBar = styled.View`
 
 const ImageTrayFileControl = styled.View`
   width: 100%;
+  height: 56px;
   flex-direction: row;
   align-items: center;
-  padding: 16px;
+  justifyContent: center;
+  padding: 0px 16px;
   background-color: rgba(38, 50, 56, 0.5);
 `;
 
@@ -196,8 +198,8 @@ class CameraTray extends Component {
         {trayItemIcons.length === 1 ? (
           <IconContainerCircle>{trayItemIcons}</IconContainerCircle>
         ) : (
-          <IconContainerPill>{trayItemIcons}</IconContainerPill>
-        )}
+            <IconContainerPill>{trayItemIcons}</IconContainerPill>
+          )}
       </View>
     );
   };
@@ -236,13 +238,13 @@ class CameraTray extends Component {
       return null;
     }
 
-    const { trayItems, emptyText, setToPhotoMode } = this.props;
+    const { trayItems, setToPhotoMode } = this.props;
     const trayEmpty = !trayItems || trayItems.length === 0;
 
     return (
       <ImageTrayFileControl>
         <TouchableOpacity
-          onPress={() => {}}
+          onPress={() => { }}
           style={styles.documentNameContainer}
         >
           {pencilIcon}
@@ -276,13 +278,13 @@ class CameraTray extends Component {
   };
 
   render() {
+    const { trayItems, emptyText, isLandscape, documentTrayHeaderVisible } = this.props;
     const trayHeight = TRAYITEMHEIGHT + SCROLLPADDING * 4;
-    const { trayItems, emptyText, isLandscape } = this.props;
     const trayEmpty = !trayItems || trayItems.length === 0;
 
     const heightInterpolation = this.state.visibility.interpolate({
       inputRange: [0, 1],
-      outputRange: [0, trayHeight],
+      outputRange: [0, trayHeight + (documentTrayHeaderVisible ? 56 : 0)],
     });
 
     return (
@@ -326,24 +328,24 @@ class CameraTray extends Component {
             </Text>
           </EmptyStateContent>
         ) : (
-          <View
-            style={{
-              backgroundColor: 'rgba(38,50,56, 0.5)',
-              transform: [
-                { rotate: this.props.swapCameraUI ? '180deg' : '0deg' },
-              ],
-              flexGrow: 1,
-            }}
-          >
-            <ScrollView
-              horizontal={!isLandscape}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.itemScroller}
+            <View
+              style={{
+                backgroundColor: 'rgba(38,50,56, 0.5)',
+                transform: [
+                  { rotate: this.props.swapCameraUI ? '180deg' : '0deg' },
+                ],
+                flexGrow: 1,
+              }}
             >
-              {trayItems.map(this.renderTrayImageFromData)}
-            </ScrollView>
-          </View>
-        )}
+              <ScrollView
+                horizontal={!isLandscape}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.itemScroller}
+              >
+                {trayItems.map(this.renderTrayImageFromData)}
+              </ScrollView>
+            </View>
+          )}
       </Animated.View>
     );
   }
@@ -360,6 +362,7 @@ CameraTray.propTypes = {
   isLandscape: PropTypes.bool,
   rotation: PropTypes.string,
   swapCameraUI: PropTypes.bool,
+  setToPhotoMode: PropTypes.func,
 };
 
 CameraTray.defaultProps = {
@@ -367,9 +370,9 @@ CameraTray.defaultProps = {
   pdfTitleVisible: false,
   trayItems: [],
   emptyText: '',
-  onSelectTrayItem: () => {},
-  onHideTray: () => {},
-  setToPhotoMode: () => {},
+  onSelectTrayItem: () => { },
+  onHideTray: () => { },
+  setToPhotoMode: () => { },
   isLandscape: false,
   rotation: '0deg',
   swapCameraUI: false,
