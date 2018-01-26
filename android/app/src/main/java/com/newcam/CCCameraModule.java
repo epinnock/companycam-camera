@@ -25,6 +25,7 @@ import com.newcam.enums.ResolutionMode;
 import com.newcam.jniexports.JNIExports;
 import com.newcam.utils.AppPreferences;
 import com.newcam.utils.CameraCheck;
+import com.newcam.utils.ImageprocState;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -62,79 +63,22 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
     //   2. The functionality might be used directly in the scanner
     // =============================================================================================
     @ReactMethod
-    void imageprocRender(ReadableMap options, Promise promise) {
+    void imageprocRender(String inputAbsolutePath, String outputAbsolutePath, ReadableMap optsMap, Promise promise) {
 
         // Read the ReadableMap
-        //----------------------------------------------
-        boolean readableMapValid = true;
-        String invalidReason = "";
-
-        String inputAbsolutePath = ""; // Required
-        String outputAbsolutePath = ""; // Required
-
-        boolean magicColor = false; // Optional
-
-        // Points are read in order from 'fourPointLocations', which is required if
-        // fourPointApplied == true. Values are in image coordinates, normalized to [0,1]^2
-        boolean fourPointApplied = false; // Optional
-        float[] pRect = new float[8];
-
-        if (options.hasKey("inputAbsolutePath")) {
-            inputAbsolutePath = options.getString("inputAbsolutePath");
-        } else {
-            readableMapValid = false;
-            invalidReason = "Missing field 'inputAbsolutePath'";
-        }
-
-        if (options.hasKey("outputAbsolutePath")) {
-            outputAbsolutePath = options.getString("outputAbsolutePath");
-        } else {
-            readableMapValid = false;
-            invalidReason = "Missing field 'outputAbsolutePath'";
-        }
-
-        if (options.hasKey("magicColor")) {
-            magicColor = options.getBoolean("magicColor");
-        }
-
-        if (options.hasKey("fourPointApplied")) {
-            fourPointApplied = options.getBoolean("fourPointApplied");
-
-            if (options.hasKey("fourPointLocations")) {
-                ReadableArray fourPointLocations = options.getArray("fourPointLocations");
-                if (fourPointLocations.size() == 8) {
-                    for (int k=0; k<8; k++) {
-                        pRect[k] = (float)fourPointLocations.getDouble(k);
-                    }
-                } else {
-                    readableMapValid = false;
-                    invalidReason = "Field 'fourPointLocations' must be [x1, y1, ..., x4, y4]";
-                }
-            } else {
-                readableMapValid = false;
-                invalidReason = "Missing field 'fourPointLocations'";
-            }
-        }
-
-        if (!readableMapValid) {
-            promise.reject("CCCameraModule", invalidReason);
+        ImageprocState opts = new ImageprocState();
+        try {
+            opts.loadReadableMap(optsMap);
+        } catch (IllegalArgumentException e) {
+            promise.reject("CCCameraModule", e.getMessage());
             return;
         }
 
-        // Debug output: summary of options
-        System.out.println("[CCCameraModule] IMAGEPROC OPTIONS:");
-        System.out.println("[CCCameraModule] - inputAbsolutePath: '" + inputAbsolutePath + "'");
-        System.out.println("[CCCameraModule] - outputAbsolutePath: '" + outputAbsolutePath + "'");
-        System.out.println("[CCCameraModule] - magicColor enabled?: " + (magicColor ? "Yes" : "No") + "");
-        System.out.println("[CCCameraModule] - fourPoint enabled?: " + (fourPointApplied ? "Yes" : "No") + "");
-        if (fourPointApplied) {
-            System.out.println("[CCCameraModule] - fourPoint locations: " +
-                "(" + pRect[0] + ", " + pRect[1] + "), " +
-                "(" + pRect[2] + ", " + pRect[3] + "), " +
-                "(" + pRect[4] + ", " + pRect[5] + "), " +
-                "(" + pRect[6] + ", " + pRect[7] + ")");
-        }
-        //----------------------------------------------
+        // Debug output
+        System.out.println("[CCCamera] Filenames for imageprocRender:");
+        System.out.println("[CCCamera] - inputAbsolutePath: '" + inputAbsolutePath + "'");
+        System.out.println("[CCCamera] - outputAbsolutePath: '" + outputAbsolutePath + "'");
+        opts.debugPrint("[CCCamera]");
 
         // Prepare input and current Bitmaps
         // Each step will apply an effect to bitmapCurrent and set bitmapCurrent to the new result.
@@ -146,7 +90,7 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
         Bitmap bitmapCurrent = bitmapInput;
 
         // Magic color (if applicable)
-        if (magicColor) {
+        if (opts.magicColor) {
             // Prepare input data
             int imgW = bitmapCurrent.getWidth();
             int imgH = bitmapCurrent.getHeight();
@@ -168,7 +112,7 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
         }
 
         // Four point transformation (if applicable)
-        if (fourPointApplied) {
+        if (opts.fourPointApplied) {
             // Prepare input data
             int imgInputW = bitmapCurrent.getWidth();
             int imgInputH = bitmapCurrent.getHeight();
@@ -181,7 +125,7 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
             int[] dataOutput = new int[MAX_OUTPUT_DIM*MAX_OUTPUT_DIM]; // TODO this might be too big...
 
             // Do the transformation
-            JNIExports.fourPoint(imgInputW, imgInputH, imageInputBGRA, dimsImageOutput, MAX_OUTPUT_DIM, dataOutput, pRect);
+            JNIExports.fourPoint(imgInputW, imgInputH, imageInputBGRA, dimsImageOutput, MAX_OUTPUT_DIM, dataOutput, opts.pRect);
 
             // Get Bitmap from relevant region of output container
             int outputImageW = dimsImageOutput[0];
