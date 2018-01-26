@@ -2,6 +2,8 @@ package com.newcam.imageprocessing;
 
 import android.graphics.Bitmap;
 
+import com.newcam.utils.ImageprocState;
+
 /**
  * Created by dan on 5/1/17.
  */
@@ -19,4 +21,5 @@ public interface CCCameraImageProcessor {
     public void clearVisiblePreview();
 
     public Bitmap getOutputImage();
+    public ImageprocState getOutputTransform();
 }

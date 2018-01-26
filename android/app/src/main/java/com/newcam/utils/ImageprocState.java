@@ -15,9 +15,15 @@ import com.newcam.jniexports.JNIExports;
 
 public class ImageprocState {
 
-    public boolean magicColor = false; // Optional
-    public boolean fourPointApplied = false; // Optional
-    public float[] pRect = new float[8]; // Required iff fourPointApplied; normalized to [0,1]^2
+    public boolean magicColor = false;
+    public boolean fourPointApplied = false;
+    public float[] pRectNormalized = new float[8]; // Points (normalized to [0,1]^2) as [x1,y1,...,x4,y4]
+
+    private ImageprocState() { }
+
+    public static ImageprocState createWithNoEffects() {
+        return new ImageprocState();
+    }
 
     public void debugPrint(String tag) {
         System.out.println(tag + " ImageprocState:");
@@ -25,10 +31,20 @@ public class ImageprocState {
         System.out.println(tag + " - fourPoint enabled?: " + (fourPointApplied ? "Yes" : "No") + "");
         if (fourPointApplied) {
             System.out.println(tag + " - fourPoint locations: " +
-                    "(" + pRect[0] + ", " + pRect[1] + "), " +
-                    "(" + pRect[2] + ", " + pRect[3] + "), " +
-                    "(" + pRect[4] + ", " + pRect[5] + "), " +
-                    "(" + pRect[6] + ", " + pRect[7] + ")");
+                    "(" + pRectNormalized[0] + ", " + pRectNormalized[1] + "), " +
+                    "(" + pRectNormalized[2] + ", " + pRectNormalized[3] + "), " +
+                    "(" + pRectNormalized[4] + ", " + pRectNormalized[5] + "), " +
+                    "(" + pRectNormalized[6] + ", " + pRectNormalized[7] + ")");
+        }
+    }
+
+    /** Set normalized pRect point locations from non-normalized rawPoints */
+    public void setFourPointLocations(float[] rawPoints, int imageWidth, int imageHeight) {
+        for (int k=0; k<4; k++) {
+            int ix = 2*k;
+            int iy = 2*k + 1;
+            pRectNormalized[ix] = rawPoints[ix] / imageWidth;
+            pRectNormalized[iy] = rawPoints[iy] / imageHeight;
         }
     }
 
@@ -41,7 +57,7 @@ public class ImageprocState {
         if (fourPointApplied) {
             WritableArray fourPointLocations = Arguments.createArray();
             for (int k=0; k<8; k++) {
-                fourPointLocations.pushDouble((double)pRect[k]);
+                fourPointLocations.pushDouble((double)pRectNormalized[k]);
             }
         }
 
@@ -63,7 +79,7 @@ public class ImageprocState {
                 throw new IllegalArgumentException("Field 'fourPointLocations' must be [x1, y1, ..., x4, y4]");
             }
             for (int k=0; k<8; k++) {
-                pRect[k] = (float)fourPointLocations.getDouble(k);
+                pRectNormalized[k] = (float)fourPointLocations.getDouble(k);
             }
         }
     }
@@ -109,7 +125,7 @@ public class ImageprocState {
             int[] dataOutput = new int[MAX_OUTPUT_DIM*MAX_OUTPUT_DIM]; // TODO this might be too big...
 
             // Do the transformation
-            JNIExports.fourPoint(imgInputW, imgInputH, imageInputBGRA, dimsImageOutput, MAX_OUTPUT_DIM, dataOutput, pRect);
+            JNIExports.fourPoint(imgInputW, imgInputH, imageInputBGRA, dimsImageOutput, MAX_OUTPUT_DIM, dataOutput, pRectNormalized);
 
             // Get Bitmap from relevant region of output container
             int outputImageW = dimsImageOutput[0];

@@ -10,6 +10,7 @@ import android.graphics.Rect;
 import android.view.View;
 
 import com.newcam.jniexports.JNIExports;
+import com.newcam.utils.ImageprocState;
 
 /**
  * Created by dan on 1/17/18.
@@ -146,4 +147,10 @@ public class ImageProcOpenCV extends View implements CCCameraImageProcessor  {
     public Bitmap getOutputImage() {
         return null;
     }
+
+    @Override
+    public ImageprocState getOutputTransform() {
+        return ImageprocState.createWithNoEffects();
+    }
+
 }

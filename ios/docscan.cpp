@@ -21,6 +21,7 @@ DocScanner::DocScanner(const int optWorkingSize, const int optMaxOutputDim) :
     didGenerateOutput(false),
     timeLastUnstable(std::chrono::high_resolution_clock::now()),
     pRect(geom::invalidPerspectiveRect()),
+    pRectOutput(geom::invalidPerspectiveRect()),
     recentRectsIndex(0)
 { }
 
@@ -28,22 +29,28 @@ DocScanner::DocScanner() :
     DocScanner(DEFAULT_WORKING_SIZE, DEFAULT_MAX_OUTPUT_DIM)
 { }
 
+/** Returns the most recent {@link PerspectiveRect}. */
+geom::PerspectiveRect DocScanner::getPerspectiveRect() const
+{
+    return pRect;
+}
+
 /** Returns the most recent debug image. */
 cv::Mat DocScanner::getDebugImage() const
 {
     return imageResized;
 }
 
+/** Returns the {@link PerspectiveRect} at the time of most recent output image */
+geom::PerspectiveRect DocScanner::getOutputPerspectiveRect() const
+{
+    return pRectOutput;
+}
+
 /** Returns the most recent output image. */
 cv::Mat DocScanner::getOutputImage() const
 {
     return imageOutput;
-}
-
-/** Returns the most recent {@link PerspectiveRect}. */
-geom::PerspectiveRect DocScanner::getPerspectiveRect() const
-{
-    return pRect;
 }
 
 void DocScanner::setStableDurationMS(const unsigned long ms)
@@ -241,6 +248,9 @@ bool DocScanner::scan(const cv::Mat& imageOrig, const bool doGenerateOutput)
     //--------------------------------
     // Only carry out this final step if requested
     if (!doGenerateOutput) { return false; }
+
+    // Snapshot of pRect at time of output generation
+    pRectOutput = pRect;
 
     // Don't bother creating image bigger than the bounding box; also limit to optMaxOutputDim
     cv::Rect rectBounds = perspectiveRectBoundingBox(pRect);

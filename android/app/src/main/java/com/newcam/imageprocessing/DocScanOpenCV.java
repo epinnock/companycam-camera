@@ -11,6 +11,7 @@ import android.graphics.Rect;
 import android.view.View;
 
 import com.newcam.jniexports.JNIExports;
+import com.newcam.utils.ImageprocState;
 
 /**
  * Created by dan on 5/1/17.
@@ -72,11 +73,12 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
     protected final static int MAX_OUTPUT_PIXELS = 1024*1024;
     protected int[] dataOutput;
 
-    // Bitmap to hold the result of a scan
+    // Data defining the result of a scan
     protected boolean didPrepareOutput;
     protected int outputImageW;
     protected int outputImageH;
     protected Bitmap bitmapOutput;
+    protected float[] pRectOutput = new float[8];
 
 
     public DocScanOpenCV(Context context) {
@@ -203,6 +205,8 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
             bitmapOutput.setPixels(dataOutput, 0, outputImageW, 0, 0, outputImageW, outputImageH);
             didPrepareOutput = true;
 
+            pRectOutput = pRect.clone();
+
             DEBUG_OUTPUT("Captured scan: (" + outputImageW + ", " + outputImageH + ")");
             this.notifyListeners();
             requestNextFrame = false;
@@ -242,5 +246,17 @@ public class DocScanOpenCV extends View implements CCCameraImageProcessor {
         DEBUG_OUTPUT("Returning output image");
 
         return bitmapOutput;
+    }
+
+    @Override
+    public ImageprocState getOutputTransform() {
+        ImageprocState imageproc = ImageprocState.createWithNoEffects();
+
+        int outputWidth = bitmapOutput.getWidth();
+        int outputHeight = bitmapOutput.getHeight();
+        imageproc.setFourPointLocations(pRectOutput, outputWidth, outputHeight);
+        imageproc.fourPointApplied = true;
+
+        return imageproc;
     }
 }
