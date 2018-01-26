@@ -28,17 +28,18 @@ const UIButton = (props) => {
 
   return (
     <TouchableHighlight
+      hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
       onPress={props.onPress}
       style={[
         styles.uiButton,
-        {backgroundColor: props.bgColor},
+        { backgroundColor: props.bgColor },
         props.style,
       ]}
       underlayColor={props.tapColor}
     >
       <View>
-        { props.icon &&
-            <Image source={props.icon} />
+        {props.icon &&
+          <Image source={props.icon} />
         }
         {props.children}
       </View>

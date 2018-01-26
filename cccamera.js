@@ -11,6 +11,9 @@ import { PRIMARY_MODE_PHOTO, PRIMARY_MODE_SCAN } from './cccam-enums';
 
 const CameraModule = NativeModules.CCCameraModuleIOS || NativeModules.CCCameraModule;
 
+const FLASH_IN_MS = 90;
+const FLASH_OUT_MS = 110;
+
 const normalizePhotoOrigin = (photoOrigin) => {
   const validPhotoOrigin =
     photoOrigin === 'STANDARD_CAMERA' ||
@@ -170,12 +173,12 @@ class CCCamera extends React.Component {
     Animated.sequence([
       Animated.timing(this.state.screenFlashOpacity, {
         toValue: 1,
-        duration: 100,
+        duration: FLASH_IN_MS,
         easing: Easing.cubic,
       }),
       Animated.timing(this.state.screenFlashOpacity, {
         toValue: 0,
-        duration: 120,
+        duration: FLASH_OUT_MS,
         easing: Easing.cubic,
       }),
     ]).start();
@@ -276,7 +279,9 @@ class CCCamera extends React.Component {
             captureButtonPress={() => {
               CameraModule.capture();
               this._doScreenFlashAnimation();
-              this.props.captureButtonPress();
+              setTimeout(() => {
+                this.props.captureButtonPress();
+              }, FLASH_IN_MS + FLASH_OUT_MS + 30);
             }}
             setPrimaryCameraMode={this._setCameraMode}
             setResolutionMode={this._setResolutionMode}
