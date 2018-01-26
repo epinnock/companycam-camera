@@ -1,20 +1,13 @@
 package com.newcam.utils;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
-import com.facebook.react.bridge.ReadableType;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.bridge.WritableMap;
 import com.newcam.jniexports.JNIExports;
-
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.util.LinkedList;
 
 /**
  * Created by dan on 1/26/18.
