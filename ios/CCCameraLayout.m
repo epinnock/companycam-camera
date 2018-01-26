@@ -873,29 +873,34 @@
 // This method shows an auto focus indicator view at the given position while the camera is focusing and/or exposing
 -(void)showAutoFocusIndicator:(CGPoint)touchPoint :(BOOL)setRepeating {
 
-    // Get the width and height of the focusIndicatorView
-    int width = self.focusIndicatorView.frame.size.width;
-    int height = self.focusIndicatorView.frame.size.height;
-
-    // Set the constraints for the focusIndicatorView
-    self.focusIndicatorTopConstraint.constant = touchPoint.y - height/2;
-    self.focusIndicatorLeftConstraint.constant = touchPoint.x - width/2;
-
-    // Add an animation to the focusIndicatorView
-    double animationIncrementTime = 0.03;
-    self.focusIndicatorView.radius = 0.0;
-
-    // Start the timer
-    self.focusIndicatorTimer = [NSTimer scheduledTimerWithTimeInterval:animationIncrementTime target:self selector:@selector(incrementFocusIndicatorRadius:) userInfo:nil repeats:YES];
-
-    // Show the focusIndicatorView
+    // now handled by _touchesEnded_ in CCCameraView.m
+    
+//    // Get the width and height of the focusIndicatorView
+//    int width = self.focusIndicatorView.frame.size.width;
+//    int height = self.focusIndicatorView.frame.size.height;
+//
+//    // Set the constraints for the focusIndicatorView
+//    self.focusIndicatorTopConstraint.constant = touchPoint.y - height/2;
+//    self.focusIndicatorLeftConstraint.constant = touchPoint.x - width/2;
+//
+//    // Add an animation to the focusIndicatorView
+//    double animationIncrementTime = 0.03;
+//    self.focusIndicatorView.radius = 0.0;
+//
+//    // Start the timer
+//    self.focusIndicatorTimer = [NSTimer scheduledTimerWithTimeInterval:animationIncrementTime target:self selector:@selector(incrementFocusIndicatorRadius:) userInfo:nil repeats:YES];
+//
+//    // Show the focusIndicatorView
 //    [self.focusIndicatorView setHidden:NO];
 }
 
 // This method hides the auto focus indicator view
 -(void)hideAutoFocusIndicator {
-    [self.focusIndicatorTimer invalidate];
-    self.focusIndicatorTimer = nil;
+    
+    // now handled by _touchesEnded_ in CCCameraView.m
+    
+//    [self.focusIndicatorTimer invalidate];
+//    self.focusIndicatorTimer = nil;
 //    [self.focusIndicatorView setHidden:YES];
 }
 

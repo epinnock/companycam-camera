@@ -15,6 +15,7 @@
 #import "CCCamera.h"
 #import "FocusIndicatorView.h"
 #import "DocScanOpenCV.h"
+#import "CCCameraFocusSquare.h"
 
 // Define some constant colors
 #define sunYellowColor [UIColor colorWithRed:253.0/255.0 green:216.0/255.0 blue:53.0/255.0 alpha:1.0]

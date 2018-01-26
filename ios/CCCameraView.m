@@ -244,18 +244,22 @@ BOOL _multipleTouches;
 
         UITouch *touch = [[event allTouches] anyObject];
         CGPoint touchPoint = [touch locationInView:touch.view];
-
-        //   TODO: Find a better solution to determining if a button was touched or not
-        //
-        //   The rub is that since we are listening to all touches, that includes
-        //   when the user touches a button. This solution takes into account that
-        //   the touch point on a button has a very low y-coord value, while a touch
-        //   point in the center of the screen will have a y-coord higher than 64
-
-        if (touchPoint.y > 64) {
+        
+        // Here, we grab the react subview with the lowest zIndex and make the
+        // **assumption** that if the touch is on that view that is it a
+        // touch on the camera preview and that we DO want to display the
+        // focus indicator and focus on that point (adversely, if it is not,
+        // we make the **assumption** the touch is on a button (like the flash toggle)
+        // and thus do not focus or display the focus indicator
+        
+        NSNumber *touchTag = [self reactTagAtPoint:touchPoint];
+        
+        NSArray<id<RCTComponent>> *sortedSubviews = [self sortedReactSubviews];
+        NSNumber *lowestZindexTag = [[sortedSubviews lastObject] reactTag];
+        
+        if ([touchTag isEqualToNumber:lowestZindexTag]) {
             id<CCCameraDelegate> cameraDelegate = (id<CCCameraDelegate>)self.camera;
             [cameraDelegate handleTouchEvent:event];
-
 
             // animate at the focus point
             self.camFocus = [[CCCameraFocusSquare alloc] initWithFrame:CGRectMake(touchPoint.x-40, touchPoint.y-40, 80, 80)];
