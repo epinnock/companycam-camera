@@ -19,8 +19,11 @@ import { PRIMARY_MODE_PHOTO, PRIMARY_MODE_SCAN } from './cccam-enums';
 const chevronDown = (
   <FeatherIcon name="chevron-down" size={24} style={{ marginTop: 2 }} color="white" />
 );
-const chevronUp = <MaterialIcon name="expand-less" size={24} color="white" />;
-const chevronLeft = <MaterialIcon name="chevron-left" size={32} color="white" />;
+const chevronUp = (
+  <FeatherIcon name="chevron-up" size={24} style={{ marginBottom: 2 }} color="white" />
+);
+
+const chevronLeft = <FeatherIcon name="chevron-left" size={32} color="white" />;
 const closeIcon = <MaterialIcon name="close" size={24} color="white" />;
 
 const isiPhoneX = Platform.OS === 'ios' && DeviceInfo.getDeviceId() === 'iPhone10,3';
@@ -31,14 +34,14 @@ const FLASH_OFF_ICON = 'flashlight-off'; // MaterialCommunityIcon set
 const ModeIndicator = styled.View`
   margin-top: 4;
   height: 4;
-  width: ${(props) => (props.isCurrentMode ? '16' : '0')};
+  width: ${props => (props.isCurrentMode ? '16' : '0')};
   border-radius: 2;
   background-color: #ffb300;
 `;
 
 const ModeTitle = styled.Text`
   background-color: transparent;
-  color: ${(props) => (props.isCurrentMode ? '#FFB300' : 'white')};
+  color: ${props => (props.isCurrentMode ? '#FFB300' : 'white')};
 `;
 
 const styles = StyleSheet.create({
@@ -299,6 +302,7 @@ class CameraLayout extends Component {
           >
             {!PrimaryModeIsScan ? (
               <TouchableOpacity
+                hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
                 onPress={() => {
                   this.props.onClose('', 'close');
                 }}
@@ -307,17 +311,14 @@ class CameraLayout extends Component {
                 {closeIcon}
               </TouchableOpacity>
             ) : (
-                <TouchableOpacity onPress={this.setToPhotoMode}>
+                <TouchableOpacity
+                  hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
+                  onPress={this.setToPhotoMode}
+                >
                   <View
                     style={[
                       styles.uiButton,
-                      {
-                        transform: [
-                          {
-                            rotate: rotationDeg,
-                          },
-                        ],
-                      },
+                      { transform: [{ rotate: rotationDeg }] },
                     ]}
                   >
                     {chevronLeft}
@@ -375,12 +376,13 @@ class CameraLayout extends Component {
               {!PrimaryModeIsScan ? (
                 filteredCameraTrayData.length > 0 ? (
                   <TouchableOpacity
+                    hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
                     onPress={() => {
                       this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
                     }}
                   >
                     {this.props.cameraTrayVisible ? (
-                      <View style={styles.uiButtonSmall}>{chevronDown}</View>
+                      <View style={[styles.uiButtonSmall, { backgroundColor: 'transparent' }]}>{chevronDown}</View>
                     ) : (
                         <View
                           style={[
@@ -398,6 +400,7 @@ class CameraLayout extends Component {
                   </TouchableOpacity>
                 ) : (
                     <TouchableOpacity
+                      hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
                       onPress={() => {
                         this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
                       }}
@@ -411,7 +414,10 @@ class CameraLayout extends Component {
 
               {/* Flash mode button */}
               {this.props.hasFlash ? (
-                <TouchableOpacity onPress={this.props.toggleFlashMode}>
+                <TouchableOpacity
+                  hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
+                  onPress={this.props.toggleFlashMode}
+                >
                   <Animated.View
                     style={[
                       styles.uiButton,
@@ -444,17 +450,14 @@ class CameraLayout extends Component {
 
               {/* Front/back camera button */}
               {!PrimaryModeIsScan ? (
-                <TouchableOpacity onPress={this.props.flipCamera}>
+                <TouchableOpacity
+                  hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
+                  onPress={this.props.flipCamera}
+                >
                   <View
                     style={[
                       styles.uiButton,
-                      {
-                        transform: [
-                          {
-                            rotate: rotationDeg,
-                          },
-                        ],
-                      },
+                      { transform: [{ rotate: rotationDeg }] },
                     ]}
                   >
                     <FeatherIcon name="repeat" size={24} color="white" />
@@ -465,6 +468,7 @@ class CameraLayout extends Component {
                 )}
 
               <TouchableOpacity
+                hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
                 onPress={() => this.setState({ showSettings: true })}
                 style={styles.uiButton}
               >
@@ -530,7 +534,8 @@ class CameraLayout extends Component {
 
           <CameraTray
             visible={this.props.cameraTrayVisible}
-            documentTrayHeaderVisible={PrimaryModeIsScan}
+            // documentTrayHeaderVisible={PrimaryModeIsScan}
+            documentTrayHeaderVisible={false} // TODO: when document scanner is ready to release, no longer force false
             primaryModeIsScan={PrimaryModeIsScan}
             emptyText={PrimaryModeIsScan ? TRAY_EMPTY_TEXT_SCANNER : TRAY_EMPTY_TEXT_CAMERA}
             trayItems={filteredCameraTrayData}

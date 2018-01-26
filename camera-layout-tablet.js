@@ -499,6 +499,7 @@ class CameraLayoutTablet extends Component {
             {!PrimaryModeIsScan ? (
               filteredCameraTrayData.length > 0 ? (
                 <TouchableOpacity
+                  hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
                   onPress={() => {
                     this.props.setCameraTrayVisible(!this.props.cameraTrayVisible);
                   }}
@@ -590,7 +591,8 @@ class CameraLayoutTablet extends Component {
 
         <CameraTray
           visible={this.props.cameraTrayVisible}
-          documentTrayHeaderVisible={PrimaryModeIsScan}
+          // documentTrayHeaderVisible={PrimaryModeIsScan}
+          documentTrayHeaderVisible={false} // TODO: when document scanner is ready to release, no longer force false
           primaryModeIsScan={PrimaryModeIsScan}
           emptyText={PrimaryModeIsScan ? TRAY_EMPTY_TEXT_SCANNER : TRAY_EMPTY_TEXT_CAMERA}
           trayItems={filteredCameraTrayData}

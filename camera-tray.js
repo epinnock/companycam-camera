@@ -2,7 +2,6 @@ import React, { Component, PropTypes } from 'react';
 import {
   Animated,
   Dimensions,
-  Easing,
   Platform,
   ScrollView,
   StyleSheet,
@@ -51,12 +50,12 @@ const chevronDown = (
 const pencilIcon = <MaterialIcon name="mode-edit" size={14} color="white" />;
 const clearTray = <MaterialIcon name="delete-sweep" size={22} color="white" />;
 
-const ImageTrayActionBar = styled.View`
-  flex-direction: row;
-  justify-content: space-between;
-  padding: 0px 16px 8px 16px;
-  ${'' /* background-color: #37474F; */} ${'' /* background-color: rgba(55,71,79, 0.5); */};
-`;
+// const ImageTrayActionBar = styled.View`
+//   flex-direction: row;
+//   justify-content: space-between;
+//   padding: 0px 16px 8px 16px;
+//   ${'' /* background-color: #37474F; */} ${'' /* background-color: rgba(55,71,79, 0.5); */};
+// `;
 
 const ImageTrayFileControl = styled.View`
   width: 100%;
