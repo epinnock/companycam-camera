@@ -275,7 +275,7 @@ public class CCCameraModule extends ReactContextBaseJavaModule implements Lifecy
     void imageprocRender(String inputAbsolutePath, String outputAbsolutePath, ReadableMap optsMap, Promise promise) {
 
         // Read the ReadableMap
-        ImageprocState imageproc = new ImageprocState();
+        ImageprocState imageproc = ImageprocState.createWithNoEffects();
         try {
             imageproc.loadReadableMap(optsMap);
         } catch (IllegalArgumentException e) {
