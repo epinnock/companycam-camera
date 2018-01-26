@@ -1498,11 +1498,11 @@ public class CCCamera2 extends CCCamera implements SurfaceHolder.Callback {
                 //TODO: better if gotoEdit/uploadFastCam are done *after* exif is set and bPhoto is recycled?
                 // If the current mode is FastCam, then upload the photo immediately
                 if (mCameraMode == CameraMode.FASTCAM) {
-                    uploadFastCamPhoto(photo, imgWidth, imgHeight, PhotoOrigin.fromCameraMode(mCameraMode));
+                    captureActionFastcam(photo, imgWidth, imgHeight, PhotoOrigin.fromCameraMode(mCameraMode));
                 }
                 // Transition to the EditPhotoCaptureActivity as long as the current mode isn't FastCam
                 else {
-                    gotoEditPhotoCapture(photo.getPath(), imgWidth, imgHeight, PhotoOrigin.fromCameraMode(mCameraMode));
+                    captureActionNoFastcam(photo, imgWidth, imgHeight, PhotoOrigin.fromCameraMode(mCameraMode));
                 }
 
                 try {

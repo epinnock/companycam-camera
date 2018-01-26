@@ -584,7 +584,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
             bos.close();
             out.close();
 
-            gotoEditPhotoCapture(photo.getPath(), imgWidth, imgHeight, PhotoOrigin.fromCameraMode(mCameraMode));
+            captureActionNoFastcam(photo, imgWidth, imgHeight, PhotoOrigin.fromCameraMode(mCameraMode));
 
             ExifUtils.setAttributes(photo, mCameraView.getExifLocation(), mFlashMode);
 
@@ -681,7 +681,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
 
                 // If the current mode is FastCam, then upload the photo immediately
                 if (mCameraMode == CameraMode.FASTCAM) {
-                    uploadFastCamPhoto(photo, imgWidth, imgHeight, PhotoOrigin.fromCameraMode(mCameraMode));
+                    captureActionFastcam(photo, imgWidth, imgHeight, PhotoOrigin.fromCameraMode(mCameraMode));
 
                     // Start the camera preview again
                     mCamera.startPreview();
@@ -689,7 +689,7 @@ public class CCCamera1 extends CCCamera implements SurfaceHolder.Callback {
                 }
                 // Transition to the EditPhotoCaptureActivity as long as the current mode isn't FastCam
                 else {
-                    gotoEditPhotoCapture(photo.getPath(), imgWidth, imgHeight, PhotoOrigin.fromCameraMode(mCameraMode));
+                    captureActionNoFastcam(photo, imgWidth, imgHeight, PhotoOrigin.fromCameraMode(mCameraMode));
                 }
 
                 try {

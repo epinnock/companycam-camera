@@ -263,29 +263,16 @@ public abstract class CCCamera implements CCCameraInterface {
     }
 
     // This method transitions to the photo editor after capturing a photo
-    public void gotoEditPhotoCapture(String photoPath, int imgWidth, int imgHeight, PhotoOrigin photoOrigin) {
+    public void captureActionNoFastcam(File photo, int imgWidth, int imgHeight, PhotoOrigin photoOrigin) {
 
-        if (photoPath == null) {
-            new AlertDialog.Builder(mContext)
-                    .setTitle("Error")
-                    .setMessage("Something went wrong while taking this photo. Try taking a picture with your camera app and uploading it.")
-                    .setNeutralButton(R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                        }
-                    }).create().show();
-            return;
-        }
+        // TODO Should this save to phone?
 
-        File file = new File(photoPath);
-
-        mCameraView.doPhotoTaken(file, imgWidth, imgHeight, photoOrigin);
+        mCameraView.doPhotoTaken(photo, imgWidth, imgHeight, photoOrigin);
         mCameraView.finishWithResult("capture");
     }
 
     // This method uploads photos taken while in FastCam mode
-    public void uploadFastCamPhoto(File photo, int imgWidth, int imgHeight, PhotoOrigin photoOrigin) {
+    public void captureActionFastcam(File photo, int imgWidth, int imgHeight, PhotoOrigin photoOrigin) {
 
         // If saveToPhone is set, then save the image to the device in addition to sending it to the server.
         SharedPreferences preferences = getSharedPreferences();
@@ -296,6 +283,6 @@ public abstract class CCCamera implements CCCameraInterface {
             String imageURL = PhotoActions.writeImageToDevice(mContext, Uri.fromFile(photo));
         }
 
-        CCCameraManager.getLatestView().doPhotoAccepted(photo, imgWidth, imgHeight, photoOrigin);
+        mCameraView.doPhotoAccepted(photo, imgWidth, imgHeight, photoOrigin);
     }
 }
